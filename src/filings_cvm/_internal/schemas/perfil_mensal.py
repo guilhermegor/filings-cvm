@@ -22,7 +22,7 @@ from decimal import ROUND_DOWN, Decimal, InvalidOperation
 import re
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, BeforeValidator, Field, field_validator, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_validator
 
 from filings_cvm._internal.utils.br_identifiers import (
 	is_valid_cnpj,
@@ -284,22 +284,29 @@ class OtcOperation(BaseModel):
 	parte_relacionada: Literal["S", "N"]
 	valor_parte: OneDecimalField
 
-	@model_validator(mode="after")
-	def _check_comitente_doc(self) -> "OtcOperation":
+	@field_validator("nr_pf_pj_comitente")
+	@classmethod
+	def _check_comitente_doc(cls, v: str, info: ValidationInfo) -> str:
 		"""Validate and normalise the counterparty document against its person type.
+
+		Parameters
+		----------
+		v : str
+			The counterparty document (CPF or CNPJ) in any shape.
+		info : ValidationInfo
+			Validation context; ``tp_pessoa`` (declared first) is read from it.
 
 		Returns
 		-------
-		OtcOperation
-			The validated model with ``nr_pf_pj_comitente`` in bare, unmasked form.
+		str
+			The document in bare, unmasked form.
 
 		Raises
 		------
 		ValueError
 			If the document is not a valid CPF (PF) or CNPJ (PJ).
 		"""
-		self.nr_pf_pj_comitente = _validate_person_doc(self.tp_pessoa, self.nr_pf_pj_comitente)
-		return self
+		return _validate_person_doc(info.data.get("tp_pessoa", ""), v)
 
 
 class PrivateCreditIssuer(BaseModel):
@@ -310,22 +317,29 @@ class PrivateCreditIssuer(BaseModel):
 	parte_relacionada: Literal["S", "N"]
 	valor_parte: OneDecimalField
 
-	@model_validator(mode="after")
-	def _check_emissor_doc(self) -> "PrivateCreditIssuer":
+	@field_validator("nr_pf_pj_emissor")
+	@classmethod
+	def _check_emissor_doc(cls, v: str, info: ValidationInfo) -> str:
 		"""Validate and normalise the issuer document against its person type.
+
+		Parameters
+		----------
+		v : str
+			The issuer document (CPF or CNPJ) in any shape.
+		info : ValidationInfo
+			Validation context; ``tp_pessoa_emissor`` (declared first) is read from it.
 
 		Returns
 		-------
-		PrivateCreditIssuer
-			The validated model with ``nr_pf_pj_emissor`` in bare, unmasked form.
+		str
+			The document in bare, unmasked form.
 
 		Raises
 		------
 		ValueError
 			If the document is not a valid CPF (PF) or CNPJ (PJ).
 		"""
-		self.nr_pf_pj_emissor = _validate_person_doc(self.tp_pessoa_emissor, self.nr_pf_pj_emissor)
-		return self
+		return _validate_person_doc(info.data.get("tp_pessoa_emissor", ""), v)
 
 
 def _validate_person_doc(tp_pessoa: str, value: str) -> str:
