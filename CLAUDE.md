@@ -9,6 +9,67 @@ tests, docs, and PyPI + Test-PyPI release workflows ready to go. It is scaffolde
 BlueprintX into a new project directory; the scaffold replaces the `<project_name>` package
 directory and the `pyproject.toml` placeholders via `envsubst`.
 
+## CVM XML Standards — Source of Truth
+
+The library implements the CVM regulatory file standards. **The single source of truth for
+every standard, version, and its official spec is the CVM catalog page:**
+
+> https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp
+
+Each entry below links to a `PadraoXML*.asp` page (relative to that base URL) describing one
+XML standard. When implementing or updating a standard, treat the linked CVM page as
+authoritative — field names, decimal scales, and cardinalities come from there, not from
+this file.
+
+### Two macro-sections — every solution lives in one of them
+
+- **`submission/` (envio → CVM)** — build, validate, and serialise a document to a
+  CVM-compliant file *to send* to CVM. Takes schema models (or a filled spreadsheet) → XML.
+- **`ingestion/` (leitura ← CVM)** — parse and interpret a file *received/downloaded* from
+  CVM back into typed models / DataFrames.
+
+The **shared, direction-neutral schema** (Pydantic models mirroring each XML standard) lives
+under `_internal/schemas/<standard>.py`; both sections import it. `submission/` and
+`ingestion/` re-export the public names consumers need. `ingestion/` is created when its
+first reading pattern lands (not scaffolded empty).
+
+### Catalog (status: ✅ implemented · ⬜ pending)
+
+Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
+
+**Fundos**
+- ⬜ Informe Diário — V4 (`PadraoXMLInfoDiarioNetV4.asp`) · V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
+- ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
+- ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
+- ⬜ Demonstrativo de Composição e Diversificação das Aplicações (CDA) — V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
+- ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
+- ⬜ Balanço (`PadraoXMLBalanco.asp`)
+- ⬜ Balancete (`PadraoXMLBalancete.asp`)
+- ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
+- ⬜ Informe Mensal FIDC — até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`) · a partir de 2019-11-01 (`PadraoXMLMensalFIDC576.asp`)
+
+**Lâmina de Fundos**
+- ⬜ Lâmina — V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
+
+**Perfil Mensal e Extrato das Informações sobre o Fundo**
+- ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/schemas/perfil_mensal.py`
+- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
+- ⬜ Extrato das Informações sobre o Fundo — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+
+**Auditores**
+- ⬜ Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`)
+
+**Investidores Não Residentes**
+- ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
+- ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
+
+**Mercados de Negociação**
+- ⬜ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`)
+
+**Escriturador de Valores Mobiliários**
+- ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)
+- ⬜ Informe de Portabilidade (`PadraoXMLInfoPortabilidade.asp`)
+
 ## Layout
 
 ```
