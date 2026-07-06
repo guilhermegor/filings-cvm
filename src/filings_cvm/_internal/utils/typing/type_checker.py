@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from filings-cvm._internal.utils.typing.validate import create_type_checked_method
+from filings_cvm._internal.utils.typing.validate import create_type_checked_method
 
 
 class TypeChecker(type):

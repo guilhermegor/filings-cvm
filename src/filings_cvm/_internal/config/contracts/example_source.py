@@ -8,7 +8,7 @@ violation before types are applied.
 
 from __future__ import annotations
 
-from filings-cvm._internal.utils.tabular_reader import FileContract
+from filings_cvm._internal.utils.tabular_reader import FileContract
 
 
 # str_name (human label), str_source_key (routes notifications), tuple_required, tuple_cnpj_cols.

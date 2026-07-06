@@ -4,15 +4,16 @@ name = "filings-cvm"
 # version, hand-bumped via `make bump_version`. ONLINE (GitHub remote): the scaffold rewrote this
 # to a "0.0.0" stub + poetry-dynamic-versioning, so the published version comes from the git tag
 # (vX.Y.Z) and `make bump_version` is removed (the CI release workflows cut releases by tagging).
-version = "0.0.1"
+version = "0.0.0"
 description = "Simple and efficient Python library to interact with CVM regulatory filings."
 authors = ["guilhermegor"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://example.com/filings-cvm"
+homepage = "https://guilhermegor.github.io/filings-cvm/"
+documentation = "https://guilhermegor.github.io/filings-cvm/"
 repository = "https://github.com/guilhermegor/filings-cvm"
 keywords = ["filings-cvm", "python", "library"]
-packages = [{ include = "filings-cvm", from = "src" }]
+packages = [{ include = "filings_cvm", from = "src" }]
 # Keep internal dev docs out of the distributed wheel/sdist.
 exclude = ["src/**/CLAUDE.md"]
 package-mode = true
@@ -28,6 +29,7 @@ classifiers = [
 [tool.poetry.urls]
 "Bug Reports" = "https://github.com/guilhermegor/filings-cvm/issues"
 "Source" = "https://github.com/guilhermegor/filings-cvm"
+"Documentation" = "https://guilhermegor.github.io/filings-cvm/"
 
 [tool.commitizen]
 # Conventional-commit driven changelog. The version comes from the git tag
@@ -43,6 +45,8 @@ python = ">=3.10,<4.0"
 # Required by the private _internal helpers (dtypes / tabular_reader / config.contracts).
 pandas = ">=2.1.0"
 openpyxl = ">=3.1.0"
+# Schema validation for the CVM XML standards (submission/ingestion sections).
+pydantic = ">=2.6,<3"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = ">=4.1.0"
@@ -77,6 +81,15 @@ mkdocs = ">=1.6.0"
 mkdocs-material = ">=9.5.0"
 pymdown-extensions = ">=10.0"
 
+[tool.poetry-dynamic-versioning]
+# Published version is derived from the latest git tag matching `v$version` (e.g. v0.2.0). On
+# an exact tag the build is clean (0.2.0); off-tag builds get a PEP 440 dev version. The CI
+# release workflows pass POETRY_DYNAMIC_VERSIONING_BYPASS to build a specific version. Needs
+# `python -m build` (a PEP 517 frontend), not `poetry build` (which ignores the backend).
+enable = true
+vcs = "git"
+style = "pep440"
+
 [build-system]
-requires = ["poetry-core>=1.7.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.7.0", "poetry-dynamic-versioning>=1.4.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"

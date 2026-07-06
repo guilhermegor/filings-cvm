@@ -44,16 +44,6 @@ init() {
 	precommit
 }
 
-bump_version() {
-	# cz computes the next semver from Conventional Commits, writes it to pyproject.toml,
-	# regenerates CHANGELOG.md, commits "bump: X.Y.Z", and creates the vX.Y.Z tag.
-	# --no-verify bypasses the commit hooks for this machine-generated commit: its single-line
-	# "bump: …" message can't satisfy gitlint's body-required rule, and the pre-commit
-	# test/format hooks are irrelevant to a pyproject + CHANGELOG bump (same rationale as
-	# bin/git_merge_to_main.sh). Run this on a feature branch (before `git_merge_to_main`).
-	poetry_exec run cz bump --yes --no-verify --git-output-to-stderr
-	echo "Version bumped to $(poetry_exec run cz version --project 2>/dev/null || poetry_exec version -s)"
-}
 
 changelog() {
 	# Regenerate CHANGELOG.md from git tags + Conventional Commits (cz derives sections
@@ -254,7 +244,6 @@ Virtual Environment
   venv                 Create Poetry venv and install dependencies
   update_venv          Update all Poetry dependencies
   precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)
-  bump_version         Bump version from Conventional Commits, tag, and update CHANGELOG.md (cz bump)
   changelog            Regenerate CHANGELOG.md from git tags (cz changelog)
 
 Corporate CA
@@ -314,7 +303,6 @@ ensure_env) ensure_env ;;
 venv) venv ;;
 update_venv) update_venv ;;
 precommit) precommit ;;
-bump_version) bump_version ;;
 get_corporate_ca) get_corporate_ca ;;
 unit_tests) unit_tests ;;
 integration_tests) integration_tests ;;

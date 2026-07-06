@@ -2,7 +2,7 @@
 
 import pytest
 
-from filings-cvm.main import main
+from filings_cvm.main import main
 
 
 def test_main(capsys: pytest.CaptureFixture[str]) -> None:

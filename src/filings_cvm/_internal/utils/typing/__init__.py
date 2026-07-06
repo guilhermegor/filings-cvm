@@ -14,11 +14,11 @@ rewritten to ``utils.typing`` on copy (mirrors the webhook seam).
 
 from __future__ import annotations
 
-from filings-cvm._internal.utils.typing.abc_type_checker import ABCTypeCheckerMeta
-from filings-cvm._internal.utils.typing.decorators import type_checker
-from filings-cvm._internal.utils.typing.protocol_type_checker import ProtocolTypeCheckerMeta
-from filings-cvm._internal.utils.typing.type_checker import TypeChecker
-from filings-cvm._internal.utils.typing.validate import validate_type
+from filings_cvm._internal.utils.typing.abc_type_checker import ABCTypeCheckerMeta
+from filings_cvm._internal.utils.typing.decorators import type_checker
+from filings_cvm._internal.utils.typing.protocol_type_checker import ProtocolTypeCheckerMeta
+from filings_cvm._internal.utils.typing.type_checker import TypeChecker
+from filings_cvm._internal.utils.typing.validate import validate_type
 
 
 __all__ = [
