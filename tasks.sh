@@ -44,7 +44,6 @@ init() {
 	precommit
 }
 
-
 changelog() {
 	# Regenerate CHANGELOG.md from git tags + Conventional Commits (cz derives sections
 	# from tags). Preview locally; the published site regenerates it in the docs workflow.
