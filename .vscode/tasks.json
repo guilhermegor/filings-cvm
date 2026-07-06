@@ -1,0 +1,132 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "init",
+			"detail": "Bootstrap venv + install pre-commit hooks (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make init || ./tasks.sh init",
+			"group": "build",
+			"icon": { "id": "tools", "color": "terminal.ansiBlue" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "run",
+			"detail": "Run the library entry-point (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make run || ./tasks.sh run",
+			"group": "build",
+			"icon": { "id": "play", "color": "terminal.ansiGreen" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "lint",
+			"detail": "Run ruff, codespell, pydocstyle, check_docstrings (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make lint || ./tasks.sh lint",
+			"group": "test",
+			"icon": { "id": "checklist", "color": "terminal.ansiYellow" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "unit_tests",
+			"detail": "Run unit tests (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make unit_tests || ./tasks.sh unit_tests",
+			"group": { "kind": "test", "isDefault": true },
+			"icon": { "id": "beaker", "color": "terminal.ansiMagenta" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "test_cov",
+			"detail": "Run unit tests with coverage report and badge (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make test_cov || ./tasks.sh test_cov",
+			"group": "test",
+			"icon": { "id": "graph", "color": "terminal.ansiMagenta" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "test_cov_report",
+			"detail": "Coverage with an HTML report + per-module terminal table (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make test_cov_report || ./tasks.sh test_cov_report",
+			"group": "test",
+			"icon": { "id": "graph", "color": "terminal.ansiMagenta" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "test_cov_serve",
+			"detail": "Serve the htmlcov/ coverage report at http://localhost:8000 (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make test_cov_serve || ./tasks.sh test_cov_serve",
+			"group": "test",
+			"icon": { "id": "globe", "color": "terminal.ansiMagenta" },
+			"presentation": { "reveal": "always", "panel": "dedicated" },
+			"problemMatcher": []
+		},
+		{
+			"label": "ship",
+			"detail": "Package the committed main tree into dist/<name>_<ts>.zip (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make ship || ./tasks.sh ship",
+			"group": { "kind": "build", "isDefault": true },
+			"icon": { "id": "package", "color": "terminal.ansiCyan" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "new_branch (offline)",
+			"detail": "Create a feat/fix branch off the default branch — offline scaffolds only",
+			"type": "shell",
+			"command": "make new_branch NAME='${input:branchName}' || ./tasks.sh new_branch '${input:branchName}'",
+			"group": "none",
+			"icon": { "id": "git-branch", "color": "terminal.ansiGreen" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "git_merge_to_main (offline)",
+			"detail": "Merge the current clean branch into main/master and delete it — offline scaffolds only",
+			"type": "shell",
+			"command": "make git_merge_to_main || ./tasks.sh git_merge_to_main",
+			"group": "none",
+			"icon": { "id": "git-merge", "color": "terminal.ansiRed" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		},
+		{
+			"label": "docs_server",
+			"detail": "Serve the MkDocs site locally at http://0.0.0.0:8000 (make, tasks.sh fallback)",
+			"type": "shell",
+			"command": "make docs_server || ./tasks.sh docs_server",
+			"group": "none",
+			"icon": { "id": "book", "color": "terminal.ansiBlue" },
+			"presentation": { "reveal": "always", "panel": "dedicated" },
+			"problemMatcher": []
+		},
+		{
+			"label": "help",
+			"detail": "List all available make / tasks.sh commands",
+			"type": "shell",
+			"command": "make help || ./tasks.sh help",
+			"group": "none",
+			"icon": { "id": "question", "color": "terminal.ansiWhite" },
+			"presentation": { "reveal": "always", "panel": "shared" },
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+			"id": "branchName",
+			"type": "promptString",
+			"description": "Branch name (e.g. feat/my-feature or fix/the-bug)"
+		}
+	]
+}

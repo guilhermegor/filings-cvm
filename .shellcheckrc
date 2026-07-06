@@ -1,0 +1,7 @@
+# shellcheck configuration.
+# severity=warning is the level at which the project's scripts are clean while still
+# catching real bugs (unquoted expansions, undefined vars, bad test syntax, ...). The
+# info/style codes below sourcing/quoting are intentional in these scripts and add noise:
+#   SC1091 — "not following sourced file": lib/common.sh is resolved at runtime, not lint time.
+severity=warning
+disable=SC1091

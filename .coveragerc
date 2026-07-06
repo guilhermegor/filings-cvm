@@ -1,0 +1,13 @@
+[run]
+source = src/
+# The private _internal/ helpers are vendored from python-common (tested there); keep them
+# out of the library's own coverage number.
+omit =
+    src/*/_internal/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    @abstractmethod
+    \.\.\.

@@ -1,0 +1,82 @@
+[tool.poetry]
+name = "filings-cvm"
+# The version source depends on how this project was scaffolded. OFFLINE (no remote): this static
+# version, hand-bumped via `make bump_version`. ONLINE (GitHub remote): the scaffold rewrote this
+# to a "0.0.0" stub + poetry-dynamic-versioning, so the published version comes from the git tag
+# (vX.Y.Z) and `make bump_version` is removed (the CI release workflows cut releases by tagging).
+version = "0.0.1"
+description = "Simple and efficient Python library to interact with CVM regulatory filings."
+authors = ["guilhermegor"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://example.com/filings-cvm"
+repository = "https://github.com/guilhermegor/filings-cvm"
+keywords = ["filings-cvm", "python", "library"]
+packages = [{ include = "filings-cvm", from = "src" }]
+# Keep internal dev docs out of the distributed wheel/sdist.
+exclude = ["src/**/CLAUDE.md"]
+package-mode = true
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+]
+
+[tool.poetry.urls]
+"Bug Reports" = "https://github.com/guilhermegor/filings-cvm/issues"
+"Source" = "https://github.com/guilhermegor/filings-cvm"
+
+[tool.commitizen]
+# Conventional-commit driven changelog. The version comes from the git tag
+# (poetry-dynamic-versioning); `cz changelog` (via `make changelog`) groups commits by tag.
+# Releases are cut by the CI release workflows (tag -> build -> publish), not a hand-run bump.
+name = "cz_conventional_commits"
+version_provider = "poetry"
+tag_format = "v"
+update_changelog_on_bump = true
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+# Required by the private _internal helpers (dtypes / tabular_reader / config.contracts).
+pandas = ">=2.1.0"
+openpyxl = ">=3.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = ">=4.1.0"
+pretty-errors = ">=1.2.25"
+commitizen = ">=4.4.1"
+poetry-plugin-export = ">=1.8"
+# Build + publish tooling for the PyPI / Test-PyPI release workflows (twine is the
+# publish fallback when `poetry publish` is unavailable).
+build = ">=1.2.2"
+twine = ">=6.1.0"
+# Pinned to the ruff-pre-commit hook minor (.pre-commit-config.yaml) so `make
+# lint` and the hook never disagree on formatting/lints.
+ruff = ">=0.11.13,<0.12"
+codespell = ">=2.4.1"
+pydocstyle = ">=6.3.0"
+pytest = ">=8.0.0"
+pytest-cov = ">=6.0.0"
+coverage = ">=7.6.0"
+# genbadge replaces the abandoned coverage-badge (it imported the removed
+# pkg_resources and breaks on setuptools >= 81).
+genbadge = {extras = ["coverage"], version = ">=1.1.0"}
+# Static type-checker + non-Python lint gates (mirrored in .pre-commit-config and
+# `make lint`). shellcheck + shfmt are pip dev-deps (shellcheck-py/shfmt-py); lint_shell.sh resolves them via poetry run, falls back to a system binary, then skips.
+mypy = ">=1.8.0"
+sqlfluff = ">=3.0.0"
+yamllint = ">=1.35.0"
+shfmt-py = ">=3.7.0"
+shellcheck-py = ">=0.10.0"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = ">=1.6.0"
+mkdocs-material = ">=9.5.0"
+pymdown-extensions = ">=10.0"
+
+[build-system]
+requires = ["poetry-core>=1.7.0"]
+build-backend = "poetry.core.masonry.api"

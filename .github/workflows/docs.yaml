@@ -1,0 +1,78 @@
+name: Docs - GitHub Pages Deployment
+
+# Build the MkDocs site and deploy it via GitHub's official Actions Pages deployment
+# (actions/configure-pages + upload-pages-artifact + deploy-pages). `enablement: true`
+# SELF-ENABLES Pages on the first run using the built-in GITHUB_TOKEN — no manual "enable
+# Pages" step and no PAT, unlike the `mkdocs gh-deploy` / gh-pages-branch model (which
+# publishes files but can't enable serving, causing the classic first-publish 404).
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One concurrent deployment; never cancel an in-progress deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # Full history so `cz changelog` sees the tags when regenerating CHANGELOG.md.
+          fetch-depth: 0
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+
+      - name: Install Docs Dependencies
+        run: poetry install --with docs
+
+      # Regenerate CHANGELOG.md from the commit/tag history so the published Changelog page is
+      # current. The changelog is never committed to main by CI; the site's copy is produced
+      # fresh here (cz derives sections from git tags).
+      - name: Regenerate CHANGELOG.md
+        run: poetry run cz changelog
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          # Enable Pages (as build_type: workflow) on the first run — no manual setting, no PAT.
+          enablement: true
+
+      - name: Build Site (strict)
+        run: poetry run mkdocs build --strict
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # mkdocs' default output directory.
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,24 @@
+[sqlfluff]
+# Default dialect for the project's `.sql` files. Override per-dialect in
+# bin/lint_sql.sh if a project mixes engines (e.g. encode the db in each query's
+# filename prefix and run one pass per dialect).
+dialect = sqlite
+# Queries commonly use DB-API positional `?` bind params; the placeholder templater
+# swaps them for a stub so they parse (a bare `?` is not valid SQL grammar otherwise).
+templater = placeholder
+max_line_length = 120
+# Tab indentation — matches the project convention (tabs where the tool allows: Python
+# via ruff, shell via shfmt, Make; spaces only where forced, e.g. YAML). Column alignment
+# inside a line still uses spaces; only the leading indent is a tab.
+indent_unit = tab
+# Hand-written `.sql` files use a deliberate, readable style (aligned column types,
+# hand-indented SELECTs, db/table/purpose header comments) and identifier casing is
+# dictated by the source schema, not ours. Exclude those opinion groups but KEEP the
+# checks that catch real defects: parse-correctness (always on) + keyword capitalisation.
+exclude_rules = layout, structure, aliasing, capitalisation.identifiers
+
+[sqlfluff:templater:placeholder]
+param_style = question_mark
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper

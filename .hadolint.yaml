@@ -1,0 +1,19 @@
+# hadolint configuration (Dockerfile linter). https://github.com/hadolint/hadolint
+#
+# A project may ship no Dockerfile yet, in which case the `hadolint-docker` pre-commit
+# hook (files: .*dockerfile) simply skips. This baseline config ships with the scaffold
+# so a project that adds a Dockerfile inherits a sensible starting point and can enhance
+# it over time. hadolint auto-discovers this file at the repo root.
+#
+# Note: hadolint lints Dockerfiles ONLY — it cannot parse docker-compose files; those are
+# YAML and are covered by `check-yaml` (validity) + yamllint (style).
+
+# Fail the lint only on warnings and above (info/style findings are advisory).
+failure-threshold: warning
+
+# Registries Docker images may be pulled from without a DL3026 warning (seed per project).
+trustedRegistries: []
+
+# Rules to ignore globally. Seed per project, e.g. add `- DL3008` (pin apt-get versions)
+# or `- DL3059` (consecutive RUN instructions) when a Dockerfile needs them.
+ignored: []

@@ -1,0 +1,28 @@
+# yamllint configuration. Complements the pre-commit `check-yaml` (which only validates
+# that YAML parses) by adding *style* checks. Relaxed where the project's config YAMLs use
+# intentional formatting: long documentation comments + email-body prose, and aligned values
+# (e.g. `log_name:  "..."`). check-yaml still guarantees validity.
+extends: default
+
+rules:
+  # The config YAMLs carry long doc-comments (paths) and long email bodies; a hard line
+  # cap fights that prose and structure is already validated elsewhere.
+  line-length: disable
+  # The project does not use the `---` document-start marker.
+  document-start: disable
+  # Values are deliberately aligned with extra spaces after the colon (outputs_*.yaml).
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: -1
+  # `false`/`no`/`on` appear inside quoted strings/values, not as bare booleans to police.
+  truthy:
+    check-keys: false
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  comments:
+    min-spaces-from-content: 1
+
+ignore: |
+  .venv/
+  daily_infos/

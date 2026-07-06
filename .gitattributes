@@ -1,0 +1,10 @@
+# Force LF line endings on shell scripts regardless of the contributor's OS.
+# A `*.sh` checked out with CRLF (Windows autocrlf) fails to run under bash with
+# obscure errors ("/usr/bin/env: bash\r: No such file or directory"), so pin the
+# eol explicitly. `text` marks them as text for normalization; `eol=lf` overrides
+# any core.autocrlf.
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Shell libraries and hooks have no extension in some layouts — keep LF too.
+bin/lib/common.sh text eol=lf

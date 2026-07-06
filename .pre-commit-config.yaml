@@ -1,0 +1,198 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: forbid-new-submodules
+      - id: detect-private-key
+      - id: detect-aws-credentials
+        args:
+          - --allow-missing-credentials
+      - id: check-merge-conflict
+      # Online default. Offline scaffolds (no GitHub remote) swap this for the
+      # local `protect-branch` hook via apply_offline_mode, which points the user
+      # at `make new_branch`. Online projects also get gh server-side protection.
+      - id: no-commit-to-branch
+        args:
+          - --branch=main
+      - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
+      - id: end-of-file-fixer
+      - id: check-xml
+      - id: check-yaml
+        args:
+          - --unsafe
+      - id: check-toml
+      - id: check-json
+        exclude: \.vscode/settings\.json
+      - id: check-symlinks
+      - id: debug-statements
+      - id: check-added-large-files
+        args:
+          - --maxkb=500
+        exclude: (?i)^(data/large/.*|poetry\.lock)$
+      - id: check-illegal-windows-names
+      - id: check-case-conflict
+      - id: name-tests-test
+        args:
+          - --pytest-test-first
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.3
+    hooks:
+      - id: commitizen
+        stages:
+          - commit-msg
+          - manual
+        always_run: true
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        stages:
+          - commit-msg
+          - manual
+        always_run: true
+
+  # module decoupled from ruff, due to DAR absence
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        name: pydocstyle (docstring conventions)
+        args:
+          - --select=D412,D417 # missing blank lines between summary/description, missing arg descriptions
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+      - id: ruff
+        name: ruff check
+        args:
+          - --config=ruff.toml
+      - id: ruff-format
+        name: ruff format
+        args:
+          - --config=ruff.toml
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        name: codespell check
+        args:
+          - --config=.codespellrc
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: lint dockerfiles
+        files: (?i).*dockerfile
+
+  - repo: local
+    hooks:
+      - id: check-unix-filenames
+        name: check unix/linux filename validity
+        entry: bash bin/check_unix_filenames.sh
+        language: system
+        types:
+          - file
+
+      - id: check-docstrings
+        name: docstring type/raises consistency check
+        entry: bash bin/poetry_exec.sh run python bin/check_docstrings.py
+        language: system
+        types:
+          - python
+        pass_filenames: false
+
+      - id: mypy
+        name: mypy (static type check)
+        # Run from src/ so it is the single package base (bare config.x/utils.x imports
+        # resolve as at runtime); avoids the dual-root "found twice" error on DDD.
+        entry: bash -c 'cd src && bash ../bin/poetry_exec.sh run mypy --config-file ../mypy.ini .'
+        language: system
+        types:
+          - python
+        pass_filenames: false
+
+      # Non-Python lint gates share a single wrapper with `make lint` (one home,
+      # zero drift). Each wrapper skips gracefully when its tool is absent.
+      - id: lint-shell
+        name: shellcheck + shfmt (shell lint)
+        entry: bash bin/lint_shell.sh --check
+        language: system
+        types:
+          - shell
+        pass_filenames: false
+
+      - id: lint-yaml
+        name: yamllint (yaml style)
+        entry: bash bin/lint_yaml.sh
+        language: system
+        types:
+          - yaml
+        pass_filenames: false
+
+      - id: lint-sql
+        name: sqlfluff (sql lint)
+        entry: bash bin/lint_sql.sh
+        language: system
+        types:
+          - sql
+        pass_filenames: false
+
+      # `|| [ $? -eq 5 ]` tolerates pytest exit 5 ("no tests collected") so a
+      # fresh project with an empty suite does not block every commit; real
+      # failures (exit 1) still block.
+      - id: unit-tests
+        name: checking unit tests
+        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/unit/ || [ $? -eq 5 ]"
+        language: system
+        types:
+          - file
+        pass_filenames: false
+
+      - id: integration-tests
+        name: checking integration tests
+        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/integration/ || [ $? -eq 5 ]"
+        language: system
+        types:
+          - file
+        pass_filenames: false
+
+      # Coverage is the slow full-suite gate — run it on pre-push, not per-commit,
+      # so day-to-day commits stay fast (static gates above still run per-commit).
+      - id: coverage-check
+        name: test coverage check
+        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/unit/ --cov=src --cov-report=term-missing --cov-fail-under=80"
+        language: system
+        types:
+          - python
+        pass_filenames: false
+        verbose: true
+        stages:
+          - pre-push
+
+      # genbadge (not the abandoned coverage-badge, which imports the removed
+      # pkg_resources and breaks on setuptools >= 81). Generates coverage.xml then
+      # the SVG. coverage.svg is tracked (README badge); coverage.xml is ignored.
+      - id: coverage-badge
+        name: coverage badge
+        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/unit/ --cov=src && bash bin/poetry_exec.sh run coverage xml -o coverage.xml && bash bin/poetry_exec.sh run genbadge coverage -i coverage.xml -o coverage.svg"
+        language: system
+        types:
+          - python
+        pass_filenames: false
+        stages:
+          - manual
+
+      - id: check-urls
+        name: check urls in docstrings
+        entry: bash bin/test_urls_docstrings.sh
+        language: system
+        types:
+          - file
+        verbose: true

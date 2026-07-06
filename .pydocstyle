@@ -1,0 +1,9 @@
+[pydocstyle]
+# Ruff already enforces the broad NumPy docstring rule set (ruff.toml: select "D",
+# convention "numpy") on all non-excluded code. pydocstyle exists only to add the
+# two DAR-style checks ruff does not cover — D412 (no blank line between a section
+# header and its body) and D417 (every parameter documented). Keeping this list in
+# lockstep with the pre-commit hook's --select means `make lint` (which runs a bare
+# `pydocstyle .`) and the hook enforce exactly the same thing — no drift, and no
+# false failures on the ruff-excluded chassis/example scaffold code.
+select = D412,D417

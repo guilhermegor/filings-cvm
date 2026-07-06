@@ -1,0 +1,200 @@
+name: Release to Test PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.2.3, 1.2.3a1, 1.2.3b1, 1.2.3rc1)'
+        required: true
+        type: string
+
+env:
+  PACKAGE_NAME: "filings-cvm"
+  OWNER: "guilhermegor"
+
+jobs:
+  # Hard release gate: always run the full test suite (tests.yaml, full matrix) on the code
+  # being released. The build/publish jobs depend on this, so a release cannot proceed unless
+  # the tests actually pass here — the gate is enforced by the pipeline, never self-attested
+  # via a form input.
+  run_tests:
+    uses: ./.github/workflows/tests.yaml
+    secrets: inherit
+
+  details:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.release.outputs.new_version }}
+      suffix: ${{ steps.release.outputs.suffix }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Check Ref Type
+        if: github.event_name != 'workflow_dispatch' && github.ref_type != 'tag'
+        run: echo "This is not a tag or workflow_dispatch; exiting"; exit 1
+
+      - name: Extract Tag and Details
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$EVENT_NAME" == "workflow_dispatch" ]; then
+            NEW_VERSION="$INPUT_VERSION"
+            SUFFIX=$(echo "$NEW_VERSION" | grep -oP '[a-z]+[0-9]+' || echo "")
+            TAG_NAME="$NEW_VERSION"
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            # Remove -test suffix if present
+            CLEAN_TAG=$(echo $TAG_NAME | sed 's/-test$//')
+            NEW_VERSION=$(echo $CLEAN_TAG | awk -F'-' '{print $1}')
+            SUFFIX=$(echo $CLEAN_TAG | grep -oP '[a-z]+[0-9]+' || echo "")
+          fi
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "suffix=$SUFFIX" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Debug Outputs
+        if: ${{ env.RUNNER_DEBUG == '1' }}
+        run: |
+          echo "Version is ${{ steps.release.outputs.new_version }}"
+          echo "Suffix is ${{ steps.release.outputs.suffix }}"
+          echo "Tag name is ${{ steps.release.outputs.tag_name }}"
+
+  check_test_pypi:
+    needs: details
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Information from Test PyPI
+        run: |
+          response=$(curl -s https://test.pypi.org/pypi/${{ env.PACKAGE_NAME }}/json || echo "{}")
+          latest_previous_version=$(echo $response | grep -oP '"releases":\{"\K[^"]+' | sort -rV | head -n 1)
+          if [ -z "$latest_previous_version" ]; then
+            echo "Package not found on Test PyPI."
+            latest_previous_version="0.0.0"
+          fi
+          echo "Latest version on Test PyPI: $latest_previous_version"
+          echo "latest_previous_version=$latest_previous_version" >> $GITHUB_ENV
+
+      - name: Compare Versions - Exit When Not Greater
+        env:
+          NEW_VERSION: ${{ needs.details.outputs.new_version }}
+        run: |
+          LATEST_VERSION=$latest_previous_version
+          if [ "$(printf '%s\n' "$LATEST_VERSION" "$NEW_VERSION" | sort -rV | head -n 1)" != "$NEW_VERSION" ] || [ "$NEW_VERSION" == "$LATEST_VERSION" ]; then
+            echo "The new version $NEW_VERSION is not greater than the latest version $LATEST_VERSION on Test PyPI."
+            exit 1
+          else
+            echo "The new version $NEW_VERSION is greater than the latest version $LATEST_VERSION on Test PyPI."
+          fi
+
+  setup_and_build:
+    needs: [details, check_test_pypi, run_tests]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12.8"]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+          version: 2.1.2
+
+      - name: Load Cached Virtual Environment
+        id: cached-venv
+        uses: actions/cache@v3
+        with:
+          path: |
+            .venv
+            poetry.lock
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install Dependencies
+        if: steps.cached-venv.outputs.cache-hit != 'true'
+        run: |
+          # temporary pyproject without Windows platform-specific dependencies
+          cp pyproject.toml pyproject.original.toml
+          cat pyproject.original.toml | python -c '
+          import sys, re
+          content = sys.stdin.read()
+          content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
+          content = re.sub(r"pywin32\s*=.*\n", "", content)
+          print(content)
+          ' > pyproject.toml
+
+          # regenerate lock file, if needed
+          if ! poetry check --lock; then
+            echo "Lock file is outdated, regenerating..."
+            rm -f poetry.lock
+            poetry lock --no-cache
+          fi
+
+          # install dependencies, excluding dev and docs groups if present
+          without_groups=()
+          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
+            without_groups+=("dev")
+          fi
+          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
+            without_groups+=("docs")
+          fi
+          if [ ${#without_groups[@]} -gt 0 ]; then
+            echo "Excluding groups: ${without_groups[*]}"
+            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
+          else
+            echo "No groups to exclude, installing all dependencies"
+            poetry install --no-interaction --no-root
+          fi
+
+          # restore original pyproject.toml
+          mv pyproject.original.toml pyproject.toml
+          poetry env activate
+
+      - name: Build Package
+        env:
+          # Test PyPI is a dry run, so stamp the requested version directly via
+          # POETRY_DYNAMIC_VERSIONING_BYPASS instead of creating a real release tag.
+          POETRY_DYNAMIC_VERSIONING_BYPASS: ${{ needs.details.outputs.new_version }}
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  test_pypi:
+    name: test_pypi
+    needs: setup_and_build
+    runs-on: ubuntu-latest
+    environment:
+      name: release-test-pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # OIDC trusted publishing — no stored token. The runner mints a short-lived
+      # OpenID Connect token (via `id-token: write`, above) that Test PyPI verifies against
+      # the trusted publisher registered for this repo/workflow/environment, then issues a
+      # one-time upload token for this run only. Requires a trusted publisher configured on
+      # test.pypi.org for owner=guilhermegor, repo=filings-cvm,
+      # workflow=release-test-pypi.yaml, environment=release-test-pypi. No TEST_PYPI_TOKEN secret is used.
+      - name: Publish to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

@@ -1,0 +1,4 @@
+# Paths sqlfluff should skip. Add any dynamically-assembled query here — one whose
+# `{placeholder}` tokens are filled at runtime (not static, parseable SQL), so sqlfluff
+# cannot template it. Example:
+#   src/config/queries/<db>__<table>__<purpose>.sql

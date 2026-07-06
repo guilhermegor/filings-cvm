@@ -1,0 +1,14 @@
+# gitlint configuration.
+#
+# These limits were previously implicit (gitlint's built-in defaults), which made
+# them easy to exceed when drafting a descriptive Conventional-Commits subject —
+# and they were only discovered when a commit was rejected AFTER the slow hook
+# chain (tests + coverage) already ran. Making them explicit documents the
+# contract for contributors and tooling alike. Commitizen already enforces the
+# Conventional-Commits *format*; gitlint here owns the length limits.
+
+[title-max-length]
+line-length=72
+
+[body-max-line-length]
+line-length=80

@@ -1,0 +1,42 @@
+{
+	// Default to the POSIX venv interpreter (Linux/macOS). There is no
+	// OS-portable way to express this key, so if the project runs on WINDOWS,
+	// comment the line below and uncomment the Windows one beneath it.
+	"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+	// "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+	"python.terminal.activateEnvironment": true,
+	"python.analysis.extraPaths": ["src"],
+	"python.testing.pytestEnabled": true,
+	"python.testing.pytestArgs": ["tests/unit"],
+	"[python]": {
+		"editor.insertSpaces": false,
+		"editor.tabSize": 4
+	},
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true,
+	// These extension-less dotfiles are tool configs, not Python — declare the
+	// language so Pylance stops analysing them and reporting false "X is not
+	// defined" errors on their keys. (.yamllint is YAML by format, but is declared
+	// ini here per project preference, grouped with the other dotfile configs.)
+	"files.associations": {
+		".gitlint": "ini",
+		".codespellrc": "ini",
+		".pydocstyle": "ini",
+		".sqlfluff": "ini",
+		".sqlfluffignore": "ini",
+		".yamllint": "ini",
+		"mypy.ini": "ini",
+		".shellcheckrc": "properties"
+	},
+	"python-envs.defaultEnvManager": "ms-python.python:poetry",
+	"python-envs.defaultPackageManager": "ms-python.python:poetry",
+	// Default integrated terminal is bash — the project's scripts and make/tasks
+	// recipes are bash. Uncomment the lines for your OS. On WINDOWS the default is
+	// Git Bash so the shell scripts still run.
+	// "terminal.integrated.defaultProfile.linux": "bash",
+	// "terminal.integrated.defaultProfile.osx": "bash",
+	// "terminal.integrated.defaultProfile.windows": "Git Bash",
+	// "terminal.integrated.profiles.windows": {
+	//     "Git Bash": { "source": "Git Bash" }
+	// }
+}

@@ -1,0 +1,56 @@
+site_name: Filings Cvm
+site_description: Documentation for Filings Cvm
+repo_url: https://github.com/guilhermegor/filings-cvm
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - Examples: examples.md
+  - API Reference: api.md
+  - FAQ: faq.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/white-balance-sunny
+        name: Switch to light mode
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  # Enables the `--8<-- "CHANGELOG.md"` include on the Changelog page (single-sources the root file).
+  - pymdownx.snippets:
+      base_path:
+        - .
+
+# Non-published docs: MkDocs builds every .md under docs/, so working
+# documents must be excluded here or they ship to readers.
+# NOTE: exclude_docs uses .gitignore syntax, which has NO inline comments — a trailing
+# "# ..." becomes part of the pattern and silently disables the exclusion. Keep every
+# comment on its own line above the pattern.
+exclude_docs: |
+  # work-to-do backlogs / follow-up notes
+  backlog/
+  # design specs / working notes, not published
+  superpowers/
+  # docs/ authoring guidance, not a published page
+  CLAUDE.md
+  # offline merge-checkpoint log, internal
+  checkpoints.md
+  # git-ignored scaffolding-lessons record, never published
+  blueprintx-lessons.md

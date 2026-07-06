@@ -1,0 +1,67 @@
+# EditorConfig — cross-editor whitespace/charset consistency.
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Python: ruff is configured with tab indentation (see ruff.toml), so the
+# editor must agree to avoid a format-on-save vs. lint tug-of-war. indent_size
+# AND tab_width must be set explicitly — without them [*.py] inherits the
+# [*] indent_size = 2 above, so a tab renders as 2 columns (the recurring
+# "why are my Python tabs 2 spaces?" trap).
+[*.py]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# Makefiles require real tabs for recipe lines.
+[Makefile]
+indent_style = tab
+
+# Included make fragments (make/*.mk) are Makefile syntax — recipe lines need real tabs.
+[*.mk]
+indent_style = tab
+
+# Shell scripts: the scripts use tabs and shfmt's default indent is tabs, so the editor,
+# shfmt and the existing code all agree (no format-on-save vs lint tug-of-war).
+[*.{sh,bash}]
+indent_style = tab
+
+# SQL: tab indentation (sqlfluff indent_unit = tab) — matches the project's tab-where-possible
+# convention (Python via ruff, shell via shfmt, Make). tab_width = 4 so a tab renders at the
+# same width as the old 4-space indent; column alignment inside a line stays spaces.
+[*.sql]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# TypeScript / JavaScript (React SPA): Prettier is configured with 2-space, spaces
+# (tabWidth: 2, useTabs unset → spaces; see .prettierrc.js) and ESLint agrees, so the editor
+# must match to avoid a format-on-save vs. lint tug-of-war. Declared explicitly (today only
+# inherited from [*]) so a future change to the [*] default never silently shifts JS/TS.
+[*.{ts,tsx,js,jsx}]
+indent_style = space
+indent_size = 2
+
+# HTML / CSS: Prettier formats both at 2-space indentation. Declared explicitly so the editor
+# never expands them to tabs or a different width.
+[*.{html,css}]
+indent_style = space
+indent_size = 2
+
+# YAML: the YAML spec FORBIDS tab indentation (parsers error on a leading tab), so spaces are
+# mandatory here — not a style choice. yamllint enforces 2 spaces; declare it explicitly
+# (today only inherited from [*]) so editors never expand it to tabs.
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2
+
+# Markdown: trailing whitespace can be a meaningful hard line break.
+[*.md]
+trim_trailing_whitespace = false

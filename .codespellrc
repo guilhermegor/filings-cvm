@@ -1,0 +1,13 @@
+[codespell]
+# skip specific file types and test files with Portuguese data
+skip = *.po,*.csv,*.json,*.xml,*.txt,.git,*.pyc,__pycache__,*.egg-info,.pytest_cache,.ruff_cache,.mypy_cache,node_modules,poetry.lock,htmlcov,coverage.svg,coverage.xml,*.diff
+# count the number of spelling errors
+count =
+# set quiet level to suppress certain messages
+quiet-level = 3
+# ignore specific words (global across all files)
+# LOCALE EXTENSION POINT: codespell only knows English, so docs/comments written
+# in another language (e.g. Portuguese: "nomes", "caracteres", "atual"...) get
+# flagged as typos. Extend this list with your locale's vocabulary rather than
+# skipping whole files (which would hide real typos in code identifiers there).
+ignore-words-list = nd,fpr,strat,enty,filetest,nome,ZAR,fro,hsi,HSI,WEGE,zar,SMLL,Classe,classe,erro,serie,emiss,TERMO,termo,INDX

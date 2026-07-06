@@ -1,0 +1,154 @@
+line-length = 99
+indent-width = 4
+# Floor of the project's requires-python (>=3.10). Bump in lockstep with pyproject.
+target-version = "py310"
+exclude = [
+    # version control systems
+    ".bzr",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".svn",
+
+    # python-specific
+    "__pycache__",
+    "__pypackages__",
+    ".eggs",
+    "*.egg",
+    "*.egg-info",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+
+    # environment and cache
+    ".direnv",
+    ".env",
+    ".mypy_cache",
+    ".nox",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "venv",
+    "site-packages",
+
+    # build and distribution
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+
+    # ide and editor
+    ".ipynb_checkpoints",
+    ".vscode",
+
+    # project-specific generated / chassis
+    "alembic",
+    "src/chassis",
+    "src/capabilities/example_feature",
+    # lib-minimal vendors the runtime type-checking engine at a nested private path; its
+    # imports are mechanically rewritten to <pkg>._internal.* (can exceed line-length) and it
+    # is intrinsic metaprogramming — fully excluded, like src/chassis (mypy excludes it too).
+    "src/*/_internal/utils/typing",
+
+    # check tooling: ruff-format would tabify space-indented helpers and trip E101
+    "bin",
+
+    # other
+    ".pants.d",
+    ".pyenv",
+    "node_modules",
+    "*.log",
+]
+
+[format]
+quote-style = "double"
+indent-style = "tab"
+docstring-code-format = false
+docstring-code-line-length = 79  # original python standard - readability in terminal (help)
+
+[lint]
+select = [
+    "UP",  # pyupgrade - flags the use of deprecated Python features
+    "E",   # pycodestyle - checks for PEP 8 compliance
+    "F",   # flake8 - checks for various code quality issues
+    "ANN", # annotations - checks for type annotations
+    "B",   # flake8-bugbear - checks for common bugs and design problems
+    "SIM", # flake8-simplify - checks for code simplification opportunities
+    "I",   # isort - checks for import sorting
+    "AIR", # airflow - checks for Airflow-specific issues
+    "ERA", # eradicate - removes commented-out code
+    "S",   # flake8-bandit - checks for security issues
+    "PD",  # pandas-vet - checks for common pandas issues
+    "D",   # pydocstring - this enables all docstring checks
+    "TID", # flake8-tidy-imports - enables the banned-api gate below
+]
+ignore = [
+    "D206",  # docstring should be indented with spaces, not tabs
+]
+fixable = ["I"]
+# allow dummy variables to start with an underscore and be followed by alphanumeric
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Bare pandas readers are banned so every file/SQL read funnels through
+# utils/tabular_reader (which enforces a FileContract + apply_dtypes). ruff resolves
+# `pd.read_csv` to `pandas.read_csv` and flags it. The seam itself and tests
+# (round-trip read-backs) are exempted via per-file-ignores below.
+[lint.flake8-tidy-imports.banned-api]
+"pandas.read_excel".msg = "Use utils.tabular_reader.read_table (enforces contract + dtypes)."
+"pandas.read_csv".msg = "Use utils.tabular_reader.read_table (enforces contract + dtypes)."
+"pandas.read_json".msg = "Use utils.tabular_reader.read_table (enforces contract + dtypes)."
+"pandas.read_table".msg = "Use utils.tabular_reader.read_table (enforces contract + dtypes)."
+"pandas.read_parquet".msg = "Use utils.tabular_reader.read_table (enforces contract + dtypes)."
+"pandas.read_sql".msg = "Use utils.tabular_reader.read_query (enforces contract + dtypes)."
+"pandas.read_sql_query".msg = "Use utils.tabular_reader.read_query (enforces contract + dtypes)."
+"pandas.read_sql_table".msg = "Use utils.tabular_reader.read_query (enforces contract + dtypes)."
+"pandas.ExcelFile".msg = "Use utils.tabular_reader.read_table (enforces contract + dtypes)."
+# FileContract is CONSTRUCTED only in config/contracts/ (per-file-exempt below); everywhere
+# else imports the instance. Both import paths of the class are banned; a file importing the
+# class purely for a type annotation carries a line-scoped `# noqa: TID251`.
+"utils.tabular_reader.FileContract".msg = "Construct contracts only in config/contracts/; import the instance."
+"config.contracts.FileContract".msg = "Construct contracts only in config/contracts/; import the instance."
+
+[lint.isort]
+force-single-line = false
+combine-as-imports = true
+split-on-trailing-comma = true
+force-sort-within-sections = true
+lines-after-imports = 2
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.flake8-annotations]
+suppress-none-returning = false  # do not suppress warnings for functions that return None
+suppress-dummy-args = false  # require annotations for dummy arguments
+ignore-fully-untyped = false  # flag functions that are completely untyped
+allow-star-arg-any = false  # do not allow `*args` and `**kwargs` to be untyped
+
+[lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",  # use of assert
+    "TID251",  # tests legitimately read back outputs with pd.read_* to assert on them
+]
+# The seam itself is the one place allowed to call the bare pandas readers.
+"src/utils/tabular_reader.py" = ["TID251"]
+# config/contracts/ is the one place allowed to construct FileContract.
+"src/config/contracts/*.py" = ["TID251"]
+# Native DB-API 2.0 / SQLAlchemy connections have no shared stdlib type, so `Any` is the
+# honest return/param annotation for the raw-driver connection factory (MVC skeletons).
+"src/config/connection_db.py" = ["ANN401"]
+# The ORM reference entity deliberately demonstrates the SQLAlchemy read idiom
+# (`pd.read_sql(select(...), conn)`), so it is exempt from the bare-reader ban; real
+# entities route reads through utils.tabular_reader.read_query.
+"src/model/example_entity.py" = ["ANN401", "TID251"]
+# The runtime type-checking engine validates arbitrary annotations, so `Any` is
+# intrinsic to its signatures. DDD ships it under src/chassis (already excluded
+# above); MVC ships it here. Ignore ANN401 rather than excluding it from all lint.
+"src/utils/typing/**/*.py" = ["ANN401"]
+# lib-minimal nests the same seams inside a private package (src/<pkg>/_internal/…);
+# mirror the exemptions above for that path (`*` matches the single package segment). The
+# typing engine there is fully excluded (see [exclude]), so it needs no per-file rule.
+"src/*/_internal/utils/tabular_reader.py" = ["TID251"]
+"src/*/_internal/config/contracts/*.py" = ["TID251"]
