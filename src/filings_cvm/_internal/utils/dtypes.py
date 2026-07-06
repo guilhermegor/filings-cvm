@@ -19,12 +19,12 @@ import pandas as pd
 # DDD; always injected, just at different paths). mypy reads the single TYPE_CHECKING
 # import (no redefinition); at runtime the try/except picks whichever layout shipped.
 if TYPE_CHECKING:
-	from filings-cvm._internal.utils.typing import type_checker
+	from filings_cvm._internal.utils.typing import type_checker
 else:
 	try:
-		from filings-cvm._internal.utils.typing import type_checker
+		from filings_cvm._internal.utils.typing import type_checker
 	except ModuleNotFoundError:  # DDD ships the engine as chassis.typing
-		from filings-cvm._internal.utils.typing import type_checker
+		from filings_cvm._internal.utils.typing import type_checker
 
 
 @type_checker

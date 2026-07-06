@@ -14,8 +14,8 @@ from __future__ import annotations
 import logging
 from typing import cast
 
-from filings-cvm._internal.utils.logs import CreateLog, LogLevel
-from filings-cvm._internal.utils.retry import LogEmitter
+from filings_cvm._internal.utils.logs import CreateLog, LogLevel
+from filings_cvm._internal.utils.retry import LogEmitter
 
 
 # The levels the rich printer accepts; an unrecognised level degrades to ``warning`` so the

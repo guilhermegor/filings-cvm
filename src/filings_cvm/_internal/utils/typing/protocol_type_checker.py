@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from filings-cvm._internal.utils.typing.type_checker import TypeChecker
+from filings_cvm._internal.utils.typing.type_checker import TypeChecker
 
 
 _ProtocolMeta = type(Protocol)
