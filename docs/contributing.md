@@ -39,6 +39,25 @@ A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente an
 make docs_server   # mkdocs serve em http://0.0.0.0:8000
 ```
 
+## Publicando a documentação (GitHub Pages)
+
+O workflow `Docs - GitHub Pages Deployment` constrói e publica o site a cada push na branch
+padrão. Ele exige que o **GitHub Pages esteja habilitado uma única vez** com a fonte *GitHub
+Actions* — e essa habilitação inicial **não** pode ser feita pelo próprio workflow: o
+`GITHUB_TOKEN` é um token de GitHub App que não consegue criar o site do Pages do zero (o primeiro
+run falha em *Configure Pages* com `Resource not accessible by integration`).
+
+Faça a habilitação uma vez, com direitos de admin no repositório:
+
+```bash
+make enable_pages          # ou: bash tasks.sh enable_pages
+```
+
+Esse passo já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente e não-bloqueante**:
+se o Pages já estiver ligado, não faz nada; se `gh` estiver ausente/não autenticado ou você não for
+admin do repositório (um fork), ele apenas avisa e segue — nunca quebra o `init`. Alternativa manual:
+*Settings → Pages → Build and deployment → Source: GitHub Actions*.
+
 ## Verificando o pacote construído
 
 Antes de abrir um PR de release, confirme que a wheel realmente constrói e importa — isso pega

@@ -1,10 +1,17 @@
 name: Docs - GitHub Pages Deployment
 
 # Build the MkDocs site and deploy it via GitHub's official Actions Pages deployment
-# (actions/configure-pages + upload-pages-artifact + deploy-pages). `enablement: true`
-# SELF-ENABLES Pages on the first run using the built-in GITHUB_TOKEN — no manual "enable
-# Pages" step and no PAT, unlike the `mkdocs gh-deploy` / gh-pages-branch model (which
-# publishes files but can't enable serving, causing the classic first-publish 404).
+# (actions/configure-pages + upload-pages-artifact + deploy-pages).
+#
+# IMPORTANT — Pages must be enabled ONCE before the first deploy. `enablement: true`
+# below is best-effort only: the workflow's GITHUB_TOKEN is a GitHub App installation
+# token that CANNOT create a Pages site from scratch, so on a repo where Pages was never
+# enabled the first run fails at "Configure Pages" with
+#   "Resource not accessible by integration / Create Pages site failed".
+# Do the one-time enable with repo-admin rights, either way:
+#   - run `make enable_pages` (or `bash tasks.sh enable_pages`) — also wired into `init`, or
+#   - Settings → Pages → Build and deployment → Source: GitHub Actions.
+# Once the site exists, `enablement: true` is a harmless self-heal on every later run.
 on:
   push:
     branches:
@@ -54,7 +61,9 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
-          # Enable Pages (as build_type: workflow) on the first run — no manual setting, no PAT.
+          # Best-effort self-heal only — NOT a first-run enable. The GITHUB_TOKEN can't create
+          # the Pages site (see the header note); do the one-time enable via `make enable_pages`
+          # or Settings → Pages. This keeps a manually-enabled site healthy on later runs.
           enablement: true
 
       - name: Build Site (strict)

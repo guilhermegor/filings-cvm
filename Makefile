@@ -7,9 +7,9 @@ POETRY := bash bin/poetry_exec.sh
 # -------------------
 # VIRTUAL ENVIRONMENT
 # -------------------
-.PHONY: init ensure_env venv update_venv precommit changelog
+.PHONY: init ensure_env venv update_venv precommit enable_pages changelog
 
-init: ensure_env venv precommit
+init: ensure_env venv precommit enable_pages
 
 # Seed .env from .env.example for a fresh checkout. The leading '-' makes a failed
 # seed (e.g. no .env.example) non-blocking for init — venv + precommit still run.
@@ -27,6 +27,14 @@ update_venv:
 # non-git deploy tree (a shipped zip with no .git) instead of aborting init.
 precommit:
 	@bash bin/precommit.sh
+
+# Enable GitHub Pages (source = GitHub Actions) once, so the docs deploy workflow can publish.
+# The workflow's GITHUB_TOKEN is a GitHub App token that CAN'T create the Pages site itself
+# (first run fails "Resource not accessible by integration"); this uses the maintainer's gh
+# auth. bin/enable_pages.sh is idempotent + non-blocking — it skips (never fails init) when gh
+# is absent/unauthenticated or the caller isn't a repo admin, so contributors run it harmlessly.
+enable_pages:
+	@bash bin/enable_pages.sh
 
 
 # Regenerate CHANGELOG.md from git tags + Conventional Commits (cz derives sections from tags).
@@ -169,6 +177,7 @@ help:
 	@echo "  venv                 Create Poetry venv and install dependencies"
 	@echo "  update_venv          Update all Poetry dependencies"
 	@echo "  precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)"
+	@echo "  enable_pages         Enable GitHub Pages (Actions source) once; needs gh + repo admin"
 	@echo "  changelog            Regenerate CHANGELOG.md from git tags (cz changelog)"
 	@echo ""
 	@echo "Corporate CA"

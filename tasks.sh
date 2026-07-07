@@ -36,12 +36,19 @@ precommit() {
 	bash "$SCRIPT_DIR/bin/precommit.sh"
 }
 
+enable_pages() {
+	# Enable GitHub Pages (source = GitHub Actions) once so the docs workflow can publish.
+	# Lives in bin/enable_pages.sh; idempotent + non-blocking (skips without gh/auth/admin).
+	bash "$SCRIPT_DIR/bin/enable_pages.sh"
+}
+
 init() {
 	# Seed .env first; a failed seed is non-blocking so init still runs venv +
 	# precommit — mirrors the Makefile's '-@' on ensure_env.
 	ensure_env || true
 	venv
 	precommit
+	enable_pages
 }
 
 changelog() {
@@ -243,6 +250,7 @@ Virtual Environment
   venv                 Create Poetry venv and install dependencies
   update_venv          Update all Poetry dependencies
   precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)
+  enable_pages         Enable GitHub Pages (Actions source) once; needs gh + repo admin
   changelog            Regenerate CHANGELOG.md from git tags (cz changelog)
 
 Corporate CA
@@ -302,6 +310,7 @@ ensure_env) ensure_env ;;
 venv) venv ;;
 update_venv) update_venv ;;
 precommit) precommit ;;
+enable_pages) enable_pages ;;
 get_corporate_ca) get_corporate_ca ;;
 unit_tests) unit_tests ;;
 integration_tests) integration_tests ;;
