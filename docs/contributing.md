@@ -1,90 +1,107 @@
-# **Contributing**
+# **Contribuindo**
 
-Everything you need to develop, test, and release this library.
+Tudo o que você precisa para desenvolver, testar e lançar esta biblioteca.
 
-> **See also:** [Usage](usage.md) · [API Reference](api.md) · the repository's root
-> `CONTRIBUTING.md` holds the authoritative branch/PR and commit-message policy.
+> **Veja também:** [Uso](usage.md) · [Referência da API](api.md) · o `CONTRIBUTING.md` na raiz do
+> repositório contém a política autoritativa de branch/PR e de mensagem de commit.
 
 ---
 
-## Setting up for development
+## Preparando o ambiente de desenvolvimento
 
-The project ships both a `Makefile` and a parallel `tasks.sh`, so use whichever suits your
-machine — **`make init`**, or **`bash tasks.sh init`** when `make` is unavailable (e.g. a stock
-Windows shell).
+O projeto traz um `Makefile` e um `tasks.sh` equivalente, então use o que couber na sua máquina —
+**`make init`** ou **`bash tasks.sh init`** quando `make` não estiver disponível (por exemplo, num
+shell padrão do Windows).
 
 ```bash
-make init        # seed .env, create the Poetry venv + install deps, install pre-commit hooks
-# or, without make:
+make init        # cria o virtualenv do Poetry + instala deps + instala hooks de pre-commit
+# ou, sem make:
 bash tasks.sh init
 ```
 
-`init` composes `ensure_env` (seed `.env`), `venv` (create the Poetry virtualenv, install **all**
-dependencies including dev + docs), and `precommit` (install the git hooks). Poetry is
-auto-installed if missing.
+`init` compõe `venv` (cria o virtualenv do Poetry e instala **todas** as dependências, inclusive
+dev + docs) e `precommit` (instala os git hooks). O Poetry é instalado automaticamente se estiver
+faltando.
 
-## Tests and linting
+## Testes e lint
 
 ```bash
 make unit_tests          # poetry run pytest tests/unit/
 make integration_tests   # poetry run pytest tests/integration/
-make lint                # ruff + mypy + codespell + pydocstyle + shell/sql/yaml gates
+make lint                # ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml
 ```
 
-CI runs the same gates on every pull request; keep them green locally before pushing.
+A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente antes de dar push.
 
-## Verifying the built package
-
-Before opening a release PR, confirm the wheel actually builds and imports — this catches
-packaging mistakes (a missing `__init__`, an unshipped `_internal/` subpackage) that source-tree
-tests never surface:
+## Servindo a documentação localmente
 
 ```bash
-make install_dist_locally    # python -m build → install → smoke-import → report the built wheel
+make docs_server   # mkdocs serve em http://0.0.0.0:8000
+```
+
+## Publicando a documentação (GitHub Pages)
+
+O workflow `Docs - GitHub Pages Deployment` constrói e publica o site a cada push na branch
+padrão. Ele exige que o **GitHub Pages esteja habilitado uma única vez** com a fonte *GitHub
+Actions* — e essa habilitação inicial **não** pode ser feita pelo próprio workflow: o
+`GITHUB_TOKEN` é um token de GitHub App que não consegue criar o site do Pages do zero (o primeiro
+run falha em *Configure Pages* com `Resource not accessible by integration`).
+
+Faça a habilitação uma vez, com direitos de admin no repositório:
+
+```bash
+make enable_pages          # ou: bash tasks.sh enable_pages
+```
+
+Esse passo já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente e não-bloqueante**:
+se o Pages já estiver ligado, não faz nada; se `gh` estiver ausente/não autenticado ou você não for
+admin do repositório (um fork), ele apenas avisa e segue — nunca quebra o `init`. Alternativa manual:
+*Settings → Pages → Build and deployment → Source: GitHub Actions*.
+
+## Verificando o pacote construído
+
+Antes de abrir um PR de release, confirme que a wheel realmente constrói e importa — isso pega
+erros de empacotamento (um `__init__` faltando, um subpacote `_internal/` não incluído) que os
+testes na árvore de fontes nunca revelam:
+
+```bash
+make install_dist_locally    # python -m build → instala → smoke-import → reporta a wheel
 ```
 
 ## Pull requests
 
-1. Branch off the default branch following the prefix policy (`feat/…`, `fix/…`, …).
-2. Fill out the PR template completely.
-3. Ensure the CI checks (tests, lint, docs build) pass — they are the merge gate.
+1. Crie a branch a partir da branch padrão seguindo a política de prefixo (`feat/…`, `fix/…`, …).
+2. Preencha o template de PR por completo.
+3. Garanta que os checks de CI (testes, lint, build da documentação) passem — eles são o gate de
+   merge.
 
-## Releasing
+## Lançando
 
-Releases are **tag-driven and secret-free** when the project is connected to a GitHub remote:
+Os releases são **dirigidos por tag** quando o projeto está conectado a um remoto no GitHub:
 
-- The version is the **git tag** (via `poetry-dynamic-versioning`); `pyproject.toml` holds a
-  `0.0.0` placeholder. Do not hand-edit it. Trigger a release from the Actions tab
-  (`Release to PyPI` / `Release to Test PyPI`, `workflow_dispatch` with the version), or by pushing
-  a `vX.Y.Z` tag.
-- The release workflow runs the **full test suite** as a hard gate, builds with `python -m build`,
-  and publishes via **OIDC trusted publishing** (`pypa/gh-action-pypi-publish`) — no stored
-  `PYPI_TOKEN`.
-- The changelog is regenerated from tags at release/build time (`make changelog` locally); CI never
-  commits `CHANGELOG.md` back to the protected default branch.
+- A versão é a **tag git** (via `poetry-dynamic-versioning`); o `pyproject.toml` guarda um
+  placeholder `0.0.0`. Não edite à mão. Dispare um release pela aba Actions
+  (`Release to PyPI` / `Release to Test PyPI`, `workflow_dispatch` com a versão) ou empurrando uma
+  tag `vX.Y.Z`.
+- O workflow de release roda a **suíte completa de testes** como gate rígido, constrói com
+  `python -m build` e publica via **trusted publishing (OIDC)** (`pypa/gh-action-pypi-publish`) —
+  sem `PYPI_TOKEN` armazenado.
+- O changelog é regenerado a partir das tags no momento do build (`make changelog` localmente); a
+  CI nunca faz commit de `CHANGELOG.md` de volta na branch padrão protegida.
 
-### Maintainer setup — trusted publisher (one time, before the first release)
+### Configuração do mantenedor — trusted publisher (uma vez, antes do primeiro release)
 
-Register a **trusted publisher** on **both** [pypi.org](https://pypi.org) and
-[test.pypi.org](https://test.pypi.org). Every claim must match the workflow exactly or the upload
-fails with an opaque `invalid-publisher`:
+Registre um **trusted publisher** tanto em [pypi.org](https://pypi.org) quanto em
+[test.pypi.org](https://test.pypi.org). Cada claim precisa bater exatamente com o workflow, ou o
+upload falha com um `invalid-publisher` opaco:
 
-| Claim | Value |
+| Claim | Valor |
 |-------|-------|
-| Owner / repository | your GitHub `<owner>` / `<repo>` |
+| Owner / repository | seu `<owner>` / `<repo>` no GitHub |
 | Workflow filename | `release-pypi.yaml` (PyPI) / `release-test-pypi.yaml` (Test PyPI) |
 | Environment | `release-pypi` / `release-test-pypi` |
-| PyPI **Project Name** | must equal the distribution name (`name` in `pyproject.toml`) |
+| PyPI **Project Name** | deve ser igual ao nome de distribuição (`name` no `pyproject.toml`) |
 
-For the very first upload the project does not exist yet — register a **pending publisher** at the
-account level (not under an existing project's settings). Publishing from a laptop instead of CI is
-the one case that still needs an API token; OIDC works only from GitHub Actions.
-
-### Choosing publish targets
-
-The scaffold wires the release workflows for the official public registry (PyPI) and a staging
-registry (Test PyPI). To publish to a **private / non-official** source instead — a git source
-(`pip install git+https://…`), a private PEP 503 index, or (for ecosystems that support it) GitHub
-Packages — wire the consumer-side source in `pyproject.toml` with an explicit-priority guard
-against dependency confusion (`poetry`'s `priority = "explicit"`; `pip --index-url`, never
-`--extra-index-url`).
+Para o primeiro upload o projeto ainda não existe — registre um **pending publisher** no nível da
+conta (não dentro das configurações de um projeto existente). Publicar de um laptop em vez da CI é
+o único caso que ainda precisa de um API token; OIDC só funciona a partir do GitHub Actions.
