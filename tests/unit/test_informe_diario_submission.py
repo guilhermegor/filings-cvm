@@ -47,9 +47,9 @@ def _document(inform: InformeDiarioInform) -> InformeDiarioDocument:
 	return InformeDiarioDocument(header=header, informs=[inform])
 
 
-def test_to_xml_minimal_document_renders_expected_structure() -> None:
-	"""to_xml emits the CVM document envelope, the INFORM block, and the fund CNPJ."""
-	xml = InformeDiario().to_xml(_document(_minimal_inform()))
+def test_export_minimal_document_renders_expected_structure() -> None:
+	"""Emit the CVM document envelope, the INFORM block, and the fund CNPJ."""
+	xml = InformeDiario().export(_document(_minimal_inform()))
 
 	assert xml is not None
 	assert 'xmlns="urn:infdiario"' in xml
@@ -61,17 +61,17 @@ def test_to_xml_minimal_document_renders_expected_structure() -> None:
 	assert "<PATRIM_LIQ>0,00</PATRIM_LIQ>" in xml
 
 
-def test_to_xml_quota_renders_twelve_decimals() -> None:
+def test_export_quota_renders_twelve_decimals() -> None:
 	"""VL_QUOTA renders with the standard's up-to-12-place scale, comma-separated."""
-	xml = InformeDiario().to_xml(_document(_minimal_inform(vl_quota="1.5")))
+	xml = InformeDiario().export(_document(_minimal_inform(vl_quota="1.5")))
 
 	assert xml is not None
 	assert "<VL_QUOTA>1,500000000000</VL_QUOTA>" in xml
 
 
-def test_to_xml_truncates_excess_precision_round_down() -> None:
+def test_export_truncates_excess_precision_round_down() -> None:
 	"""A value with excess precision is truncated toward zero, never rounded up."""
-	xml = InformeDiario().to_xml(_document(_minimal_inform(vl_total="10.999")))
+	xml = InformeDiario().export(_document(_minimal_inform(vl_total="10.999")))
 
 	assert xml is not None
 	assert "<VL_TOTAL>10,99</VL_TOTAL>" in xml
@@ -99,7 +99,7 @@ def test_neither_fund_identifier_is_rejected() -> None:
 def test_subclasse_informe_renders_cod_subclasse() -> None:
 	"""A subclass informe carries COD_SUBCLASSE and omits CNPJ_FDO."""
 	inform = _minimal_inform(cnpj_fdo=None, cod_subclasse="SUB123")
-	xml = InformeDiario().to_xml(_document(inform))
+	xml = InformeDiario().export(_document(inform))
 
 	assert xml is not None
 	assert "<COD_SUBCLASSE>SUB123</COD_SUBCLASSE>" in xml
@@ -110,7 +110,7 @@ def test_significant_shareholder_block_renders() -> None:
 	"""A significant shareholder renders inside LISTA_COTST_SIGNIF with 4-place PR_COTST."""
 	cotista = SignificantShareholder(tp_pessoa="PJ", cpf_cnpj_cotst=VALID_CNPJ, pr_cotst="25.5")
 	inform = _minimal_inform(nr_cotst=1, lista_cotst_signif=[cotista])
-	xml = InformeDiario().to_xml(_document(inform))
+	xml = InformeDiario().export(_document(inform))
 
 	assert xml is not None
 	assert "<LISTA_COTST_SIGNIF>" in xml
@@ -118,8 +118,8 @@ def test_significant_shareholder_block_renders() -> None:
 	assert "<PR_COTST>25,5000</PR_COTST>" in xml
 
 
-def test_to_xml_writes_file_in_windows_1252(tmp_path: Path) -> None:
-	"""With an output path, to_xml returns None and writes a windows-1252 file.
+def test_export_writes_file_in_windows_1252(tmp_path: Path) -> None:
+	"""With an output path, export returns None and writes a windows-1252 file.
 
 	Parameters
 	----------
@@ -127,7 +127,7 @@ def test_to_xml_writes_file_in_windows_1252(tmp_path: Path) -> None:
 		Pytest-provided throwaway directory for the output file.
 	"""
 	out = tmp_path / "informe_diario.xml"
-	result = InformeDiario().to_xml(_document(_minimal_inform()), output_path=str(out))
+	result = InformeDiario().export(_document(_minimal_inform()), output_path=str(out))
 
 	assert result is None
 	content = out.read_text(encoding="windows-1252")
@@ -135,7 +135,7 @@ def test_to_xml_writes_file_in_windows_1252(tmp_path: Path) -> None:
 	assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in content
 
 
-def test_to_xml_rejects_wrong_argument_type() -> None:
+def test_export_rejects_wrong_argument_type() -> None:
 	"""The TypeChecker metaclass rejects a mistyped argument at call time."""
 	with pytest.raises(TypeError):
-		InformeDiario().to_xml("not a document")
+		InformeDiario().export("not a document")

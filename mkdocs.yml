@@ -11,6 +11,7 @@ nav:
       - Informe Diário: submission/informe_diario.md
   - Leitura (← CVM):
       - Visão geral: ingestion/index.md
+      - Informe Diário FIF: ingestion/informe_diario.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md

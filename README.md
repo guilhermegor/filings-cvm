@@ -94,8 +94,18 @@ header = DocumentHeader(dt_compt="01/2025", dt_gerac_arq="15/01/2025")
 row = PerfilMensalRow(cnpj_fdo="11222333000181", ...)  # validado na construção
 doc = PerfilMensalDocument(header=header, rows=[row])
 
-xml = PerfilMensal().to_xml(doc)                          # XML como str
-PerfilMensal().to_xml(doc, output_path="perfil.xml")     # ou grava em disco (windows-1252)
+xml = PerfilMensal().export(doc)                          # XML como str
+PerfilMensal().export(doc, output_path="perfil.xml")     # ou grava em disco (windows-1252)
+```
+
+E a leitura (← CVM) devolve um `DataFrame` tipado e validado por contrato:
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion import InformeDiarioReader
+
+df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()   # dump mensal inf_diario_fi
 ```
 
 O exemplo completo (incluindo o bloco obrigatório de contagem de clientes) está em
@@ -120,8 +130,8 @@ filings-cvm/
 ├── src/filings_cvm/
 │   ├── __init__.py         # API pública (controlada por __all__)
 │   ├── submission/         # envio → CVM (modelo validado → XML)
-│   ├── ingestion/          # leitura ← CVM (criada quando o 1º padrão landar)
-│   └── _internal/          # PRIVADO — schemas Pydantic + helpers vendorizados
+│   ├── ingestion/          # leitura ← CVM (arquivo baixado → DataFrame tipado)
+│   └── _internal/          # PRIVADO — schemas Pydantic, ports (interfaces) + helpers
 ├── tests/
 │   ├── unit/  integration/  performance/
 ├── .pre-commit-config.yaml

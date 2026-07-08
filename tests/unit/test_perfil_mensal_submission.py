@@ -71,9 +71,9 @@ def _document(row: PerfilMensalRow) -> PerfilMensalDocument:
 	return PerfilMensalDocument(header=header, rows=[row])
 
 
-def test_to_xml_minimal_document_renders_expected_structure() -> None:
-	"""to_xml emits the CVM document envelope, the row block, and the fund CNPJ."""
-	xml = PerfilMensal().to_xml(_document(_minimal_row()))
+def test_export_minimal_document_renders_expected_structure() -> None:
+	"""Emit the CVM document envelope, the row block, and the fund CNPJ."""
+	xml = PerfilMensal().export(_document(_minimal_row()))
 
 	assert xml is not None
 	assert "<DOC_ARQ" in xml
@@ -84,9 +84,9 @@ def test_to_xml_minimal_document_renders_expected_structure() -> None:
 	assert "<TOTAL_RECURS_BR>0,00</TOTAL_RECURS_BR>" in xml
 
 
-def test_to_xml_truncates_excess_precision_round_down() -> None:
+def test_export_truncates_excess_precision_round_down() -> None:
 	"""A value with excess precision is truncated toward zero, never rounded up."""
-	xml = PerfilMensal().to_xml(_document(_minimal_row(total_recurs_br="10.999")))
+	xml = PerfilMensal().export(_document(_minimal_row(total_recurs_br="10.999")))
 
 	assert xml is not None
 	assert "<TOTAL_RECURS_BR>10,99</TOTAL_RECURS_BR>" in xml
@@ -175,9 +175,9 @@ def _full_row() -> PerfilMensalRow:
 	)
 
 
-def test_to_xml_full_row_renders_all_optional_blocks() -> None:
+def test_export_full_row_renders_all_optional_blocks() -> None:
 	"""A fully populated row emits every optional block with escaping and comma decimals."""
-	xml = PerfilMensal().to_xml(_document(_full_row()))
+	xml = PerfilMensal().export(_document(_full_row()))
 
 	assert xml is not None
 	assert "<DISTR_PATRIM>" in xml
@@ -191,8 +191,8 @@ def test_to_xml_full_row_renders_all_optional_blocks() -> None:
 	assert "voto resumido &lt;ok&gt;" in xml
 
 
-def test_to_xml_writes_file_in_windows_1252(tmp_path: Path) -> None:
-	"""With an output path, to_xml returns None and writes a windows-1252 file.
+def test_export_writes_file_in_windows_1252(tmp_path: Path) -> None:
+	"""With an output path, export returns None and writes a windows-1252 file.
 
 	Parameters
 	----------
@@ -200,13 +200,13 @@ def test_to_xml_writes_file_in_windows_1252(tmp_path: Path) -> None:
 		Pytest-provided throwaway directory for the output file.
 	"""
 	out = tmp_path / "perfil_mensal.xml"
-	result = PerfilMensal().to_xml(_document(_minimal_row()), output_path=str(out))
+	result = PerfilMensal().export(_document(_minimal_row()), output_path=str(out))
 
 	assert result is None
 	assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in out.read_text(encoding="windows-1252")
 
 
-def test_to_xml_rejects_wrong_argument_type() -> None:
+def test_export_rejects_wrong_argument_type() -> None:
 	"""The TypeChecker metaclass rejects a mistyped argument at call time."""
 	with pytest.raises(TypeError):
-		PerfilMensal().to_xml("not a document")
+		PerfilMensal().export("not a document")

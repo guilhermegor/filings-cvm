@@ -9,6 +9,7 @@ from decimal import Decimal
 from pathlib import Path
 import xml.sax.saxutils as saxutils
 
+from filings_cvm._internal.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.schemas.perfil_mensal import (
 	ClientCount,
 	NominalRiskBlock,
@@ -18,19 +19,20 @@ from filings_cvm._internal.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
-from filings_cvm._internal.utils.typing import TypeChecker
 
 
-class PerfilMensal(metaclass=TypeChecker):
+class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 	"""Serialize a validated Perfil Mensal document to CVM-compliant XML.
+
+	Concrete :class:`SubmissionWriter` for the Perfil Mensal V4 XML standard.
 
 	Methods
 	-------
-	to_xml(doc, output_path, versao)
+	export(doc, output_path, versao)
 		Serialize a validated document to a CVM-compliant XML string.
 	"""
 
-	def to_xml(
+	def export(
 		self,
 		doc: PerfilMensalDocument,
 		output_path: str | None = None,
