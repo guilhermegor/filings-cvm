@@ -17,128 +17,46 @@ CNPJ/CPF fields are validated with this library's own check-digit validators
 CVM expects in the XML — rather than a format-only regex.
 """
 
-from collections.abc import Callable
-from decimal import ROUND_DOWN, Decimal, InvalidOperation
+from decimal import Decimal
 import re
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, Field, ValidationInfo, field_validator
 
-from filings_cvm._internal.utils.br_identifiers import (
-	is_valid_cnpj,
-	is_valid_cpf,
-	unmask_cnpj,
-	unmask_cpf,
+from filings_cvm._internal.schemas._fields import (
+	truncate_to_scale,
+	validate_person_doc,
+	validated_cnpj,
 )
-
-
-# Raw values a decimal before-validator may receive, before coercion to Decimal.
-DecimalInput = Decimal | str | int | float | None
-
-
-def _truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Decimal | None]:
-	"""Build a before-validator that truncates a value to ``decimal_places`` (ROUND_DOWN).
-
-	Truncation (never rounding) is used so a value is never inflated past the scale
-	the CVM standard permits; any excess precision is discarded toward zero.
-
-	Parameters
-	----------
-	decimal_places : int
-		Number of decimal places mandated by the CVM standard for the field.
-
-	Returns
-	-------
-	Callable[[DecimalInput], Optional[Decimal]]
-		A validator callable returning the truncated ``Decimal`` (or ``None``).
-
-	Raises
-	------
-	ValueError
-		Raised by the returned validator when a value cannot be interpreted as a
-		decimal number.
-	"""
-	quantum = Decimal(1).scaleb(-decimal_places)
-
-	def _truncate(value: DecimalInput) -> Decimal | None:
-		"""Truncate a single incoming value to the bound scale.
-
-		Parameters
-		----------
-		value : DecimalInput
-			Raw value from XML parsing, CSV reload, or direct construction.
-
-		Returns
-		-------
-		Optional[Decimal]
-			Truncated value, or ``None`` when the input is ``None``.
-
-		Raises
-		------
-		ValueError
-			If the value cannot be interpreted as a decimal number.
-		"""
-		if value is None:
-			return None
-		try:
-			as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
-		except (InvalidOperation, ValueError) as exc:
-			raise ValueError(f"invalid decimal value: {value!r}") from exc
-		return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
-
-	return _truncate
 
 
 # Decimal field types with the scale pinned to the CVM Perfil standard.
 # Fields where the standard states only the number of decimal places.
 OneDecimalField = Annotated[
-	Decimal, BeforeValidator(_truncate_to_scale(1)), Field(decimal_places=1)
+	Decimal, BeforeValidator(truncate_to_scale(1)), Field(decimal_places=1)
 ]
 TwoDecimalField = Annotated[
-	Decimal, BeforeValidator(_truncate_to_scale(2)), Field(decimal_places=2)
+	Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)
 ]
 FiveDecimalField = Annotated[
-	Decimal, BeforeValidator(_truncate_to_scale(5)), Field(decimal_places=5)
+	Decimal, BeforeValidator(truncate_to_scale(5)), Field(decimal_places=5)
 ]
 
 # Fields where the standard also bounds the integer-digit count.
 # VAR_PERC_PL: "valor com até 10 casas inteiras e 4 decimais".
 VarPercentPlField = Annotated[
-	Decimal, BeforeValidator(_truncate_to_scale(4)), Field(max_digits=14, decimal_places=4)
+	Decimal, BeforeValidator(truncate_to_scale(4)), Field(max_digits=14, decimal_places=4)
 ]
 # PRAZ_MED_CART_TIT: "valor com até 4 casas inteiras e 4 decimais".
 AvgTermField = Annotated[
-	Decimal, BeforeValidator(_truncate_to_scale(4)), Field(max_digits=8, decimal_places=4)
+	Decimal, BeforeValidator(truncate_to_scale(4)), Field(max_digits=8, decimal_places=4)
 ]
 # PR_* patrimony distribution: "até 3 casas inteiras e 1 decimal. Valor máximo 100".
 PercentField = Annotated[
 	Decimal,
-	BeforeValidator(_truncate_to_scale(1)),
+	BeforeValidator(truncate_to_scale(1)),
 	Field(ge=Decimal("0"), le=Decimal("100"), max_digits=4, decimal_places=1),
 ]
-
-
-def _validated_cnpj(value: str) -> str:
-	"""Normalise and check-digit-validate a CNPJ, returning its bare 14-char form.
-
-	Parameters
-	----------
-	value : str
-		A CNPJ in any shape (masked, padded, or bare).
-
-	Returns
-	-------
-	str
-		The unmasked (bare) CNPJ.
-
-	Raises
-	------
-	ValueError
-		If the value is not a valid CNPJ (failing check digits).
-	"""
-	if not is_valid_cnpj(value):
-		raise ValueError(f"invalid CNPJ: {value!r}")
-	return unmask_cnpj(value)
 
 
 class DocumentHeader(BaseModel):
@@ -306,7 +224,7 @@ class OtcOperation(BaseModel):
 		ValueError
 			If the document is not a valid CPF (PF) or CNPJ (PJ).
 		"""
-		return _validate_person_doc(info.data.get("tp_pessoa", ""), v)
+		return validate_person_doc(info.data.get("tp_pessoa", ""), v)
 
 
 class PrivateCreditIssuer(BaseModel):
@@ -339,36 +257,7 @@ class PrivateCreditIssuer(BaseModel):
 		ValueError
 			If the document is not a valid CPF (PF) or CNPJ (PJ).
 		"""
-		return _validate_person_doc(info.data.get("tp_pessoa_emissor", ""), v)
-
-
-def _validate_person_doc(tp_pessoa: str, value: str) -> str:
-	"""Validate a document as CPF (PF) or CNPJ (PJ) and return its bare form.
-
-	Parameters
-	----------
-	tp_pessoa : str
-		``"PF"`` (natural person → CPF) or ``"PJ"`` (legal entity → CNPJ).
-	value : str
-		The document in any shape.
-
-	Returns
-	-------
-	str
-		The unmasked (bare) document.
-
-	Raises
-	------
-	ValueError
-		If the document is not valid for the given person type.
-	"""
-	if tp_pessoa == "PF":
-		if not is_valid_cpf(value):
-			raise ValueError(f"invalid CPF for PF: {value!r}")
-		return unmask_cpf(value)
-	if not is_valid_cnpj(value):
-		raise ValueError(f"invalid CNPJ for PJ: {value!r}")
-	return unmask_cnpj(value)
+		return validate_person_doc(info.data.get("tp_pessoa_emissor", ""), v)
 
 
 class PerformanceFeeDetails(BaseModel):
@@ -456,7 +345,7 @@ class PerfilMensalRow(BaseModel):
 		ValueError
 			If value is not a valid CNPJ.
 		"""
-		return _validated_cnpj(v)
+		return validated_cnpj(v)
 
 
 class PerfilMensalDocument(BaseModel):

@@ -10,7 +10,12 @@ See the CVM XML Standards catalog in ``CLAUDE.md`` for the full source of truth.
 
 from importlib.metadata import PackageNotFoundError, version
 
-from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
+from filings_cvm.submission import (
+	InformeDiario,
+	InformeDiarioDocument,
+	PerfilMensal,
+	PerfilMensalDocument,
+)
 
 
 try:
@@ -19,4 +24,10 @@ except PackageNotFoundError:  # pragma: no cover - source tree without an instal
 	__version__ = "0.0.0"
 
 
-__all__ = ["PerfilMensal", "PerfilMensalDocument", "__version__"]
+__all__ = [
+	"InformeDiario",
+	"InformeDiarioDocument",
+	"PerfilMensal",
+	"PerfilMensalDocument",
+	"__version__",
+]
