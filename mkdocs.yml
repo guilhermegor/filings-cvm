@@ -18,6 +18,8 @@ nav:
 theme:
   name: material
   language: pt-BR
+  logo: assets/cvm-logo.png
+  favicon: assets/cvm-logo.png
   palette:
     - scheme: default
       primary: indigo

@@ -1,120 +1,157 @@
-# Filings Cvm <img src="assets/logo_lorem_ipsum.png" align="right" width="200" style="border-radius: 15px;" alt="Filings Cvm">
+# filings-cvm <img src="assets/cvm-logo.png" align="right" width="200" style="border-radius: 15px;" alt="filings-cvm">
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![Python Version](https://img.shields.io/badge/python-${PYTHON_VERSIONS}-blue.svg)
-![PyPI Version](https://img.shields.io/pypi/v/${PYPI_NAME})
-[![Snyk Vulnerabilities](https://snyk.io/test/github/${GITHUB_USERNAME}/${PROJECT_SLUG}/badge.svg)](https://snyk.io/test/github/${GITHUB_USERNAME}/${PROJECT_SLUG})
-[![Snyk License](https://snyk.io/advisor/python/${PYPI_NAME}/badge.svg)](https://snyk.io/advisor/python/${PYPI_NAME})
-![PyPI Downloads](https://static.pepy.tech/badge/${PYPI_NAME})
-[![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff+https://github.com/codespell-project/codespell)
-![Formatting: isort](https://img.shields.io/badge/formatting-isort-%231674b1)
+![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
+![PyPI Version](https://img.shields.io/pypi/v/filings-cvm)
+![PyPI Downloads](https://static.pepy.tech/badge/filings-cvm)
+[![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff)
 ![Test Coverage](./coverage.svg)
-![License](https://img.shields.io/badge/license-${PROJECT_LICENSE}-green.svg)
-![Open Issues](https://img.shields.io/github/issues/${GITHUB_USERNAME}/${PROJECT_SLUG})
-![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://guilhermegor.github.io/filings-cvm/)
 
-${PROJECT_DESCRIPTION}
+Biblioteca Python **tipada** para os padrões de arquivo XML regulatórios da
+[CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários). Monte, valide e
+serialize documentos no formato exigido pela CVM — e, à medida que a biblioteca cresce,
+leia arquivos baixados da CVM de volta para modelos tipados.
 
-## ✨ Key Features
+Modelos [Pydantic v2](https://docs.pydantic.dev/) validam **tudo** na construção — formato
+de datas, dígitos verificadores de CNPJ/CPF e a **escala decimal** de cada campo — e valores
+com casas decimais em excesso são **truncados em direção a zero** (`ROUND_DOWN`), nunca
+arredondados, para que um valor reportado jamais seja inflado.
 
-> Replace these placeholder groups with your project's actual capabilities.
-> Group features by domain or capability — one `###` heading per area.
+> **Fonte da verdade:** nomes de campo, escalas decimais e cardinalidades vêm do catálogo
+> oficial da CVM — <https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp> —
+> não desta documentação.
 
-### 🧩 Capability Group 1
-- [Feature placeholder 1](${LINK_PLACEHOLDER})
-- [Feature placeholder 2](${LINK_PLACEHOLDER})
-- [Feature placeholder 3](${LINK_PLACEHOLDER})
+## 📖 Documentação
 
-### 🧩 Capability Group 2
-- [Feature placeholder 4](${LINK_PLACEHOLDER})
-- [Feature placeholder 5](${LINK_PLACEHOLDER})
-- [Feature placeholder 6](${LINK_PLACEHOLDER})
+A documentação completa (em pt-BR) fica em **<https://guilhermegor.github.io/filings-cvm/>**
+ou pode ser servida localmente:
 
-### ⚙️ Utilities
-- [Utility placeholder 1](${LINK_PLACEHOLDER})
-- [Utility placeholder 2](${LINK_PLACEHOLDER})
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python ${PYTHON_VERSIONS}
-- Poetry (recommended)
-- Optional: Makefile
-
-### Installation
-
-**Option 1: Pip (recommended)**
 ```bash
-pip install ${PYPI_NAME}
+make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_server)
 ```
 
-**Option 2: Build from source**
+## ✨ Funcionalidades
+
+Toda solução vive em uma de duas macrosseções:
+
+| Seção | Sentido | O que faz |
+|-------|---------|-----------|
+| `filings_cvm.submission` | **envio** → CVM | Recebe modelos de schema validados e produz o arquivo XML compatível com a CVM, pronto para envio. |
+| `filings_cvm.ingestion` | **leitura** ← CVM | Analisa um arquivo baixado da CVM de volta para modelos tipados. Criada quando o primeiro padrão de leitura for implementado. |
+
+O **schema compartilhado** (modelos Pydantic que espelham cada padrão XML) é neutro em
+relação à direção e reexportado pelas seções públicas — você importa tudo de que precisa a
+partir de `filings_cvm.submission`.
+
+### 🧩 Padrões implementados (envio)
+
+- ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp)) — `PerfilMensal` / `PerfilMensalDocument`
+- ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp)) — `InformeDiario` / `InformeDiarioDocument`
+
+Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes —
+consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
+
+## 🚀 Primeiros Passos
+
+### Pré-requisitos
+
+- Python **>= 3.10**
+- Poetry (recomendado)
+- Opcional: Makefile (ou use `./tasks.sh` no Git Bash / Windows)
+
+### Instalação
+
+**Como dependência:**
+
 ```bash
-git clone https://github.com/${GITHUB_USERNAME}/${PROJECT_SLUG}.git
-cd ${PROJECT_SLUG}
-pyenv install ${PYTHON_VERSION_PIN}
-pyenv local ${PYTHON_VERSION_PIN}
-poetry install --no-root
-poetry shell
+pip install filings-cvm
+# ou
+poetry add filings-cvm
 ```
 
-**Make (optional automation)**
-- Windows: install via MinGW or Chocolatey
-- macOS: Xcode CLI tools or Homebrew
-- Linux: sudo apt-get install build-essential
+**A partir do código-fonte:**
 
-### Running Tests
 ```bash
-poetry run pytest tests/unit/ -v
-poetry run pytest tests/integration/ -v
+git clone https://github.com/guilhermegor/filings-cvm.git
+cd filings-cvm
+make init            # cria a .venv e instala os hooks de pre-commit
+                     # (sem make: ./tasks.sh init)
 ```
 
-## 📂 Project Structure (template)
+### Uso básico
+
+```python
+from filings_cvm.submission import (
+    DocumentHeader,
+    PerfilMensal,
+    PerfilMensalDocument,
+    PerfilMensalRow,
+)
+
+header = DocumentHeader(dt_compt="01/2025", dt_gerac_arq="15/01/2025")
+row = PerfilMensalRow(cnpj_fdo="11222333000181", ...)  # validado na construção
+doc = PerfilMensalDocument(header=header, rows=[row])
+
+xml = PerfilMensal().to_xml(doc)                          # XML como str
+PerfilMensal().to_xml(doc, output_path="perfil.xml")     # ou grava em disco (windows-1252)
 ```
-${PROJECT_SLUG}/
-├── .github/
-│   ├── workflows/
-│   ├── CODEOWNERS
-│   └── PULL_REQUEST_TEMPLATE.md
-├── .vscode/
-├── bin/
-│   ├── check_unix_filenames.sh
-│   ├── fix_playwright.sh
-│   ├── start.sh
-│   └── test_urls_docstrings.sh
-├── data/
-├── docs/
-├── examples/
-├── img/
-├── assets/
-│   └── logo.png
-├── src/${PACKAGE_IMPORT_PATH}/
+
+O exemplo completo (incluindo o bloco obrigatório de contagem de clientes) está em
+**[Uso](https://guilhermegor.github.io/filings-cvm/usage/)**.
+
+### Execução dos testes
+
+```bash
+make unit_tests      # pytest tests/unit/
+make test_cov        # cobertura + badge (coverage.svg)
+make lint            # ruff, codespell, pydocstyle, check_docstrings
+make help            # lista todos os comandos disponíveis
+```
+
+## 📂 Estrutura do projeto
+
+```
+filings-cvm/
+├── assets/                 # logo e imagens do projeto
+├── docs/                   # documentação MkDocs (pt-BR) — make docs_server
+├── mkdocs.yml              # configuração do site de documentação
+├── src/filings_cvm/
+│   ├── __init__.py         # API pública (controlada por __all__)
+│   ├── submission/         # envio → CVM (modelo validado → XML)
+│   ├── ingestion/          # leitura ← CVM (criada quando o 1º padrão landar)
+│   └── _internal/          # PRIVADO — schemas Pydantic + helpers vendorizados
 ├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── performance/
-├── .gitignore
+│   ├── unit/  integration/  performance/
 ├── .pre-commit-config.yaml
-├── .python-version
-├── LICENSE
-├── Makefile
-├── poetry.lock
+├── Makefile  /  tasks.sh   # interfaces espelhadas (com e sem make)
 ├── pyproject.toml
-├── README.md
-├── requirements.txt
-└── requirements-prd.txt
+└── README.md
 ```
 
-## 👨‍💻 Authors
-- ${AUTHOR_NAME} — [GitHub](https://github.com/${GITHUB_USERNAME}) | [LinkedIn](${LINKEDIN_URL})
+## 🤝 Contribuição
 
-## 📜 License
-This project is licensed under ${PROJECT_LICENSE}. Update this section if you use a different license.
+Contribuições são bem-vindas — leia o
+[docs/contributing.md](docs/contributing.md) antes de abrir sua primeira branch. Fluxo
+resumido:
 
-## 🙌 Acknowledgments
-- Inspired by relevant open-source work.
-- Thank contributors and the community.
+```bash
+make lint            # ruff, codespell, pydocstyle
+make unit_tests      # pytest tests/unit/
+```
 
-## 🔗 Useful Links
-- [GitHub Repository](https://github.com/${GITHUB_USERNAME}/${PROJECT_SLUG})
-- [Issue Tracker](https://github.com/${GITHUB_USERNAME}/${PROJECT_SLUG}/issues)
+## 👨‍💻 Autores
+
+**Guilherme Rodrigues**
+
+[![GitHub](https://img.shields.io/badge/GitHub-guilhermegor-181717?style=flat&logo=github)](https://github.com/guilhermegor)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Guilherme_Rodrigues-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/guilhermegor/)
+
+## 📜 Licença
+
+Este projeto é licenciado sob a Licença **MIT** — veja [LICENSE](LICENSE).
+
+## 🙌 Agradecimentos
+
+- Gerado a partir do template **lib-minimal** via [BlueprintX](https://github.com/guilhermegor/BlueprintX).
