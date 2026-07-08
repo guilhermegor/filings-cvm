@@ -2,7 +2,7 @@
 
 Como instalar a biblioteca e gerar o seu primeiro arquivo XML compatível com a CVM.
 
-> **Veja também:** [Referência da API](api.md) · [Exemplos](examples.md)
+> **Veja também:** [Referência da API](api.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md)
 
 ---
 
@@ -87,10 +87,36 @@ Passe os valores decimais como **strings** (`"10.5"`) para preservar a precisão
 
 ---
 
-## Executando via Makefile
+## Informe Diário
 
-```bash
-make start         # executa src/filings_cvm/main.py via Poetry
+O fluxo é idêntico — troque os modelos pelos do padrão Informe Diário. Cada `INFORM` identifica o
+fundo por **exatamente um** de `cnpj_fdo` (classe) **ou** `cod_subclasse` (subclasse):
+
+```python
+from filings_cvm.submission import (
+    InformeDiario,
+    InformeDiarioDocument,
+    InformeDiarioHeader,
+    InformeDiarioInform,
+)
+
+doc = InformeDiarioDocument(
+    header=InformeDiarioHeader(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025"),
+    informs=[
+        InformeDiarioInform(
+            cnpj_fdo="11222333000181",   # ou cod_subclasse=..., nunca os dois
+            data_prox_pl="16/01/2025",
+            vl_total="1000000.00",
+            vl_quota="1.23456789",       # até 12 casas decimais
+            patrim_liq="999999.50",
+            captc_dia="0", resg_dia="0",
+            vl_total_sai="0", vl_total_atv="0",
+            nr_cotst=2,
+        )
+    ],
+)
+
+InformeDiario().to_xml(doc, output_path="informe_20250115.xml")
 ```
 
 ---

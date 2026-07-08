@@ -30,13 +30,15 @@ não desta documentação:
 
 > <https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp>
 
-### Padrão implementado
+### Padrões implementados
 
 - ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp))
   — envio (`submission/perfil_mensal.py`).
+- ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp))
+  — envio (`submission/informe_diario.py`).
 
-Os demais padrões do catálogo (Informe Diário, CDA, Lâmina, Informe Mensal FIDC, etc.) estão
-pendentes. Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
+Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
+Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
 
 ---
 
@@ -54,8 +56,8 @@ Instalação como dependência:
 pip install filings-cvm
 ```
 
-Continue em **[Uso](usage.md)** para o primeiro documento, ou pule direto para os
-**[Exemplos](examples.md)**.
+Continue em **[Uso](usage.md)** para o primeiro documento, ou veja cada padrão em **Envio**:
+**[Perfil Mensal](submission/perfil_mensal.md)** e **[Informe Diário](submission/informe_diario.md)**.
 
 ---
 

@@ -6,7 +6,11 @@ docs_dir: docs
 nav:
   - Início: index.md
   - Uso: usage.md
-  - Exemplos: examples.md
+  - Envio (→ CVM):
+      - Perfil Mensal: submission/perfil_mensal.md
+      - Informe Diário: submission/informe_diario.md
+  - Leitura (← CVM):
+      - Visão geral: ingestion/index.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md
