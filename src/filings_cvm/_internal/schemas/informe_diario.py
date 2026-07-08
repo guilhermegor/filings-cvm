@@ -18,9 +18,11 @@ class) or ``COD_SUBCLASSE`` (subclass), as the standard requires. CNPJ/CPF field
 validated with this library's own check-digit validators and stored bare/unmasked.
 """
 
+from __future__ import annotations
+
 from decimal import Decimal
 import re
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal
 
 from pydantic import (
 	BaseModel,
@@ -188,12 +190,12 @@ class InformeDiarioInform(BaseModel):
 		return validated_cnpj(v)
 
 	@model_validator(mode="after")
-	def _check_fund_identifier(self) -> Self:
+	def _check_fund_identifier(self) -> InformeDiarioInform:
 		"""Require exactly one fund identifier — CNPJ_FDO xor COD_SUBCLASSE.
 
 		Returns
 		-------
-		Self
+		InformeDiarioInform
 			The validated model.
 
 		Raises
