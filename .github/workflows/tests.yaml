@@ -100,6 +100,14 @@ jobs:
           poetry run python -m pydocstyle --select=D412,D417 --match="(src|tests).*\\.py" src/ tests/
           poetry run python bin/check_docstrings.py
 
+      - name: Run Runtime Type-Checking Enforcement
+        if: runner.os == 'Linux'
+        # Mirrors the `check-typing` pre-commit hook: every src/ class/function carries the
+        # runtime checker (TypeChecker metaclass / @type_checker), Pydantic models excepted.
+        # CI runs its gates as explicit steps, not via pre-commit, so this must be listed
+        # here or a hook-skipping contributor bypasses the check entirely.
+        run: poetry run python bin/check_typing.py
+
       - name: Run Ruff Linting
         if: runner.os == 'Linux'
         run: |
