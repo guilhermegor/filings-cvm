@@ -175,7 +175,7 @@ repos:
       # so day-to-day commits stay fast (static gates above still run per-commit).
       - id: coverage-check
         name: test coverage check
-        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/unit/ --cov=src --cov-report=term-missing --cov-fail-under=80"
+        entry: bash -c "bash bin/poetry_exec.sh run pytest tests/unit/ --cov=src --cov-report=term-missing"
         language: system
         types:
           - python

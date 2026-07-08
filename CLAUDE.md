@@ -116,6 +116,11 @@ of your public `__all__`. The internal imports are package-qualified
 - **Ruff**: linter + formatter. Line-length 99, tab indent, double quotes, NumPy docstrings.
 - **Pre-commit**: ruff, pydocstyle, codespell, commitizen, gitlint, unit + integration
   tests, coverage badge.
+- **Gate parity — every lint/static/test gate lives in BOTH `.pre-commit-config.yaml` and
+  `.github/workflows/tests.yaml`.** CI runs its gates as explicit steps (not `pre-commit run`),
+  so adding a hook does not cover CI — add the matching step in the same commit, or a
+  hook-skipping contributor (or branch-protection CI) bypasses it. Full rationale + canonical
+  set + current open drift: `.github/CLAUDE.md` ("Gate parity").
 - **Tests**: `pytest` — `make unit_tests` (`poetry run pytest tests/unit/`). Write
   pytest-style functions with fixtures, not `unittest.TestCase`.
 - **Explicit column typing & Brazilian identifiers** — if the library touches pandas, type

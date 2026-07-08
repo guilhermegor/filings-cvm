@@ -118,6 +118,12 @@ jobs:
             exit 1
           fi
 
+      - name: Run Ruff Format Check
+        if: runner.os == 'Linux'
+        # Mirrors the `ruff-format` pre-commit hook — CI must fail on unformatted code,
+        # not just flag lint issues. Fix locally with `poetry run ruff format src/ tests/`.
+        run: poetry run ruff format --check src/ tests/ --config=ruff.toml
+
       - name: Run Static Type Check (mypy)
         if: runner.os == 'Linux'
         # Run from src/ so it is the single package base (avoids the dual-root
@@ -144,6 +150,13 @@ jobs:
 
       - name: Run Unit Tests
         run: poetry run pytest tests/unit/ || [ $? -eq 5 ]
+
+      - name: Run Coverage Gate
+        if: runner.os == 'Linux'
+        # Enforce the coverage floor (`.coveragerc` [report] fail_under) on every PR,
+        # mirroring the pre-commit `coverage-check` hook. The badge step below runs only on
+        # main/tags, so without this a PR could drop coverage below the floor uncaught.
+        run: poetry run pytest tests/unit/ --cov=src --cov-report=term-missing || [ $? -eq 5 ]
 
       - name: Run Coverage Report
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}

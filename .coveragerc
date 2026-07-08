@@ -6,6 +6,9 @@ omit =
     src/*/_internal/*
 
 [report]
+# Single source of truth for the coverage floor — read by pytest-cov in both the
+# pre-commit `coverage-check` hook and the CI coverage gate (no duplicated literal).
+fail_under = 80
 exclude_lines =
     pragma: no cover
     if TYPE_CHECKING:
