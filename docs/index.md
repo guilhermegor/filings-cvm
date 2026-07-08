@@ -1,4 +1,4 @@
-# **filings-cvm**
+# **filings-cvm** <img src="assets/cvm-logo.png" align="right" width="200" style="border-radius: 15px;" alt="filings-cvm">
 
 Biblioteca Python **tipada** para os padrões de arquivo XML regulatórios da
 [CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários).
