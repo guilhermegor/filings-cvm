@@ -108,6 +108,14 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-typing
+        name: runtime type-checking at submission/ingestion boundary
+        entry: bash bin/poetry_exec.sh run python bin/check_typing.py
+        language: system
+        types:
+          - python
+        pass_filenames: false
+
       - id: mypy
         name: mypy (static type check)
         # Run from src/ so it is the single package base (bare config.x/utils.x imports

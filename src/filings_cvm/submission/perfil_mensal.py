@@ -18,9 +18,10 @@ from filings_cvm._internal.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.utils.typing import TypeChecker
 
 
-class PerfilMensal:
+class PerfilMensal(metaclass=TypeChecker):
 	"""Serialize a validated Perfil Mensal document to CVM-compliant XML.
 
 	Methods
@@ -195,9 +196,7 @@ class PerfilMensal:
 			+ [f"{ind}    </NR_CLIENT>"]
 		)
 
-	def _build_distr_patrim_lines(
-		self, dp: PatrimonyDistribution | None, ind: str
-	) -> list[str]:
+	def _build_distr_patrim_lines(self, dp: PatrimonyDistribution | None, ind: str) -> list[str]:
 		"""Build XML lines for the optional DISTR_PATRIM block.
 
 		Parameters

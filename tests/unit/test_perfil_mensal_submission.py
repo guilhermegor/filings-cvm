@@ -204,3 +204,9 @@ def test_to_xml_writes_file_in_windows_1252(tmp_path: Path) -> None:
 
 	assert result is None
 	assert f"<CNPJ_FDO>{VALID_CNPJ}</CNPJ_FDO>" in out.read_text(encoding="windows-1252")
+
+
+def test_to_xml_rejects_wrong_argument_type() -> None:
+	"""The TypeChecker metaclass rejects a mistyped argument at call time."""
+	with pytest.raises(TypeError):
+		PerfilMensal().to_xml("not a document")

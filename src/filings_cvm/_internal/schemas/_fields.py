@@ -18,12 +18,14 @@ from filings_cvm._internal.utils.br_identifiers import (
 	unmask_cnpj,
 	unmask_cpf,
 )
+from filings_cvm._internal.utils.typing import type_checker
 
 
 # Raw values a decimal before-validator may receive, before coercion to Decimal.
 DecimalInput = Decimal | str | int | float | None
 
 
+@type_checker
 def truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Decimal | None]:
 	"""Build a before-validator that truncates a value to ``decimal_places`` (ROUND_DOWN).
 
@@ -77,6 +79,7 @@ def truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Decimal |
 	return _truncate
 
 
+@type_checker
 def validated_cnpj(value: str) -> str:
 	"""Normalise and check-digit-validate a CNPJ, returning its bare 14-char form.
 
@@ -100,6 +103,7 @@ def validated_cnpj(value: str) -> str:
 	return unmask_cnpj(value)
 
 
+@type_checker
 def validate_person_doc(tp_pessoa: str, value: str) -> str:
 	"""Validate a document as CPF (PF) or CNPJ (PJ) and return its bare form.
 

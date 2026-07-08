@@ -13,9 +13,10 @@ from filings_cvm._internal.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.utils.typing import TypeChecker
 
 
-class InformeDiario:
+class InformeDiario(metaclass=TypeChecker):
 	"""Serialize a validated Informe Diário document to CVM-compliant XML.
 
 	Methods
