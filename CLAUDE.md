@@ -134,13 +134,15 @@ of your public `__all__`. The internal imports are package-qualified
 - **Runtime type checking is mandatory everywhere in `src/`.** It complements — does not replace
   — ruff `ANN` + mypy: static checks miss what crosses runtime boundaries (deserialised data, DB
   rows), so honest signatures become enforced contracts that fail loudly. The rule is uniform, no
-  by-layer exemption: **every public class** under `src/` declares a checker metaclass from
-  `_internal.utils.typing` (`metaclass=TypeChecker`; `ABCTypeCheckerMeta` for ABCs,
-  `ProtocolTypeCheckerMeta` for Protocols), and **every public standalone function** uses
-  `@type_checker`. The only exclusions:
+  by-layer and no public/private exemption: **every class** under `src/` declares a checker
+  metaclass from `_internal.utils.typing` (`metaclass=TypeChecker`; `ABCTypeCheckerMeta` for ABCs,
+  `ProtocolTypeCheckerMeta` for Protocols), and **every standalone function** uses `@type_checker`
+  — private (`_`-prefixed) helpers included. The only exclusions:
   - **Pydantic `BaseModel` subclasses** — Pydantic owns the metaclass (conflict at import) and
     already validates at construction, so never add `metaclass=TypeChecker` to a model.
   - **The typing engine itself** (`_internal/utils/typing/`) — it is the machinery.
+  - **Dunders** (`__x__`) — the `TypeChecker` metaclass leaves them untouched, so the hook
+    skips them too; single-underscore private names are **not** exempt.
   - Metaclasses are **inherited**, so only a hierarchy root declares it — a subclass of a
     checker-metaclass class (e.g. `LogsEmitter(LogEmitter)`) is already checked.
 

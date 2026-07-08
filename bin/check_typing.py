@@ -7,15 +7,17 @@ hook enforces the convention structurally, since neither ruff nor mypy can asser
 *presence* of a metaclass or decorator.
 
 Rules, for every ``.py`` under ``src/`` (excluding the typing engine itself,
-``**/typing/``):
+``**/typing/``). The doctrine is uniform — private helpers are checked too; the only
+name-based skip is **dunders**, mirroring the ``TypeChecker`` metaclass which leaves
+``__dunder__`` attributes untouched:
 
-- **Public standalone functions** (module-level, name not ``_``-prefixed) must be
-  decorated with ``@type_checker``.
-- **Public classes** (top-level, name not ``_``-prefixed) that are **hierarchy roots**
-  (declare no base class) must declare a checker metaclass (``TypeChecker`` /
-  ``ABCTypeCheckerMeta`` / ``ProtocolTypeCheckerMeta``). A class *with* bases is left
-  alone — Python inherits the metaclass, so a subclass of a checked class is already
-  checked (e.g. ``LogsEmitter(LogEmitter)``).
+- **Standalone functions** (module-level, non-dunder) must be decorated with
+  ``@type_checker``.
+- **Classes** (top-level, non-dunder) that are **hierarchy roots** (declare no base
+  class) must declare a checker metaclass (``TypeChecker`` / ``ABCTypeCheckerMeta`` /
+  ``ProtocolTypeCheckerMeta``). A class *with* bases is left alone — Python inherits the
+  metaclass, so a subclass of a checked class is already checked (e.g.
+  ``LogsEmitter(LogEmitter)``).
 - **Pydantic ``BaseModel`` subclasses** must **not** declare ``metaclass=TypeChecker`` —
   Pydantic owns the metaclass (conflict at import) and already validates at construction.
 
@@ -29,6 +31,26 @@ import sys
 
 # The metaclasses from ``_internal.utils.typing`` that apply runtime checking.
 _CHECKER_METACLASSES = {"TypeChecker", "ABCTypeCheckerMeta", "ProtocolTypeCheckerMeta"}
+
+
+def _is_dunder(name: str) -> bool:
+    """Return whether a name is a Python dunder (``__x__``).
+
+    Dunders are the one enforcement skip: the ``TypeChecker`` metaclass itself leaves
+    ``__dunder__`` attributes untouched to avoid interfering with Python internals, so
+    the hook mirrors that boundary rather than skipping all ``_``-prefixed names.
+
+    Parameters
+    ----------
+    name : str
+        The class or function name.
+
+    Returns
+    -------
+    bool
+        ``True`` when the name is a dunder.
+    """
+    return name.startswith("__") and name.endswith("__")
 
 
 def _base_names(node: ast.ClassDef) -> set[str]:
@@ -132,7 +154,7 @@ def _check_class(node: ast.ClassDef, filepath: str) -> int:
     if metaclass not in _CHECKER_METACLASSES:
         allowed = ", ".join(sorted(_CHECKER_METACLASSES))
         print(
-            f"❌ {node.name} at line {node.lineno} ({filepath}): a public root class must declare "
+            f"❌ {node.name} at line {node.lineno} ({filepath}): a root class must declare "
             f"metaclass=<one of: {allowed}> (runtime type checking)."
         )
         return 1
@@ -156,16 +178,16 @@ def check_file(filepath: str) -> int:
     with open(filepath, encoding="utf-8") as fh:
         tree = ast.parse(fh.read(), filename=filepath)
     for node in tree.body:
-        if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+        if isinstance(node, ast.ClassDef) and not _is_dunder(node.name):
             errors += _check_class(node, filepath)
         elif (
             isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
-            and not node.name.startswith("_")
+            and not _is_dunder(node.name)
             and "type_checker" not in _decorator_names(node)
         ):
             print(
-                f"❌ {node.name}() at line {node.lineno} ({filepath}): a public standalone "
-                f"function must be decorated with @type_checker (runtime type checking)."
+                f"❌ {node.name}() at line {node.lineno} ({filepath}): a standalone function must "
+                f"be decorated with @type_checker (runtime type checking)."
             )
             errors += 1
     return errors
