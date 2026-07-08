@@ -103,6 +103,13 @@ def read_table(
 	legitimately constrains nothing still declares intent by passing an empty contract
 	(``FileContract(name, key, (), ())``).
 
+	The file is read as **raw text** and every type is then applied by
+	:func:`utils.dtypes.apply_dtypes` — the seam never trusts pandas' inference. Inferring on
+	read and casting afterwards would corrupt the source before typing (a zero-padded code
+	``"007"`` becomes ``7``, a money decimal ``"10.50"`` becomes ``10.5``, unrecoverable by a
+	later ``astype``); reading text-first keeps the source exact until the declared type
+	coerces it. Columns absent from ``dict_dtypes`` / the date lists therefore remain text.
+
 	Parameters
 	----------
 	path_file : pathlib.Path
@@ -141,10 +148,12 @@ def read_table(
 	ContractError
 		When the file violates ``cls_contract``.
 	"""
+	# Read as raw text and let apply_dtypes do all coercion. See the docstring for why the
+	# seam never trusts pandas inference on read.
 	df_raw = _read_raw(
 		path_file,
 		str_sheet,
-		None,
+		"str",
 		str_csv_sep,
 		list_columns,
 		str_encoding,

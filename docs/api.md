@@ -1,9 +1,10 @@
 # **Referência da API**
 
-Interface pública da biblioteca. Tudo abaixo é importável de `filings_cvm.submission`; os nomes
-principais também são reexportados no topo de `filings_cvm`.
+Interface pública da biblioteca. Os serializadores e modelos abaixo são importáveis de
+`filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
+são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md)
 
 ---
 
@@ -15,7 +16,7 @@ principais também são reexportados no topo de `filings_cvm`.
 
 Serializa um documento validado para XML compatível com a CVM (padrão Perfil Mensal V4).
 
-#### `to_xml(doc, output_path=None, versao="4.0") -> str | None`
+#### `export(doc, output_path=None, versao="4.0") -> str | None`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
@@ -26,8 +27,8 @@ Serializa um documento validado para XML compatível com a CVM (padrão Perfil M
 ```python
 from filings_cvm.submission import PerfilMensal
 
-xml = PerfilMensal().to_xml(doc)                       # retorna str
-PerfilMensal().to_xml(doc, output_path="perfil.xml")   # grava arquivo, retorna None
+xml = PerfilMensal().export(doc)                       # retorna str
+PerfilMensal().export(doc, output_path="perfil.xml")   # grava arquivo, retorna None
 ```
 
 Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
@@ -38,7 +39,7 @@ Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
 
 Serializa um documento validado para XML compatível com a CVM (padrão Informe Diário V4).
 
-#### `to_xml(doc, output_path=None, versao="4.0") -> str | None`
+#### `export(doc, output_path=None, versao="4.0") -> str | None`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
@@ -49,11 +50,50 @@ Serializa um documento validado para XML compatível com a CVM (padrão Informe 
 ```python
 from filings_cvm.submission import InformeDiario
 
-xml = InformeDiario().to_xml(doc)                          # retorna str
-InformeDiario().to_xml(doc, output_path="informe.xml")     # grava arquivo, retorna None
+xml = InformeDiario().export(doc)                          # retorna str
+InformeDiario().export(doc, output_path="informe.xml")     # grava arquivo, retorna None
 ```
 
 O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `PerfilMensal`.
+
+---
+
+## Leitor (ingestion)
+
+### `InformeDiarioReader`
+
+`filings_cvm.ingestion.InformeDiarioReader`
+
+Lê o dump mensal de *open-data* do Informe Diário de fundos (`inf_diario_fi_AAAAMM`) e o devolve
+como um `DataFrame` tipado e validado por contrato.
+
+#### `InformeDiarioReader(date_ref=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência (só ano/mês selecionam o dump). Padrão: hoje. O mês corrente pode ainda não estar publicado — use um mês passado para dados completos. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável (`log_message(msg, level)`). Padrão: um `LogEmitter` sobre a stdlib. |
+
+#### `read(int_timeout_s=30) -> pd.DataFrame`
+
+Baixa, descompacta e faz o parse do mês de referência. Valida o contrato (colunas obrigatórias +
+coluna de CNPJ coercível) antes de aplicar os tipos declarados. Colunas monetárias são mantidas
+como **texto exato** (nunca `float`); `DT_COMPTC` vira `date`; `NR_COTST` usa `Int64` (nulável).
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `int_timeout_s` | `int` | Timeout de socket do download, em segundos. Padrão `30`. |
+
+Levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou `ValueError`
+(o ZIP não contém CSV).
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion import InformeDiarioReader
+
+df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+```
 
 ---
 

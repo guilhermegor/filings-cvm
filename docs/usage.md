@@ -30,7 +30,7 @@ O fluxo de envio (`submission`) tem sempre a mesma forma:
    (`PerfilMensalRow`), cada uma referente a uma classe de fundo.
 2. Na construção, os modelos **validam** tudo: formato de datas (`MM/AAAA`, `DD/MM/AAAA`),
    dígitos verificadores de CNPJ/CPF, e a **escala decimal** de cada campo.
-3. Serialize com `PerfilMensal().to_xml(...)` — em memória (retorna a `str`) ou direto para um
+3. Serialize com `PerfilMensal().export(...)` — em memória (retorna a `str`) ou direto para um
    arquivo (codificação `windows-1252`, como a CVM exige).
 
 Valores com mais casas decimais do que o padrão permite são **truncados em direção a zero**
@@ -76,10 +76,10 @@ linha = PerfilMensalRow(
 doc = PerfilMensalDocument(header=header, rows=[linha])
 
 # 1) Obter o XML como string (sem escrever em disco):
-xml = PerfilMensal().to_xml(doc)
+xml = PerfilMensal().export(doc)
 
 # 2) Ou gravar direto no arquivo (retorna None):
-PerfilMensal().to_xml(doc, output_path="perfil_202501.xml")
+PerfilMensal().export(doc, output_path="perfil_202501.xml")
 ```
 
 Passe os valores decimais como **strings** (`"10.5"`) para preservar a precisão — nunca como
@@ -116,8 +116,30 @@ doc = InformeDiarioDocument(
     ],
 )
 
-InformeDiario().to_xml(doc, output_path="informe_20250115.xml")
+InformeDiario().export(doc, output_path="informe_20250115.xml")
 ```
+
+---
+
+## Leitura (← CVM)
+
+O fluxo de leitura (`ingestion`) faz o caminho inverso: baixa um arquivo publicado pela CVM e o
+devolve como um `DataFrame` **tipado e validado por contrato**. O primeiro leitor cobre o dump
+mensal de *open-data* do Informe Diário de fundos (`inf_diario_fi_AAAAMM`):
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion import InformeDiarioReader
+
+# Qualquer dia do mês de referência seleciona o dump mensal; o padrão é hoje.
+df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+```
+
+O leitor baixa, descompacta e faz o parse em um diretório temporário, valida o
+[contrato](api.md) (colunas obrigatórias + coluna de CNPJ coercível) e aplica os tipos
+declarados. As colunas monetárias são mantidas como **texto exato** (o que a CVM publicou),
+nunca `float` — converta para `Decimal` no ponto em que for calcular.
 
 ---
 

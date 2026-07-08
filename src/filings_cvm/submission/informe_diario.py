@@ -8,24 +8,26 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 from decimal import Decimal
 from pathlib import Path
 
+from filings_cvm._internal.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioInform,
 	SignificantShareholder,
 )
-from filings_cvm._internal.utils.typing import TypeChecker
 
 
-class InformeDiario(metaclass=TypeChecker):
+class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
 	"""Serialize a validated Informe Diário document to CVM-compliant XML.
+
+	Concrete :class:`SubmissionWriter` for the Informe Diário V4 XML standard.
 
 	Methods
 	-------
-	to_xml(doc, output_path, versao)
+	export(doc, output_path, versao)
 		Serialize a validated document to a CVM-compliant XML string.
 	"""
 
-	def to_xml(
+	def export(
 		self,
 		doc: InformeDiarioDocument,
 		output_path: str | None = None,

@@ -11,7 +11,7 @@ Envio (→ CVM) do padrão **Informe Diário V4**
 ## Descrição
 
 Monte um `InformeDiarioDocument` (um `InformeDiarioHeader` + uma lista de `InformeDiarioInform`,
-uma por fundo, até 100) e serialize com `InformeDiario().to_xml(...)`. O XML usa o namespace
+uma por fundo, até 100) e serialize com `InformeDiario().export(...)`. O XML usa o namespace
 `urn:infdiario` e `COD_DOC=1`.
 
 | Modelo | Tag XML | Papel |
@@ -62,13 +62,13 @@ doc = InformeDiarioDocument(
     ],
 )
 
-print(InformeDiario().to_xml(doc))
+print(InformeDiario().export(doc))
 ```
 
 ### Escrever direto em disco (codificação da CVM)
 
 ```python
-InformeDiario().to_xml(doc, output_path="informe_20250115.xml")
+InformeDiario().export(doc, output_path="informe_20250115.xml")
 ```
 
 ### Cotistas com participação ≥ 20% do PL

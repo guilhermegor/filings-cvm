@@ -11,7 +11,7 @@ Envio (→ CVM) do padrão **Perfil Mensal V4**
 ## Descrição
 
 Monte um `PerfilMensalDocument` (um `DocumentHeader` + uma ou mais `PerfilMensalRow`, cada uma
-por classe de fundo) e serialize com `PerfilMensal().to_xml(...)`. A validação acontece na
+por classe de fundo) e serialize com `PerfilMensal().export(...)`. A validação acontece na
 construção dos modelos [Pydantic](https://docs.pydantic.dev/): formato de datas, dígitos
 verificadores de CNPJ/CPF e a escala decimal de cada campo.
 
@@ -71,7 +71,7 @@ doc = PerfilMensalDocument(
     ],
 )
 
-print(PerfilMensal().to_xml(doc))
+print(PerfilMensal().export(doc))
 ```
 
 ### Escrever direto em disco (codificação da CVM)
@@ -79,7 +79,7 @@ print(PerfilMensal().to_xml(doc))
 Com `output_path`, o arquivo é gravado em **`windows-1252`** e o método retorna `None`.
 
 ```python
-PerfilMensal().to_xml(doc, output_path="perfil_202501.xml")
+PerfilMensal().export(doc, output_path="perfil_202501.xml")
 ```
 
 ### Truncamento de casas decimais (nunca arredonda para cima)
@@ -88,7 +88,7 @@ PerfilMensal().to_xml(doc, output_path="perfil_202501.xml")
 
 ```python
 # ... total_recurs_br="10.999" na linha ...
-xml = PerfilMensal().to_xml(doc)
+xml = PerfilMensal().export(doc)
 assert "<TOTAL_RECURS_BR>10,99</TOTAL_RECURS_BR>" in xml   # 10,99 — não 11,00
 ```
 
