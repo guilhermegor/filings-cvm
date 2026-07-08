@@ -3,7 +3,7 @@
 Respostas para dúvidas comuns de uso e desenvolvimento. Adicione entradas específicas do projeto
 conforme surgirem nas issues.
 
-> **Veja também:** [Uso](usage.md) · [Exemplos](examples.md) · [Contribuindo](contributing.md).
+> **Veja também:** [Uso](usage.md) · [Envio](submission/perfil_mensal.md) · [Contribuindo](contributing.md).
 
 ---
 

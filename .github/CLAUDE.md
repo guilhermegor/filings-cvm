@@ -12,6 +12,34 @@ silently long after the person who added it has moved on.
 **Add a time-triggered job only when the project genuinely needs one, and write
 down *why* in the workflow file.**
 
+## Gate parity — every check lives in BOTH pre-commit and CI
+
+Every lint, static-analysis, and test gate must be wired into **both** the local
+`.pre-commit-config.yaml` **and** the CI workflow (`.github/workflows/tests.yaml`).
+They must stay in sync — the same discipline as the Makefile ↔ `tasks.sh` parity
+rule. When you add, rename, or remove a gate in one place, make the identical
+change in the other **in the same commit**.
+
+**Why both, never one:**
+
+- **Pre-commit only** → a contributor who commits with `--no-verify` (or whose
+  hooks aren't installed) bypasses the gate, and branch-protection CI — which runs
+  the workflow, not local hooks — never catches it. This is exactly how
+  `check_typing.py` shipped enforced locally but invisible to CI.
+- **CI only** → the failure surfaces minutes later on a pushed branch instead of
+  failing fast on the developer's machine, and can't be run offline.
+
+CI runs its gates as **explicit steps** (it does *not* invoke `pre-commit run`), so
+adding a hook to `.pre-commit-config.yaml` does **not** automatically cover CI — you
+must add the matching step to `tests.yaml` yourself. The canonical set to keep
+mirrored: codespell, `check_docstrings.py`, `check_typing.py`, ruff check + format,
+mypy, the shell/sql/yaml lint gates, unit + integration tests, and the coverage
+`fail-under` threshold. After changing a gate, confirm both files list it.
+
+The coverage floor is single-sourced in `.coveragerc` (`[report] fail_under`), so the
+pre-commit `coverage-check` hook and the CI coverage gate share one value — never pass a
+duplicate `--cov-fail-under` literal in either place.
+
 ## Recurrent (scheduled) workflows
 
 To run a workflow on a schedule, add an `on.schedule` trigger with a cron

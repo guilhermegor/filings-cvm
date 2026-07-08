@@ -38,7 +38,7 @@ first reading pattern lands (not scaffolded empty).
 Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
 
 **Fundos**
-- ⬜ Informe Diário — V4 (`PadraoXMLInfoDiarioNetV4.asp`) · V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
+- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/schemas/informe_diario.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
 - ⬜ Demonstrativo de Composição e Diversificação das Aplicações (CDA) — V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
@@ -116,6 +116,11 @@ of your public `__all__`. The internal imports are package-qualified
 - **Ruff**: linter + formatter. Line-length 99, tab indent, double quotes, NumPy docstrings.
 - **Pre-commit**: ruff, pydocstyle, codespell, commitizen, gitlint, unit + integration
   tests, coverage badge.
+- **Gate parity — every lint/static/test gate lives in BOTH `.pre-commit-config.yaml` and
+  `.github/workflows/tests.yaml`.** CI runs its gates as explicit steps (not `pre-commit run`),
+  so adding a hook does not cover CI — add the matching step in the same commit, or a
+  hook-skipping contributor (or branch-protection CI) bypasses it. Full rationale + canonical
+  set + current open drift: `.github/CLAUDE.md` ("Gate parity").
 - **Tests**: `pytest` — `make unit_tests` (`poetry run pytest tests/unit/`). Write
   pytest-style functions with fixtures, not `unittest.TestCase`.
 - **Explicit column typing & Brazilian identifiers** — if the library touches pandas, type
@@ -131,6 +136,22 @@ of your public `__all__`. The internal imports are package-qualified
   it in `pyproject.toml` — even when it is already installed transitively via another dep. A
   transitive presence is an accident of another package's tree and breaks silently the day that
   package drops or version-caps it. Run `poetry add <pkg>` for anything you import.
+- **Runtime type checking is mandatory everywhere in `src/`.** It complements — does not replace
+  — ruff `ANN` + mypy: static checks miss what crosses runtime boundaries (deserialised data, DB
+  rows), so honest signatures become enforced contracts that fail loudly. The rule is uniform, no
+  by-layer and no public/private exemption: **every class** under `src/` declares a checker
+  metaclass from `_internal.utils.typing` (`metaclass=TypeChecker`; `ABCTypeCheckerMeta` for ABCs,
+  `ProtocolTypeCheckerMeta` for Protocols), and **every standalone function** uses `@type_checker`
+  — private (`_`-prefixed) helpers included. The only exclusions:
+  - **Pydantic `BaseModel` subclasses** — Pydantic owns the metaclass (conflict at import) and
+    already validates at construction, so never add `metaclass=TypeChecker` to a model.
+  - **The typing engine itself** (`_internal/utils/typing/`) — it is the machinery.
+  - **Dunders** (`__x__`) — the `TypeChecker` metaclass leaves them untouched, so the hook
+    skips them too; single-underscore private names are **not** exempt.
+  - Metaclasses are **inherited**, so only a hierarchy root declares it — a subclass of a
+    checker-metaclass class (e.g. `LogsEmitter(LogEmitter)`) is already checked.
+
+  The `check-typing` pre-commit hook (`bin/check_typing.py`) enforces this across all of `src/`.
 
 ## Releasing to PyPI
 
