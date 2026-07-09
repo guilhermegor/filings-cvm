@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md)
 
 ---
 
@@ -177,6 +177,44 @@ from filings_cvm.ingestion import LaminaCarteiraReader
 
 df = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
 df["PCT"] = df["PR_PL_ATIVO"].map(Decimal)
+```
+
+### `LaminaReader`
+
+`filings_cvm.ingestion.LaminaReader`
+
+Lê o membro `lamina_fi_AAAAMM` do dump mensal da Lâmina (`lamina_fi_AAAAMM.zip`) — a lâmina
+propriamente dita — e devolve uma linha por classe de fundo, com as suas **78 colunas**. Lê um
+membro **diferente** do mesmo ZIP que o `LaminaCarteiraReader`.
+
+#### `LaminaReader(date_ref=None, path_raw=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` e todos os CSVs extraídos). Padrão `None`: diretório temporário, descartado. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=30) -> pd.DataFrame`
+
+Devolve uma linha por classe de fundo. As quatro colunas `DT_*` viram `datetime.date` (vazio →
+`NaT`); as outras 74 são texto exato da CVM. O arquivo é lido com `QUOTE_NONE`: os campos de texto
+livre contêm aspas soltas que, com o *quoting* padrão, fundem dois registros.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `int_timeout_s` | `int` | Timeout de socket do download, em segundos. Padrão `30`. |
+
+Levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou `ValueError` (o ZIP
+não contém o membro `lamina_fi_AAAAMM.csv`).
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion import LaminaReader
+
+df = LaminaReader(date_ref=date(2025, 4, 15)).read()
+print(df[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 ```
 
 ---

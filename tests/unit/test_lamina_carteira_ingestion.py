@@ -233,7 +233,7 @@ def test_read_raises_value_error_when_archive_has_no_carteira_member(
 	del dict_members["lamina_fi_carteira_202504.csv"]
 	_patch_download(monkeypatch, _zip_bytes(dict_members))
 
-	with pytest.raises(ValueError, match="No Lâmina carteira member"):
+	with pytest.raises(ValueError, match="lamina_fi_carteira_202504.csv"):
 		LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
 
 

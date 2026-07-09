@@ -16,6 +16,8 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
 - **[Lâmina carteira FIF](lamina_carteira.md)** — `LaminaCarteiraReader`: lê o membro
   `lamina_fi_carteira_AAAAMM` do dump da Lâmina e devolve a alocação de cada fundo por **tipo de
   ativo** (`PR_PL_ATIVO`, percentual sinalizado do patrimônio líquido).
+- **[Lâmina FIF](lamina.md)** — `LaminaReader`: lê o membro `lamina_fi_AAAAMM` do **mesmo** dump —
+  a lâmina propriamente dita, uma linha por classe de fundo com as suas 78 colunas.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
