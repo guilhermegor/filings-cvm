@@ -55,11 +55,24 @@ from decimal import Decimal
 df["VL_PATRIM_LIQ"] = df["VL_PATRIM_LIQ"].map(Decimal)
 ```
 
-### Injetar um logger
+### Persistir o artefato bruto (camada *bronze*)
+
+Sem `path_raw` o ZIP é baixado num diretório temporário e descartado. Informando um caminho, o
+artefato **bruto e intacto** (o `.zip` e o CSV extraído) é gravado ali e **mantido**, antes de
+qualquer parsing — veja [a visão geral da leitura](index.md#artefato-bruto-path_raw).
 
 ```python
-import logging
+from pathlib import Path
 
+df = InformeDiarioReader(
+    date_ref=date(2025, 1, 15),
+    path_raw=Path("/data/bronze/cvm/informe_diario/202501"),
+).read()
+```
+
+### Ajustar o timeout
+
+```python
 from filings_cvm.ingestion import InformeDiarioReader
 
 reader = InformeDiarioReader(date_ref=date(2025, 1, 15))

@@ -112,6 +112,47 @@ def test_read_raises_value_error_when_zip_has_no_csv(monkeypatch: pytest.MonkeyP
 		InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 
 
+def test_read_persists_raw_artifact_when_path_raw_is_given(
+	monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+	"""With ``path_raw`` set, the downloaded ZIP and its extracted CSV survive the read.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	tmp_path : pathlib.Path
+		Pytest-provided scratch directory standing in for the bronze layer.
+	"""
+	_patch_download(monkeypatch, _zip_bytes(f"{_HEADER}\n{_ROW}\n"))
+	path_raw = tmp_path / "bronze" / "informe_diario" / "202501"
+
+	InformeDiarioReader(date_ref=date(2025, 1, 15), path_raw=path_raw).read()
+
+	assert (path_raw / "inf_diario_fi_202501.zip").is_file()
+	assert (path_raw / "inf_diario_fi_202501.csv").is_file()
+
+
+def test_read_leaves_no_artifact_on_disk_when_path_raw_is_none(
+	monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+	"""Without ``path_raw`` the artifact lands in a temp dir and is discarded.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	tmp_path : pathlib.Path
+		Scratch directory asserted to stay empty.
+	"""
+	_patch_download(monkeypatch, _zip_bytes(f"{_HEADER}\n{_ROW}\n"))
+	monkeypatch.chdir(tmp_path)
+
+	InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+
+	assert list(tmp_path.iterdir()) == []
+
+
 def test_url_reflects_reference_month() -> None:
 	"""The download URL is built from the reference month (AAAAMM)."""
 	reader = InformeDiarioReader(date_ref=date(2025, 3, 9))
