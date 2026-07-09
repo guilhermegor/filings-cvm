@@ -39,11 +39,17 @@ issue) of the lifecycle above:
 4a. Compute the next version: a **minor** semver bump of the currently published version
     (`0.4.0` → `0.5.0` → `0.6.0` …). The version is **not** in `pyproject.toml` (it is a
     `0.0.0` stub; `poetry-dynamic-versioning` derives it from the `vX.Y.Z` git tag), so read
-    the truth from the index, not the repo:
+    the truth from the index, not the repo.
+
+    **Use the `/simple/` index, never `/pypi/<pkg>/json`.** The JSON endpoint is CDN-cached
+    and lags a fresh upload by minutes: on 2026-07-09 it still reported `0.4.0` *after* a
+    verified-successful `0.5.0` publish. A cached negative is "unknown", not "absent" —
+    acting on it would mean re-publishing or declaring a good release broken.
 
     ```bash
-    python3 -c "import json,urllib.request as u; \
-      print(json.load(u.urlopen('https://pypi.org/pypi/filings-cvm/json'))['info']['version'])"
+    python3 -c "import re,urllib.request as u; \
+      h=u.urlopen('https://pypi.org/simple/filings-cvm/').read().decode(); \
+      print(sorted(set(re.findall(r'filings[_-]cvm-([0-9.]+?)(?:\.tar\.gz|-py3)', h))))"
     ```
 
 4b. Run **`release-test-pypi.yaml`** (`workflow_dispatch`, input `version`) with that version.
@@ -54,11 +60,19 @@ issue) of the lifecycle above:
     ```
 
 4c. **Verify it actually landed on Test PyPI** before going further — the workflow going green
-    is not the same as the artifact being installable:
+    is not the same as the artifact being installable. Check the `/simple/` index (not the
+    cached JSON), then *actually install it* in a throwaway venv and import it. That last step
+    is the only one that proves the wheel works and the dynamic version stamped correctly:
 
     ```bash
-    python3 -c "import json,urllib.request as u; \
-      print(json.load(u.urlopen('https://test.pypi.org/pypi/filings-cvm/json'))['info']['version'])"
+    python3 -c "import re,urllib.request as u; \
+      h=u.urlopen('https://test.pypi.org/simple/filings-cvm/').read().decode(); \
+      print(sorted(set(re.findall(r'filings[_-]cvm-([0-9.]+?)(?:\.tar\.gz|-py3)', h))))"
+
+    python3 -m venv /tmp/smoke && /tmp/smoke/bin/pip install \
+      --index-url https://test.pypi.org/simple/ \
+      --extra-index-url https://pypi.org/simple/ "filings-cvm==X.Y.0"
+    /tmp/smoke/bin/python -c "import filings_cvm as f; print(f.__version__, f.__all__)"
     ```
 
 4d. Only once Test PyPI holds that version, run **`release-pypi.yaml`** with the **same**
@@ -130,8 +144,23 @@ writer to `__all__`, which is a feature addition, not a fix.
     on all 4,474 rows. **`PR_PL_ATIVO` does not sum to 100** (per-fund -37.08 → 1123.00, median
     100.03 — leverage/shorts), so no "totals 100%" invariant is asserted.
   - 13 new tests (58 total green); verified end-to-end against the live CVM file, not just mocks.
-    Docs + catalog updated. Merged? _pending review._
-- [ ] **#8** Lâmina (fact sheet) reader · `feat/ingestion-lamina-reader` · PR —
+    Docs + catalog updated. **Merged** (commit `c11b68e`); **released as `0.5.0`** to Test PyPI
+    then PyPI, both verified by installing the wheel from the index.
+  - CI caught a real bug local runs could not: `astype("str")` fabricates the literal `"nan"` on
+    pandas < 3. Fixed at the root in `apply_dtypes` (`"str"` → nullable `"string"`), which also
+    cured the same latent corruption in `InformeDiarioReader`. New `tests/unit/test_dtypes.py`.
+- [x] **#8** Lâmina (fact sheet) reader · `feat/ingestion-lamina-reader` · PR _pending_ —
+  - Ledger: [`ingestion-lamina-reader_20260709_213000.md`](ingestion-lamina-reader_20260709_213000.md)
+  - `LaminaReader` reads `lamina_fi_AAAAMM.csv` — a **sibling member of the ZIP #7 already
+    downloads**. 78 columns, one row per fund class, grain unique.
+  - **`QUOTE_NONE` is load-bearing**, not incidental: free-text fields carry stray unbalanced `"`,
+    and pandas' default quoting merges two records (real file: 142 fields seen, 78 expected →
+    `ParserError`). With `QUOTE_NONE` all 1,325 lines parse at exactly 78 fields.
+  - Took the deferred dedup: `zip_extractor.find_member(members, exact_name)` now serves both
+    Lâmina readers. **Exact name, never prefix** — `lamina_fi_AAAAMM.csv` is a strict prefix of
+    `lamina_fi_carteira_*` and both `rentab_*`.
+  - Dtype map derived from the contract, so the 78 names exist in exactly one place.
+  - 77 tests green under **both** pandas 3.0.3 and 2.3.3; verified end-to-end against the live file.
 - [ ] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · PR —
 - [ ] **#10** Registro de Intermediários Financeiros reader ·
   `feat/ingestion-registro-intermediarios-reader` · PR —

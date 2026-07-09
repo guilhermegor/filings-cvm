@@ -142,6 +142,39 @@ def extract_all(
 
 
 @type_checker
+def find_member(list_members: list[Path], str_name: str) -> Path:
+	"""Return the extracted member named ``str_name``, or raise.
+
+	Selection is by **exact file name**, never a prefix: CVM archives routinely hold members
+	whose names prefix one another (``lamina_fi_202504.csv`` is a prefix of
+	``lamina_fi_carteira_202504.csv`` and of ``lamina_fi_rentab_ano_202504.csv``), so a
+	``startswith`` match silently reads the wrong layout. The caller knows the reference
+	month and can therefore name the member exactly.
+
+	Parameters
+	----------
+	list_members : list of pathlib.Path
+		The archive's extracted members, as returned by :func:`extract_all`.
+	str_name : str
+		The exact file name to select (no directory component).
+
+	Returns
+	-------
+	pathlib.Path
+		Path to the matching member.
+
+	Raises
+	------
+	ValueError
+		If no member bears that name — the archive is malformed or CVM renamed it.
+	"""
+	for path_member in list_members:
+		if path_member.name == str_name:
+			return path_member
+	raise ValueError(f"No member named {str_name!r} in the archive")
+
+
+@type_checker
 def extract_all_to_memory(path_zip: Path, str_password: str | None = None) -> dict[str, bytes]:
 	"""Read every file member of ``path_zip`` into memory, never touching disk.
 

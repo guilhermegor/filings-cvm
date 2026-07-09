@@ -10,4 +10,4 @@ quiet-level = 3
 # in another language (e.g. Portuguese: "nomes", "caracteres", "atual"...) get
 # flagged as typos. Extend this list with your locale's vocabulary rather than
 # skipping whole files (which would hide real typos in code identifiers there).
-ignore-words-list = nd,fpr,strat,enty,filetest,nome,ZAR,fro,hsi,HSI,WEGE,zar,SMLL,Classe,classe,erro,serie,emiss,TERMO,termo,INDX,anual,nomes,cliente,datas,saem,vai,copie,valide,interprete,oficial,erros,eles,momento,registre,ser,meu,caracteres,alternar,inicial,comandos,construtor
+ignore-words-list = nd,fpr,strat,enty,filetest,nome,ZAR,fro,hsi,HSI,WEGE,zar,SMLL,Classe,classe,erro,serie,emiss,TERMO,termo,INDX,anual,nomes,cliente,datas,saem,vai,copie,valide,interprete,oficial,erros,eles,momento,registre,ser,meu,caracteres,alternar,inicial,comandos,construtor,essencial

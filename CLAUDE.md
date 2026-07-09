@@ -70,7 +70,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/lamina_carteira.py`
   (`LaminaCarteiraReader`); contract `_internal/config/contracts/lamina_carteira_fif.py` ·
-  ⬜ **ingestion** lâmina proper + `rentab_*` (membros irmãos do mesmo ZIP) ·
+  ✅ **ingestion** lâmina proper (`lamina_fi_*`, 78 colunas) — `ingestion/lamina.py`
+  (`LaminaReader`); contract `_internal/config/contracts/lamina_fif.py` ·
+  ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP) ·
   ⬜ **submission** V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
