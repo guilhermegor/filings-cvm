@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md)
 
 ---
 
@@ -137,6 +137,46 @@ from filings_cvm.ingestion import CdaReader
 
 df = CdaReader(date_ref=date(2025, 4, 15)).read()
 df["PCT_PL"] = df["VL_MERC_POS_FINAL"].map(Decimal) / df["VL_PATRIM_LIQ"].map(Decimal)
+```
+
+### `LaminaCarteiraReader`
+
+`filings_cvm.ingestion.LaminaCarteiraReader`
+
+Lê o membro `lamina_fi_carteira_AAAAMM` do dump mensal da Lâmina (`lamina_fi_AAAAMM.zip`) e devolve
+a alocação de cada fundo **por tipo de ativo**. Complementa o `CdaReader`: este traz o percentual
+por classe de ativo, aquele a posição título a título.
+
+#### `LaminaCarteiraReader(date_ref=None, path_raw=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` e todos os CSVs extraídos, não só o membro lido). Padrão `None`: diretório temporário, descartado. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=30) -> pd.DataFrame`
+
+Devolve uma linha por fundo × `TP_ATIVO`, com `PR_PL_ATIVO` — o percentual **sinalizado** do
+patrimônio líquido, como texto exato da CVM. Os totais por fundo **não** somam 100: alavancagem e
+posições vendidas são comuns (em 2025-04, de -37,08 a 1123,00). Os membros irmãos do ZIP
+(`lamina_fi_*`, `lamina_fi_rentab_*`) são ignorados.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `int_timeout_s` | `int` | Timeout de socket do download, em segundos. Padrão `30`. |
+
+Levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou `ValueError` (o ZIP
+não contém o membro `lamina_fi_carteira_*`).
+
+```python
+from datetime import date
+from decimal import Decimal
+
+from filings_cvm.ingestion import LaminaCarteiraReader
+
+df = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
+df["PCT"] = df["PR_PL_ATIVO"].map(Decimal)
 ```
 
 ---
