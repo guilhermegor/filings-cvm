@@ -40,6 +40,17 @@ import the concrete writers/readers, never the port. An `ingestion` reader of a 
 CSV consumes a **different artifact** from the same standard's submission XML, so it declares its
 own `FileContract` rather than reusing the submission Pydantic schema.
 
+**Every ingestion reader takes an optional `path_raw: Path | None = None`** at construction.
+`None` → the artifact is fetched into a `TemporaryDirectory` and destroyed on exit, so nothing
+persists (note: the read still transiently touches disk and needs a writable temp dir — it is not
+a zero-disk read); a path → the untouched raw artifact (`.zip`, `.csv`, `.html`, `.xlsx`, …) is
+written there and **kept**, before any parsing. This is the reading-side mirror of the writers' `output_path`. It is
+implemented once by the shared `_internal/utils/raw_workspace.py` context manager — never
+re-branch on the tempdir inside a reader. Keeping the raw bytes is what makes a downstream
+datalake's bronze layer authoritative: when CVM changes a data contract and a transform breaks,
+the exact bytes that broke it stay on disk, replayable, instead of being lost to a re-fetch of an
+already-changed source.
+
 ### Catalog (status: ✅ implemented · ⬜ pending)
 
 Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
@@ -48,7 +59,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
-- ⬜ Demonstrativo de Composição e Diversificação das Aplicações (CDA) — V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
+- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)

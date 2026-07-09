@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md)
 
 ---
 
@@ -67,11 +67,12 @@ O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `Perf
 Lê o dump mensal de *open-data* do Informe Diário de fundos (`inf_diario_fi_AAAAMM`) e o devolve
 como um `DataFrame` tipado e validado por contrato.
 
-#### `InformeDiarioReader(date_ref=None, cls_logger=None)`
+#### `InformeDiarioReader(date_ref=None, path_raw=None, cls_logger=None)`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência (só ano/mês selecionam o dump). Padrão: hoje. O mês corrente pode ainda não estar publicado — use um mês passado para dados completos. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` baixado e o CSV extraído), para a camada *bronze* de um *datalake*. Criado junto com os pais. Padrão `None`: usa um diretório temporário e descarta tudo. |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável (`log_message(msg, level)`). Padrão: um `LogEmitter` sobre a stdlib. |
 
 #### `read(int_timeout_s=30) -> pd.DataFrame`
@@ -93,6 +94,49 @@ from datetime import date
 from filings_cvm.ingestion import InformeDiarioReader
 
 df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+```
+
+### `CdaReader`
+
+`filings_cvm.ingestion.CdaReader`
+
+Lê o dump mensal de *open-data* do CDA (`cda_fi_AAAAMM`), consolida os blocos de ativos
+`BLC_1`…`BLC_8` numa única granularidade (fundo × data × ativo) e traz o `VL_PATRIM_LIQ` do fundo
+junto de cada posição, via *left join* do membro `PL`.
+
+#### `CdaReader(date_ref=None, path_raw=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` e todos os CSVs extraídos). Padrão `None`: diretório temporário, descartado. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. Recebe o `warning` de cobertura do `PL`. |
+
+#### `read(int_timeout_s=30) -> pd.DataFrame`
+
+Devolve uma linha por posição em carteira, com a coluna sintética `BLOCO` (`BLC_1`…`BLC_8`) e a
+coluna `VL_PATRIM_LIQ`. As colunas específicas de um bloco ficam nulas nas linhas dos demais. O
+membro `cda_fie` é ignorado — é um *layout* distinto.
+
+Se um fundo da carteira não constar de `PL`, o `VL_PATRIM_LIQ` fica nulo e o leitor **emite um
+`warning` nomeando os CNPJs** em vez de falhar — você não perde as demais linhas boas do mês.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `int_timeout_s` | `int` | Timeout de socket do download, em segundos. Padrão `30`. |
+
+Levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato), `ValueError` (o ZIP
+não contém bloco `BLC_*` ou membro `PL`) ou `pandas.errors.MergeError` (o `PL` não tem uma linha
+por fundo/data).
+
+```python
+from datetime import date
+from decimal import Decimal
+
+from filings_cvm.ingestion import CdaReader
+
+df = CdaReader(date_ref=date(2025, 4, 15)).read()
+df["PCT_PL"] = df["VL_MERC_POS_FINAL"].map(Decimal) / df["VL_PATRIM_LIQ"].map(Decimal)
 ```
 
 ---

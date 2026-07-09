@@ -7,7 +7,8 @@ building/serialising counterpart lives in the ``submission`` section.
     from filings_cvm.ingestion import InformeDiarioReader
 """
 
+from filings_cvm.ingestion.cda import CdaReader
 from filings_cvm.ingestion.informe_diario import InformeDiarioReader
 
 
-__all__ = ["InformeDiarioReader"]
+__all__ = ["CdaReader", "InformeDiarioReader"]

@@ -21,10 +21,12 @@ exclude_docs: |
   `nav:`, **not** part of the published site. For any non-trivial branch, keep a
   **per-branch work ledger** here at `docs/backlog/<kebab-topic>_YYYYMMDD_HHMMSS.md`
   (timestamped filename, set at creation, never renamed) recording **what was done**
-  and **what remains / is open**, updated as the work proceeds. Tracked in git but
-  excluded from the site, so knowledge survives across sessions. Distinct from
-  generalizable lessons: the ledger is *this branch's* state — delete it once every
-  item is done.
+  and **what remains / is open**, updated as the work proceeds. Track each item as a
+  Markdown checkbox (`- [ ]` open, `- [x]` done), not a bare `-` bullet. Tracked in git
+  but excluded from the site, so knowledge survives across sessions. Distinct from
+  generalizable lessons: the ledger is *this branch's* state. **Keep it on completion —
+  never delete:** when every box is `[x]`, tick the last one, add a short "Completed —
+  kept as a record" note, and leave the file as the permanent record of what was done.
 - Any new non-published folder must be added to `exclude_docs` in the same commit.
 
 ## Published pages

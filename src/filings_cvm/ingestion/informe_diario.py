@@ -14,6 +14,9 @@ framework — so the single I/O boundary is :func:`download_file` and tests mock
 there. Monetary columns are kept as their exact source text (``str``), never coerced to
 ``float``, so no precision is lost on the way in; a consumer converts to ``Decimal`` at
 the point it computes.
+
+Pass ``path_raw`` to keep the downloaded ``.zip`` and its extracted CSV on disk (a
+datalake's bronze layer); omit it and they live in a temporary directory that is discarded.
 """
 
 from __future__ import annotations
@@ -21,13 +24,13 @@ from __future__ import annotations
 import csv
 from datetime import date
 from pathlib import Path
-import tempfile
 
 import pandas as pd
 
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
 from filings_cvm._internal.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
+from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import read_table
 from filings_cvm._internal.utils.zip_extractor import extract_all
@@ -65,7 +68,12 @@ class InformeDiarioReader(IngestionReader):
 		Download, unzip, and parse the reference month into a validated DataFrame.
 	"""
 
-	def __init__(self, date_ref: date | None = None, cls_logger: LogEmitter | None = None) -> None:
+	def __init__(
+		self,
+		date_ref: date | None = None,
+		path_raw: Path | None = None,
+		cls_logger: LogEmitter | None = None,
+	) -> None:
 		"""Initialise the reader for one reference month.
 
 		Parameters
@@ -74,11 +82,17 @@ class InformeDiarioReader(IngestionReader):
 			Any day within the reference month; only its year and month select the
 			monthly dump. Defaults to today. The current month's file may not yet be
 			published or may be partial — pass a past month for complete data.
+		path_raw : pathlib.Path, optional
+			Directory in which to **persist** the raw artifact — the downloaded ``.zip``
+			and the CSV extracted from it — for a datalake's bronze layer. Created if
+			absent. When ``None`` (the default) the artifact is fetched into a temporary
+			directory and discarded, so the read leaves nothing on disk.
 		cls_logger : LogEmitter, optional
 			Injected log sink (``log_message(message, level)``). Defaults to a stdlib
 			-backed :class:`LogEmitter`, so no logging import is forced on consumers.
 		"""
 		self._date_ref = date_ref or date.today()
+		self._path_raw = path_raw
 		self._cls_logger = cls_logger if cls_logger is not None else LogEmitter()
 		self._str_url = _BASE_URL.format(ym=self._date_ref.strftime("%Y%m"))
 
@@ -111,10 +125,10 @@ class InformeDiarioReader(IngestionReader):
 		self._cls_logger.log_message(
 			f"Downloading Informe Diário FIF from {self._str_url}", "info"
 		)
-		with tempfile.TemporaryDirectory() as str_tmp:
-			path_tmp = Path(str_tmp)
-			path_zip = download_file(self._str_url, path_tmp / "inf_diario.zip", int_timeout_s)
-			path_csv = self._extract_csv(path_zip, path_tmp)
+		with raw_workspace(self._path_raw) as path_dir:
+			str_zip = f"inf_diario_fi_{self._date_ref.strftime('%Y%m')}.zip"
+			path_zip = download_file(self._str_url, path_dir / str_zip, int_timeout_s)
+			path_csv = self._extract_csv(path_zip, path_dir)
 			df_ = read_table(
 				path_csv,
 				"",
