@@ -149,7 +149,7 @@ writer to `__all__`, which is a feature addition, not a fix.
   - CI caught a real bug local runs could not: `astype("str")` fabricates the literal `"nan"` on
     pandas < 3. Fixed at the root in `apply_dtypes` (`"str"` → nullable `"string"`), which also
     cured the same latent corruption in `InformeDiarioReader`. New `tests/unit/test_dtypes.py`.
-- [x] **#8** Lâmina (fact sheet) reader · `feat/ingestion-lamina-reader` · PR _pending_ —
+- [x] **#8** Lâmina (fact sheet) reader · `feat/ingestion-lamina-reader` · **PR #37** —
   - Ledger: [`ingestion-lamina-reader_20260709_213000.md`](ingestion-lamina-reader_20260709_213000.md)
   - `LaminaReader` reads `lamina_fi_AAAAMM.csv` — a **sibling member of the ZIP #7 already
     downloads**. 78 columns, one row per fund class, grain unique.
