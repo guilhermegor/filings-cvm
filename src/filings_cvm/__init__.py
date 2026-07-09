@@ -10,7 +10,7 @@ See the CVM XML Standards catalog in ``CLAUDE.md`` for the full source of truth.
 
 from importlib.metadata import PackageNotFoundError, version
 
-from filings_cvm.ingestion import CdaReader, InformeDiarioReader
+from filings_cvm.ingestion import CdaReader, InformeDiarioReader, LaminaCarteiraReader
 from filings_cvm.submission import (
 	InformeDiario,
 	InformeDiarioDocument,
@@ -30,6 +30,7 @@ __all__ = [
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioReader",
+	"LaminaCarteiraReader",
 	"PerfilMensal",
 	"PerfilMensalDocument",
 	"__version__",

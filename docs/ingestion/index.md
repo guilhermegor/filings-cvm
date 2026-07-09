@@ -13,6 +13,9 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   *open-data* (`inf_diario_fi_AAAAMM`) e devolve um `DataFrame` tipado e validado por contrato.
 - **[CDA FIF](cda.md)** — `CdaReader`: lê o dump mensal (`cda_fi_AAAAMM`), consolida os blocos de
   ativos `BLC_1`…`BLC_8` e traz o patrimônio líquido do fundo junto de cada posição.
+- **[Lâmina carteira FIF](lamina_carteira.md)** — `LaminaCarteiraReader`: lê o membro
+  `lamina_fi_carteira_AAAAMM` do dump da Lâmina e devolve a alocação de cada fundo por **tipo de
+  ativo** (`PR_PL_ATIVO`, percentual sinalizado do patrimônio líquido).
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).

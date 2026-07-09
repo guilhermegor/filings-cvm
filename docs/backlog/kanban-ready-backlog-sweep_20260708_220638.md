@@ -30,6 +30,52 @@ buries feedback, risks building later work on an approach the user may still cha
 the branch/main state ambiguous. **When a PR is open, the default action is to wait, not to
 proceed.**
 
+## Release gate — every merge to `main` ships, Test PyPI first
+
+**Standing instruction from the user (2026-07-09). Applies after *every* PR merge in this
+sweep**, not just at the end. It slots between step 4 (sync `main`) and step 5 (start the next
+issue) of the lifecycle above:
+
+4a. Compute the next version: a **minor** semver bump of the currently published version
+    (`0.4.0` → `0.5.0` → `0.6.0` …). The version is **not** in `pyproject.toml` (it is a
+    `0.0.0` stub; `poetry-dynamic-versioning` derives it from the `vX.Y.Z` git tag), so read
+    the truth from the index, not the repo:
+
+    ```bash
+    python3 -c "import json,urllib.request as u; \
+      print(json.load(u.urlopen('https://pypi.org/pypi/filings-cvm/json'))['info']['version'])"
+    ```
+
+4b. Run **`release-test-pypi.yaml`** (`workflow_dispatch`, input `version`) with that version.
+    Both release workflows call `tests.yaml` as a hard gate, so a red suite blocks the publish.
+
+    ```bash
+    rtk gh workflow run release-test-pypi.yaml -f version=X.Y.0
+    ```
+
+4c. **Verify it actually landed on Test PyPI** before going further — the workflow going green
+    is not the same as the artifact being installable:
+
+    ```bash
+    python3 -c "import json,urllib.request as u; \
+      print(json.load(u.urlopen('https://test.pypi.org/pypi/filings-cvm/json'))['info']['version'])"
+    ```
+
+4d. Only once Test PyPI holds that version, run **`release-pypi.yaml`** with the **same**
+    version (never a different one — Test PyPI is a rehearsal of the exact artifact, and PyPI
+    versions are immutable once taken):
+
+    ```bash
+    rtk gh workflow run release-pypi.yaml -f version=X.Y.0
+    ```
+
+4e. Confirm the version on PyPI, then — and only then — start the next backlog issue.
+
+Rationale: Test PyPI is the only place a bad wheel is still recoverable. A PyPI version number
+can never be reused or overwritten, so a broken publish burns that version permanently. Bumping
+minor (not patch) on every merge is deliberate: each merged issue adds a new public reader or
+writer to `__all__`, which is a feature addition, not a fix.
+
 ## Standing decisions (apply to every issue in this sweep)
 
 - **Ground every schema in the real artifact.** Before declaring a `FileContract` or a dtype
@@ -73,8 +119,18 @@ proceed.**
   - Rejected: stacking all ten members (mixed grain — `groupby().sum()` double-counts).
   - Also shipped the `path_raw` raw-artifact seam (`_internal/utils/raw_workspace.py`),
     retrofitted onto `InformeDiarioReader`. Warn-not-raise policy for funds absent from PL.
-  - 49 tests green; docs + catalog updated. Merged? _pending review._
-- [ ] **#7** Carteira / Portfolio composition reader · `feat/ingestion-carteira-reader` · PR —
+  - 49 tests green; docs + catalog updated. **Merged** (commit `89454bf`).
+- [x] **#7** Carteira / Portfolio composition reader · `feat/ingestion-carteira-reader` · **PR #36** —
+  - Ledger: [`ingestion-lamina-carteira-reader_20260709_194646.md`](ingestion-lamina-carteira-reader_20260709_194646.md)
+  - **Not a duplicate of #6.** The issue's stpstone reference `CvmFIFPortfolio` downloads
+    `lamina_fi_AAAAMM.zip`, not CDA — #7 is the **Lâmina's allocation-by-asset-type** table.
+    Shipped as `LaminaCarteiraReader` (`ingestion/lamina_carteira.py`), not `CarteiraReader`:
+    "carteira" alone collides with CDA and with #8's `LaminaReader`.
+  - Grounded in the real `lamina_fi_202504.zip`: 7 columns, grain unique, `ID_SUBCLASSE` empty
+    on all 4,474 rows. **`PR_PL_ATIVO` does not sum to 100** (per-fund -37.08 → 1123.00, median
+    100.03 — leverage/shorts), so no "totals 100%" invariant is asserted.
+  - 13 new tests (58 total green); verified end-to-end against the live CVM file, not just mocks.
+    Docs + catalog updated. Merged? _pending review._
 - [ ] **#8** Lâmina (fact sheet) reader · `feat/ingestion-lamina-reader` · PR —
 - [ ] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · PR —
 - [ ] **#10** Registro de Intermediários Financeiros reader ·
@@ -124,3 +180,7 @@ Each needs its `PadraoXML*.asp` spec page fetched first; the CVM catalog page is
 - [ ] Writers cannot be fully verified without a CVM validation round-trip; field names and
   decimal scales carry residual risk even when taken from the spec page. Flag any writer PR
   that could not be checked against a real CVM-accepted document.
+- [x] *Resolved 2026-07-09:* the PyPI release that ran after the #35 merge was **`0.4.0`**, and
+  it was intentional — the user has since made publishing a standing post-merge step (see
+  "Release gate" above). Local tags lag the published versions; `git fetch --tags` before
+  reasoning about the current version, or just query the index.

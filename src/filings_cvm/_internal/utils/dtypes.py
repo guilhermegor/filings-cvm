@@ -15,6 +15,15 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 
+# ``astype("str")`` is **not** missing-value safe on pandas < 3: it stringifies every NA into
+# the literal three-character text ``"nan"``, so a blank field silently becomes data. pandas 3
+# introduced a real ``str`` dtype that preserves NA, which means the same declaration produces
+# different values depending on the interpreter (the lock file carries pandas 2.3 and 3.0, keyed
+# by Python marker — CI runs both). ``"string"`` is the nullable text dtype and behaves
+# identically on 2 and 3, so a ``"str"`` declaration is normalised to it. Callers keep writing
+# the obvious ``"str"``.
+_DTYPE_TEXT = "string"
+
 # Runtime type-checking engine — layout-agnostic (utils.typing in MVC, chassis.typing in
 # DDD; always injected, just at different paths). mypy reads the single TYPE_CHECKING
 # import (no redefinition); at runtime the try/except picks whichever layout shipped.
@@ -47,7 +56,10 @@ def apply_dtypes(
 		The source frame (left unmodified — work happens on a copy).
 	dict_dtypes : dict of {str: str}, optional
 		Column→dtype mapping passed to :meth:`pandas.DataFrame.astype` (e.g. ``"str"``,
-		``"int64"``, ``"float64"``).
+		``"int64"``, ``"float64"``). A ``"str"`` declaration is applied as pandas'
+		nullable ``"string"`` dtype, so a missing value stays missing instead of becoming
+		the literal text ``"nan"`` (which is what a bare ``astype(str)`` yields on
+		pandas < 3). Elements of such a column are still ordinary :class:`str`.
 	list_date_cols : sequence of str, optional
 		Columns coerced to ``datetime.date`` (date only, no time component).
 	list_datetime_cols : sequence of str, optional
@@ -87,7 +99,11 @@ def apply_dtypes(
 	df_typed = df_input.copy()
 
 	if dict_dtypes:
-		df_typed = df_typed.astype(dict_dtypes)
+		dict_resolved = {
+			str_col: (_DTYPE_TEXT if str_dtype == "str" else str_dtype)
+			for str_col, str_dtype in dict_dtypes.items()
+		}
+		df_typed = df_typed.astype(dict_resolved)
 
 	for str_col in list_datetime_cols:
 		df_typed[str_col] = pd.to_datetime(df_typed[str_col], errors="raise")

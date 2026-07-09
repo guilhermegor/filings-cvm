@@ -19,6 +19,7 @@ from __future__ import annotations
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
+from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.utils.tabular_reader import (
 	ContractError,
 	FileContract,
@@ -30,6 +31,7 @@ __all__ = [
 	"CDA_FIF",
 	"EXAMPLE_SOURCE",
 	"INFORME_DIARIO_FIF",
+	"LAMINA_CARTEIRA_FIF",
 	"ContractError",
 	"FileContract",
 	"find_file_problems",
