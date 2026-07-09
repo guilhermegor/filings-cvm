@@ -9,6 +9,27 @@ ticked and a "Completed — kept as a record" note added, per `docs/CLAUDE.md`.
 This file is the **resume point**: if a session drops, read the checkboxes below to see what
 landed, then continue from the first `- [ ]`.
 
+## Workflow gate — ONE PR at a time, user approves before the next starts
+
+**Hard rule. Do not violate.** The sweep is strictly sequential and gated on the user's
+approval. Claude must **never** start the next issue's branch/PR while a PR is still open and
+unapproved. The per-issue lifecycle, in order:
+
+1. Implement the issue on its branch; open the PR (closes the issue).
+2. **STOP. Wait for the user to review and approve/merge the PR.** Do not branch, do not touch
+   the next issue, do not run `git checkout main` — nothing.
+3. Once the user has approved and the PR is **merged** (which closes it), delete the merged
+   branch (`git branch -d <branch>` local + `git push origin --delete <branch>` remote, or the
+   `gh pr merge --delete-branch` that did it).
+4. Sync `main` (`git checkout main && git pull --ff-only`) so the next branch forks from the
+   merged state.
+5. Only **then** start the next issue's branch/PR.
+
+Rationale: the user is the reviewer/approver. A second PR opened before the first is approved
+buries feedback, risks building later work on an approach the user may still change, and makes
+the branch/main state ambiguous. **When a PR is open, the default action is to wait, not to
+proceed.**
+
 ## Standing decisions (apply to every issue in this sweep)
 
 - **Ground every schema in the real artifact.** Before declaring a `FileContract` or a dtype
@@ -44,13 +65,15 @@ landed, then continue from the first `- [ ]`.
 
 ## Ready — ingestion readers (#6–#14)
 
-- [ ] **#6** CDA — Composição e Diversificação das Aplicações reader ·
-  `feat/ingestion-cda-reader` · PR —
-  - Shape decided 2026-07-08: concat `BLC_1…BLC_8` tagged with a `BLOCO` column, then
-    **left-join** `PL`'s `VL_PATRIM_LIQ` on `(TP_FUNDO_CLASSE, CNPJ_FUNDO_CLASSE, DT_COMPTC)`.
-    Single grain: fund × date × asset. `cda_fie_*.csv` (a distinct FIE layout carrying its own
-    `ID_DOC`/`VL_PATRIM_LIQ`) is **out of scope** — see follow-up below.
+- [x] **#6** CDA — Composição e Diversificação das Aplicações reader ·
+  `feat/ingestion-cda-reader` · **PR #35** —
+  - Shape: concat `BLC_1…BLC_8` tagged with a `BLOCO` column, then **left-join** `PL`'s
+    `VL_PATRIM_LIQ` on `(TP_FUNDO_CLASSE, CNPJ_FUNDO_CLASSE, DT_COMPTC)` (`validate="many_to_one"`).
+    Single grain: fund × date × asset. `cda_fie_*.csv` out of scope — see follow-up.
   - Rejected: stacking all ten members (mixed grain — `groupby().sum()` double-counts).
+  - Also shipped the `path_raw` raw-artifact seam (`_internal/utils/raw_workspace.py`),
+    retrofitted onto `InformeDiarioReader`. Warn-not-raise policy for funds absent from PL.
+  - 49 tests green; docs + catalog updated. Merged? _pending review._
 - [ ] **#7** Carteira / Portfolio composition reader · `feat/ingestion-carteira-reader` · PR —
 - [ ] **#8** Lâmina (fact sheet) reader · `feat/ingestion-lamina-reader` · PR —
 - [ ] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · PR —
