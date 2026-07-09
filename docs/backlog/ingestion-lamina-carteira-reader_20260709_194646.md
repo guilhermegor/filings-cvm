@@ -58,6 +58,26 @@ and #8's `LaminaReader` will read a sibling member of this very ZIP.
   dtypes as declared, `DT_COMPTC` coerced to `date`, 141 negative shares preserved, and
   `path_raw` kept the `.zip` plus all four CSVs.
 
+## Bug found by CI, fixed at the root (not in the test)
+
+- [x] CI failed on all three OSes: `test_read_tolerates_an_empty_id_subclasse` saw the literal
+  string `"nan"` where a missing value belonged. **Not a flake, and not a test bug.**
+- [x] Root cause in the shared seam `_internal/utils/dtypes.py`: `astype("str")` stringifies NA
+  into the three-character text `"nan"` on **pandas < 3**. pandas 3 added a real `str` dtype that
+  preserves NA. `poetry.lock` legitimately carries **both** (2.3.3 and 3.0.3, keyed by Python
+  marker), so the same declaration produced different *data* per interpreter. Local pandas 3.0.3
+  masked it entirely.
+- [x] Fix: `apply_dtypes` normalises a `"str"` declaration to pandas' nullable `"string"` dtype,
+  which behaves identically on 2 and 3; elements stay ordinary `str`. One guard in the function
+  every reader routes through — `InformeDiarioReader.ID_SUBCLASSE` had the same latent corruption.
+- [x] New `tests/unit/test_dtypes.py` (6 tests) pins it; the seam had no test of its own before.
+- [x] Verified on **both** majors: 64 unit tests green under pandas 3.0.3 *and* under a
+  pandas 2.3.3 venv. Reproduced the old behaviour explicitly first
+  (`Series([nan]).astype("str") -> ['nan']`, `isna() -> False`).
+
+Lesson (generalizable → BlueprintX store): a green suite on one pandas major proves nothing about
+the other when the lock ships two.
+
 ## Open
 
 - [ ] PR opened; awaiting user review/merge.
