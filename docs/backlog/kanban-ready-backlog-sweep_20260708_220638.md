@@ -120,7 +120,7 @@ writer to `__all__`, which is a feature addition, not a fix.
   - Also shipped the `path_raw` raw-artifact seam (`_internal/utils/raw_workspace.py`),
     retrofitted onto `InformeDiarioReader`. Warn-not-raise policy for funds absent from PL.
   - 49 tests green; docs + catalog updated. **Merged** (commit `89454bf`).
-- [x] **#7** Carteira / Portfolio composition reader · `feat/ingestion-carteira-reader` · PR _pending_ —
+- [x] **#7** Carteira / Portfolio composition reader · `feat/ingestion-carteira-reader` · **PR #36** —
   - Ledger: [`ingestion-lamina-carteira-reader_20260709_194646.md`](ingestion-lamina-carteira-reader_20260709_194646.md)
   - **Not a duplicate of #6.** The issue's stpstone reference `CvmFIFPortfolio` downloads
     `lamina_fi_AAAAMM.zip`, not CDA — #7 is the **Lâmina's allocation-by-asset-type** table.
