@@ -9,22 +9,29 @@ User chose **option A (by CVM portal path) + per-dataset sub-folders** for multi
 
 ## Target tree (built)
 
+The portal path is `dados.cvm.gov.br/dados/<ROOT>/…` where `FI/` is **one root among
+siblings** (`FIDC/`, `FII/`, `AUDITOR/`, `INVNR/`, … — all pending in the catalog). So the
+nesting carries the `fi/` root level; `doc/`/`cad/` are `FI/DOC` and `FI/CAD` beneath it, and
+future roots become siblings of `fi/`, not name-collisions with it.
+
 ```
 ingestion/
   __init__.py                 # FLAT public API — re-exports every reader (unchanged import path)
-  doc/                        # FI/DOC/*
-    informe_diario.py
-    cda.py
-    lamina/                   # FI/DOC/LAMINA (one ZIP, two members)
-      lamina.py
-      lamina_carteira.py
-  cad/                        # FI/CAD
-    cadastro_fi.py            # cad_fi.csv
-    registro/                 # registro_fundo_classe.zip (3 members)
-      registro_fundo.py  registro_classe.py  registro_subclasse.py
-    cad_fi_hist/              # cad_fi_hist.zip (19 members)
-      _base_cad_fi_hist_reader.py
-      cad_fi_hist_*.py  (19)
+  fi/                         # FI/ — Fundos de Investimento (one portal root)
+    __init__.py               #   aggregates all 28 FI readers
+    doc/                      #   FI/DOC/*
+      informe_diario.py
+      cda.py
+      lamina/                 #   FI/DOC/LAMINA (one ZIP, two members)
+        lamina.py
+        lamina_carteira.py
+    cad/                      #   FI/CAD
+      cadastro_fi.py          #   cad_fi.csv
+      registro/               #   registro_fundo_classe.zip (3 members)
+        registro_fundo.py  registro_classe.py  registro_subclasse.py
+      cad_fi_hist/            #   cad_fi_hist.zip (19 members)
+        _base_cad_fi_hist_reader.py
+        cad_fi_hist_*.py  (19)
 ```
 
 ## Key property — public API unchanged
@@ -45,6 +52,10 @@ reorg) — zero public API change.
 - [x] Rewrote test internal module paths (monkeypatch targets + private imports) with anchored
   seds (name + delimiter, so substrings can't collide), verified by the suite.
 - [x] Root `CLAUDE.md` catalog source paths + Layout tree updated to the nested structure.
+- [x] **Review feedback (portal has many roots besides FI):** added the `fi/` root level above
+  `doc/`/`cad/` so `doc/`/`cad/` are `FI/DOC`/`FI/CAD` and future roots (`FIDC/`, `AUDITOR/`, …)
+  are siblings of `fi/`. New `fi/__init__.py` aggregates all 28; `ingestion/__init__` re-exports
+  from `.fi`. Second commit on the same branch.
 
 ## Verification
 
