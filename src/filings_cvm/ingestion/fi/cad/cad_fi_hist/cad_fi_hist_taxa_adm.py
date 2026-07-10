@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from filings_cvm._internal.config.contracts import CAD_FI_HIST_TAXA_ADM, FileContract
-from filings_cvm.ingestion.cad.cad_fi_hist._base_cad_fi_hist_reader import _BaseCadFiHistReader
+from filings_cvm.ingestion.fi.cad.cad_fi_hist._base_cad_fi_hist_reader import _BaseCadFiHistReader
 
 
 class CadastroFiHistTaxaAdmReader(_BaseCadFiHistReader):

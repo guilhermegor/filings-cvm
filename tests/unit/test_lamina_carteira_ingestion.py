@@ -87,7 +87,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.doc.lamina.lamina_carteira.download_file", _fake_download
+		"filings_cvm.ingestion.fi.doc.lamina.lamina_carteira.download_file", _fake_download
 	)
 
 
