@@ -21,6 +21,9 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
 - **[Cadastro de Fundos (CAD/FI)](cadastro_fi.md)** — `CadastroFiReader`: lê `cad_fi.csv`, o
   **retrato do estado atual** do cadastro. Sem `date_ref` e **sem chave única** — o CNPJ se repete
   entre regimes regulatórios.
+- **[Registro RCVM 175](registro.md)** — `RegistroFundoReader`, `RegistroClasseReader`,
+  `RegistroSubclasseReader`: lêem os três membros de `registro_fundo_classe.zip` (hierarquia
+  `fundo → classe → subclasse`), o cadastro **atual** onde estão os fundos vivos.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).

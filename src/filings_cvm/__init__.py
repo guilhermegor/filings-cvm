@@ -16,6 +16,9 @@ from filings_cvm.ingestion import (
 	InformeDiarioReader,
 	LaminaCarteiraReader,
 	LaminaReader,
+	RegistroClasseReader,
+	RegistroFundoReader,
+	RegistroSubclasseReader,
 )
 from filings_cvm.submission import (
 	InformeDiario,
@@ -40,6 +43,9 @@ __all__ = [
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"PerfilMensal",
+	"RegistroClasseReader",
+	"RegistroFundoReader",
+	"RegistroSubclasseReader",
 	"PerfilMensalDocument",
 	"__version__",
 ]

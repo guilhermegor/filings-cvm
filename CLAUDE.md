@@ -69,7 +69,10 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   snapshot `cad_fi.csv` — `ingestion/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
   única** (o CNPJ se repete entre regimes) · ⬜ **ingestion** `cad_fi_hist.zip` (log de alterações)
-  · ⬜ **ingestion** `registro_fundo_classe.zip` (cadastro pós-RCVM 175)
+  · ✅ **ingestion** `registro_fundo_classe.zip` (cadastro pós-RCVM 175, onde estão os fundos vivos) —
+  `ingestion/registro_fundo.py`, `registro_classe.py`, `registro_subclasse.py`
+  (`RegistroFundoReader`, `RegistroClasseReader`, `RegistroSubclasseReader`); contracts
+  `_internal/config/contracts/registro_{fundo,classe,subclasse}.py`
 
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
