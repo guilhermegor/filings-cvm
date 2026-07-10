@@ -256,6 +256,12 @@ Each needs its `PadraoXML*.asp` spec page fetched first; the CVM catalog page is
 - [ ] `cda_fie_*.csv` — the CDA dump also ships a **FIE** member with a distinct layout
   (`ID_DOC`, inline `VL_PATRIM_LIQ`, exterior-asset columns). Deliberately excluded from #6.
   Worth its own issue + reader rather than forcing it into the FIF frame.
+- [ ] **Nest the growing `ingestion/` folder into sub-packages** — issue **#44** (kanban
+  **Backlog**). 27 reader modules + 1 base already (19 are `cad_fi_hist_*`); #41 will add more.
+  Public API stays flat (`ingestion/__init__` re-exports), so it's a pure internal reorg like
+  PR #39. Options A–E in the issue; recommended **hybrid B/C**: a sub-package per standard with
+  ≥2 reader modules (`cad_fi_hist/`, `registro/`, `lamina/`), single-module standards stay flat.
+  **Run after #42** (provenance retrofit touches every reader — avoid colliding).
 - [ ] Writers cannot be fully verified without a CVM validation round-trip; field names and
   decimal scales carry residual risk even when taken from the spec page. Flag any writer PR
   that could not be checked against a real CVM-accepted document.
