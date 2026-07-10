@@ -7,8 +7,8 @@ shape. They ship inside the wheel under ``_internal`` but are **not** part of th
 consumers import the concrete writers/readers, never these ports.
 """
 
-from filings_cvm._internal.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.ports.submission_writer import SubmissionWriter
+from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 
 
 __all__ = ["IngestionReader", "SubmissionWriter"]

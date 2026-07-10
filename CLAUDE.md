@@ -29,11 +29,11 @@ this file.
   CVM back into typed models / DataFrames.
 
 The **shared, direction-neutral schema** (Pydantic models mirroring each XML standard) lives
-under `_internal/schemas/<standard>.py`; both sections import it. `submission/` and
+under `_internal/config/schemas/<standard>.py`; both sections import it. `submission/` and
 `ingestion/` re-export the public names consumers need.
 
 Each section's classes implement a private **port** (hexagonal ports-and-adapters) in
-`_internal/ports/`: submission writers are `SubmissionWriter[TDoc]` adapters exposing
+`_internal/config/ports/`: submission writers are `SubmissionWriter[TDoc]` adapters exposing
 `export(doc, output_path)`; ingestion readers are `IngestionReader` adapters exposing
 `read() -> pd.DataFrame`. The ports are ABCs (`ABCTypeCheckerMeta`) and stay private — consumers
 import the concrete writers/readers, never the port. An `ingestion` reader of a CVM open-data
@@ -56,7 +56,7 @@ already-changed source.
 Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
 
 **Fundos**
-- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
+- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
@@ -81,7 +81,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   ⬜ **submission** V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
-- ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/schemas/perfil_mensal.py`
+- ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
 - ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
 - ⬜ Extrato das Informações sobre o Fundo — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
@@ -107,12 +107,12 @@ src/filings_cvm/
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
-        schemas/           # shared, direction-neutral Pydantic models (one per XML standard)
-        ports/             # private behavioural ABCs (SubmissionWriter, IngestionReader)
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
-        config/
+        config/            # private structural declarations (shapes + interfaces, not machinery)
             contracts/     # FileContract declarations (one per input source)
+            schemas/       # shared, direction-neutral Pydantic models (one per XML standard)
+            ports/         # private behavioural ABCs (SubmissionWriter, IngestionReader)
 tests/
     unit/  integration/  performance/
 ```

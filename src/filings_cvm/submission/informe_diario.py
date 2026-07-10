@@ -8,8 +8,8 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 from decimal import Decimal
 from pathlib import Path
 
-from filings_cvm._internal.ports.submission_writer import SubmissionWriter
-from filings_cvm._internal.schemas.informe_diario import (
+from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioInform,
 	SignificantShareholder,

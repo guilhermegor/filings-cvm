@@ -9,8 +9,8 @@ from decimal import Decimal
 from pathlib import Path
 import xml.sax.saxutils as saxutils
 
-from filings_cvm._internal.ports.submission_writer import SubmissionWriter
-from filings_cvm._internal.schemas.perfil_mensal import (
+from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
+from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	NominalRiskBlock,
 	PatrimonyDistribution,

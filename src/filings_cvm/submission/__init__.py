@@ -10,13 +10,13 @@ and serialise them through a single import:
     from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
 """
 
-from filings_cvm._internal.schemas.informe_diario import (
+from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
 	InformeDiarioInform,
 	SignificantShareholder,
 )
-from filings_cvm._internal.schemas.perfil_mensal import (
+from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
 	NominalRiskBlock,
