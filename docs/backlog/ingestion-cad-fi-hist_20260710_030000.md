@@ -53,6 +53,6 @@ Where `CadastroFiReader` gives the current snapshot, these give the history.
 
 ## Open
 
-- [ ] PR opened; awaiting user review/merge, then the single release with any co-merged work.
+- [x] **PR #43** opened; awaiting user review/merge + release.
 - [ ] **Next to-do is #42** (provenance `url` + `updated_at` on every reader) — will retrofit these
   19 too.
