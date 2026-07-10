@@ -7,10 +7,17 @@ building/serialising counterpart lives in the ``submission`` section.
     from filings_cvm.ingestion import InformeDiarioReader
 """
 
+from filings_cvm.ingestion.cadastro_fi import CadastroFiReader
 from filings_cvm.ingestion.cda import CdaReader
 from filings_cvm.ingestion.informe_diario import InformeDiarioReader
 from filings_cvm.ingestion.lamina import LaminaReader
 from filings_cvm.ingestion.lamina_carteira import LaminaCarteiraReader
 
 
-__all__ = ["CdaReader", "InformeDiarioReader", "LaminaCarteiraReader", "LaminaReader"]
+__all__ = [
+	"CadastroFiReader",
+	"CdaReader",
+	"InformeDiarioReader",
+	"LaminaCarteiraReader",
+	"LaminaReader",
+]

@@ -11,6 +11,7 @@ See the CVM XML Standards catalog in ``CLAUDE.md`` for the full source of truth.
 from importlib.metadata import PackageNotFoundError, version
 
 from filings_cvm.ingestion import (
+	CadastroFiReader,
 	CdaReader,
 	InformeDiarioReader,
 	LaminaCarteiraReader,
@@ -31,6 +32,7 @@ except PackageNotFoundError:  # pragma: no cover - source tree without an instal
 
 
 __all__ = [
+	"CadastroFiReader",
 	"CdaReader",
 	"InformeDiario",
 	"InformeDiarioDocument",

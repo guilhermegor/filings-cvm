@@ -16,6 +16,7 @@ delete the example once your own contracts exist.
 
 from __future__ import annotations
 
+from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
@@ -29,6 +30,7 @@ from filings_cvm._internal.utils.tabular_reader import (
 
 
 __all__ = [
+	"CAD_FI",
 	"CDA_FIF",
 	"EXAMPLE_SOURCE",
 	"INFORME_DIARIO_FIF",

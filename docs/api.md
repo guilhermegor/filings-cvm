@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md)
 
 ---
 
@@ -215,6 +215,41 @@ from filings_cvm.ingestion import LaminaReader
 
 df = LaminaReader(date_ref=date(2025, 4, 15)).read()
 print(df[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
+```
+
+### `CadastroFiReader`
+
+`filings_cvm.ingestion.CadastroFiReader`
+
+Lê `cad_fi.csv`, o **retrato do estado atual** do cadastro de fundos. É o único leitor **sem
+`date_ref`**: o artefato não é particionado por mês.
+
+#### `CadastroFiReader(path_raw=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o retrato. A CVM sobrescreve o arquivo no lugar, então o que não for gravado **não pode ser recuperado**. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve uma linha por entrada do cadastro (46.809 × 41 hoje). **Não é indexado por
+`CNPJ_FUNDO`**: um fundo mantém o CNPJ ao migrar de regime e reaparece com novo `TP_FUNDO` e
+`CD_CVM`, então um `merge` só por essa coluna multiplica linhas. As nove colunas `DT_*` viram
+`datetime.date` (vazio → `NaT`); as demais são texto exato. `SIT` é `CANCELADA` na maioria das
+linhas — filtre antes de tratar como fundos vivos.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `int_timeout_s` | `int` | Timeout de socket, em segundos. Padrão `60` (o arquivo tem ~18 MB e não é zipado). |
+
+Levanta `OSError` (falha de download) ou `ContractError` (CSV viola o contrato).
+
+```python
+from filings_cvm.ingestion import CadastroFiReader
+
+df = CadastroFiReader().read()
+ativos = df[df["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 ```
 
 ---
