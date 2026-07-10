@@ -222,9 +222,11 @@ Each needs its `PadraoXML*.asp` spec page fetched first; the CVM catalog page is
   Lâmina ZIP, untouched by #7/#8. `zip_extractor.find_member` is ready for them.
 - [ ] `cad_fi_hist.zip` — the CAD/FI **change log** (history the snapshot does not carry).
   Deliberately excluded from #9.
-- [ ] `registro_fundo_classe.zip` — the post-**Resolução CVM 175** fund/class/subclass registry,
-  which is where currently-active funds actually live (`cad_fi.csv` is 99.5% `CANCELADA`). Almost
-  certainly the more useful artifact for live-fund lookups; deserves its own issue.
+- [x] `registro_fundo_classe.zip` — **DONE** (user-prioritised over the numbered backlog). Three
+  readers `RegistroFundoReader` / `RegistroClasseReader` / `RegistroSubclasseReader` for the post-
+  RCVM 175 fund→class→subclass hierarchy — where the **live** funds are (34,176 active vs 22 in
+  `cad_fi.csv`). Ledger: [`ingestion-registro-fundo-classe_20260710_020000.md`](ingestion-registro-fundo-classe_20260710_020000.md).
+  Landed on the reorg PR's release (single `0.8.0`), per user.
 - [ ] `cda_fie_*.csv` — the CDA dump also ships a **FIE** member with a distinct layout
   (`ID_DOC`, inline `VL_PATRIM_LIQ`, exterior-asset columns). Deliberately excluded from #6.
   Worth its own issue + reader rather than forcing it into the FIF frame.

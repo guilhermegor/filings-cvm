@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md)
 
 ---
 
@@ -250,6 +250,47 @@ from filings_cvm.ingestion import CadastroFiReader
 
 df = CadastroFiReader().read()
 ativos = df[df["SIT"] == "EM FUNCIONAMENTO NORMAL"]
+```
+
+### `RegistroFundoReader` · `RegistroClasseReader` · `RegistroSubclasseReader`
+
+`filings_cvm.ingestion.RegistroFundoReader` · `…RegistroClasseReader` · `…RegistroSubclasseReader`
+
+Lêem os três membros de `registro_fundo_classe.zip` — o cadastro pós-**Resolução CVM 175**, na
+hierarquia `fundo → classe → subclasse`. É onde estão os fundos **vivos** (o `registro_fundo` tinha
+~34 mil `Em Funcionamento Normal`, contra 22 no `cad_fi.csv`). Página completa:
+[Registro RCVM 175](ingestion/registro.md).
+
+#### `RegistroFundoReader(path_raw=None, cls_logger=None)` (idem para Classe e Subclasse)
+
+Como o `CadastroFiReader`, **sem `date_ref`** (retrato do estado atual). Os três baixam o **mesmo**
+ZIP, então um `path_raw` gravado por qualquer um serve aos outros.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os três CSVs. A CVM sobrescreve o arquivo no lugar. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+| Leitor | Membro | Colunas | FK |
+|--------|--------|---------|-----|
+| `RegistroFundoReader` | `registro_fundo.csv` | 21 | — |
+| `RegistroClasseReader` | `registro_classe.csv` | 30 | `ID_Registro_Fundo` |
+| `RegistroSubclasseReader` | `registro_subclasse.csv` | 14 | `ID_Registro_Classe` |
+
+Os três **não** são unidos num único frame — a hierarquia é um-para-muitos, então um `join`
+multiplicaria linhas; junte nas chaves substitutas você mesmo. As colunas `Data_*` viram
+`datetime.date`; as demais são texto exato. `ID_Registro_Fundo` **não** é estritamente único
+(re-registro entre regimes). Cada `read` levanta `OSError`, `ContractError` ou `ValueError` (membro
+ausente).
+
+```python
+from filings_cvm.ingestion import RegistroFundoReader, RegistroClasseReader
+
+fundos = RegistroFundoReader().read()
+classes = RegistroClasseReader().read()
+fc = classes.merge(fundos, on="ID_Registro_Fundo", suffixes=("_classe", "_fundo"))
 ```
 
 ---

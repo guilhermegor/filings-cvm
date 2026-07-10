@@ -12,6 +12,9 @@ from filings_cvm.ingestion.cda import CdaReader
 from filings_cvm.ingestion.informe_diario import InformeDiarioReader
 from filings_cvm.ingestion.lamina import LaminaReader
 from filings_cvm.ingestion.lamina_carteira import LaminaCarteiraReader
+from filings_cvm.ingestion.registro_classe import RegistroClasseReader
+from filings_cvm.ingestion.registro_fundo import RegistroFundoReader
+from filings_cvm.ingestion.registro_subclasse import RegistroSubclasseReader
 
 
 __all__ = [
@@ -20,4 +23,7 @@ __all__ = [
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
+	"RegistroClasseReader",
+	"RegistroFundoReader",
+	"RegistroSubclasseReader",
 ]
