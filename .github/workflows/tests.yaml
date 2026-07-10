@@ -108,6 +108,13 @@ jobs:
         # here or a hook-skipping contributor bypasses the check entirely.
         run: poetry run python bin/check_typing.py
 
+      - name: Run Provenance-Stamp Enforcement
+        if: runner.os == 'Linux'
+        # Mirrors the `check-provenance` pre-commit hook: every src/ module that calls
+        # read_table must also call stamp_provenance, so no ingested frame ships without its
+        # url/updated_at/source_key/... columns. Explicit CI step (gate parity with pre-commit).
+        run: poetry run python bin/check_provenance.py
+
       - name: Run Ruff Linting
         if: runner.os == 'Linux'
         run: |

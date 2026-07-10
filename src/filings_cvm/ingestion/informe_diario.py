@@ -30,6 +30,7 @@ import pandas as pd
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
+from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import read_table
@@ -128,6 +129,7 @@ class InformeDiarioReader(IngestionReader):
 		with raw_workspace(self._path_raw) as path_dir:
 			str_zip = f"inf_diario_fi_{self._date_ref.strftime('%Y%m')}.zip"
 			path_zip = download_file(self._str_url, path_dir / str_zip, int_timeout_s)
+			str_content_hash = hash_artifact(path_zip)
 			path_csv = self._extract_csv(path_zip, path_dir)
 			df_ = read_table(
 				path_csv,
@@ -140,7 +142,7 @@ class InformeDiarioReader(IngestionReader):
 				int_csv_quoting=csv.QUOTE_NONE,
 			)
 		self._cls_logger.log_message(f"Loaded {len(df_)} rows from Informe Diário FIF", "info")
-		return df_
+		return stamp_provenance(df_, self._str_url, INFORME_DIARIO_FIF, str_content_hash)
 
 	@staticmethod
 	def _extract_csv(path_zip: Path, path_dest: Path) -> Path:

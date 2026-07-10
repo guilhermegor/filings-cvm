@@ -117,7 +117,7 @@ def test_read_returns_the_fund_member_with_all_columns(monkeypatch: pytest.Monke
 	df_ = _read_default(monkeypatch)
 
 	assert len(df_) == 1
-	assert list(df_.columns) == list(REGISTRO_FUNDO.tuple_required)
+	assert list(df_.columns) == list(REGISTRO_FUNDO.output_columns)
 
 
 def test_read_selects_the_fund_member_not_its_siblings(monkeypatch: pytest.MonkeyPatch) -> None:

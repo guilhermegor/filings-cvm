@@ -94,7 +94,7 @@ def test_read_returns_the_subclass_member_with_all_columns(
 	df_ = _read_default(monkeypatch)
 
 	assert len(df_) == 1
-	assert list(df_.columns) == list(REGISTRO_SUBCLASSE.tuple_required)
+	assert list(df_.columns) == list(REGISTRO_SUBCLASSE.output_columns)
 	assert df_["ID_Registro_Classe"].iloc[0] == "10"
 
 

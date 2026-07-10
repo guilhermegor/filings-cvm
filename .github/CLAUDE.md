@@ -32,9 +32,9 @@ change in the other **in the same commit**.
 CI runs its gates as **explicit steps** (it does *not* invoke `pre-commit run`), so
 adding a hook to `.pre-commit-config.yaml` does **not** automatically cover CI — you
 must add the matching step to `tests.yaml` yourself. The canonical set to keep
-mirrored: codespell, `check_docstrings.py`, `check_typing.py`, ruff check + format,
-mypy, the shell/sql/yaml lint gates, unit + integration tests, and the coverage
-`fail-under` threshold. After changing a gate, confirm both files list it.
+mirrored: codespell, `check_docstrings.py`, `check_typing.py`, `check_provenance.py`,
+ruff check + format, mypy, the shell/sql/yaml lint gates, unit + integration tests, and
+the coverage `fail-under` threshold. After changing a gate, confirm both files list it.
 
 The coverage floor is single-sourced in `.coveragerc` (`[report] fail_under`), so the
 pre-commit `coverage-check` hook and the CI coverage gate share one value — never pass a

@@ -54,6 +54,7 @@ import pandas as pd
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
+from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import read_table
@@ -171,6 +172,7 @@ class CdaReader(IngestionReader):
 		with raw_workspace(self._path_raw) as path_dir:
 			str_zip = f"cda_fi_{self._date_ref.strftime('%Y%m')}.zip"
 			path_zip = download_file(self._str_url, path_dir / str_zip, int_timeout_s)
+			str_content_hash = hash_artifact(path_zip)
 			list_members = sorted(extract_all(path_zip, path_dir))
 			df_holdings = self._read_blocks(list_members)
 			df_pl = self._read_pl(list_members)
@@ -185,7 +187,7 @@ class CdaReader(IngestionReader):
 			f"across {df_[_COL_BLOCK].nunique()} blocks",
 			"info",
 		)
-		return df_
+		return stamp_provenance(df_, self._str_url, CDA_FIF, str_content_hash)
 
 	def _check_pl_coverage(self, df_merged: pd.DataFrame) -> None:
 		"""Warn about holdings rows that matched no ``PL`` row, naming the funds.

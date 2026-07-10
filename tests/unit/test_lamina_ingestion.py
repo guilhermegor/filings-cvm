@@ -96,8 +96,8 @@ def test_read_returns_one_row_per_fund_class(monkeypatch: pytest.MonkeyPatch) ->
 	df_ = _read_default(monkeypatch)
 
 	assert len(df_) == 2
-	assert len(df_.columns) == 78
-	assert list(df_.columns) == list(LAMINA_FIF.tuple_required)
+	assert len(df_.columns) == 78 + len(LAMINA_FIF.PROVENANCE_COLUMNS)
+	assert list(df_.columns) == list(LAMINA_FIF.output_columns)
 
 
 def test_read_selects_the_lamina_member_not_its_prefix_siblings(
