@@ -1,18 +1,15 @@
-"""Ingestion section — parse and interpret files *received* from CVM (leitura).
+"""CVM open-data **Fundos de Investimento** readers (`FI/`).
 
-Every "leitura" solution lives here: it takes a file downloaded from CVM (an XML
-standard document or an open-data dump) and returns typed models / DataFrames. The
-building/serialising counterpart lives in the ``submission`` section.
-
-Readers are nested by CVM open-data portal path (`dados.cvm.gov.br/dados/<ROOT>/…`)
-— today only the `FI/` root (:mod:`filings_cvm.ingestion.fi`) is implemented; other
-roots (`FIDC/`, `FII/`, `AUDITOR/`, …) get sibling sub-packages as they land. The
-public API stays flat regardless of nesting::
-
-    from filings_cvm.ingestion import InformeDiarioReader
+Mirrors the `dados.cvm.gov.br/dados/FI/` portal branch — one sibling among the
+portal's other roots (`FIDC/`, `FII/`, `AUDITOR/`, `INVNR/`, …), each of which
+gets its own sub-package here as it is implemented. Under `FI/` live the document
+dumps (:mod:`filings_cvm.ingestion.fi.doc`) and the cadastro
+(:mod:`filings_cvm.ingestion.fi.cad`). Every reader is re-exported flat from
+`filings_cvm.ingestion`.
 """
 
-from filings_cvm.ingestion.fi import (
+from filings_cvm.ingestion.fi.cad import CadastroFiReader
+from filings_cvm.ingestion.fi.cad.cad_fi_hist import (
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
 	CadastroFiHistClasseReader,
@@ -32,14 +29,17 @@ from filings_cvm.ingestion.fi import (
 	CadastroFiHistTaxaAdmReader,
 	CadastroFiHistTaxaPerfmReader,
 	CadastroFiHistTribLprazoReader,
-	CadastroFiReader,
+)
+from filings_cvm.ingestion.fi.cad.registro import (
+	RegistroClasseReader,
+	RegistroFundoReader,
+	RegistroSubclasseReader,
+)
+from filings_cvm.ingestion.fi.doc import (
 	CdaReader,
 	InformeDiarioReader,
 	LaminaCarteiraReader,
 	LaminaReader,
-	RegistroClasseReader,
-	RegistroFundoReader,
-	RegistroSubclasseReader,
 )
 
 

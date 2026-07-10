@@ -50,7 +50,9 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		path_dest.write_bytes(payload)
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.informe_diario.download_file", _fake_download)
+	monkeypatch.setattr(
+		"filings_cvm.ingestion.fi.doc.informe_diario.download_file", _fake_download
+	)
 
 
 def test_read_returns_typed_contract_valid_dataframe(monkeypatch: pytest.MonkeyPatch) -> None:

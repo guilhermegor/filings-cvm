@@ -109,7 +109,8 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_cad_fi_hist_reader.download_file", _fake_download
+		"filings_cvm.ingestion.fi.cad.cad_fi_hist._base_cad_fi_hist_reader.download_file",
+		_fake_download,
 	)
 
 

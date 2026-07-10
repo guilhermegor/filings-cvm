@@ -1,7 +1,7 @@
 """CVM CAD/FI histórico — controlador change-log reader.
 
 The ``cad_fi_hist_controlador.csv`` member of ``cad_fi_hist.zip``: the history of each fund's
-controlador. See :mod:`filings_cvm.ingestion._base_cad_fi_hist_reader` for shared behaviour.
+controlador. See ``_base_cad_fi_hist_reader`` for shared behaviour.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from filings_cvm._internal.config.contracts import CAD_FI_HIST_CONTROLADOR, FileContract
-from filings_cvm.ingestion._base_cad_fi_hist_reader import _BaseCadFiHistReader
+from filings_cvm.ingestion.fi.cad.cad_fi_hist._base_cad_fi_hist_reader import _BaseCadFiHistReader
 
 
 class CadastroFiHistControladorReader(_BaseCadFiHistReader):

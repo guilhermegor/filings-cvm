@@ -1,7 +1,7 @@
 """CVM CAD/FI histórico — diretor responsável change-log reader.
 
 The ``cad_fi_hist_diretor_resp.csv`` member of ``cad_fi_hist.zip``: the history of each fund's
-responsible director. See :mod:`filings_cvm.ingestion._base_cad_fi_hist_reader` for shared
+responsible director. See ``_base_cad_fi_hist_reader`` for shared
 behaviour.
 """
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from filings_cvm._internal.config.contracts import CAD_FI_HIST_DIRETOR_RESP, FileContract
-from filings_cvm.ingestion._base_cad_fi_hist_reader import _BaseCadFiHistReader
+from filings_cvm.ingestion.fi.cad.cad_fi_hist._base_cad_fi_hist_reader import _BaseCadFiHistReader
 
 
 class CadastroFiHistDiretorRespReader(_BaseCadFiHistReader):
