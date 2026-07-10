@@ -67,5 +67,5 @@ not a release each.
 
 ## Open
 
-- [ ] PR opened; awaiting user review/merge, then the single `0.8.0` release.
+- [x] **PR #40** opened; awaiting user review/merge, then the single `0.8.0` release.
 - [ ] `cad_fi_hist.zip` (CAD/FI change log) remains the last unread member of the CAD directory.
