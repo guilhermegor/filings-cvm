@@ -86,7 +86,9 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		path_dest.write_bytes(payload)
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.lamina_carteira.download_file", _fake_download)
+	monkeypatch.setattr(
+		"filings_cvm.ingestion.doc.lamina.lamina_carteira.download_file", _fake_download
+	)
 
 
 def _read_default(monkeypatch: pytest.MonkeyPatch) -> pd.DataFrame:

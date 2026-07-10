@@ -138,9 +138,13 @@ writer to `__all__`, which is a feature addition, not a fix.
 
 ## Follow-up issues opened during the sweep (kanban)
 
-- [ ] **#44** nest the growing `ingestion/` folder — user chose **option A + per-dataset
-  sub-folders** (`doc/{informe_diario,cda,lamina/}`, `cad/{cadastro_fi,registro/,cad_fi_hist/}`).
-  Pure internal move (public API stays flat); run when convenient. Backlog.
+- [x] **#44 nest the `ingestion/` folder — DONE (PR pending).** Option A + per-dataset sub-folders:
+  `doc/{informe_diario,cda,lamina/{lamina,lamina_carteira}}`,
+  `cad/{cadastro_fi,registro/{fundo,classe,subclasse},cad_fi_hist/{19 + base}}`. Pure internal move
+  (28 `git mv` renames); public API stays flat via `ingestion/__init__` re-exports (sub-packages
+  aggregate). 213 tests green both pandas majors; ruff/format/typing/provenance/mypy/strict-docs
+  clean. Ledger: [`refactor-nest-ingestion_20260710_233000.md`](refactor-nest-ingestion_20260710_233000.md).
+  Follow-up: mirror the test-folder hierarchy (tests still flat, clearly named) — deferred, low value.
 - [ ] **#45** import CVM META (`meta_*.txt`) files as tracked artifacts for datalake drift-detection
   + sniffer loop. Backlog.
 - [ ] **#46** META-first contract definition (+ audit — done, no misconceptions: `cad_fi` and

@@ -72,31 +72,31 @@ already-changed source.
 Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
 
 **Fundos**
-- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
+- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
-- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
+- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
 - ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
 - ⬜ Informe Mensal FIDC — até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`) · a partir de 2019-11-01 (`PadraoXMLMensalFIDC576.asp`)
 - Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
-  snapshot `cad_fi.csv` — `ingestion/cadastro_fi.py` (`CadastroFiReader`); contract
+  snapshot `cad_fi.csv` — `ingestion/cad/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
   única** (o CNPJ se repete entre regimes) · ✅ **ingestion** `cad_fi_hist.zip` (log de alterações,
-  19 membros/atributos) — `ingestion/cad_fi_hist_*.py` (`CadastroFiHist*Reader`, base privada
+  19 membros/atributos) — `ingestion/cad/cad_fi_hist/cad_fi_hist_*.py` (`CadastroFiHist*Reader`, base privada
   `_base_cad_fi_hist_reader.py`); contracts em `_internal/config/contracts/cad_fi_hist.py`
   · ✅ **ingestion** `registro_fundo_classe.zip` (cadastro pós-RCVM 175, onde estão os fundos vivos) —
-  `ingestion/registro_fundo.py`, `registro_classe.py`, `registro_subclasse.py`
+  `ingestion/cad/registro/registro_fundo.py`, `registro_classe.py`, `registro_subclasse.py`
   (`RegistroFundoReader`, `RegistroClasseReader`, `RegistroSubclasseReader`); contracts
   `_internal/config/contracts/registro_{fundo,classe,subclasse}.py`
 
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
-  por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/lamina_carteira.py`
+  por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/doc/lamina/lamina_carteira.py`
   (`LaminaCarteiraReader`); contract `_internal/config/contracts/lamina_carteira_fif.py` ·
-  ✅ **ingestion** lâmina proper (`lamina_fi_*`, 78 colunas) — `ingestion/lamina.py`
+  ✅ **ingestion** lâmina proper (`lamina_fi_*`, 78 colunas) — `ingestion/doc/lamina/lamina.py`
   (`LaminaReader`); contract `_internal/config/contracts/lamina_fif.py` ·
   ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP) ·
   ⬜ **submission** V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
@@ -127,6 +127,10 @@ src/filings_cvm/
     __init__.py            # the public API surface (control it with __all__)
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
+                           #   nested by CVM portal path; __init__ re-exports a FLAT public API
+        doc/               #   FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira)
+        cad/               #   FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
+                           #     cad_fi_hist/ (19 change-log readers + private base)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

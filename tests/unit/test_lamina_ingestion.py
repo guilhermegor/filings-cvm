@@ -76,7 +76,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		path_dest.write_bytes(payload)
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.lamina.download_file", _fake_download)
+	monkeypatch.setattr("filings_cvm.ingestion.doc.lamina.lamina.download_file", _fake_download)
 
 
 def _read_default(monkeypatch: pytest.MonkeyPatch) -> pd.DataFrame:
@@ -198,7 +198,7 @@ def test_read_keeps_empty_id_subclasse_missing(monkeypatch: pytest.MonkeyPatch) 
 
 def test_dtype_map_covers_every_non_date_column() -> None:
 	"""The derived dtype map and the date columns together span the whole contract."""
-	from filings_cvm.ingestion.lamina import _DATE_COLS, _DTYPES
+	from filings_cvm.ingestion.doc.lamina.lamina import _DATE_COLS, _DTYPES
 
 	assert set(_DTYPES) | set(_DATE_COLS) == set(LAMINA_FIF.tuple_required)
 	assert not set(_DTYPES) & set(_DATE_COLS)

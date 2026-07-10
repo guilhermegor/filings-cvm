@@ -97,7 +97,9 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		path_dest.write_bytes(payload)
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.registro_fundo.download_file", _fake_download)
+	monkeypatch.setattr(
+		"filings_cvm.ingestion.cad.registro.registro_fundo.download_file", _fake_download
+	)
 
 
 def _read_default(monkeypatch: pytest.MonkeyPatch) -> pd.DataFrame:
@@ -228,7 +230,7 @@ def test_read_keeps_money_as_exact_source_text(monkeypatch: pytest.MonkeyPatch) 
 
 def test_dtype_map_covers_every_non_date_column() -> None:
 	"""The derived dtype map and the date columns together span the whole contract."""
-	from filings_cvm.ingestion.registro_fundo import _DATE_COLS, _DTYPES
+	from filings_cvm.ingestion.cad.registro.registro_fundo import _DATE_COLS, _DTYPES
 
 	assert set(_DTYPES) | set(_DATE_COLS) == set(REGISTRO_FUNDO.tuple_required)
 	assert not set(_DTYPES) & set(_DATE_COLS)
