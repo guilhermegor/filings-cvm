@@ -15,6 +15,7 @@ nav:
       - CDA FIF: ingestion/cda.md
       - Lâmina carteira FIF: ingestion/lamina_carteira.md
       - Lâmina FIF: ingestion/lamina.md
+      - Cadastro de Fundos (CAD/FI): ingestion/cadastro_fi.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md

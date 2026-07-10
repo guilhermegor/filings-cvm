@@ -18,6 +18,9 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   ativo** (`PR_PL_ATIVO`, percentual sinalizado do patrimônio líquido).
 - **[Lâmina FIF](lamina.md)** — `LaminaReader`: lê o membro `lamina_fi_AAAAMM` do **mesmo** dump —
   a lâmina propriamente dita, uma linha por classe de fundo com as suas 78 colunas.
+- **[Cadastro de Fundos (CAD/FI)](cadastro_fi.md)** — `CadastroFiReader`: lê `cad_fi.csv`, o
+  **retrato do estado atual** do cadastro. Sem `date_ref` e **sem chave única** — o CNPJ se repete
+  entre regimes regulatórios.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).

@@ -161,7 +161,22 @@ writer to `__all__`, which is a feature addition, not a fix.
     `lamina_fi_carteira_*` and both `rentab_*`.
   - Dtype map derived from the contract, so the 78 names exist in exactly one place.
   - 77 tests green under **both** pandas 3.0.3 and 2.3.3; verified end-to-end against the live file.
-- [ ] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · PR —
+  - **Merged** (commit `c2ccb73`); **released as `0.6.0`** to Test PyPI then PyPI, both verified by
+    installing the wheel.
+- [x] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · **PR #38** —
+  - Ledger: [`ingestion-cadastro-fi-reader_20260710_001500.md`](ingestion-cadastro-fi-reader_20260710_001500.md)
+  - **Breaks the reader pattern twice**, and both are properties of the artifact, not bugs:
+    - `cad_fi.csv` is a bare CSV at a fixed URL, **not month-partitioned** → `CadastroFiReader`
+      takes **no `date_ref`**. CVM overwrites it in place, so a persisted `path_raw` snapshot is
+      the only record of what the registry said that day.
+    - **No unique key.** `CNPJ_FUNDO` repeats on 10,947 of 46,809 rows (41,106 distinct CNPJs): a
+      fund keeps its CNPJ across regime migrations, re-registered with a new `TP_FUNDO` +
+      `CD_CVM`. No column combination is unique. The reader asserts no grain and does **not**
+      de-duplicate — picking the "current" row is a domain decision.
+  - `CPF_CNPJ_GESTOR` holds a **CPF** on 47 rows (`PF_PJ_GESTOR == "PF"`), so it is deliberately
+    *not* declared a CNPJ column — a CNPJ check would reject a valid registry.
+  - 46,569 of 46,809 rows are `SIT == "CANCELADA"`; this is mostly a historical registry.
+  - 89 tests green under both pandas majors; verified end-to-end against the live 18 MB file.
 - [ ] **#10** Registro de Intermediários Financeiros reader ·
   `feat/ingestion-registro-intermediarios-reader` · PR —
 - [ ] **#11** Perfil Mensal FI (funds) reader · `feat/ingestion-perfil-mensal-fi-reader` · PR —
@@ -203,6 +218,13 @@ Each needs its `PadraoXML*.asp` spec page fetched first; the CVM catalog page is
 
 ## Open / follow-up
 
+- [ ] `lamina_fi_rentab_ano_*` and `lamina_fi_rentab_mes_*` — the two remaining members of the
+  Lâmina ZIP, untouched by #7/#8. `zip_extractor.find_member` is ready for them.
+- [ ] `cad_fi_hist.zip` — the CAD/FI **change log** (history the snapshot does not carry).
+  Deliberately excluded from #9.
+- [ ] `registro_fundo_classe.zip` — the post-**Resolução CVM 175** fund/class/subclass registry,
+  which is where currently-active funds actually live (`cad_fi.csv` is 99.5% `CANCELADA`). Almost
+  certainly the more useful artifact for live-fund lookups; deserves its own issue.
 - [ ] `cda_fie_*.csv` — the CDA dump also ships a **FIE** member with a distinct layout
   (`ID_DOC`, inline `VL_PATRIM_LIQ`, exterior-asset columns). Deliberately excluded from #6.
   Worth its own issue + reader rather than forcing it into the FIF frame.

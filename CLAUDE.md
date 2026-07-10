@@ -65,6 +65,11 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
 - ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
 - ⬜ Informe Mensal FIDC — até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`) · a partir de 2019-11-01 (`PadraoXMLMensalFIDC576.asp`)
+- Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
+  snapshot `cad_fi.csv` — `ingestion/cadastro_fi.py` (`CadastroFiReader`); contract
+  `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
+  única** (o CNPJ se repete entre regimes) · ⬜ **ingestion** `cad_fi_hist.zip` (log de alterações)
+  · ⬜ **ingestion** `registro_fundo_classe.zip` (cadastro pós-RCVM 175)
 
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
