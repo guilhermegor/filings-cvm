@@ -24,6 +24,9 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
 - **[Registro RCVM 175](registro.md)** — `RegistroFundoReader`, `RegistroClasseReader`,
   `RegistroSubclasseReader`: lêem os três membros de `registro_fundo_classe.zip` (hierarquia
   `fundo → classe → subclasse`), o cadastro **atual** onde estão os fundos vivos.
+- **[CAD/FI histórico](cad_fi_hist.md)** — 19 readers `CadastroFiHist*Reader`: o **log de
+  alterações** de cada atributo mutável do cadastro legado (situação, denominação, taxas, gestor,
+  …), um por membro de `cad_fi_hist.zip`.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
