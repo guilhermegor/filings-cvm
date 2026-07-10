@@ -48,6 +48,7 @@ import pandas as pd
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
+from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import read_table
@@ -155,6 +156,7 @@ class LaminaCarteiraReader(IngestionReader):
 			path_zip = download_file(
 				self._str_url, path_dir / f"lamina_fi_{str_ym}.zip", int_timeout_s
 			)
+			str_content_hash = hash_artifact(path_zip)
 			list_members = extract_all(path_zip, path_dir)
 			path_csv = find_member(list_members, _MEMBER_CARTEIRA.format(ym=str_ym))
 			df_ = read_table(
@@ -172,4 +174,4 @@ class LaminaCarteiraReader(IngestionReader):
 			f"across {df_['TP_ATIVO'].nunique()} asset types",
 			"info",
 		)
-		return df_
+		return stamp_provenance(df_, self._str_url, LAMINA_CARTEIRA_FIF, str_content_hash)

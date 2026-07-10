@@ -11,7 +11,7 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
 from filings_cvm.ingestion import InformeDiarioReader
 
 
@@ -65,7 +65,7 @@ def test_read_returns_typed_contract_valid_dataframe(monkeypatch: pytest.MonkeyP
 
 	df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 
-	assert list(df_.columns) == _COLUMNS
+	assert list(df_.columns) == [*_COLUMNS, *FileContract.PROVENANCE_COLUMNS]
 	assert len(df_) == 1
 	# NR_COTST uses the nullable integer dtype so a blank count would not raise.
 	assert str(df_["NR_COTST"].dtype) == "Int64"

@@ -17,7 +17,7 @@ import pandas as pd
 import pytest
 
 from filings_cvm._internal.utils.retry import LogEmitter
-from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
 from filings_cvm.ingestion import LaminaCarteiraReader
 
 
@@ -114,6 +114,7 @@ def test_read_returns_one_row_per_fund_and_asset_type(monkeypatch: pytest.Monkey
 		"DT_COMPTC",
 		"TP_ATIVO",
 		"PR_PL_ATIVO",
+		*FileContract.PROVENANCE_COLUMNS,
 	]
 	assert sorted(df_["TP_ATIVO"]) == [
 		"Cotas de fundos 409",

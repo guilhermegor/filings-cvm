@@ -131,7 +131,7 @@ def test_read_selects_its_own_member_with_all_columns(
 	df_ = cls().read()
 
 	assert len(df_) == 1
-	assert list(df_.columns) == list(cls._CONTRACT.tuple_required)  # type: ignore[attr-defined]
+	assert list(df_.columns) == list(cls._CONTRACT.output_columns)  # type: ignore[attr-defined]
 
 
 @pytest.mark.parametrize("cls", ALL_READERS, ids=lambda c: c.__name__)

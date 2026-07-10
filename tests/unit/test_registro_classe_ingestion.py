@@ -96,7 +96,7 @@ def test_read_returns_the_class_member_with_all_columns(monkeypatch: pytest.Monk
 	df_ = _read_default(monkeypatch)
 
 	assert len(df_) == 1
-	assert list(df_.columns) == list(REGISTRO_CLASSE.tuple_required)
+	assert list(df_.columns) == list(REGISTRO_CLASSE.output_columns)
 	assert df_["ID_Registro_Fundo"].iloc[0] == "1"
 
 

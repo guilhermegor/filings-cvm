@@ -39,6 +39,25 @@ inferência do pandas. Leitores de *open-data* (CSV) declaram o seu próprio con
 **não** reaproveitam o schema Pydantic de submissão, pois consomem um artefato distinto do XML.
 Consulte o catálogo completo de padrões (implementados e pendentes) no `CLAUDE.md` do repositório.
 
+## Colunas de proveniência
+
+Todo `DataFrame` devolvido por um leitor carrega, **ao lado** das colunas de origem, seis colunas
+de **proveniência**, para que a camada *bronze* de um *datalake* seja autodescritiva e rastreável:
+
+| Coluna | Conteúdo |
+|--------|----------|
+| `url` | URL exata de onde o dado foi baixado. |
+| `updated_at` | *Timestamp* de coleta (quando esta leitura buscou o dado), **UTC, tz-aware**. |
+| `source_key` | Identificador do dataset (do contrato) — distingue leitores que compartilham a mesma `url` (ex.: os 19 membros de um mesmo ZIP). |
+| `package_version` | Versão do pacote que produziu a linha (para re-ingestão após correção de bug). |
+| `ingestion_run_id` | UUID gerado uma vez por `read()`, comum a todas as linhas daquela leitura. |
+| `content_hash` | `sha256` dos bytes do artefato baixado — detecta se a fonte mudou desde a última coleta. |
+
+Os nomes vivem em `FileContract.PROVENANCE_COLUMNS`; o seam `stamp_provenance` as acrescenta
+**depois** da validação de contrato (elas não fazem parte do artefato de origem). `updated_at`
+permanece *tz-aware* — um destino SQL que precise de *naive* normaliza no carregamento do *warehouse*,
+nunca aqui.
+
 ## Artefato bruto — `path_raw`
 
 Todo leitor aceita um `path_raw: Path | None = None` no construtor:

@@ -180,6 +180,15 @@ of your public `__all__`. The internal imports are package-qualified
   every DataFrame on load via `apply_dtypes` (`_internal.utils.dtypes`, never pandas'
   inference), route reads through `_internal.utils.tabular_reader`, and use
   `_internal.utils.br_identifiers` for CNPJ/CPF (alphanumeric-aware for the 2026 CNPJ).
+- **Every ingested DataFrame is provenance-stamped.** A reader's returned frame carries, beside
+  its source columns, the six `FileContract.PROVENANCE_COLUMNS` — `url`, `updated_at` (tz-aware
+  UTC collection time), `source_key`, `package_version`, `ingestion_run_id`, `content_hash` —
+  appended by the shared `_internal.utils.provenance.stamp_provenance` seam **after** contract
+  validation (they are not in `tuple_required`; the source lacks them). `updated_at` stays
+  tz-aware — a SQL sink that needs naive normalises at the warehouse load, never here. This is
+  enforced structurally: `bin/check_provenance.py` (pre-commit + CI) fails any `src/` module that
+  calls `read_table` without also calling `stamp_provenance`, so the contract read and the stamp
+  ship together.
 - **No `.env`** — a distributable library has no runtime env to seed (unlike the service
   tiers), so none is shipped.
 - **Logging via dependency injection** — never hard-import a logging backend in a helper;

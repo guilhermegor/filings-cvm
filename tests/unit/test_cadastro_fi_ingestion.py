@@ -104,7 +104,7 @@ def test_read_returns_every_registry_entry(monkeypatch: pytest.MonkeyPatch) -> N
 	df_ = _read_default(monkeypatch)
 
 	assert len(df_) == 3
-	assert list(df_.columns) == list(CAD_FI.tuple_required)
+	assert list(df_.columns) == list(CAD_FI.output_columns)
 
 
 def test_read_keeps_a_cnpj_that_appears_under_two_regimes(

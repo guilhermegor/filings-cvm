@@ -125,20 +125,26 @@ writer to `__all__`, which is a feature addition, not a fix.
 
 ## ⭐ NEXT UP (cross-cutting, before resuming the numbered sweep)
 
-- [ ] **Provenance columns `url` + `updated_at` on every ingested DataFrame** — issue **#42**
-  (kanban **Ready**). Standing rule from the user (2026-07-10): every DataFrame produced by
-  ingestion (file download *or* webscrape, any format) must carry two columns **beside** the
-  originals — `url` (exact source URL) and `updated_at` (UTC tz-aware collection timestamp).
-  **The columns are part of the contract:** `FileContract` declares them as **universal
-  provenance columns** (default `("url", "updated_at")`), so the contract describes the full
-  *output* frame (source-required + provenance). They are **not** added to `tuple_required` —
-  that validates the *source* artifact, which lacks them, so it would always fail. Implement as
-  a **shared seam** (all readers already know their `url`) that stamps them **after** the
-  source-column check; assert output shape = source-required + provenance. **Retrofit all
-  existing readers.** Update root `CLAUDE.md` "Standing decisions" in that same PR. Convention
-  persisted as: project memory, BlueprintX lesson (scaffold into lib-minimal for `filings-anbima`
-  / `filings-b3` / `filings-maisretorno` / …), and a dotfiles-dev `rules/python.md` rule. **This
-  is the next to-do** — addressed after the in-flight `cad_fi_hist` PR merges + releases.
+- [x] **Provenance columns on every ingested DataFrame — DONE (#42, PR pending).** Shipped **six**
+  columns (user expanded from 2): `url`, `updated_at` (tz-aware UTC), `source_key`,
+  `package_version`, `ingestion_run_id`, `content_hash`. Seam `_internal/utils/provenance.py`
+  (`stamp_provenance` pure transform + `hash_artifact`); names on `FileContract.PROVENANCE_COLUMNS`
+  / `output_columns`. `updated_at` stays tz-aware (SQL sinks normalise at the warehouse, not here).
+  **Enforced** by `bin/check_provenance.py` (pre-commit + tests.yaml, gate parity) — a `src/` module
+  calling `read_table` must also call `stamp_provenance`. All 9 readers retrofitted; 213 tests green
+  both pandas majors; live-verified. Lessons: BlueprintX seam+enforcement, dotfiles `python.md` rule.
+  Memory: [[ingestion-provenance-columns]]. Started as a 2-column rule; the user expanded it to six
+  and paired the `check_provenance` enforcement with `tabular_reader`.
+
+## Follow-up issues opened during the sweep (kanban)
+
+- [ ] **#44** nest the growing `ingestion/` folder — user chose **option A + per-dataset
+  sub-folders** (`doc/{informe_diario,cda,lamina/}`, `cad/{cadastro_fi,registro/,cad_fi_hist/}`).
+  Pure internal move (public API stays flat); run when convenient. Backlog.
+- [ ] **#45** import CVM META (`meta_*.txt`) files as tracked artifacts for datalake drift-detection
+  + sniffer loop. Backlog.
+- [ ] **#46** META-first contract definition (+ audit — done, no misconceptions: `cad_fi` and
+  `inf_diario` match their META exactly; others have no META, correctly inferred). Backlog.
 
 ## Ready — ingestion readers (#6–#14)
 

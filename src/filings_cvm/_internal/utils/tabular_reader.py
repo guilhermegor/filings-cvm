@@ -27,7 +27,7 @@ from collections.abc import Sequence
 import csv
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import pandas as pd
 
@@ -61,12 +61,43 @@ class FileContract(metaclass=TypeChecker):
 		Columns that must be present.
 	tuple_cnpj_cols : tuple of str
 		Columns that must hold at least one valid CNPJ (coercible-type check).
+
+	Attributes
+	----------
+	PROVENANCE_COLUMNS : tuple of str
+		The provenance columns every ingested DataFrame carries **beside** its source columns
+		— ``url``, ``updated_at``, ``source_key``, ``package_version``, ``ingestion_run_id``,
+		``content_hash`` (see ``utils.provenance``). Universal (a class constant, not a field),
+		so every contract owns them without restating. They are **not** part of
+		:attr:`tuple_required`: that validates the *source* artifact, which does not contain
+		them (a read would always fail). The shared ``stamp_provenance`` seam appends them
+		**after** the source-column check; :attr:`output_columns` names the full result shape.
 	"""
 
 	str_name: str
 	str_source_key: str
 	tuple_required: tuple[str, ...]
 	tuple_cnpj_cols: tuple[str, ...]
+
+	PROVENANCE_COLUMNS: ClassVar[tuple[str, ...]] = (
+		"url",
+		"updated_at",
+		"source_key",
+		"package_version",
+		"ingestion_run_id",
+		"content_hash",
+	)
+
+	@property
+	def output_columns(self) -> tuple[str, ...]:
+		"""Source-required columns plus the provenance columns — the full output shape.
+
+		Returns
+		-------
+		tuple of str
+			:attr:`tuple_required` followed by :attr:`PROVENANCE_COLUMNS`.
+		"""
+		return (*self.tuple_required, *self.PROVENANCE_COLUMNS)
 
 
 class ContractError(Exception, metaclass=TypeChecker):

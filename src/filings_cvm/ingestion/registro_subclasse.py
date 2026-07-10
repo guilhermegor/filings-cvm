@@ -40,6 +40,7 @@ import pandas as pd
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
+from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import read_table
@@ -135,6 +136,7 @@ class RegistroSubclasseReader(IngestionReader):
 		)
 		with raw_workspace(self._path_raw) as path_dir:
 			path_zip = download_file(self._str_url, path_dir / _ZIP_FILENAME, int_timeout_s)
+			str_content_hash = hash_artifact(path_zip)
 			path_csv = find_member(extract_all(path_zip, path_dir), _MEMBER)
 			df_ = read_table(
 				path_csv,
@@ -149,4 +151,4 @@ class RegistroSubclasseReader(IngestionReader):
 		self._cls_logger.log_message(
 			f"Loaded {len(df_)} subclass registrations from Registro Subclasse", "info"
 		)
-		return df_
+		return stamp_provenance(df_, self._str_url, REGISTRO_SUBCLASSE, str_content_hash)
