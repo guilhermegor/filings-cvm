@@ -163,7 +163,7 @@ writer to `__all__`, which is a feature addition, not a fix.
   - 77 tests green under **both** pandas 3.0.3 and 2.3.3; verified end-to-end against the live file.
   - **Merged** (commit `c2ccb73`); **released as `0.6.0`** to Test PyPI then PyPI, both verified by
     installing the wheel.
-- [x] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · PR _pending_ —
+- [x] **#9** Cadastro de Fundos (CAD/FI) reader · `feat/ingestion-cadastro-fi-reader` · **PR #38** —
   - Ledger: [`ingestion-cadastro-fi-reader_20260710_001500.md`](ingestion-cadastro-fi-reader_20260710_001500.md)
   - **Breaks the reader pattern twice**, and both are properties of the artifact, not bugs:
     - `cad_fi.csv` is a bare CSV at a fixed URL, **not month-partitioned** → `CadastroFiReader`
