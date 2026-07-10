@@ -323,7 +323,7 @@ tem até 4 casas.
 Novos padrões da CVM entram como novos módulos:
 
 - O schema compartilhado (neutro em relação à direção) vai em
-  `src/filings_cvm/_internal/schemas/<padrao>.py`.
+  `src/filings_cvm/_internal/config/schemas/<padrao>.py`.
 - O escritor de envio vai em `src/filings_cvm/submission/<padrao>.py` (uma classe pública por
   arquivo, nomeada como o arquivo).
 - Reexporte os símbolos públicos em `filings_cvm/submission/__init__.py` e, quando fizer sentido,

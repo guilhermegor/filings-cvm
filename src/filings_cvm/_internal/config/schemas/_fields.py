@@ -1,6 +1,6 @@
 """Shared field helpers for CVM XML-standard schemas.
 
-Direction-neutral building blocks reused by every ``_internal/schemas/<standard>.py``
+Direction-neutral building blocks reused by every ``_internal/config/schemas/<standard>.py``
 model: a decimal-scale truncation factory (ROUND_DOWN, never inflating a value past
 the scale a standard permits) and the Brazilian CPF/CNPJ check-digit validators.
 

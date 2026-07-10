@@ -46,7 +46,7 @@ from pathlib import Path
 import pandas as pd
 
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
-from filings_cvm._internal.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter

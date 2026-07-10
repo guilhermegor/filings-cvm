@@ -28,7 +28,7 @@ formato das páginas de [Envio](../submission/informe_diario.md).
 ## Forma de um leitor
 
 Todo leitor implementa o **port** `read() -> pd.DataFrame` (o contrato compartilhado, privado, em
-`_internal/ports`) e devolve um `DataFrame` cujas colunas são tipadas explicitamente — nunca pela
+`_internal/config/ports`) e devolve um `DataFrame` cujas colunas são tipadas explicitamente — nunca pela
 inferência do pandas. Leitores de *open-data* (CSV) declaram o seu próprio contrato de colunas e
 **não** reaproveitam o schema Pydantic de submissão, pois consomem um artefato distinto do XML.
 Consulte o catálogo completo de padrões (implementados e pendentes) no `CLAUDE.md` do repositório.
