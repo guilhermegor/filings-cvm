@@ -123,6 +123,23 @@ writer to `__all__`, which is a feature addition, not a fix.
 - One PR per issue, branched from an up-to-date `main`; PR body closes the issue.
 - Each issue gets its own per-branch ledger under `docs/backlog/` too; this file is the index.
 
+## ⭐ NEXT UP (cross-cutting, before resuming the numbered sweep)
+
+- [ ] **Provenance columns `url` + `updated_at` on every ingested DataFrame** — issue **#42**
+  (kanban **Ready**). Standing rule from the user (2026-07-10): every DataFrame produced by
+  ingestion (file download *or* webscrape, any format) must carry two columns **beside** the
+  originals — `url` (exact source URL) and `updated_at` (UTC tz-aware collection timestamp).
+  **The columns are part of the contract:** `FileContract` declares them as **universal
+  provenance columns** (default `("url", "updated_at")`), so the contract describes the full
+  *output* frame (source-required + provenance). They are **not** added to `tuple_required` —
+  that validates the *source* artifact, which lacks them, so it would always fail. Implement as
+  a **shared seam** (all readers already know their `url`) that stamps them **after** the
+  source-column check; assert output shape = source-required + provenance. **Retrofit all
+  existing readers.** Update root `CLAUDE.md` "Standing decisions" in that same PR. Convention
+  persisted as: project memory, BlueprintX lesson (scaffold into lib-minimal for `filings-anbima`
+  / `filings-b3` / `filings-maisretorno` / …), and a dotfiles-dev `rules/python.md` rule. **This
+  is the next to-do** — addressed after the in-flight `cad_fi_hist` PR merges + releases.
+
 ## Ready — ingestion readers (#6–#14)
 
 - [x] **#6** CDA — Composição e Diversificação das Aplicações reader ·
@@ -220,13 +237,22 @@ Each needs its `PadraoXML*.asp` spec page fetched first; the CVM catalog page is
 
 - [ ] `lamina_fi_rentab_ano_*` and `lamina_fi_rentab_mes_*` — the two remaining members of the
   Lâmina ZIP, untouched by #7/#8. `zip_extractor.find_member` is ready for them.
-- [ ] `cad_fi_hist.zip` — the CAD/FI **change log** (history the snapshot does not carry).
-  Deliberately excluded from #9.
+- [x] `cad_fi_hist.zip` — **DONE** (user-prioritised). The CAD/FI **change log**: 19 per-attribute
+  members → 19 `CadastroFiHist*Reader` (user chose "19 separate readers") over a private base
+  `_base_cad_fi_hist_reader.py`; contracts consolidated in one `cad_fi_hist.py` module (deviation
+  from one-per-file, noted — 19 members of one archive). Ledger:
+  [`ingestion-cad-fi-hist_20260710_030000.md`](ingestion-cad-fi-hist_20260710_030000.md).
 - [x] `registro_fundo_classe.zip` — **DONE** (user-prioritised over the numbered backlog). Three
   readers `RegistroFundoReader` / `RegistroClasseReader` / `RegistroSubclasseReader` for the post-
   RCVM 175 fund→class→subclass hierarchy — where the **live** funds are (34,176 active vs 22 in
   `cad_fi.csv`). Ledger: [`ingestion-registro-fundo-classe_20260710_020000.md`](ingestion-registro-fundo-classe_20260710_020000.md).
   Landed on the reorg PR's release (single `0.8.0`), per user.
+- [ ] **Survey the CVM open-data portal** — <https://dados.cvm.gov.br/dados/> — **once every other
+  ingestion to-do is done** (issue **#41**, on the kanban). Nearly all ingestion data comes from
+  this portal; it holds far more than is implemented. Enumerate the datasets, cross-check against
+  the `CLAUDE.md` catalog, list what is uncollected, and decide whether to scrape all of the
+  remainder or only a high-value subset (opening a per-dataset issue for each chosen one). **Gated:
+  do not start until the readers backlog + `cad_fi_hist` are delivered.**
 - [ ] `cda_fie_*.csv` — the CDA dump also ships a **FIE** member with a distinct layout
   (`ID_DOC`, inline `VL_PATRIM_LIQ`, exterior-asset columns). Deliberately excluded from #6.
   Worth its own issue + reader rather than forcing it into the FIF frame.

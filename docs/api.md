@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md)
 
 ---
 
@@ -291,6 +291,36 @@ from filings_cvm.ingestion import RegistroFundoReader, RegistroClasseReader
 fundos = RegistroFundoReader().read()
 classes = RegistroClasseReader().read()
 fc = classes.merge(fundos, on="ID_Registro_Fundo", suffixes=("_classe", "_fundo"))
+```
+
+### `CadastroFiHist*Reader` (19 readers)
+
+`filings_cvm.ingestion.CadastroFiHist{Admin,Auditor,Classe,Condom,Controlador,Custodiante,DenomComerc,DenomSocial,DiretorResp,Exclusivo,ExercSocial,Fic,Gestor,PublicoAlvo,Rentab,Sit,TaxaAdm,TaxaPerfm,TribLprazo}Reader`
+
+Os 19 membros de `cad_fi_hist.zip` — o **log de alterações** de cada atributo mutável do cadastro
+CAD/FI legado (situação, denominação, taxas, gestor, …), um reader por membro. Página completa:
+[CAD/FI histórico](ingestion/cad_fi_hist.md).
+
+Todos têm a mesma assinatura, sem `date_ref` (retrato do estado atual), e baixam o **mesmo** ZIP:
+
+#### `CadastroFiHistSitReader(path_raw=None, cls_logger=None)` (idem para os outros 18)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 19 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve o log daquele atributo — muitas linhas por fundo (uma por período de vigência), **sem grão
+único**. As colunas `DT_*` viram `datetime.date`; as demais são texto exato. Levanta `OSError`,
+`ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm.ingestion import CadastroFiHistSitReader
+
+sit = CadastroFiHistSitReader().read()
+janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]   # DT_INI_SIT / DT_FIM_SIT
 ```
 
 ---

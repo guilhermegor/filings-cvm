@@ -9,17 +9,33 @@ tests, docs, and PyPI + Test-PyPI release workflows ready to go. It is scaffolde
 BlueprintX into a new project directory; the scaffold replaces the `<project_name>` package
 directory and the `pyproject.toml` placeholders via `envsubst`.
 
-## CVM XML Standards — Source of Truth
+## CVM Sources of Truth — one per direction
 
-The library implements the CVM regulatory file standards. **The single source of truth for
-every standard, version, and its official spec is the CVM catalog page:**
+The library implements the CVM regulatory file standards in two directions, and **each
+direction has its own authoritative CVM source.** Do not cross them.
+
+**Submission (`submission/`, envio → CVM) — the XML-standards catalog page:**
 
 > https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp
 
-Each entry below links to a `PadraoXML*.asp` page (relative to that base URL) describing one
-XML standard. When implementing or updating a standard, treat the linked CVM page as
-authoritative — field names, decimal scales, and cardinalities come from there, not from
-this file.
+Each catalog entry below links to a `PadraoXML*.asp` page (relative to that base URL) describing
+one XML standard. When implementing or updating a **writer**, treat the linked CVM page as
+authoritative — field names, decimal scales, and cardinalities come from there, not from this
+file.
+
+**Ingestion (`ingestion/`, leitura ← CVM) — the open-data portal:**
+
+> https://dados.cvm.gov.br/dados/
+
+The **readers** consume the flat open-data dumps published under this portal, **not** the
+submission XML specs. Nearly every ingestion artifact comes from here, each with its own dataset
+page — e.g. Perfil Mensal ingestion is <https://dados.cvm.gov.br/dataset/fi-doc-perfil_mensal>,
+and the implemented readers pull from `FI/DOC/INF_DIARIO`, `FI/DOC/CDA`, `FI/DOC/LAMINA`,
+`FI/CAD`, … When implementing or updating a **reader**, ground its `FileContract` in the real
+downloaded artifact from the relevant dataset page (per "Standing decisions" in the sweep ledger).
+
+The portal holds far more than is implemented; a standing task (issue **#41**) is to survey it
+once the current ingestion backlog is cleared and decide what else is worth scraping.
 
 ### Two macro-sections — every solution lives in one of them
 
@@ -68,7 +84,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
   snapshot `cad_fi.csv` — `ingestion/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
-  única** (o CNPJ se repete entre regimes) · ⬜ **ingestion** `cad_fi_hist.zip` (log de alterações)
+  única** (o CNPJ se repete entre regimes) · ✅ **ingestion** `cad_fi_hist.zip` (log de alterações,
+  19 membros/atributos) — `ingestion/cad_fi_hist_*.py` (`CadastroFiHist*Reader`, base privada
+  `_base_cad_fi_hist_reader.py`); contracts em `_internal/config/contracts/cad_fi_hist.py`
   · ✅ **ingestion** `registro_fundo_classe.zip` (cadastro pós-RCVM 175, onde estão os fundos vivos) —
   `ingestion/registro_fundo.py`, `registro_classe.py`, `registro_subclasse.py`
   (`RegistroFundoReader`, `RegistroClasseReader`, `RegistroSubclasseReader`); contracts

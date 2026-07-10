@@ -17,6 +17,7 @@ nav:
       - Lâmina FIF: ingestion/lamina.md
       - Cadastro de Fundos (CAD/FI): ingestion/cadastro_fi.md
       - Registro RCVM 175: ingestion/registro.md
+      - CAD/FI histórico: ingestion/cad_fi_hist.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md
