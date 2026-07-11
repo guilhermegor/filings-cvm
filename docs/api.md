@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
 
@@ -506,6 +506,41 @@ from filings_cvm import InfAnualFiiProcessoReader
 
 df_ = InfAnualFiiProcessoReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 # uma linha por processo: Juizo, Instancia, Data_Instauracao, Valor_Causa, Chance_Perda…
+```
+
+### `InfTrimestralFipReader` · `InfQuadrimestralFipReader` (2 readers)
+
+`filings_cvm.ingestion.InfTrimestralFipReader` · `filings_cvm.ingestion.InfQuadrimestralFipReader`
+
+Os dois informes periódicos dos **FIP** (`inf_trimestral_fip_AAAA.csv`, `inf_quadrimestral_fip_AAAA.csv`),
+que **inauguram o portal root `fip/`**. O trimestral é o regime **pré-RCVM 175** (2010–2023); o
+quadrimestral o substituiu no **pós-175** (a partir de 2024). Conteúdo quase idêntico — a única
+diferença estrutural é o identificador do fundo (`CNPJ_FUNDO` vs `TP_FUNDO_CLASSE` +
+`CNPJ_FUNDO_CLASSE`). Página completa: [Informes periódicos FIP](ingestion/inf_fip.md).
+
+CSVs soltos (não ZIP), particionados por **ano** — o `date_ref` seleciona o ano. Apenas `DT_COMPTC`
+vira `date`; dinheiro e cota ficam texto exato.
+
+#### `InfTrimestralFipReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para o quadrimestral)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o CSV bruto (camada *bronze*). |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve uma linha por fundo (ou fundo/classe) por período de competência. **Sem chave única.**
+Levanta `OSError` ou `ContractError`.
+
+```python
+from datetime import date
+from filings_cvm import InfQuadrimestralFipReader
+
+df_ = InfQuadrimestralFipReader(date_ref=date(2024, 8, 15)).read()   # o ANO de 2024
+# df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "VL_PATRIM_LIQ", "VL_CAP_INTEGR"]]
 ```
 
 ---

@@ -94,6 +94,10 @@ from filings_cvm.ingestion.fii import (
 	InfTrimestralFiiResultadoContabilFinanceiroReader,
 	InfTrimestralFiiTerrenoReader,
 )
+from filings_cvm.ingestion.fip import (
+	InfQuadrimestralFipReader,
+	InfTrimestralFipReader,
+)
 
 
 __all__ = [
@@ -151,6 +155,7 @@ __all__ = [
 	"InfMensalFiiAtivoPassivoReader",
 	"InfMensalFiiComplementoReader",
 	"InfMensalFiiGeralReader",
+	"InfQuadrimestralFipReader",
 	"InfTrimestralFiiAlienacaoImovelReader",
 	"InfTrimestralFiiAlienacaoTerrenoReader",
 	"InfTrimestralFiiAquisicaoImovelReader",
@@ -167,6 +172,7 @@ __all__ = [
 	"InfTrimestralFiiRentabilidadeEfetivaReader",
 	"InfTrimestralFiiResultadoContabilFinanceiroReader",
 	"InfTrimestralFiiTerrenoReader",
+	"InfTrimestralFipReader",
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",

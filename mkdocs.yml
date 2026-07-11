@@ -23,6 +23,7 @@ nav:
       - DFIN FII: ingestion/dfin_fii.md
       - Informe Trimestral FII: ingestion/inf_trimestral_fii.md
       - Informe Anual FII: ingestion/inf_anual_fii.md
+      - Informes periódicos FIP: ingestion/inf_fip.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md
