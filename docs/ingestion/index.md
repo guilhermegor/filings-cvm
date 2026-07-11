@@ -42,6 +42,10 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   tabelas do informe trimestral dos FII (`inf_trimestral_fii_AAAA.zip`) — cadastro, ativos,
   imóveis/terrenos e suas transações, rentabilidade e resultado contábil/financeiro. ⚠️
   Particionado por **ano** (o `date_ref` seleciona o ano, não o trimestre).
+- **[Informe Anual FII](inf_anual_fii.md)** — 12 readers `InfAnualFii*Reader`: as tabelas do informe
+  anual dos FII (`inf_anual_fii_AAAA.zip`) — cadastro, ativos, distribuição de cotistas, diretor e
+  prestadores, processos, representante. ⚠️ Contém **CPF** (dado pessoal, texto exato) e um
+  `Link_Download_Anexo` **não seguido**. Com ele o portal root `fii/` fica **completo (4/4)**.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
