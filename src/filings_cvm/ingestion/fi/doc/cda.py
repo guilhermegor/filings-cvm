@@ -48,6 +48,7 @@ from collections.abc import Sequence
 import csv
 from datetime import date
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 
@@ -94,6 +95,16 @@ _COL_BLOCK = "BLOCO"
 _MAX_UNMATCHED_SAMPLE = 5
 
 
+# Reader-owned default retry/backoff (CVM's open-data portal throttles under load): 5 attempts on
+# a capped exponential schedule (~2, 4, 8, 10 s). Per-reader tunable via ``_RETRY_POLICY``; a
+# per-instance ``retry_policy=`` still overrides.
+_DEFAULT_RETRY_POLICY: RetryPolicy = RetryPolicy(
+	int_max_attempts=5,
+	float_base_wait_s=2.0,
+	float_max_wait_s=10.0,
+)
+
+
 class CdaReader(IngestionReader):
 	"""Read the CVM CDA FIF open-data dump into one typed, single-grain DataFrame.
 
@@ -106,6 +117,8 @@ class CdaReader(IngestionReader):
 	read(int_timeout_s)
 		Download, unzip, and parse the reference month into a validated DataFrame.
 	"""
+
+	_RETRY_POLICY: ClassVar[RetryPolicy | None] = _DEFAULT_RETRY_POLICY
 
 	def __init__(
 		self,
@@ -128,16 +141,17 @@ class CdaReader(IngestionReader):
 			absent. When ``None`` (the default) the artifact is fetched into a temporary
 			directory and discarded, so the read leaves nothing on disk.
 		retry_policy : RetryPolicy, optional
-			Forwarded to the download seam as its retry/backoff schedule; by
-			default the seam's throttle-tolerant policy. Pass a
-			:class:`RetryPolicy` for a source needing more (or less) patience.
+			Retry/backoff schedule forwarded to the download seam. When ``None``
+			(the default) this reader's own :attr:`_RETRY_POLICY` class attribute
+			is used. Pass a :class:`RetryPolicy` to override it for this one
+			instance.
 		cls_logger : LogEmitter, optional
 			Injected log sink (``log_message(message, level)``). Defaults to a stdlib
 			-backed :class:`LogEmitter`, so no logging import is forced on consumers.
 		"""
 		self._date_ref = date_ref or date.today()
 		self._path_raw = path_raw
-		self._retry_policy = retry_policy
+		self._retry_policy = retry_policy if retry_policy is not None else self._RETRY_POLICY
 		self._cls_logger = cls_logger if cls_logger is not None else LogEmitter()
 		self._str_url = _BASE_URL.format(ym=self._date_ref.strftime("%Y%m"))
 

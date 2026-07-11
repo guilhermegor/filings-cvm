@@ -62,6 +62,39 @@ Os nomes vivem em `FileContract.PROVENANCE_COLUMNS`; o seam `stamp_provenance` a
 permanece *tz-aware* — um destino SQL que precise de *naive* normaliza no carregamento do *warehouse*,
 nunca aqui.
 
+## Política de retry — `retry_policy` e `_RETRY_POLICY`
+
+Todo leitor aceita um `retry_policy: RetryPolicy | None = None` no construtor, repassado ao *seam*
+de download como a sua agenda de novas tentativas / *backoff*. **Cada leitor declara a sua própria
+paciência** por meio do atributo de classe `_RETRY_POLICY`, então a política fica **junto do
+dataset** e é ajustável **por leitor** — sem tocar nos demais.
+
+A resolução é em duas camadas:
+
+1. **Argumento `retry_policy` no construtor** — se informado, vence para *aquela instância*.
+2. **Atributo de classe `_RETRY_POLICY` do próprio leitor** — o padrão quando nada é passado. O
+   padrão de fábrica é paciente (o portal da CVM aplica *throttle* sob carga): **5 tentativas**,
+   *backoff* exponencial limitado (~2, 4, 8, 10 s).
+
+```python
+from filings_cvm import CdaReader, RetryPolicy
+
+# 1. Padrão — o leitor usa a política do seu próprio módulo. Nada a passar:
+df_ = CdaReader().read()
+
+# 2. Sobrescrever numa chamada — o argumento vence o padrão do módulo:
+cls_retry_policy = RetryPolicy(int_max_attempts=10, float_max_wait_s=30.0)
+df_ = CdaReader(retry_policy=cls_retry_policy).read()
+
+# 3. Inspecionar o padrão de um leitor sem construir:
+CdaReader._RETRY_POLICY   # → RetryPolicy(int_max_attempts=5, …)
+```
+
+Para tornar a diferença **permanente** para um dataset, ajuste o `_RETRY_POLICY` na classe daquele
+leitor — o `RetryPolicy` é um *value object* imutável, então declarar um por leitor é seguro. O
+padrão é **estrutural**: um teste percorre toda a API pública e falha se um leitor novo não
+declarar o seu `_RETRY_POLICY`.
+
 ## Artefato bruto — `path_raw`
 
 Todo leitor aceita um `path_raw: Path | None = None` no construtor:

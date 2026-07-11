@@ -67,12 +67,13 @@ O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `Perf
 Lê o dump mensal de *open-data* do Informe Diário de fundos (`inf_diario_fi_AAAAMM`) e o devolve
 como um `DataFrame` tipado e validado por contrato.
 
-#### `InformeDiarioReader(date_ref=None, path_raw=None, cls_logger=None)`
+#### `InformeDiarioReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência (só ano/mês selecionam o dump). Padrão: hoje. O mês corrente pode ainda não estar publicado — use um mês passado para dados completos. |
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` baixado e o CSV extraído), para a camada *bronze* de um *datalake*. Criado junto com os pais. Padrão `None`: usa um diretório temporário e descarta tudo. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável (`log_message(msg, level)`). Padrão: um `LogEmitter` sobre a stdlib. |
 
 #### `read(int_timeout_s=30) -> pd.DataFrame`
@@ -104,12 +105,13 @@ Lê o dump mensal de *open-data* do CDA (`cda_fi_AAAAMM`), consolida os blocos d
 `BLC_1`…`BLC_8` numa única granularidade (fundo × data × ativo) e traz o `VL_PATRIM_LIQ` do fundo
 junto de cada posição, via *left join* do membro `PL`.
 
-#### `CdaReader(date_ref=None, path_raw=None, cls_logger=None)`
+#### `CdaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência. Padrão: hoje. |
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` e todos os CSVs extraídos). Padrão `None`: diretório temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. Recebe o `warning` de cobertura do `PL`. |
 
 #### `read(int_timeout_s=30) -> pd.DataFrame`
@@ -147,12 +149,13 @@ Lê o membro `lamina_fi_carteira_AAAAMM` do dump mensal da Lâmina (`lamina_fi_A
 a alocação de cada fundo **por tipo de ativo**. Complementa o `CdaReader`: este traz o percentual
 por classe de ativo, aquele a posição título a título.
 
-#### `LaminaCarteiraReader(date_ref=None, path_raw=None, cls_logger=None)`
+#### `LaminaCarteiraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência. Padrão: hoje. |
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` e todos os CSVs extraídos, não só o membro lido). Padrão `None`: diretório temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 
 #### `read(int_timeout_s=30) -> pd.DataFrame`
@@ -187,12 +190,13 @@ Lê o membro `lamina_fi_AAAAMM` do dump mensal da Lâmina (`lamina_fi_AAAAMM.zip
 propriamente dita — e devolve uma linha por classe de fundo, com as suas **78 colunas**. Lê um
 membro **diferente** do mesmo ZIP que o `LaminaCarteiraReader`.
 
-#### `LaminaReader(date_ref=None, path_raw=None, cls_logger=None)`
+#### `LaminaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência. Padrão: hoje. |
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (o `.zip` e todos os CSVs extraídos). Padrão `None`: diretório temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 
 #### `read(int_timeout_s=30) -> pd.DataFrame`
@@ -224,11 +228,12 @@ print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 Lê `cad_fi.csv`, o **retrato do estado atual** do cadastro de fundos. É o único leitor **sem
 `date_ref`**: o artefato não é particionado por mês.
 
-#### `CadastroFiReader(path_raw=None, cls_logger=None)`
+#### `CadastroFiReader(path_raw=None, retry_policy=None, cls_logger=None)`
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o retrato. A CVM sobrescreve o arquivo no lugar, então o que não for gravado **não pode ser recuperado**. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 
 #### `read(int_timeout_s=60) -> pd.DataFrame`
@@ -261,7 +266,7 @@ hierarquia `fundo → classe → subclasse`. É onde estão os fundos **vivos** 
 ~34 mil `Em Funcionamento Normal`, contra 22 no `cad_fi.csv`). Página completa:
 [Registro RCVM 175](ingestion/registro.md).
 
-#### `RegistroFundoReader(path_raw=None, cls_logger=None)` (idem para Classe e Subclasse)
+#### `RegistroFundoReader(path_raw=None, retry_policy=None, cls_logger=None)` (idem para Classe e Subclasse)
 
 Como o `CadastroFiReader`, **sem `date_ref`** (retrato do estado atual). Os três baixam o **mesmo**
 ZIP, então um `path_raw` gravado por qualquer um serve aos outros.
@@ -269,6 +274,7 @@ ZIP, então um `path_raw` gravado por qualquer um serve aos outros.
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os três CSVs. A CVM sobrescreve o arquivo no lugar. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 
 #### `read(int_timeout_s=60) -> pd.DataFrame`
@@ -303,11 +309,12 @@ CAD/FI legado (situação, denominação, taxas, gestor, …), um reader por mem
 
 Todos têm a mesma assinatura, sem `date_ref` (retrato do estado atual), e baixam o **mesmo** ZIP:
 
-#### `CadastroFiHistSitReader(path_raw=None, cls_logger=None)` (idem para os outros 18)
+#### `CadastroFiHistSitReader(path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 18)
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 19 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 
 #### `read(int_timeout_s=60) -> pd.DataFrame`

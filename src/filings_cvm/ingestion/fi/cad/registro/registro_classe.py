@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 
@@ -69,6 +70,16 @@ _DTYPES: dict[str, str] = {
 }
 
 
+# Reader-owned default retry/backoff (CVM's open-data portal throttles under load): 5 attempts on
+# a capped exponential schedule (~2, 4, 8, 10 s). Per-reader tunable via ``_RETRY_POLICY``; a
+# per-instance ``retry_policy=`` still overrides. Shared by all three registro readers.
+_DEFAULT_RETRY_POLICY: RetryPolicy = RetryPolicy(
+	int_max_attempts=5,
+	float_base_wait_s=2.0,
+	float_max_wait_s=10.0,
+)
+
+
 class RegistroClasseReader(IngestionReader):
 	"""Read the CVM Registro de Classe (RCVM 175) open-data snapshot into a typed DataFrame.
 
@@ -81,6 +92,8 @@ class RegistroClasseReader(IngestionReader):
 	read(int_timeout_s)
 		Download, unzip, and parse the class registry into a validated DataFrame.
 	"""
+
+	_RETRY_POLICY: ClassVar[RetryPolicy | None] = _DEFAULT_RETRY_POLICY
 
 	def __init__(
 		self,
@@ -99,15 +112,16 @@ class RegistroClasseReader(IngestionReader):
 			discarded. CVM overwrites the file in place, so a persisted snapshot is the only
 			record of what the registry said that day.
 		retry_policy : RetryPolicy, optional
-			Forwarded to the download seam as its retry/backoff schedule; by
-			default the seam's throttle-tolerant policy. Pass a
-			:class:`RetryPolicy` for a source needing more (or less) patience.
+			Retry/backoff schedule forwarded to the download seam. When ``None``
+			(the default) this reader's own :attr:`_RETRY_POLICY` class attribute
+			is used. Pass a :class:`RetryPolicy` to override it for this one
+			instance.
 		cls_logger : LogEmitter, optional
 			Injected log sink (``log_message(message, level)``). Defaults to a stdlib-backed
 			:class:`LogEmitter`, so no logging import is forced on consumers.
 		"""
 		self._path_raw = path_raw
-		self._retry_policy = retry_policy
+		self._retry_policy = retry_policy if retry_policy is not None else self._RETRY_POLICY
 		self._cls_logger = cls_logger if cls_logger is not None else LogEmitter()
 		self._str_url = _URL
 
