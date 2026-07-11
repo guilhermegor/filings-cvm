@@ -74,3 +74,5 @@ exclude_docs: |
   blueprintx-lessons.md
   # git-ignored dotfiles-dev toolchain backport queue, never published
   dotfiles-dev-lessons.md
+  # git-ignored bedrock-fm architecture record, never published
+  bedrock-fm-lessons.md
