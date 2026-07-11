@@ -51,7 +51,9 @@ class _FlakyOpener:
 @pytest.fixture(autouse=True)
 def _no_real_sleep(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""Neutralise the backoff wait so retry tests run instantly."""
-	monkeypatch.setattr("filings_cvm._internal.utils.retry.time.sleep", lambda _float_s: None)
+	monkeypatch.setattr(
+		"filings_cvm._internal.utils.retry.backoff.time.sleep", lambda _float_s: None
+	)
 
 
 def test_download_file_retries_transient_failure(
@@ -80,7 +82,7 @@ def test_download_file_gives_up_after_max_attempts(
 
 	with pytest.raises(OSError, match="transient"):
 		http_downloader.download_file("https://example.com/out.zip", tmp_path / "out.zip")
-	assert cls_opener.int_calls == http_downloader._DOWNLOAD_MAX_ATTEMPTS
+	assert cls_opener.int_calls == http_downloader._DEFAULT_DOWNLOAD_RETRY.int_max_attempts
 
 
 def test_download_file_does_not_retry_bad_url(

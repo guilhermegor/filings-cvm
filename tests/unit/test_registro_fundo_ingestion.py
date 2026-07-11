@@ -92,7 +92,9 @@ def _zip_bytes(dict_members: dict[str, str]) -> bytes:
 def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 	"""Patch the reader's download_file boundary to drop ``payload`` at the destination."""
 
-	def _fake_download(str_url: str, path_dest: Path, int_timeout_s: int = 60) -> Path:
+	def _fake_download(
+		str_url: str, path_dest: Path, int_timeout_s: int = 60, retry_policy: object = None
+	) -> Path:
 		path_dest.parent.mkdir(parents=True, exist_ok=True)
 		path_dest.write_bytes(payload)
 		return path_dest
