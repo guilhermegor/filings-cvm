@@ -10,6 +10,7 @@ See the CVM XML Standards catalog in ``CLAUDE.md`` for the full source of truth.
 
 from importlib.metadata import PackageNotFoundError, version
 
+from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm.ingestion import (
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
@@ -85,5 +86,6 @@ __all__ = [
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",
+	"RetryPolicy",
 	"__version__",
 ]
