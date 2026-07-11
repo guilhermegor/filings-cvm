@@ -103,7 +103,10 @@ de envio para estes informes). O portal tem 4 datasets sob `FII/DOC/`:
   privada `_base_inf_mensal_fii_reader.py`); contracts `_internal/config/contracts/inf_mensal_fii.py`.
   Inaugura o portal root `fii/`. ⚠️ **Particionado por ANO** (`_AAAA`), apesar de mensal — o
   `date_ref` seleciona o ano
-- ⬜ **ingestion** DFIN (`dfin_fii_AAAA.csv`, índice das demonstrações financeiras) — issue #57
+- DFIN — ✅ **ingestion** `dfin_fii_AAAA.csv` (índice das demonstrações financeiras; CSV solto,
+  particionado por ano) — `ingestion/fii/doc/dfin.py` (`DfinFiiReader`); contract
+  `_internal/config/contracts/dfin_fii.py`. Uma linha por documento entregue; `Link_Download`
+  devolvido como texto, **não seguido**
 - ⬜ **ingestion** Informe Trimestral (`inf_trimestral_fii_AAAA.zip`, 16 membros) — issue #58
 - ⬜ **ingestion** Informe Anual (`inf_anual_fii_AAAA.zip`, 12 membros) — issue #59
 
@@ -148,7 +151,7 @@ src/filings_cvm/
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
-        fii/               #   FII/ — inf_mensal/ (3 readers + private base); DFIN/trimestral/anual pending
+        fii/               #   FII/ — inf_mensal/ (3 readers + base), dfin (1); trimestral/anual pending
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

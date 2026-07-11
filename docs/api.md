@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md)
 
 ---
 
@@ -399,6 +399,41 @@ from filings_cvm import InfMensalFiiComplementoReader
 
 df_ = InfMensalFiiComplementoReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 junho = df_[df_["Data_Referencia"] == date(2025, 6, 1)]
+```
+
+### `DfinFiiReader`
+
+`filings_cvm.ingestion.DfinFiiReader`
+
+O **índice** das demonstrações financeiras dos FII (`dfin_fii_AAAA.csv`) — uma linha por documento
+entregue. Página completa: [DFIN FII](ingestion/dfin_fii.md).
+
+⚠️ **É um índice, não uma demonstração.** A coluna `Link_Download` aponta para o documento no fnet
+da B3; o reader a **devolve como texto e não a segue**. É um **CSV solto** (não ZIP), particionado
+por **ano** (`date_ref` seleciona o ano).
+
+#### `DfinFiiReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o `.csv` baixado. Padrão `None`: diretório temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve uma linha por documento entregue no ano. `Data_Referencia` e `Data_Entrega` viram
+`datetime.date`; as demais colunas — incluindo `Link_Download` e `Versao` — são texto exato.
+**Sem chave única:** um fundo entrega muitos documentos, e um reenvio repete com `Versao` maior.
+Levanta `OSError` ou `ContractError`.
+
+```python
+from datetime import date
+from filings_cvm import DfinFiiReader
+
+df_ = DfinFiiReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
+# df_[["CNPJ_Fundo_Classe", "Data_Referencia", "Versao", "Link_Download"]]
 ```
 
 ---

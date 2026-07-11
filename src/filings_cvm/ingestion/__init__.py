@@ -61,6 +61,7 @@ from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabXReader,
 )
 from filings_cvm.ingestion.fii import (
+	DfinFiiReader,
 	InfMensalFiiAtivoPassivoReader,
 	InfMensalFiiComplementoReader,
 	InfMensalFiiGeralReader,
@@ -89,6 +90,7 @@ __all__ = [
 	"CadastroFiHistTribLprazoReader",
 	"CadastroFiReader",
 	"CdaReader",
+	"DfinFiiReader",
 	"InfMensalFidcTabIIIReader",
 	"InfMensalFidcTabIIReader",
 	"InfMensalFidcTabIReader",
