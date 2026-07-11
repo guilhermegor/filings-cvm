@@ -39,6 +39,7 @@ from filings_cvm._internal.config.contracts.cad_fi_hist import (
 	CAD_FI_HIST_TRIB_LPRAZO,
 )
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
+from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
 from filings_cvm._internal.config.contracts.inf_mensal_fidc import (
 	INF_MENSAL_FIDC_TAB_I,
@@ -99,6 +100,7 @@ __all__ = [
 	"CAD_FI_HIST_TAXA_PERFM",
 	"CAD_FI_HIST_TRIB_LPRAZO",
 	"CDA_FIF",
+	"DFIN_FII",
 	"EXAMPLE_SOURCE",
 	"INFORME_DIARIO_FIF",
 	"INF_MENSAL_FIDC_TAB_I",

@@ -8,6 +8,7 @@ re-exported flat from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.fii.doc import (
+	DfinFiiReader,
 	InfMensalFiiAtivoPassivoReader,
 	InfMensalFiiComplementoReader,
 	InfMensalFiiGeralReader,
@@ -15,6 +16,7 @@ from filings_cvm.ingestion.fii.doc import (
 
 
 __all__ = [
+	"DfinFiiReader",
 	"InfMensalFiiAtivoPassivoReader",
 	"InfMensalFiiComplementoReader",
 	"InfMensalFiiGeralReader",

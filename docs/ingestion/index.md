@@ -35,6 +35,9 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `ativo_passivo`, `complemento`): o informe mensal dos fundos imobiliários. Inaugura o *portal
   root* `fii/`. ⚠️ O dump é **particionado por ano** (`inf_mensal_fii_AAAA.zip`), apesar de mensal —
   o `date_ref` seleciona o **ano**.
+- **[DFIN FII](dfin_fii.md)** — `DfinFiiReader`: o **índice** das demonstrações financeiras dos FII
+  (`dfin_fii_AAAA.csv`, um CSV solto). Uma linha por documento entregue, com um `Link_Download` que
+  o reader **devolve como texto e não segue**. Particionado por ano.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
