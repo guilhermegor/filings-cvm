@@ -23,7 +23,7 @@ from typing import IO, TYPE_CHECKING
 from urllib import error, request
 from urllib.parse import urlsplit
 
-from filings_cvm._internal.utils.retry import retry_with_backoff
+from filings_cvm._internal.utils.retry import RetryPolicy, call_with_backoff
 
 
 # Runtime type-checking engine — layout-agnostic (utils.typing in MVC, chassis.typing in
@@ -42,11 +42,18 @@ _TIMEOUT_SECONDS: int = 30
 _HTTP_OK_MIN: int = 200
 _HTTP_OK_MAX: int = 299
 _ALLOWED_SCHEMES: frozenset[str] = frozenset({"http", "https"})
-# Download retry/backoff: a transient network failure (timeout, dropped connection, 5xx)
-# is retried with an exponentially growing wait; a deterministic ValueError (bad URL /
-# SSRF-blocked host) is NOT retried, so a permanent error still fails fast.
-_DOWNLOAD_MAX_ATTEMPTS: int = 3
-_DOWNLOAD_BASE_WAIT_S: float = 2.0
+# Default download retry/backoff: a transient network failure (timeout, dropped connection,
+# 5xx, 429 rate-limit — all surface as OSError) is retried on a capped exponential schedule;
+# a deterministic ValueError (bad URL / SSRF-blocked host) is NOT retried, so a permanent
+# error still fails fast. These defaults suit a throttling open-data portal (CVM): 5 attempts
+# over ~24 s (2, 4, 8, 10 s) tolerate a brief rate-limit without hanging the sweep. A caller
+# (e.g. a reader given a source that needs more patience) overrides by passing its own
+# RetryPolicy to download_file — the seam is the single choke point every download routes through.
+_DEFAULT_DOWNLOAD_RETRY: RetryPolicy = RetryPolicy(
+	int_max_attempts=5,
+	float_base_wait_s=2.0,
+	float_max_wait_s=10.0,
+)
 
 
 class _NoRedirectHandler(request.HTTPRedirectHandler, metaclass=TypeChecker):
@@ -96,19 +103,14 @@ class _NoRedirectHandler(request.HTTPRedirectHandler, metaclass=TypeChecker):
 _OPENER: request.OpenerDirector = request.build_opener(_NoRedirectHandler)
 
 
-@retry_with_backoff(
-	int_max_attempts=_DOWNLOAD_MAX_ATTEMPTS,
-	float_base_wait_s=_DOWNLOAD_BASE_WAIT_S,
-	tuple_exceptions=(OSError,),
-)
 @type_checker
-def download_file(str_url: str, path_dest: Path, int_timeout_s: int = _TIMEOUT_SECONDS) -> Path:
-	"""Download ``str_url`` to ``path_dest`` and return the written path.
+def _download_once(str_url: str, path_dest: Path, int_timeout_s: int) -> Path:
+	"""Perform a **single** download attempt of ``str_url`` to ``path_dest``.
 
-	Validates the URL (scheme + non-internal host), fetches it **without following
-	redirects**, and writes the body to disk (the destination directory is created when
-	absent). Any failure — bad URL, internal host, non-2xx status, redirect, network
-	error, timeout — raises, so the caller can treat a failed download as a broken input.
+	Validates the URL (scheme + non-internal host), fetches it **without following redirects**,
+	and writes the body to disk (the destination directory is created when absent). This is the
+	unit :func:`download_file` retries; a deterministic ``ValueError`` fails fast (never retried),
+	while a transient ``OSError`` is what the retry loop catches.
 
 	Parameters
 	----------
@@ -116,8 +118,8 @@ def download_file(str_url: str, path_dest: Path, int_timeout_s: int = _TIMEOUT_S
 		The (http/https) URL to download.
 	path_dest : pathlib.Path
 		Destination file path; its parent is created if missing.
-	int_timeout_s : int, optional
-		Socket timeout in seconds, by default :data:`_TIMEOUT_SECONDS`.
+	int_timeout_s : int
+		Socket timeout in seconds for this attempt.
 
 	Returns
 	-------
@@ -152,6 +154,55 @@ def download_file(str_url: str, path_dest: Path, int_timeout_s: int = _TIMEOUT_S
 		raise OSError(f"Failed to download {str_url!r}: {cls_err}") from cls_err
 	path_dest.write_bytes(bytes_body)
 	return path_dest
+
+
+@type_checker
+def download_file(
+	str_url: str,
+	path_dest: Path,
+	int_timeout_s: int = _TIMEOUT_SECONDS,
+	retry_policy: RetryPolicy | None = None,
+) -> Path:
+	"""Download ``str_url`` to ``path_dest`` with retry, and return the written path.
+
+	Fetches the URL (scheme + non-internal host validated, redirects blocked) and writes the
+	body to disk, retrying transient failures per ``retry_policy``. A transient network error
+	(timeout, dropped connection, non-2xx incl. 429 rate-limit → ``OSError``) is retried; a
+	deterministic ``ValueError`` (bad URL / SSRF-blocked host) fails fast, never retried.
+
+	Parameters
+	----------
+	str_url : str
+		The (http/https) URL to download.
+	path_dest : pathlib.Path
+		Destination file path; its parent is created if missing.
+	int_timeout_s : int, optional
+		Per-attempt socket timeout in seconds, by default :data:`_TIMEOUT_SECONDS`. The socket
+		timeout is a download concern and stays here — it is **not** part of ``retry_policy``.
+	retry_policy : RetryPolicy, optional
+		The retry/backoff schedule; by default :data:`_DEFAULT_DOWNLOAD_RETRY` (5 attempts, capped
+		exponential ~24 s), tuned for a throttling open-data portal. Pass a custom policy for a
+		source that needs more (or less) patience.
+
+	Returns
+	-------
+	pathlib.Path
+		The path the content was written to (``path_dest``).
+
+	Raises
+	------
+	ValueError
+		If the URL is empty, its scheme is not http/https, or its host resolves to a
+		non-public (private / loopback / link-local / reserved) address.
+	OSError
+		If the download still fails after the policy's attempts are exhausted.
+	"""
+	cls_policy = retry_policy if retry_policy is not None else _DEFAULT_DOWNLOAD_RETRY
+	return call_with_backoff(
+		lambda: _download_once(str_url, path_dest, int_timeout_s),
+		cls_policy,
+		str_label="download_file",
+	)
 
 
 @type_checker

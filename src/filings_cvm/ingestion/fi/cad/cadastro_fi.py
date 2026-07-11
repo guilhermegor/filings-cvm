@@ -59,7 +59,7 @@ from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.http_downloader import download_file
 from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
-from filings_cvm._internal.utils.retry import LogEmitter
+from filings_cvm._internal.utils.retry import LogEmitter, RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import read_table
 
 
@@ -105,6 +105,7 @@ class CadastroFiReader(IngestionReader):
 	def __init__(
 		self,
 		path_raw: Path | None = None,
+		retry_policy: RetryPolicy | None = None,
 		cls_logger: LogEmitter | None = None,
 	) -> None:
 		"""Initialise the reader.
@@ -119,11 +120,16 @@ class CadastroFiReader(IngestionReader):
 			Persisting matters more here than for the monthly dumps: CVM overwrites this
 			file in place, so a snapshot kept on disk is the **only** record of what the
 			registry said on the day it was fetched. It cannot be re-fetched.
+		retry_policy : RetryPolicy, optional
+			Forwarded to the download seam as its retry/backoff schedule; by
+			default the seam's throttle-tolerant policy. Pass a
+			:class:`RetryPolicy` for a source needing more (or less) patience.
 		cls_logger : LogEmitter, optional
 			Injected log sink (``log_message(message, level)``). Defaults to a stdlib
 			-backed :class:`LogEmitter`, so no logging import is forced on consumers.
 		"""
 		self._path_raw = path_raw
+		self._retry_policy = retry_policy
 		self._cls_logger = cls_logger if cls_logger is not None else LogEmitter()
 		self._str_url = _URL
 
@@ -157,7 +163,9 @@ class CadastroFiReader(IngestionReader):
 		"""
 		self._cls_logger.log_message(f"Downloading CAD/FI from {self._str_url}", "info")
 		with raw_workspace(self._path_raw) as path_dir:
-			path_csv = download_file(self._str_url, path_dir / _FILENAME, int_timeout_s)
+			path_csv = download_file(
+				self._str_url, path_dir / _FILENAME, int_timeout_s, retry_policy=self._retry_policy
+			)
 			str_content_hash = hash_artifact(path_csv)
 			df_ = read_table(
 				path_csv,

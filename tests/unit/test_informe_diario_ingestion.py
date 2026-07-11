@@ -11,6 +11,7 @@ import zipfile
 
 import pytest
 
+from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
 from filings_cvm.ingestion import InformeDiarioReader
 
@@ -45,7 +46,9 @@ def _zip_bytes(csv_text: str, member: str = "inf_diario_fi_202501.csv") -> bytes
 def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 	"""Patch the reader's download_file boundary to drop ``payload`` at the destination."""
 
-	def _fake_download(str_url: str, path_dest: Path, int_timeout_s: int = 30) -> Path:
+	def _fake_download(
+		str_url: str, path_dest: Path, int_timeout_s: int = 30, retry_policy: object = None
+	) -> Path:
 		path_dest.parent.mkdir(parents=True, exist_ok=True)
 		path_dest.write_bytes(payload)
 		return path_dest
@@ -53,6 +56,37 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 	monkeypatch.setattr(
 		"filings_cvm.ingestion.fi.doc.informe_diario.download_file", _fake_download
 	)
+
+
+def test_read_forwards_retry_policy_to_download(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The reader hands its ``retry_policy`` through to the ``download_file`` seam.
+
+	Guards the wiring end to end: a construction-time policy must reach the single network
+	boundary, or per-source retry tuning would be silently ignored.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to capture the download boundary's arguments.
+	"""
+	dict_seen: dict[str, object] = {}
+
+	def _capturing_download(
+		str_url: str, path_dest: Path, int_timeout_s: int = 30, retry_policy: object = None
+	) -> Path:
+		dict_seen["retry_policy"] = retry_policy
+		path_dest.parent.mkdir(parents=True, exist_ok=True)
+		path_dest.write_bytes(_zip_bytes(f"{_HEADER}\n{_ROW}\n"))
+		return path_dest
+
+	monkeypatch.setattr(
+		"filings_cvm.ingestion.fi.doc.informe_diario.download_file", _capturing_download
+	)
+	cls_policy = RetryPolicy(int_max_attempts=7, str_strategy="linear")
+
+	InformeDiarioReader(date_ref=date(2025, 1, 15), retry_policy=cls_policy).read()
+
+	assert dict_seen["retry_policy"] is cls_policy
 
 
 def test_read_returns_typed_contract_valid_dataframe(monkeypatch: pytest.MonkeyPatch) -> None:
