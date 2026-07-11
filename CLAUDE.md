@@ -107,7 +107,12 @@ de envio para estes informes). O portal tem 4 datasets sob `FII/DOC/`:
   particionado por ano) — `ingestion/fii/doc/dfin.py` (`DfinFiiReader`); contract
   `_internal/config/contracts/dfin_fii.py`. Uma linha por documento entregue; `Link_Download`
   devolvido como texto, **não seguido**
-- ⬜ **ingestion** Informe Trimestral (`inf_trimestral_fii_AAAA.zip`, 16 membros) — issue #58
+- Informe Trimestral FII — ✅ **ingestion** `inf_trimestral_fii_AAAA.zip` (**16 membros**: geral,
+  complemento, ativo(+garantia), direito, imóvel(+desempenho/contrato/inquilino), terreno,
+  aquisição/alienação de imóvel/terreno, rentabilidade, resultado contábil/financeiro) —
+  `ingestion/fii/doc/inf_trimestral/*` (`InfTrimestralFii*Reader`, base privada
+  `_base_inf_trimestral_fii_reader.py`); contracts `_internal/config/contracts/inf_trimestral_fii.py`.
+  Particionado por ano
 - ⬜ **ingestion** Informe Anual (`inf_anual_fii_AAAA.zip`, 12 membros) — issue #59
 
 **Lâmina de Fundos**
@@ -151,7 +156,7 @@ src/filings_cvm/
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
-        fii/               #   FII/ — inf_mensal/ (3 readers + base), dfin (1); trimestral/anual pending
+        fii/               #   FII/ — inf_mensal/ (3), dfin (1), inf_trimestral/ (16 + base); anual pending
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
