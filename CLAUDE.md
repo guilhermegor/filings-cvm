@@ -96,6 +96,17 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   (`RegistroFundoReader`, `RegistroClasseReader`, `RegistroSubclasseReader`); contracts
   `_internal/config/contracts/registro_{fundo,classe,subclasse}.py`
 
+**Fundos Imobiliários (FII)** — portal root `fii/`; **open-data only** (a CVM não publica padrão XML
+de envio para estes informes). O portal tem 4 datasets sob `FII/DOC/`:
+- Informe Mensal FII — ✅ **ingestion** `inf_mensal_fii_AAAA.zip` (**3 membros**: `geral`,
+  `ativo_passivo`, `complemento`) — `ingestion/fii/doc/inf_mensal/*` (`InfMensalFii*Reader`, base
+  privada `_base_inf_mensal_fii_reader.py`); contracts `_internal/config/contracts/inf_mensal_fii.py`.
+  Inaugura o portal root `fii/`. ⚠️ **Particionado por ANO** (`_AAAA`), apesar de mensal — o
+  `date_ref` seleciona o ano
+- ⬜ **ingestion** DFIN (`dfin_fii_AAAA.csv`, índice das demonstrações financeiras) — issue #57
+- ⬜ **ingestion** Informe Trimestral (`inf_trimestral_fii_AAAA.zip`, 16 membros) — issue #58
+- ⬜ **ingestion** Informe Anual (`inf_anual_fii_AAAA.zip`, 12 membros) — issue #59
+
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/fi/doc/lamina/lamina_carteira.py`
@@ -132,10 +143,12 @@ src/filings_cvm/
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); __init__ FLAT public API
-        fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings later)
+        fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
+        fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
+        fii/               #   FII/ — inf_mensal/ (3 readers + private base); DFIN/trimestral/anual pending
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

@@ -31,6 +31,10 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   do informe mensal dos FIDC (`inf_mensal_fidc_AAAAMM.zip`, Tabelas I–X + sub-tabelas de X), um por
   membro. Inaugura o *portal root* `fidc/`. Cada reader declara a sua **política de retry por
   tabela** (`_RETRY_POLICY`).
+- **[Informe Mensal FII](inf_mensal_fii.md)** — 3 readers `InfMensalFii*Reader` (`geral`,
+  `ativo_passivo`, `complemento`): o informe mensal dos fundos imobiliários. Inaugura o *portal
+  root* `fii/`. ⚠️ O dump é **particionado por ano** (`inf_mensal_fii_AAAA.zip`), apesar de mensal —
+  o `date_ref` seleciona o **ano**.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).

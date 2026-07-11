@@ -64,6 +64,9 @@ docs/blueprintx-lessons.md
 # dotfiles-dev toolchain lessons — local backport queue for ~/github/dotfiles-dev.
 # Never committed here; lands in dotfiles-dev via its own PR.
 docs/dotfiles-dev-lessons.md
+# bedrock-fm architecture record — design notes for the downstream consumer project.
+# Internal working document; never committed here.
+docs/bedrock-fm-lessons.md
 
 # Environment files — ignore real env files, keep .env.example tracked
 .env

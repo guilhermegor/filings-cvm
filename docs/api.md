@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md)
 
 ---
 
@@ -364,6 +364,41 @@ from filings_cvm import InfMensalFidcTabIVReader, RetryPolicy
 pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1)).read()          # padrão do módulo
 cls_retry_policy = RetryPolicy(int_max_attempts=10, float_max_wait_s=30.0)
 pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1), retry_policy=cls_retry_policy).read()  # override
+```
+
+### `InfMensalFii*Reader` (3 readers)
+
+`filings_cvm.ingestion.InfMensalFii{Geral,AtivoPassivo,Complemento}Reader`
+
+Os 3 membros de `inf_mensal_fii_AAAA.zip` — o **Informe Mensal FII**, um reader por membro.
+Inaugura o *portal root* `fii/`. Página completa: [Informe Mensal FII](ingestion/inf_mensal_fii.md).
+
+⚠️ **O dump é particionado por ANO, não por mês**, apesar de ser o informe mensal: um
+`inf_mensal_fii_2025.zip` traz os doze meses de 2025. O `date_ref` seleciona o **ano** (mês e dia
+são ignorados); filtre `Data_Referencia` no frame para um único mês.
+
+#### `InfMensalFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 2)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. O ano corrente é parcial por definição. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 3 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por reader.** |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas daquele membro no **ano** — todos os doze meses, uma linha por (fundo, mês,
+versão). **Sem chave única:** um mês reenviado repete (filtre por `Versao`). As colunas `Data_*`
+viram `datetime.date` (vazios → `NaT`); as demais são texto exato. Levanta `OSError`,
+`ContractError` ou `ValueError` (membro do ano ausente).
+
+```python
+from datetime import date
+from filings_cvm import InfMensalFiiComplementoReader
+
+df_ = InfMensalFiiComplementoReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
+junho = df_[df_["Data_Referencia"] == date(2025, 6, 1)]
 ```
 
 ---
