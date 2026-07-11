@@ -43,6 +43,14 @@ theme:
       toggle:
         icon: material/white-balance-sunny
         name: Alternar para o modo claro
+# Version selector, powered by mike (https://github.com/jimporter/mike). Each release publishes
+# its own version to the `gh-pages` branch (`mike deploy X.Y latest` in release-pypi.yaml), and this
+# provider renders the dropdown that lets a reader switch between them. `latest` is the default
+# alias, so the bare site URL always lands on the newest release.
+extra:
+  version:
+    provider: mike
+
 markdown_extensions:
   - admonition
   - toc:

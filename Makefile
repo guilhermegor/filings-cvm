@@ -28,11 +28,12 @@ update_venv:
 precommit:
 	@bash bin/precommit.sh
 
-# Enable GitHub Pages (source = GitHub Actions) once, so the docs deploy workflow can publish.
-# The workflow's GITHUB_TOKEN is a GitHub App token that CAN'T create the Pages site itself
-# (first run fails "Resource not accessible by integration"); this uses the maintainer's gh
-# auth. bin/enable_pages.sh is idempotent + non-blocking — it skips (never fails init) when gh
-# is absent/unauthenticated or the caller isn't a repo admin, so contributors run it harmlessly.
+# Point GitHub Pages at the gh-pages branch once, so mike's versioned docs (published there by
+# the release workflow) are served. The workflow's GITHUB_TOKEN is a GitHub App token that CAN'T
+# change Pages settings; this uses the maintainer's gh auth. bin/enable_pages.sh is idempotent +
+# non-blocking — it skips (never fails init) when gh is absent/unauthenticated or the caller isn't
+# a repo admin, and leaves Pages untouched until the gh-pages branch exists (no 404), so
+# contributors run it harmlessly.
 enable_pages:
 	@bash bin/enable_pages.sh
 
@@ -176,7 +177,7 @@ help:
 	@echo "  venv                 Create Poetry venv and install dependencies"
 	@echo "  update_venv          Update all Poetry dependencies"
 	@echo "  precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)"
-	@echo "  enable_pages         Enable GitHub Pages (Actions source) once; needs gh + repo admin"
+	@echo "  enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin"
 	@echo "  changelog            Regenerate CHANGELOG.md from git tags (cz changelog)"
 	@echo ""
 	@echo "Corporate CA"

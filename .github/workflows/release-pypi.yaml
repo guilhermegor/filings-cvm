@@ -227,3 +227,17 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  # Publish the versioned docs with mike AFTER the PyPI publish succeeds — so the docs site only
+  # ever documents a version that actually shipped. The deploy itself lives in its own reusable
+  # workflow (deploy-docs.yaml) for organisation and so it can also be triggered manually; here we
+  # just call it with the shipped version. Only stable releases move `latest`: a prerelease
+  # (suffix like a1/b1/rc1) publishes to PyPI but must not become the default documented version.
+  deploy_docs:
+    needs: [details, pypi]
+    if: needs.details.outputs.suffix == ''
+    uses: ./.github/workflows/deploy-docs.yaml
+    with:
+      version: ${{ needs.details.outputs.new_version }}
+    permissions:
+      contents: write

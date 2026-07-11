@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# Enable GitHub Pages (source = GitHub Actions) for this repo — once.
+# Point GitHub Pages at the `gh-pages` branch for this repo — once.
 #
-# WHY THIS EXISTS: the docs deploy workflow (.github/workflows/docs.yaml) uses
-# actions/configure-pages with `enablement: true`, which is *documented* to
-# self-enable Pages on the first run. In practice the workflow's GITHUB_TOKEN is a
-# GitHub App installation token that CANNOT create a Pages site from scratch — the
-# first run fails with "Resource not accessible by integration / Create Pages site
-# failed". Creating the site needs a token with repo-admin rights, which a maintainer
-# running `make init` / `tasks.sh init` has (via `gh auth`) but the workflow does not.
-# This script makes that one-time API call so the very next workflow run can deploy.
+# WHY THIS EXISTS: the docs are versioned with mike (https://github.com/jimporter/mike),
+# which publishes each release to the `gh-pages` branch. GitHub Pages must therefore serve
+# from "Deploy from a branch -> gh-pages", NOT from the "GitHub Actions" artifact source.
+# Switching the source is a repo-settings change, and the docs deploy runs in CI where the
+# workflow's GITHUB_TOKEN (a GitHub App installation token) CANNOT change Pages settings or
+# create a Pages site. A maintainer running `make init` / `tasks.sh init` has repo-admin via
+# `gh auth`, so this one-time call belongs here, not in CI.
 #
-# Idempotent + non-blocking: if Pages is already enabled it no-ops; if gh is absent,
-# unauthenticated, or the caller lacks repo-admin (a fork/contributor), it WARNS and
-# returns 0 so `init` still completes. Only the repo owner's first run creates the site.
+# NO 404 WINDOW: we switch the source ONLY once the `gh-pages` branch actually exists (the
+# first `mike deploy` in the release workflow creates it). Until then Pages is left exactly as
+# it is, so the live site is never pointed at an empty branch. Re-run `make enable_pages` after
+# the first release if it was skipped for that reason.
+#
+# Idempotent + non-blocking: an already-correct source no-ops; missing gh / no auth / no
+# repo-admin / no gh-pages yet all WARN and return 0 so `init` still completes.
 
 set -euo pipefail
 
@@ -22,11 +25,11 @@ source "$SCRIPT_DIR/lib/common.sh"
 require_gh() {
 	# gh must be installed and authenticated. Missing either is a skip, not a failure.
 	if ! command -v gh >/dev/null 2>&1; then
-		print_status "warning" "gh CLI not found — skipping Pages enablement (enable once in Settings → Pages → Source: GitHub Actions)"
+		print_status "warning" "gh CLI not found — skipping Pages setup (Settings -> Pages -> Deploy from a branch -> gh-pages)"
 		return 1
 	fi
 	if ! gh auth status >/dev/null 2>&1; then
-		print_status "warning" "gh not authenticated — skipping Pages enablement (run 'gh auth login', then 'make enable_pages')"
+		print_status "warning" "gh not authenticated — skipping Pages setup (run 'gh auth login', then 'make enable_pages')"
 		return 1
 	fi
 	return 0
@@ -37,33 +40,48 @@ resolve_repo() {
 	gh repo view --json nameWithOwner --jq .nameWithOwner 2>/dev/null || true
 }
 
+point_pages_at_gh_pages() {
+	# Create the Pages site pointing at gh-pages if it does not exist yet; otherwise update the
+	# existing site's source to the branch. The nested `source` object needs a JSON body, so it
+	# is piped via --input (gh does not nest bracketed form keys).
+	local str_repo="$1"
+	local str_body='{"source": {"branch": "gh-pages", "path": "/"}, "build_type": "legacy"}'
+
+	if gh api "repos/$str_repo/pages" >/dev/null 2>&1; then
+		if printf '%s' "$str_body" | gh api -X PUT "repos/$str_repo/pages" --input - >/dev/null 2>&1; then
+			print_status "success" "GitHub Pages now serves from the gh-pages branch"
+			return 0
+		fi
+	elif printf '%s' "$str_body" | gh api -X POST "repos/$str_repo/pages" --input - >/dev/null 2>&1; then
+		print_status "success" "GitHub Pages created, serving from the gh-pages branch"
+		return 0
+	fi
+
+	print_status "warning" "Could not set the gh-pages source for $str_repo (needs repo-admin rights) — a maintainer must run 'make enable_pages' or set it in Settings -> Pages"
+	return 0
+}
+
 enable_pages() {
 	local str_repo
 	str_repo="$(resolve_repo)"
 	if [ -z "$str_repo" ]; then
-		print_status "warning" "No GitHub remote resolved — skipping Pages enablement (push the repo to GitHub first)"
+		print_status "warning" "No GitHub remote resolved — skipping Pages setup (push the repo to GitHub first)"
 		return 0
 	fi
 
-	# Already enabled → nothing to do (idempotent; every run after the first lands here).
-	if gh api "repos/$str_repo/pages" >/dev/null 2>&1; then
-		print_status "info" "GitHub Pages already enabled for $str_repo — leaving it untouched"
+	# Guard: never point Pages at gh-pages before that branch has content — that would 404 the
+	# live site. The first `mike deploy` (release workflow) creates it; re-run this afterwards.
+	if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+		print_status "info" "gh-pages branch not created yet — leaving Pages as-is (the first release's mike deploy creates it; re-run 'make enable_pages' after that)"
 		return 0
 	fi
 
-	print_status "info" "Enabling GitHub Pages (source = GitHub Actions) for $str_repo..."
-	if gh api -X POST "repos/$str_repo/pages" -f build_type=workflow >/dev/null 2>&1; then
-		print_status "success" "GitHub Pages enabled — the docs deploy workflow can now publish"
-		return 0
-	fi
-
-	# Most common cause: the caller is not a repo admin (a fork/contributor). Non-fatal.
-	print_status "warning" "Could not enable Pages for $str_repo (needs repo-admin rights) — a maintainer must run 'make enable_pages' or enable it in Settings → Pages"
-	return 0
+	print_status "info" "Pointing GitHub Pages at the gh-pages branch for $str_repo..."
+	point_pages_at_gh_pages "$str_repo"
 }
 
 main() {
-	print_status "section" "GitHub Pages Enablement"
+	print_status "section" "GitHub Pages Setup (mike / gh-pages branch)"
 	# A skip (no gh / not authed) must not fail init — return 0 either way.
 	if ! require_gh; then
 		return 0

@@ -1,0 +1,82 @@
+name: Deploy Versioned Docs (mike)
+
+# Publish the versioned documentation with mike (https://github.com/jimporter/mike).
+# mike commits the built site to the `gh-pages` branch under an `X.Y` version and moves the
+# `latest` alias to it; GitHub Pages serves that branch (set once via `make enable_pages`).
+# The push uses the built-in GITHUB_TOKEN (`contents: write`) — no external credential, no OIDC
+# needed, since it writes a branch in this same repo.
+#
+# Two entry points:
+#   - workflow_call  — the release pipeline (release-pypi.yaml) invokes this AFTER the PyPI
+#     publish succeeds, passing the shipped version, so the docs site only ever documents a
+#     version that actually released.
+#   - workflow_dispatch — a maintainer can seed / re-deploy a version manually from the Actions
+#     tab (e.g. to bootstrap gh-pages, or backfill docs for an already-published version).
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Released version (e.g. 1.2.3) — docs deploy at X.Y granularity.'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to (re)deploy docs for (e.g. 1.2.3) — deployed at X.Y granularity.'
+        required: true
+        type: string
+
+jobs:
+  deploy_docs:
+    name: Deploy Versioned Docs (mike)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # Full history so mike can read/extend the gh-pages branch and cz sees the tags.
+          fetch-depth: 0
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+
+      - name: Install Docs Dependencies
+        run: poetry install --with docs
+
+      # Same fresh changelog as the build-check workflow, so the Changelog page's
+      # `--8<-- "CHANGELOG.md"` include resolves in the deployed build.
+      - name: Regenerate CHANGELOG.md
+        run: poetry run cz changelog
+
+      - name: Configure Git Identity for mike
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Compute X.Y Alias
+        id: docs_version
+        env:
+          NEW_VERSION: ${{ inputs.version }}
+        run: |
+          # Docs are versioned at minor granularity (the project bumps minor per release), so a
+          # patch inherits its minor's docs slot instead of proliferating entries.
+          MINOR=$(echo "$NEW_VERSION" | awk -F. '{print $1"."$2}')
+          echo "minor=$MINOR" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy with mike
+        run: |
+          # Fetch gh-pages if it already exists (first release creates it); mike needs it locally
+          # to append the new version without clobbering the others.
+          git fetch origin gh-pages --depth=1 2>/dev/null || true
+          poetry run mike deploy --push --update-aliases "${{ steps.docs_version.outputs.minor }}" latest
+          poetry run mike set-default --push latest

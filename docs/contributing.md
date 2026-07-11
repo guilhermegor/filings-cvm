@@ -39,24 +39,48 @@ A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente an
 make docs_server   # mkdocs serve em http://0.0.0.0:8000
 ```
 
-## Publicando a documentação (GitHub Pages)
+## Documentação versionada (mike + GitHub Pages)
 
-O workflow `Docs - GitHub Pages Deployment` constrói e publica o site a cada push na branch
-padrão. Ele exige que o **GitHub Pages esteja habilitado uma única vez** com a fonte *GitHub
-Actions* — e essa habilitação inicial **não** pode ser feita pelo próprio workflow: o
-`GITHUB_TOKEN` é um token de GitHub App que não consegue criar o site do Pages do zero (o primeiro
-run falha em *Configure Pages* com `Resource not accessible by integration`).
+O site é **versionado com [mike](https://github.com/jimporter/mike)**: cada release publica a sua
+própria versão navegável na branch `gh-pages`, e o leitor alterna entre versões por um **dropdown**
+no cabeçalho. O alias `latest` sempre aponta para a release mais recente, então a URL raiz do site
+cai na versão mais nova.
 
-Faça a habilitação uma vez, com direitos de admin no repositório:
+**Como cada peça se encaixa:**
+
+- **Build-check (CI):** o workflow `Docs - Build Check` roda `mkdocs build --strict` a cada push e
+  PR — sem publicar. É só a garantia de que a doc sempre compila; um release nunca descobre uma
+  árvore de docs quebrada na hora de publicar.
+- **Deploy (CI):** o job `Deploy Versioned Docs (mike)` do `Release to PyPI` roda **depois** do
+  publish no PyPI (só documenta versão que efetivamente subiu): `mike deploy --push X.Y latest` +
+  `mike set-default --push latest`, empurrando para `gh-pages` com o `GITHUB_TOKEN` embutido
+  (`contents: write`) — sem token externo. A granularidade é **minor** (`X.Y`): um patch herda o
+  slot da sua minor em vez de multiplicar entradas. Prereleases (`rc1`, `b1`, …) **não** movem
+  `latest` (o job é pulado para elas).
+
+**Configuração do mantenedor — uma única vez, com admin no repositório:** apontar o GitHub Pages
+para a branch `gh-pages` (o modelo mike), em vez da fonte *GitHub Actions*. O workflow **não** faz
+isso: o `GITHUB_TOKEN` é um token de GitHub App que não altera as configurações do Pages.
 
 ```bash
 make enable_pages          # ou: bash tasks.sh enable_pages
 ```
 
-Esse passo já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente e não-bloqueante**:
-se o Pages já estiver ligado, não faz nada; se `gh` estiver ausente/não autenticado ou você não for
-admin do repositório (um fork), ele apenas avisa e segue — nunca quebra o `init`. Alternativa manual:
-*Settings → Pages → Build and deployment → Source: GitHub Actions*.
+Já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente e não-bloqueante**, e — para
+**nunca** deixar o site em 404 — só troca a fonte para `gh-pages` **depois** que essa branch existir
+(o primeiro `mike deploy` do release a cria). Se rodar antes disso, ele avisa e não mexe no Pages;
+basta rodar `make enable_pages` de novo após o primeiro release. Alternativa manual:
+*Settings → Pages → Build and deployment → Source: Deploy from a branch → `gh-pages` / `(root)`*.
+
+**Semear a versão atual imediatamente (opcional):** se quiser publicar a versão já lançada sem
+esperar o próximo release, rode uma vez, com a branch limpa:
+
+```bash
+git config user.name "<você>" && git config user.email "<seu-email>"
+poetry run mike deploy --push --update-aliases 0.18 latest
+poetry run mike set-default --push latest
+make enable_pages          # agora que gh-pages existe, aponta o Pages para ela
+```
 
 ## Verificando o pacote construído
 

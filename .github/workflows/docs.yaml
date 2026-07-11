@@ -1,32 +1,23 @@
-name: Docs - GitHub Pages Deployment
+name: Docs - Build Check
 
-# Build the MkDocs site and deploy it via GitHub's official Actions Pages deployment
-# (actions/configure-pages + upload-pages-artifact + deploy-pages).
+# Build the MkDocs site under `--strict` on every push and PR, as a guard that the docs are
+# always publishable — WITHOUT deploying. Deployment is owned by the release workflow, which
+# versions the site with mike (https://github.com/jimporter/mike) and publishes each release to
+# the `gh-pages` branch (see release-pypi.yaml). Keeping the build green here means a release
+# never discovers a broken docs tree at deploy time.
 #
-# IMPORTANT — Pages must be enabled ONCE before the first deploy. `enablement: true`
-# below is best-effort only: the workflow's GITHUB_TOKEN is a GitHub App installation
-# token that CANNOT create a Pages site from scratch, so on a repo where Pages was never
-# enabled the first run fails at "Configure Pages" with
-#   "Resource not accessible by integration / Create Pages site failed".
-# Do the one-time enable with repo-admin rights, either way:
-#   - run `make enable_pages` (or `bash tasks.sh enable_pages`) — also wired into `init`, or
-#   - Settings → Pages → Build and deployment → Source: GitHub Actions.
-# Once the site exists, `enablement: true` is a harmless self-heal on every later run.
+# There is deliberately no `pages`/`id-token` permission and no deploy job: this workflow only
+# proves the site compiles. GitHub Pages serves from the `gh-pages` branch (set once via
+# `make enable_pages`), fed exclusively by mike from the release workflow.
 on:
   push:
     branches:
       - main
       - master
+  pull_request:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-# One concurrent deployment; never cancel an in-progress deploy.
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -52,36 +43,11 @@ jobs:
       - name: Install Docs Dependencies
         run: poetry install --with docs
 
-      # Regenerate CHANGELOG.md from the commit/tag history so the published Changelog page is
-      # current. The changelog is never committed to main by CI; the site's copy is produced
+      # Regenerate CHANGELOG.md from the commit/tag history so the Changelog page's
+      # `--8<-- "CHANGELOG.md"` include resolves under --strict. Never committed to main; produced
       # fresh here (cz derives sections from git tags).
       - name: Regenerate CHANGELOG.md
         run: poetry run cz changelog
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          # Best-effort self-heal only — NOT a first-run enable. The GITHUB_TOKEN can't create
-          # the Pages site (see the header note); do the one-time enable via `make enable_pages`
-          # or Settings → Pages. This keeps a manually-enabled site healthy on later runs.
-          enablement: true
-
       - name: Build Site (strict)
         run: poetry run mkdocs build --strict
-
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # mkdocs' default output directory.
-          path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

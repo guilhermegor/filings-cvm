@@ -37,8 +37,9 @@ precommit() {
 }
 
 enable_pages() {
-	# Enable GitHub Pages (source = GitHub Actions) once so the docs workflow can publish.
-	# Lives in bin/enable_pages.sh; idempotent + non-blocking (skips without gh/auth/admin).
+	# Point GitHub Pages at the gh-pages branch once (mike's versioned docs are published there
+	# by the release workflow). Lives in bin/enable_pages.sh; idempotent + non-blocking (skips
+	# without gh/auth/admin, and leaves Pages untouched until gh-pages exists — no 404).
 	bash "$SCRIPT_DIR/bin/enable_pages.sh"
 }
 
@@ -250,7 +251,7 @@ Virtual Environment
   venv                 Create Poetry venv and install dependencies
   update_venv          Update all Poetry dependencies
   precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)
-  enable_pages         Enable GitHub Pages (Actions source) once; needs gh + repo admin
+  enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin
   changelog            Regenerate CHANGELOG.md from git tags (cz changelog)
 
 Corporate CA
