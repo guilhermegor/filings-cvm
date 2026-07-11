@@ -93,7 +93,7 @@ from datetime import date
 
 from filings_cvm.ingestion import InformeDiarioReader
 
-df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 ```
 
 ### `CdaReader`
@@ -135,8 +135,8 @@ from decimal import Decimal
 
 from filings_cvm.ingestion import CdaReader
 
-df = CdaReader(date_ref=date(2025, 4, 15)).read()
-df["PCT_PL"] = df["VL_MERC_POS_FINAL"].map(Decimal) / df["VL_PATRIM_LIQ"].map(Decimal)
+df_ = CdaReader(date_ref=date(2025, 4, 15)).read()
+df_["PCT_PL"] = df_["VL_MERC_POS_FINAL"].map(Decimal) / df_["VL_PATRIM_LIQ"].map(Decimal)
 ```
 
 ### `LaminaCarteiraReader`
@@ -175,8 +175,8 @@ from decimal import Decimal
 
 from filings_cvm.ingestion import LaminaCarteiraReader
 
-df = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
-df["PCT"] = df["PR_PL_ATIVO"].map(Decimal)
+df_ = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
+df_["PCT"] = df_["PR_PL_ATIVO"].map(Decimal)
 ```
 
 ### `LaminaReader`
@@ -213,8 +213,8 @@ from datetime import date
 
 from filings_cvm.ingestion import LaminaReader
 
-df = LaminaReader(date_ref=date(2025, 4, 15)).read()
-print(df[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
+df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
+print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 ```
 
 ### `CadastroFiReader`
@@ -248,8 +248,8 @@ Levanta `OSError` (falha de download) ou `ContractError` (CSV viola o contrato).
 ```python
 from filings_cvm.ingestion import CadastroFiReader
 
-df = CadastroFiReader().read()
-ativos = df[df["SIT"] == "EM FUNCIONAMENTO NORMAL"]
+df_ = CadastroFiReader().read()
+ativos = df_[df_["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 ```
 
 ### `RegistroFundoReader` · `RegistroClasseReader` · `RegistroSubclasseReader`
@@ -355,8 +355,8 @@ from datetime import date
 from filings_cvm import InfMensalFidcTabIVReader, RetryPolicy
 
 pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1)).read()          # padrão do módulo
-teimoso = RetryPolicy(int_max_attempts=10, float_max_wait_s=30.0)
-pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1), retry_policy=teimoso).read()  # override
+cls_retry_policy = RetryPolicy(int_max_attempts=10, float_max_wait_s=30.0)
+pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1), retry_policy=cls_retry_policy).read()  # override
 ```
 
 ---

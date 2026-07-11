@@ -69,11 +69,11 @@ from datetime import date
 from filings_cvm import InfMensalFidcTabIReader, RetryPolicy
 
 # 1. Padrão — o reader usa a política do seu próprio módulo (5 tentativas). Nada a passar:
-df = InfMensalFidcTabIReader(date_ref=date(2025, 6, 1)).read()
+df_ = InfMensalFidcTabIReader(date_ref=date(2025, 6, 1)).read()
 
 # 2. Sobrescrever numa chamada — o argumento vence o padrão do módulo:
-paciente = RetryPolicy(int_max_attempts=8, float_base_wait_s=1.0)
-df = InfMensalFidcTabIReader(date_ref=date(2025, 6, 1), retry_policy=paciente).read()
+cls_retry_policy = RetryPolicy(int_max_attempts=8, float_base_wait_s=1.0)
+df_ = InfMensalFidcTabIReader(date_ref=date(2025, 6, 1), retry_policy=cls_retry_policy).read()
 
 # 3. Inspecionar o padrão de um módulo sem construir (co-localizado, por tabela):
 InfMensalFidcTabIReader._RETRY_POLICY   # → RetryPolicy(int_max_attempts=5, …)
@@ -91,8 +91,8 @@ from datetime import date
 from filings_cvm import InfMensalFidcTabX4Reader, RetryPolicy
 
 # Mais tentativas e teto de espera maior só para esta tabela, nesta execução:
-teimoso = RetryPolicy(int_max_attempts=10, float_base_wait_s=2.0, float_max_wait_s=30.0)
-df = InfMensalFidcTabX4Reader(date_ref=date(2025, 6, 1), retry_policy=teimoso).read()
+cls_retry_policy = RetryPolicy(int_max_attempts=10, float_base_wait_s=2.0, float_max_wait_s=30.0)
+df_ = InfMensalFidcTabX4Reader(date_ref=date(2025, 6, 1), retry_policy=cls_retry_policy).read()
 ```
 
 Para tornar a diferença **permanente** para uma tabela, ajuste o `_RETRY_POLICY` na classe daquele

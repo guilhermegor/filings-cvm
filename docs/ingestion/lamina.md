@@ -53,9 +53,9 @@ from datetime import date
 
 from filings_cvm.ingestion import LaminaReader
 
-df = LaminaReader(date_ref=date(2025, 4, 15)).read()
+df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
 
-print(df[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
+print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 ```
 
 ### Converter valores no ponto de cálculo
@@ -64,7 +64,7 @@ print(df[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 from decimal import Decimal
 
 # As colunas monetárias vêm como texto exato; converta apenas onde for calcular.
-df["PL"] = df["VL_PATRIM_LIQ"].dropna().map(Decimal)
+df_["PL"] = df_["VL_PATRIM_LIQ"].dropna().map(Decimal)
 ```
 
 ### Persistir o artefato bruto (camada *bronze*)
@@ -72,7 +72,7 @@ df["PL"] = df["VL_PATRIM_LIQ"].dropna().map(Decimal)
 ```python
 from pathlib import Path
 
-df = LaminaReader(
+df_ = LaminaReader(
     date_ref=date(2025, 4, 15),
     path_raw=Path("/data/bronze/cvm/lamina/202504"),
 ).read()
@@ -84,7 +84,7 @@ O ZIP e **todos** os CSVs extraídos são mantidos — não só o membro lido �
 ### Timeout
 
 ```python
-df = LaminaReader(date_ref=date(2025, 4, 15)).read(int_timeout_s=60)
+df_ = LaminaReader(date_ref=date(2025, 4, 15)).read(int_timeout_s=60)
 ```
 
 O `read` levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou

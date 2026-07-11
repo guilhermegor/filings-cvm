@@ -133,7 +133,7 @@ from datetime import date
 from filings_cvm.ingestion import InformeDiarioReader
 
 # Qualquer dia do mês de referência seleciona o dump mensal; o padrão é hoje.
-df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 ```
 
 O leitor baixa, descompacta e faz o parse em um diretório temporário, valida o
