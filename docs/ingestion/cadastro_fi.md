@@ -62,14 +62,14 @@ O mapa de tipos é **derivado do contrato**, não redigitado, de modo que os doi
 ```python
 from filings_cvm.ingestion import CadastroFiReader
 
-df = CadastroFiReader().read()   # sem date_ref: é um retrato do estado atual
-print(df.shape)                  # (46809, 41)
+df_ = CadastroFiReader().read()   # sem date_ref: é um retrato do estado atual
+print(df_.shape)                  # (46809, 41)
 ```
 
 ### Obter apenas os fundos em funcionamento
 
 ```python
-ativos = df[df["SIT"] == "EM FUNCIONAMENTO NORMAL"]
+ativos = df_[df_["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 ```
 
 ### Escolher a linha mais recente de cada CNPJ
@@ -77,7 +77,7 @@ ativos = df[df["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 Como o CNPJ se repete entre regimes, **você** decide o critério:
 
 ```python
-atual = df.sort_values("DT_REG").groupby("CNPJ_FUNDO", as_index=False).last()
+atual = df_.sort_values("DT_REG").groupby("CNPJ_FUNDO", as_index=False).last()
 ```
 
 ### Persistir o retrato (camada *bronze*)
@@ -86,7 +86,7 @@ atual = df.sort_values("DT_REG").groupby("CNPJ_FUNDO", as_index=False).last()
 from datetime import date
 from pathlib import Path
 
-df = CadastroFiReader(
+df_ = CadastroFiReader(
     path_raw=Path(f"/data/bronze/cvm/cad_fi/{date.today():%Y%m%d}"),
 ).read()
 ```
@@ -96,7 +96,7 @@ df = CadastroFiReader(
 O padrão é `60 s` — maior que o dos leitores mensais, porque o retrato tem ~18 MB e não é zipado.
 
 ```python
-df = CadastroFiReader().read(int_timeout_s=120)
+df_ = CadastroFiReader().read(int_timeout_s=120)
 ```
 
 O `read` levanta `OSError` (falha de download) ou `ContractError` (CSV viola o contrato) — falha

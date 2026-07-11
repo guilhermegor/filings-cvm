@@ -27,6 +27,10 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
 - **[CAD/FI histórico](cad_fi_hist.md)** — 19 readers `CadastroFiHist*Reader`: o **log de
   alterações** de cada atributo mutável do cadastro legado (situação, denominação, taxas, gestor,
   …), um por membro de `cad_fi_hist.zip`.
+- **[Informe Mensal FIDC](inf_mensal_fidc.md)** — 17 readers `InfMensalFidcTab*Reader`: as tabelas
+  do informe mensal dos FIDC (`inf_mensal_fidc_AAAAMM.zip`, Tabelas I–X + sub-tabelas de X), um por
+  membro. Inaugura o *portal root* `fidc/`. Cada reader declara a sua **política de retry por
+  tabela** (`_RETRY_POLICY`).
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).

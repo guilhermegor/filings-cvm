@@ -39,10 +39,10 @@ from filings_cvm.ingestion import InformeDiarioReader
 
 # Qualquer dia do mês seleciona o dump; o padrão é hoje. Prefira um mês passado
 # para dados completos — o mês corrente pode ainda não estar publicado.
-df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 
-print(df.dtypes)
-print(df.head())
+print(df_.dtypes)
+print(df_.head())
 ```
 
 ### Converter valores monetários para `Decimal`
@@ -52,7 +52,7 @@ As colunas monetárias vêm como texto exato; converta no ponto em que for calcu
 ```python
 from decimal import Decimal
 
-df["VL_PATRIM_LIQ"] = df["VL_PATRIM_LIQ"].map(Decimal)
+df_["VL_PATRIM_LIQ"] = df_["VL_PATRIM_LIQ"].map(Decimal)
 ```
 
 ### Persistir o artefato bruto (camada *bronze*)
@@ -64,7 +64,7 @@ qualquer parsing — veja [a visão geral da leitura](index.md#artefato-bruto-pa
 ```python
 from pathlib import Path
 
-df = InformeDiarioReader(
+df_ = InformeDiarioReader(
     date_ref=date(2025, 1, 15),
     path_raw=Path("/data/bronze/cvm/informe_diario/202501"),
 ).read()
@@ -76,7 +76,7 @@ df = InformeDiarioReader(
 from filings_cvm.ingestion import InformeDiarioReader
 
 reader = InformeDiarioReader(date_ref=date(2025, 1, 15))
-df = reader.read(int_timeout_s=60)   # timeout de download maior
+df_ = reader.read(int_timeout_s=60)   # timeout de download maior
 ```
 
 O `read` levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou

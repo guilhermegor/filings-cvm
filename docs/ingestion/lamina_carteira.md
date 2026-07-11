@@ -55,9 +55,9 @@ from filings_cvm.ingestion import LaminaCarteiraReader
 
 # Qualquer dia do mês seleciona o dump; o padrão é hoje. Prefira um mês passado
 # para dados completos — o mês corrente pode ainda não estar publicado.
-df = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
+df_ = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
 
-print(df["TP_ATIVO"].value_counts())
+print(df_["TP_ATIVO"].value_counts())
 ```
 
 ### Somar a alocação de um fundo
@@ -66,9 +66,9 @@ print(df["TP_ATIVO"].value_counts())
 from decimal import Decimal
 
 # O percentual vem como texto exato; converta no ponto em que for calcular.
-df["PCT"] = df["PR_PL_ATIVO"].map(Decimal)
+df_["PCT"] = df_["PR_PL_ATIVO"].map(Decimal)
 
-total = df.groupby("CNPJ_FUNDO_CLASSE")["PCT"].sum()
+total = df_.groupby("CNPJ_FUNDO_CLASSE")["PCT"].sum()
 # Não espere 100: alavancagem e posições vendidas afastam o total dos 100%.
 ```
 
@@ -82,7 +82,7 @@ mesmos bytes em vez de rebaixar uma fonte que já pode ter mudado.
 ```python
 from pathlib import Path
 
-df = LaminaCarteiraReader(
+df_ = LaminaCarteiraReader(
     date_ref=date(2025, 4, 15),
     path_raw=Path("/data/bronze/cvm/lamina/202504"),
 ).read()
@@ -91,7 +91,7 @@ df = LaminaCarteiraReader(
 ### Timeout
 
 ```python
-df = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read(int_timeout_s=60)
+df_ = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read(int_timeout_s=60)
 ```
 
 O `read` levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou

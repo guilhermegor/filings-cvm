@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md)
 
 ---
 
@@ -93,7 +93,7 @@ from datetime import date
 
 from filings_cvm.ingestion import InformeDiarioReader
 
-df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
+df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 ```
 
 ### `CdaReader`
@@ -135,8 +135,8 @@ from decimal import Decimal
 
 from filings_cvm.ingestion import CdaReader
 
-df = CdaReader(date_ref=date(2025, 4, 15)).read()
-df["PCT_PL"] = df["VL_MERC_POS_FINAL"].map(Decimal) / df["VL_PATRIM_LIQ"].map(Decimal)
+df_ = CdaReader(date_ref=date(2025, 4, 15)).read()
+df_["PCT_PL"] = df_["VL_MERC_POS_FINAL"].map(Decimal) / df_["VL_PATRIM_LIQ"].map(Decimal)
 ```
 
 ### `LaminaCarteiraReader`
@@ -175,8 +175,8 @@ from decimal import Decimal
 
 from filings_cvm.ingestion import LaminaCarteiraReader
 
-df = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
-df["PCT"] = df["PR_PL_ATIVO"].map(Decimal)
+df_ = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
+df_["PCT"] = df_["PR_PL_ATIVO"].map(Decimal)
 ```
 
 ### `LaminaReader`
@@ -213,8 +213,8 @@ from datetime import date
 
 from filings_cvm.ingestion import LaminaReader
 
-df = LaminaReader(date_ref=date(2025, 4, 15)).read()
-print(df[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
+df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
+print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 ```
 
 ### `CadastroFiReader`
@@ -248,8 +248,8 @@ Levanta `OSError` (falha de download) ou `ContractError` (CSV viola o contrato).
 ```python
 from filings_cvm.ingestion import CadastroFiReader
 
-df = CadastroFiReader().read()
-ativos = df[df["SIT"] == "EM FUNCIONAMENTO NORMAL"]
+df_ = CadastroFiReader().read()
+ativos = df_[df_["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 ```
 
 ### `RegistroFundoReader` · `RegistroClasseReader` · `RegistroSubclasseReader`
@@ -321,6 +321,42 @@ from filings_cvm.ingestion import CadastroFiHistSitReader
 
 sit = CadastroFiHistSitReader().read()
 janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]   # DT_INI_SIT / DT_FIM_SIT
+```
+
+### `InfMensalFidcTab*Reader` (17 readers)
+
+`filings_cvm.ingestion.InfMensalFidcTab{I,II,III,IV,V,VI,VII,IX,X,X1,X11,X2,X3,X4,X5,X6,X7}Reader`
+
+Os 17 membros de `inf_mensal_fidc_AAAAMM.zip` — as tabelas do **Informe Mensal FIDC** (Tabelas I–X
+mais as sub-tabelas de X), um reader por membro. Inaugura o *portal root* `fidc/`. Página completa:
+[Informe Mensal FIDC](ingestion/inf_mensal_fidc.md).
+
+Todos têm a mesma assinatura, **com `date_ref`** (dump particionado por mês), e baixam o **mesmo**
+ZIP mensal:
+
+#### `InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 16)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência seleciona o dump `AAAAMM`. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 17 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por tabela** — veja a página. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas daquela tabela no mês. `DT_COMPTC` vira `datetime.date`; as demais são texto
+exato (monetários/quantidades/percentuais/contagens **nunca `float`**). As sub-tabelas são longas
+(muitas linhas por fundo), **sem grão único**. Levanta `OSError`, `ContractError` ou `ValueError`
+(membro do mês ausente).
+
+```python
+from datetime import date
+from filings_cvm import InfMensalFidcTabIVReader, RetryPolicy
+
+pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1)).read()          # padrão do módulo
+cls_retry_policy = RetryPolicy(int_max_attempts=10, float_max_wait_s=30.0)
+pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1), retry_policy=cls_retry_policy).read()  # override
 ```
 
 ---

@@ -58,9 +58,9 @@ from filings_cvm.ingestion import CdaReader
 
 # Qualquer dia do mês seleciona o dump; o padrão é hoje. Prefira um mês passado
 # para dados completos — o mês corrente pode ainda não estar publicado.
-df = CdaReader(date_ref=date(2025, 4, 15)).read()
+df_ = CdaReader(date_ref=date(2025, 4, 15)).read()
 
-print(df["BLOCO"].value_counts())
+print(df_["BLOCO"].value_counts())
 ```
 
 ### Calcular a diversificação (% do patrimônio líquido)
@@ -71,10 +71,10 @@ print(df["BLOCO"].value_counts())
 from decimal import Decimal
 
 # As colunas monetárias vêm como texto exato; converta no ponto em que for calcular.
-valor = df["VL_MERC_POS_FINAL"].map(Decimal)
-patrimonio = df["VL_PATRIM_LIQ"].map(Decimal)
+valor = df_["VL_MERC_POS_FINAL"].map(Decimal)
+patrimonio = df_["VL_PATRIM_LIQ"].map(Decimal)
 
-df["PCT_PL"] = valor / patrimonio
+df_["PCT_PL"] = valor / patrimonio
 ```
 
 ### Persistir o artefato bruto (camada *bronze*)
@@ -86,7 +86,7 @@ antes de qualquer parsing:
 ```python
 from pathlib import Path
 
-df = CdaReader(
+df_ = CdaReader(
     date_ref=date(2025, 4, 15),
     path_raw=Path("/data/bronze/cvm/cda/202504"),
 ).read()
@@ -102,7 +102,7 @@ O leitor **avisa em vez de falhar** quando um fundo da carteira não consta de `
 recebendo as demais linhas boas do mês, e o aviso nomeia os CNPJs afetados.
 
 ```python
-df = CdaReader(date_ref=date(2025, 4, 15)).read(int_timeout_s=60)  # timeout maior
+df_ = CdaReader(date_ref=date(2025, 4, 15)).read(int_timeout_s=60)  # timeout maior
 ```
 
 O `read` levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato),
