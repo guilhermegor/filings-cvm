@@ -43,6 +43,15 @@ _URL = "https://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi_hist.zip"
 
 _ZIP_FILENAME = "cad_fi_hist.zip"
 
+# Reader-owned default retry/backoff (CVM's open-data portal throttles under load): 5 attempts on
+# a capped exponential schedule (~2, 4, 8, 10 s). Shared by all 19 change-log readers, which
+# inherit it via ``_RETRY_POLICY``; a per-instance ``retry_policy=`` still overrides.
+_DEFAULT_RETRY_POLICY: RetryPolicy = RetryPolicy(
+	int_max_attempts=5,
+	float_base_wait_s=2.0,
+	float_max_wait_s=10.0,
+)
+
 
 class _BaseCadFiHistReader(IngestionReader):
 	"""Private base for the 19 CAD/FI change-log readers.
@@ -62,6 +71,11 @@ class _BaseCadFiHistReader(IngestionReader):
 	_DATE_COLS: ClassVar[tuple[str, ...]]
 	_LABEL: ClassVar[str]
 
+	# Per-reader default retry and backoff schedule. The 19 change-log readers share one archive,
+	# so they inherit this default; a subclass may still assign its own, and a retry_policy passed
+	# to the constructor overrides it for that instance.
+	_RETRY_POLICY: ClassVar[RetryPolicy | None] = _DEFAULT_RETRY_POLICY
+
 	def __init__(
 		self,
 		path_raw: Path | None = None,
@@ -79,15 +93,16 @@ class _BaseCadFiHistReader(IngestionReader):
 			temporary directory and discarded. CVM overwrites the file in place, so a persisted
 			snapshot is the only record of what the registry history said that day.
 		retry_policy : RetryPolicy, optional
-			Forwarded to the download seam as its retry/backoff schedule; by
-			default the seam's throttle-tolerant policy. Pass a
-			:class:`RetryPolicy` for a source needing more (or less) patience.
+			Retry/backoff schedule forwarded to the download seam. When ``None``
+			(the default) this reader's own :attr:`_RETRY_POLICY` class attribute
+			is used. Pass a :class:`RetryPolicy` to override it for this one
+			instance.
 		cls_logger : LogEmitter, optional
 			Injected log sink (``log_message(message, level)``). Defaults to a stdlib-backed
 			:class:`LogEmitter`, so no logging import is forced on consumers.
 		"""
 		self._path_raw = path_raw
-		self._retry_policy = retry_policy
+		self._retry_policy = retry_policy if retry_policy is not None else self._RETRY_POLICY
 		self._cls_logger = cls_logger if cls_logger is not None else LogEmitter()
 		self._str_url = _URL
 

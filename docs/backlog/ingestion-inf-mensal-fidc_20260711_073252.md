@@ -33,9 +33,14 @@ Launches the **`fidc/` portal root** (sibling of `fi/`).
 
 ## Open / next
 
-- [ ] User review of the open PR (approval gate — do not start the next task until merged).
-- [ ] After merge: release (minor bump) Test PyPI → verify by install → PyPI → verify.
-- [ ] Then Wave 1 continues: FII → FIP → FIAGRO → FIE (see portal-survey-41 ledger), then Waves 2–5.
+- [x] User review of the open PR (approval gate — do not start the next task until merged).
+      PR #54 approved and squash-merged to main (`53e2e87`); content-verified post-merge.
+- [x] After merge: release (minor bump) Test PyPI → verify by install → PyPI → verify.
+      **0.13.0** released and install-verified on Test PyPI + PyPI (2026-07-11).
+- [x] Next task started: **#53** (per-module `_RETRY_POLICY` standard) branched; Wave 1
+      (FII → FIP → FIAGRO → FIE) resumes after #53. See portal-survey-41 ledger.
+
+**Completed — kept as a record.** All boxes ticked 2026-07-11; PR #54 merged, 0.13.0 shipped.
 
 ## Notes
 
