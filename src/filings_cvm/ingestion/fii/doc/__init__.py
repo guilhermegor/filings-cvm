@@ -1,13 +1,28 @@
 """CVM open-data **document-dump** readers for FII (`FII/DOC/*`).
 
-The FII portal root holds only document dumps (there is no `FII/CAD`). Today the Informe Mensal
-(`INF_MENSAL`, 3 members), the DFIN index (`DFIN`,
-:mod:`filings_cvm.ingestion.fii.doc.dfin`) and the Informe Trimestral (`INF_TRIMESTRAL`, 16
-members, :mod:`filings_cvm.ingestion.fii.doc.inf_trimestral`); the `INF_ANUAL` dataset lands as a
-sibling. Re-exported from `filings_cvm.ingestion`.
+The FII portal root holds only document dumps (there is no `FII/CAD`), and **all four of its
+datasets are implemented**: the Informe Mensal (`INF_MENSAL`, 3 members), the DFIN index (`DFIN`,
+:mod:`filings_cvm.ingestion.fii.doc.dfin`), the Informe Trimestral (`INF_TRIMESTRAL`, 16 members,
+:mod:`filings_cvm.ingestion.fii.doc.inf_trimestral`) and the Informe Anual (`INF_ANUAL`, 12
+members, :mod:`filings_cvm.ingestion.fii.doc.inf_anual`). Re-exported from
+`filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.fii.doc.dfin import DfinFiiReader
+from filings_cvm.ingestion.fii.doc.inf_anual import (
+	InfAnualFiiAtivoAdquiridoReader,
+	InfAnualFiiAtivoTransacaoReader,
+	InfAnualFiiAtivoValorContabilReader,
+	InfAnualFiiComplementoReader,
+	InfAnualFiiDiretorResponsavelReader,
+	InfAnualFiiDistribuicaoCotistasReader,
+	InfAnualFiiExperienciaProfissionalReader,
+	InfAnualFiiGeralReader,
+	InfAnualFiiPrestadorServicoReader,
+	InfAnualFiiProcessoReader,
+	InfAnualFiiProcessoSemelhanteReader,
+	InfAnualFiiRepresentanteCotistaReader,
+)
 from filings_cvm.ingestion.fii.doc.inf_mensal import (
 	InfMensalFiiAtivoPassivoReader,
 	InfMensalFiiComplementoReader,
@@ -35,6 +50,18 @@ from filings_cvm.ingestion.fii.doc.inf_trimestral import (
 
 __all__ = [
 	"DfinFiiReader",
+	"InfAnualFiiAtivoAdquiridoReader",
+	"InfAnualFiiAtivoTransacaoReader",
+	"InfAnualFiiAtivoValorContabilReader",
+	"InfAnualFiiComplementoReader",
+	"InfAnualFiiDiretorResponsavelReader",
+	"InfAnualFiiDistribuicaoCotistasReader",
+	"InfAnualFiiExperienciaProfissionalReader",
+	"InfAnualFiiGeralReader",
+	"InfAnualFiiPrestadorServicoReader",
+	"InfAnualFiiProcessoReader",
+	"InfAnualFiiProcessoSemelhanteReader",
+	"InfAnualFiiRepresentanteCotistaReader",
 	"InfMensalFiiAtivoPassivoReader",
 	"InfMensalFiiComplementoReader",
 	"InfMensalFiiGeralReader",

@@ -4,7 +4,7 @@ Interface pública da biblioteca. Os serializadores e modelos abaixo são import
 `filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
 são reexportados no topo de `filings_cvm`.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md)
 
 ---
 
@@ -469,6 +469,43 @@ from filings_cvm import InfTrimestralFiiImovelReader
 
 df_ = InfTrimestralFiiImovelReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 primeiro_tri = df_[df_["Data_Referencia"] == date(2025, 3, 31)]
+```
+
+### `InfAnualFii*Reader` (12 readers)
+
+`filings_cvm.ingestion.InfAnualFii{Geral,Complemento,AtivoAdquirido,AtivoTransacao,AtivoValorContabil,DistribuicaoCotistas,DiretorResponsavel,ExperienciaProfissional,PrestadorServico,Processo,ProcessoSemelhante,RepresentanteCotista}Reader`
+
+Os 12 membros de `inf_anual_fii_AAAA.zip` — o **Informe Anual FII**, um reader por membro. **Com ele
+o portal root `fii/` fica completo (4/4).** Página completa:
+[Informe Anual FII](ingestion/inf_anual_fii.md).
+
+Particionado por **ano** — aqui a partição é natural (é o informe *anual*). ⚠️ Dois pontos:
+`Link_Download_Anexo` (em `complemento`) é **devolvido como texto e não seguido**; e o **`CPF`** (em
+`diretor_responsavel` / `representante_cotista`) é **dado pessoal**, lido como texto exato e nunca
+validado como CNPJ.
+
+#### `InfAnualFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 11)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 12 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas daquele membro no ano. **Sem chave única:** a maioria dos membros é longa (um
+ativo/transação/processo/prestador/diretor por linha). As `Data_*` viram `datetime.date` (vazios →
+`NaT`); as demais são texto exato. Levanta `OSError`, `ContractError` ou `ValueError` (membro do ano
+ausente).
+
+```python
+from datetime import date
+from filings_cvm import InfAnualFiiProcessoReader
+
+df_ = InfAnualFiiProcessoReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
+# uma linha por processo: Juizo, Instancia, Data_Instauracao, Valor_Causa, Chance_Perda…
 ```
 
 ---

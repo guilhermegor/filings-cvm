@@ -96,8 +96,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   (`RegistroFundoReader`, `RegistroClasseReader`, `RegistroSubclasseReader`); contracts
   `_internal/config/contracts/registro_{fundo,classe,subclasse}.py`
 
-**Fundos Imobiliários (FII)** — portal root `fii/`; **open-data only** (a CVM não publica padrão XML
-de envio para estes informes). O portal tem 4 datasets sob `FII/DOC/`:
+**Fundos Imobiliários (FII)** — portal root `fii/` ✅ **COMPLETO (4/4 datasets)**; **open-data only**
+(a CVM não publica padrão XML de envio para estes informes). Não há `FII/CAD`. Os 4 datasets sob
+`FII/DOC/`:
 - Informe Mensal FII — ✅ **ingestion** `inf_mensal_fii_AAAA.zip` (**3 membros**: `geral`,
   `ativo_passivo`, `complemento`) — `ingestion/fii/doc/inf_mensal/*` (`InfMensalFii*Reader`, base
   privada `_base_inf_mensal_fii_reader.py`); contracts `_internal/config/contracts/inf_mensal_fii.py`.
@@ -113,7 +114,13 @@ de envio para estes informes). O portal tem 4 datasets sob `FII/DOC/`:
   `ingestion/fii/doc/inf_trimestral/*` (`InfTrimestralFii*Reader`, base privada
   `_base_inf_trimestral_fii_reader.py`); contracts `_internal/config/contracts/inf_trimestral_fii.py`.
   Particionado por ano
-- ⬜ **ingestion** Informe Anual (`inf_anual_fii_AAAA.zip`, 12 membros) — issue #59
+- Informe Anual FII — ✅ **ingestion** `inf_anual_fii_AAAA.zip` (**12 membros**: geral, complemento,
+  ativo adquirido/transação/valor contábil, distribuição de cotistas, diretor responsável,
+  experiência profissional, prestador de serviço, processo(+semelhante), representante de cotistas)
+  — `ingestion/fii/doc/inf_anual/*` (`InfAnualFii*Reader`, base privada
+  `_base_inf_anual_fii_reader.py`); contracts `_internal/config/contracts/inf_anual_fii.py`.
+  ⚠️ Contém **CPF** (dado pessoal, texto exato, nunca validado como CNPJ) e um `Link_Download_Anexo`
+  **não seguido**. **Com este, o portal root `fii/` está completo (4/4 datasets)**
 
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
@@ -156,7 +163,7 @@ src/filings_cvm/
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
-        fii/               #   FII/ — inf_mensal/ (3), dfin (1), inf_trimestral/ (16 + base); anual pending
+        fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
