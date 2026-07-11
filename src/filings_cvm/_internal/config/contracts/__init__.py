@@ -79,6 +79,7 @@ from filings_cvm._internal.config.contracts.inf_mensal_fii import (
 	INF_MENSAL_FII_COMPLEMENTO,
 	INF_MENSAL_FII_GERAL,
 )
+from filings_cvm._internal.config.contracts.inf_quadrimestral_fip import INF_QUADRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.inf_trimestral_fii import (
 	INF_TRIMESTRAL_FII_ALIENACAO_IMOVEL,
 	INF_TRIMESTRAL_FII_ALIENACAO_TERRENO,
@@ -97,6 +98,7 @@ from filings_cvm._internal.config.contracts.inf_trimestral_fii import (
 	INF_TRIMESTRAL_FII_RESULTADO_CONTABIL_FINANCEIRO,
 	INF_TRIMESTRAL_FII_TERRENO,
 )
+from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
@@ -167,6 +169,7 @@ __all__ = [
 	"INF_MENSAL_FII_ATIVO_PASSIVO",
 	"INF_MENSAL_FII_COMPLEMENTO",
 	"INF_MENSAL_FII_GERAL",
+	"INF_QUADRIMESTRAL_FIP",
 	"INF_TRIMESTRAL_FII_ALIENACAO_IMOVEL",
 	"INF_TRIMESTRAL_FII_ALIENACAO_TERRENO",
 	"INF_TRIMESTRAL_FII_AQUISICAO_IMOVEL",
@@ -183,6 +186,7 @@ __all__ = [
 	"INF_TRIMESTRAL_FII_RENTABILIDADE_EFETIVA",
 	"INF_TRIMESTRAL_FII_RESULTADO_CONTABIL_FINANCEIRO",
 	"INF_TRIMESTRAL_FII_TERRENO",
+	"INF_TRIMESTRAL_FIP",
 	"LAMINA_CARTEIRA_FIF",
 	"LAMINA_FIF",
 	"REGISTRO_CLASSE",

@@ -122,6 +122,20 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   ⚠️ Contém **CPF** (dado pessoal, texto exato, nunca validado como CNPJ) e um `Link_Download_Anexo`
   **não seguido**. **Com este, o portal root `fii/` está completo (4/4 datasets)**
 
+**Fundos de Investimento em Participações (FIP)** — portal root `fip/` ✅ **COMPLETO (2/2 datasets)**;
+**open-data only** (a CVM não publica padrão XML de envio). Não há `FIP/CAD`. Os 2 datasets sob
+`FIP/DOC/`, ambos CSVs soltos particionados por ano (um reader cada):
+- Informe Trimestral FIP — ✅ **ingestion** `inf_trimestral_fip_AAAA.csv` (54 colunas, regime
+  **pré-RCVM 175**, série 2010–2023) — `ingestion/fip/doc/inf_trimestral.py` (`InfTrimestralFipReader`);
+  contract `_internal/config/contracts/inf_trimestral_fip.py`. Chaveado por `CNPJ_FUNDO`. Inaugura o
+  portal root `fip/`
+- Informe Quadrimestral FIP — ✅ **ingestion** `inf_quadrimestral_fip_AAAA.csv` (55 colunas, regime
+  **pós-RCVM 175**, a partir de 2024) — `ingestion/fip/doc/inf_quadrimestral.py`
+  (`InfQuadrimestralFipReader`); contract `_internal/config/contracts/inf_quadrimestral_fip.py`.
+  Idêntico ao trimestral **exceto** as 2 primeiras colunas: `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE`
+  (split fundo/classe da RCVM 175) no lugar de `CNPJ_FUNDO`. **Com este, o portal root `fip/` está
+  completo (2/2 datasets)**
+
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/fi/doc/lamina/lamina_carteira.py`
@@ -164,6 +178,7 @@ src/filings_cvm/
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
         fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
+        fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
