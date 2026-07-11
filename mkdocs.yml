@@ -19,6 +19,7 @@ nav:
       - Registro RCVM 175: ingestion/registro.md
       - CAD/FI histórico: ingestion/cad_fi_hist.md
       - Informe Mensal FIDC: ingestion/inf_mensal_fidc.md
+      - Informe Mensal FII: ingestion/inf_mensal_fii.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md
