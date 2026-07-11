@@ -42,11 +42,16 @@ _TIMEOUT_SECONDS: int = 30
 _HTTP_OK_MIN: int = 200
 _HTTP_OK_MAX: int = 299
 _ALLOWED_SCHEMES: frozenset[str] = frozenset({"http", "https"})
-# Download retry/backoff: a transient network failure (timeout, dropped connection, 5xx)
-# is retried with an exponentially growing wait; a deterministic ValueError (bad URL /
-# SSRF-blocked host) is NOT retried, so a permanent error still fails fast.
-_DOWNLOAD_MAX_ATTEMPTS: int = 3
+# Download retry/backoff: a transient network failure (timeout, dropped connection, 5xx,
+# 429 rate-limit — all surface as OSError) is retried with an exponentially growing wait,
+# capped by _DOWNLOAD_MAX_WAIT_S so the schedule stays bounded; a deterministic ValueError
+# (bad URL / SSRF-blocked host) is NOT retried, so a permanent error still fails fast. The
+# defaults suit a throttling open-data portal (CVM): 5 attempts over ~24 s (2, 4, 8, 10 s)
+# tolerate a brief rate-limit without hanging the sweep. Tune here — the seam is the single
+# choke point every reader's download routes through.
+_DOWNLOAD_MAX_ATTEMPTS: int = 5
 _DOWNLOAD_BASE_WAIT_S: float = 2.0
+_DOWNLOAD_MAX_WAIT_S: float = 10.0
 
 
 class _NoRedirectHandler(request.HTTPRedirectHandler, metaclass=TypeChecker):
@@ -99,6 +104,7 @@ _OPENER: request.OpenerDirector = request.build_opener(_NoRedirectHandler)
 @retry_with_backoff(
 	int_max_attempts=_DOWNLOAD_MAX_ATTEMPTS,
 	float_base_wait_s=_DOWNLOAD_BASE_WAIT_S,
+	float_max_wait_s=_DOWNLOAD_MAX_WAIT_S,
 	tuple_exceptions=(OSError,),
 )
 @type_checker
