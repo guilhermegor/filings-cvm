@@ -303,8 +303,18 @@ def render_comment(
 
 
 # HTTP statuses worth retrying: GitHub's API returns a transient 5xx or a rate-limit 429 often
-# enough that a single unlucky call must not decide the gate's fate. A real 4xx (404, 422, …) is a
-# bug in the request and is raised at once — retrying it would only hide it.
+# enough that a single unlucky call must not decide the gate's fate. A real 4xx — 404, 422, … — is
+# a bug in the request and is raised at once, since retrying it would only hide it.
+#
+# YES, THE LIBRARY ALREADY HAS A RETRY SEAM, and no, it cannot be reused here. The proper seam is
+# `filings_cvm._internal.utils.retry.call_with_backoff` — but this script runs in CI as a bare
+# `python bin/pr_gate.py` with only `actions/setup-python`: the package is NEVER installed in that
+# job. Importing the seam would first execute `filings_cvm/__init__`, which pulls in pandas and
+# pydantic, so the import dies. Reusing it would mean installing the whole library — pandas, numpy,
+# pydantic — into a job whose only purpose is to post one comment, and coupling the CI gate to the
+# library's dependency tree. The stdlib lines below are the cheaper trade and keep this script's
+# zero-dependency contract (see the module docstring). Revisit only if the gate ever needs the
+# installed package for something else anyway.
 RETRYABLE_STATUS: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 
 # Attempts per API call, and the base of the exponential backoff between them (1 s, 2 s, 4 s).
