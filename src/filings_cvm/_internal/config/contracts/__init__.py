@@ -16,6 +16,8 @@ delete the example once your own contracts exist.
 
 from __future__ import annotations
 
+from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
+from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
 from filings_cvm._internal.config.contracts.cad_fi_hist import (
 	CAD_FI_HIST_ADMIN,
@@ -106,6 +108,7 @@ from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMES
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
+from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
 from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
@@ -117,6 +120,8 @@ from filings_cvm._internal.utils.tabular_reader import (
 
 
 __all__ = [
+	"BALANCETE_FIE",
+	"BALANCO_FIE",
 	"CAD_FI",
 	"CAD_FI_HIST_ADMIN",
 	"CAD_FI_HIST_AUDITOR",
@@ -195,6 +200,7 @@ __all__ = [
 	"INF_TRIMESTRAL_FIP",
 	"LAMINA_CARTEIRA_FIF",
 	"LAMINA_FIF",
+	"MEDIDAS_MES_FIE",
 	"REGISTRO_CLASSE",
 	"REGISTRO_FUNDO",
 	"REGISTRO_SUBCLASSE",

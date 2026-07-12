@@ -56,6 +56,11 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   membros `inf_mensal_fiagro` + `inf_mensal_fiagro_subclasse`), que **inauguram o portal root
   `fiagro/`**. Particionado por **mês** (série a partir de `202505`); nomenclatura pós-RCVM 175
   (chave `CNPJ_Classe`).
+- **[FIE](fie.md)** — 3 readers `BalanceteFieReader` (ZIP mensal, pós-RCVM 175), `BalancoFieReader`
+  (ZIP anual, **descontinuado em 2020**, pré-175) e `MedidasMesFieReader` (CSV mensal solto): os três
+  datasets dos Fundos de Investimento Especialmente constituídos, que **completam o portal root
+  `fie/`**. Não há `FIE/CAD`. `FIE/MEDIDAS` é irmão de `FIE/DOC`, então o seu reader mora no *root*
+  `fie/`.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
