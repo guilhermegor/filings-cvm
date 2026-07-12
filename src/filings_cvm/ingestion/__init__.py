@@ -41,6 +41,10 @@ from filings_cvm.ingestion.fi import (
 	RegistroFundoReader,
 	RegistroSubclasseReader,
 )
+from filings_cvm.ingestion.fiagro import (
+	InfMensalFiagroReader,
+	InfMensalFiagroSubclasseReader,
+)
 from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabIIIReader,
 	InfMensalFidcTabIIReader,
@@ -135,6 +139,8 @@ __all__ = [
 	"InfAnualFiiProcessoReader",
 	"InfAnualFiiProcessoSemelhanteReader",
 	"InfAnualFiiRepresentanteCotistaReader",
+	"InfMensalFiagroReader",
+	"InfMensalFiagroSubclasseReader",
 	"InfMensalFidcTabIIIReader",
 	"InfMensalFidcTabIIReader",
 	"InfMensalFidcTabIReader",
