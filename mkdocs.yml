@@ -33,13 +33,18 @@ theme:
   language: pt-BR
   logo: assets/cvm-logo.png
   favicon: assets/cvm-logo.png
+  # The `media` queries make the site follow the READER'S OS theme on first visit, instead of always
+  # opening light (Material picks the first palette when no `media` is given). The toggle still wins
+  # and is remembered in localStorage — the OS preference is only the default.
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: indigo
       toggle:
         icon: material/weather-night
         name: Alternar para o modo escuro
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       primary: indigo
       toggle:
         icon: material/white-balance-sunny

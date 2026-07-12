@@ -7,9 +7,9 @@ POETRY := bash bin/poetry_exec.sh
 # -------------------
 # VIRTUAL ENVIRONMENT
 # -------------------
-.PHONY: init ensure_env venv update_venv precommit enable_pages changelog
+.PHONY: init ensure_env venv update_venv precommit enable_pages enable_repo_rules changelog
 
-init: ensure_env venv precommit enable_pages
+init: ensure_env venv precommit enable_pages enable_repo_rules
 
 # Seed .env from .env.example for a fresh checkout. The leading '-' makes a failed
 # seed (e.g. no .env.example) non-blocking for init — venv + precommit still run.
@@ -36,6 +36,14 @@ precommit:
 # contributors run it harmlessly.
 enable_pages:
 	@bash bin/enable_pages.sh
+
+# Provision the `pr-quality-gate` branch ruleset (PR required, CI green, CodeQL clean, Copilot
+# review on every push) instead of clicking ~10 boxes in Settings -> Rules. EVERY rule is REST-
+# settable, including the Copilot auto-review (its own `copilot_code_review` rule type), so nothing
+# here needs a manual click. CI's GITHUB_TOKEN can't write rulesets; this uses the maintainer's gh
+# auth. bin/enable_repo_rules.sh is idempotent (updates an existing ruleset in place) + non-blocking.
+enable_repo_rules:
+	@bash bin/enable_repo_rules.sh
 
 # Regenerate CHANGELOG.md from git tags + Conventional Commits (cz derives sections from tags).
 # Preview locally; the published site regenerates it in the docs workflow. CI never commits it.
@@ -178,6 +186,7 @@ help:
 	@echo "  update_venv          Update all Poetry dependencies"
 	@echo "  precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)"
 	@echo "  enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin"
+	@echo "  enable_repo_rules    Apply the pr-quality-gate branch ruleset (PR + CI + CodeQL + Copilot review); needs gh + repo admin"
 	@echo "  changelog            Regenerate CHANGELOG.md from git tags (cz changelog)"
 	@echo ""
 	@echo "Corporate CA"

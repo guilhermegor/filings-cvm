@@ -99,6 +99,45 @@ make install_dist_locally    # python -m build → instala → smoke-import → 
 3. Garanta que os checks de CI (testes, lint, build da documentação) passem — eles são o gate de
    merge.
 
+### O ruleset `pr-quality-gate` (revisão automática e proteção da branch)
+
+A branch padrão é protegida por um **branch ruleset** chamado `pr-quality-gate`, provisionado
+**inteiramente por código** — nenhuma caixinha marcada à mão:
+
+```bash
+make enable_repo_rules     # ou: bash tasks.sh enable_repo_rules
+```
+
+Já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente** (um ruleset existente é
+atualizado no lugar, não duplicado) e **não-bloqueante** (sem `gh`, sem auth ou sem permissão de
+admin, ele avisa e sai com 0 — o `init` completa). Exige `gh` autenticado com direitos de admin no
+repositório: o `GITHUB_TOKEN` do CI **não** consegue escrever rulesets, por isso isto é um passo do
+mantenedor, não um job de workflow.
+
+O que o ruleset aplica:
+
+| Regra | Efeito |
+|---|---|
+| `pull_request` | Toda mudança passa por PR. **0 aprovações exigidas** — o GitHub não deixa o autor aprovar o próprio PR, então exigir ≥1 travaria um mantenedor solo. As conversas precisam estar resolvidas (`required_review_thread_resolution`), o que torna os comentários do Copilot **vinculantes**. |
+| `required_status_checks` | Os testes (`Run Automated Tests`, nos 3 SOs) e o `build` da documentação **bloqueiam** o merge de fato. |
+| `code_scanning` | CodeQL: alertas de segurança `high_or_higher` e alertas de erro bloqueiam o merge. |
+| `copilot_code_review` | **Revisão automática do Copilot** em todo PR, revisando cada novo push (`review_on_push`). Grátis em repositórios públicos. |
+| `non_fast_forward` + `deletion` | Sem force-push e sem deletar a branch padrão. |
+
+**Automático × manual.** *Tudo* acima é gravável pela REST API — inclusive a revisão do Copilot, que
+é um **rule type próprio** (`copilot_code_review`), e **não** um parâmetro de `pull_request` (essa
+grafia devolve HTTP 422). Ou seja: **nada aqui exige clique na UI**. O único pré-requisito fora do
+script é o **CodeQL estar habilitado** no repositório (*default setup*), o que também é feito por API:
+
+```bash
+gh api -X PATCH repos/:owner/:repo/code-scanning/default-setup -f state=configured
+```
+
+Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segunda fonte de verdade:
+*Require code quality results* (severidade subjetiva de IA no caminho do merge — `ruff`, `mypy` e os
+gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o
+piso já é single-source em `.coveragerc`, aplicado por pre-commit + CI).
+
 ## Lançando
 
 Os releases são **dirigidos por tag** quando o projeto está conectado a um remoto no GitHub:

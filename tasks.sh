@@ -43,6 +43,14 @@ enable_pages() {
 	bash "$SCRIPT_DIR/bin/enable_pages.sh"
 }
 
+enable_repo_rules() {
+	# Apply the `pr-quality-gate` branch ruleset (PR required, CI green, CodeQL clean, Copilot
+	# review on every push) instead of clicking through Settings -> Rules. Lives in
+	# bin/enable_repo_rules.sh; idempotent (updates an existing ruleset in place) + non-blocking
+	# (skips without gh/auth/admin). Every rule is REST-settable — nothing needs a manual click.
+	bash "$SCRIPT_DIR/bin/enable_repo_rules.sh"
+}
+
 init() {
 	# Seed .env first; a failed seed is non-blocking so init still runs venv +
 	# precommit — mirrors the Makefile's '-@' on ensure_env.
@@ -50,6 +58,7 @@ init() {
 	venv
 	precommit
 	enable_pages
+	enable_repo_rules
 }
 
 changelog() {
@@ -252,6 +261,7 @@ Virtual Environment
   update_venv          Update all Poetry dependencies
   precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)
   enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin
+  enable_repo_rules    Apply the pr-quality-gate branch ruleset (PR + CI + CodeQL + Copilot review); needs gh + repo admin
   changelog            Regenerate CHANGELOG.md from git tags (cz changelog)
 
 Corporate CA
@@ -312,6 +322,7 @@ venv) venv ;;
 update_venv) update_venv ;;
 precommit) precommit ;;
 enable_pages) enable_pages ;;
+enable_repo_rules) enable_repo_rules ;;
 get_corporate_ca) get_corporate_ca ;;
 unit_tests) unit_tests ;;
 integration_tests) integration_tests ;;
