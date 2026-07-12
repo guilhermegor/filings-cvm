@@ -7,9 +7,9 @@ POETRY := bash bin/poetry_exec.sh
 # -------------------
 # VIRTUAL ENVIRONMENT
 # -------------------
-.PHONY: init ensure_env venv update_venv precommit enable_pages enable_repo_rules changelog
+.PHONY: init ensure_env venv update_venv precommit enable_pages enable_repo_rules enable_security changelog
 
-init: ensure_env venv precommit enable_pages enable_repo_rules
+init: ensure_env venv precommit enable_pages enable_repo_rules enable_security
 
 # Seed .env from .env.example for a fresh checkout. The leading '-' makes a failed
 # seed (e.g. no .env.example) non-blocking for init — venv + precommit still run.
@@ -44,6 +44,13 @@ enable_pages:
 # auth. bin/enable_repo_rules.sh is idempotent (updates an existing ruleset in place) + non-blocking.
 enable_repo_rules:
 	@bash bin/enable_repo_rules.sh
+
+# Enable the repo's free GitHub security features (private vulnerability reporting, Dependabot
+# alerts, Dependabot security updates) via the REST API instead of clicking Settings -> Security.
+# CI's GITHUB_TOKEN can't flip these; this uses the maintainer's gh auth. bin/enable_security.sh is
+# idempotent + non-blocking. Weekly version bumps are declared statically in .github/dependabot.yml.
+enable_security:
+	@bash bin/enable_security.sh
 
 # Regenerate CHANGELOG.md from git tags + Conventional Commits (cz derives sections from tags).
 # Preview locally; the published site regenerates it in the docs workflow. CI never commits it.
@@ -187,6 +194,7 @@ help:
 	@echo "  precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)"
 	@echo "  enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin"
 	@echo "  enable_repo_rules    Apply the pr-quality-gate branch ruleset (PR + CI + CodeQL + Copilot review); needs gh + repo admin"
+	@echo "  enable_security      Enable private vuln reporting + Dependabot alerts/security updates; needs gh + repo admin"
 	@echo "  changelog            Regenerate CHANGELOG.md from git tags (cz changelog)"
 	@echo ""
 	@echo "Corporate CA"

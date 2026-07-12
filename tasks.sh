@@ -51,6 +51,14 @@ enable_repo_rules() {
 	bash "$SCRIPT_DIR/bin/enable_repo_rules.sh"
 }
 
+enable_security() {
+	# Enable the repo's free GitHub security features (private vulnerability reporting, Dependabot
+	# alerts, Dependabot security updates) via the REST API instead of clicking Settings ->
+	# Security. Lives in bin/enable_security.sh; idempotent + non-blocking (skips without
+	# gh/auth/admin). Weekly version bumps are declared statically in .github/dependabot.yml.
+	bash "$SCRIPT_DIR/bin/enable_security.sh"
+}
+
 init() {
 	# Seed .env first; a failed seed is non-blocking so init still runs venv +
 	# precommit — mirrors the Makefile's '-@' on ensure_env.
@@ -59,6 +67,7 @@ init() {
 	precommit
 	enable_pages
 	enable_repo_rules
+	enable_security
 }
 
 changelog() {
@@ -262,6 +271,7 @@ Virtual Environment
   precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)
   enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin
   enable_repo_rules    Apply the pr-quality-gate branch ruleset (PR + CI + CodeQL + Copilot review); needs gh + repo admin
+  enable_security      Enable private vuln reporting + Dependabot alerts/security updates; needs gh + repo admin
   changelog            Regenerate CHANGELOG.md from git tags (cz changelog)
 
 Corporate CA
@@ -323,6 +333,7 @@ update_venv) update_venv ;;
 precommit) precommit ;;
 enable_pages) enable_pages ;;
 enable_repo_rules) enable_repo_rules ;;
+enable_security) enable_security ;;
 get_corporate_ca) get_corporate_ca ;;
 unit_tests) unit_tests ;;
 integration_tests) integration_tests ;;
