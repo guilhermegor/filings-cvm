@@ -46,6 +46,27 @@ Also captured, from a real PR's check-runs (never guessed): the required status-
 - [ ] BlueprintX lesson (`language-common`): the verified ruleset JSON + the automatic/manual
       boundary, so future scaffolds ship the gate instead of rediscovering the 422.
 
+## The automatic/manual boundary — repo config vs account PLAN
+
+Verified live on PR #69: CI + CodeQL gate the merge (`mergeStateStatus: CLEAN` only because all
+checks passed), force-push/deletion blocked — **but no Copilot review appeared**. The cause is *not*
+the ruleset (`copilot_code_review` is active in the JSON) and *not* a missing activation: the account
+**already has Copilot Free**. The rule only fires "if the author has access to Copilot code review",
+and **code review is not included in Copilot Free** — GitHub's plan page lists "*AI reviews*" as an
+**upgrade** feature, and the Free feature list has no code-review entry. So the rule is correctly
+configured and **inert: no review, no error** — the silence is the trap.
+
+- **Repository config** (all 6 rules + CodeQL default setup) → **scripted**, zero clicks. ✅
+- **Account plan** (Copilot *code review*) → needs Pro / Pro+ / Business. Copilot **Pro is free** for
+  verified students / teachers / popular-OSS maintainers; otherwise a free-tier LLM (e.g. Gemini
+  Flash) in a `pull_request` workflow is the genuinely-free reviewer.
+- ⚠️ Do **not** diagnose this from `gh api user/copilot_billing` → 404 (I did, and it was wrong):
+  that endpoint is org/enterprise seat management and 404s for a personal account **even with Copilot
+  Free active**. Read the plan page.
+- **Every other rule works regardless of any Copilot plan** — the gate is worth having as-is.
+
+Folded into `bin/enable_repo_rules.sh` (header), `docs/contributing.md`, and the BlueprintX lessons.
+
 ## Notes
 
 - CodeQL default setup was enabled separately (API, on this repo) and is a **prerequisite** for the

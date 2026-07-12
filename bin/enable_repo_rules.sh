@@ -12,6 +12,15 @@
 # the Copilot auto-review, which is its OWN rule type (`copilot_code_review`) — it is NOT a
 # parameter of `pull_request` (that spelling returns HTTP 422). Nothing here needs a click.
 #
+# THE ONE THING THIS CANNOT DO — and it is an ACCOUNT PLAN, not a REPO setting: the
+# `copilot_code_review` rule only fires "if the author has access to Copilot code review", and code
+# review is NOT included in Copilot Free (GitHub's own plan page lists "AI reviews" as an upgrade
+# feature). Without a plan that includes it (Pro / Pro+ / Business), the rule stays correctly
+# configured but INERT: no review appears and NOTHING ERRORS — the silence is the trap. Copilot Pro
+# is free for verified students / teachers / popular-OSS maintainers; otherwise use a free-tier LLM
+# in a `pull_request` workflow instead. Every OTHER rule here (PR required, CI green, CodeQL clean)
+# works regardless of any Copilot plan.
+#
 # DELIBERATELY NOT ENABLED (both would be a second source of truth for gates we already own):
 #   - "Require code quality results" — subjective AI severity levels on the merge path; ruff,
 #     mypy and the bin/check_*.py gates already enforce quality deterministically.
