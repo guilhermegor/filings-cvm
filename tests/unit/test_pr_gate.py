@@ -328,3 +328,30 @@ def test_axes_are_terminal_when_every_axis_finished() -> None:
 def test_axes_are_terminal_is_false_with_no_axes() -> None:
 	"""Nothing reported yet is not "finished" — keep polling, never render a vacuous verdict."""
 	assert pr_gate.axes_are_terminal([]) is False
+
+
+@pytest.mark.parametrize("int_status", [429, 500, 502, 503, 504])
+def test_transient_status_is_retryable(int_status: int) -> None:
+	"""A rate-limit or server-side error is retried.
+
+	Regression: a GitHub **502** on the sticky comment's PATCH killed the whole gate job, reddening
+	a PR whose every real check was green.
+
+	Parameters
+	----------
+	int_status : int
+		The transient HTTP status under test.
+	"""
+	assert pr_gate.is_retryable_status(int_status) is True
+
+
+@pytest.mark.parametrize("int_status", [400, 401, 403, 404, 422])
+def test_client_error_is_not_retryable(int_status: int) -> None:
+	"""A 4xx is a bug in the request — raise at once instead of burying it under retries.
+
+	Parameters
+	----------
+	int_status : int
+		The client-error HTTP status under test.
+	"""
+	assert pr_gate.is_retryable_status(int_status) is False

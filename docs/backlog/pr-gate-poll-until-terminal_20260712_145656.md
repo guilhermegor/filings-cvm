@@ -41,6 +41,27 @@ still said Blocked. The comment was advisory and stale.
   regression, "awaiting result" pending, and the failing-check naming. ruff + ruff-format + codespell
   clean.
 
+## Third defect — found by the PR's own CI (2026-07-12)
+
+PR #83's **Quality Gate job itself failed** (red check, 19 others green). Cause was **not** the #76
+logic: a transient **GitHub `HTTP 502 Bad Gateway`** on the sticky comment's `PATCH` raised an
+unhandled `HTTPError` and killed the job — reddening a PR whose CodeQL, docs and every test passed.
+
+Two real defects it exposed, both fixed here:
+
+- [x] **`_api()` had no retry.** A single transient 5xx/429 decided the gate's fate. Now retries on
+  `RETRYABLE_STATUS` (429/500/502/503/504) with capped exponential backoff (4 attempts, 1→2→4 s); a
+  real 4xx still raises at once, because retrying a malformed request only buries the bug. Pure
+  predicate `is_retryable_status()` so it is unit-tested offline.
+- [x] **A reporting failure failed the build.** The gate's contract is *"it reports, the ruleset
+  blocks"* (`main()` returns 0 always) — but an unhandled exception bypassed that. The poll body is
+  now wrapped: whatever survives the retries is logged and the job **exits 0**. A lost comment is
+  cosmetic; a red PR is not.
+- [x] 10 more tests (58 in file, **867 total**); ruff/format/codespell clean.
+
+**Note:** #76's fix *increased exposure* to this (polling to completion = more API calls = more
+chances to hit a hiccup), so it belongs in this PR rather than a follow-up.
+
 ## Remaining
 
 - [ ] Open PR (`Closes #76`). Class = `ci` + touches `tests/` → `risk:tests` → **not auto-merged**

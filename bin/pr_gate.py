@@ -302,8 +302,39 @@ def render_comment(
 	)
 
 
+# HTTP statuses worth retrying: GitHub's API returns a transient 5xx or a rate-limit 429 often
+# enough that a single unlucky call must not decide the gate's fate. A real 4xx (404, 422, …) is a
+# bug in the request and is raised at once — retrying it would only hide it.
+RETRYABLE_STATUS: frozenset[int] = frozenset({429, 500, 502, 503, 504})
+
+# Attempts per API call, and the base of the exponential backoff between them (1 s, 2 s, 4 s).
+_API_ATTEMPTS = 4
+_API_BACKOFF_S = 1.0
+
+
+def is_retryable_status(int_status: int) -> bool:
+	"""Say whether an HTTP status is a transient failure worth retrying.
+
+	Parameters
+	----------
+	int_status : int
+		The HTTP status code returned by the API.
+
+	Returns
+	-------
+	bool
+		True for a rate-limit or a server-side error, False for a client error.
+	"""
+	return int_status in RETRYABLE_STATUS
+
+
 def _api(str_method: str, str_url: str, dict_body: dict | None = None) -> Any:  # noqa: ANN401
-	"""Call the GitHub REST API with the workflow token.
+	"""Call the GitHub REST API with the workflow token, retrying transient failures.
+
+	A GitHub 502/503/429 is a fact of life on a busy API, and one of them once killed this whole
+	job mid-poll (a 502 on the sticky comment's PATCH). Transient statuses are retried on a capped
+	exponential backoff; a client error (4xx other than 429) raises immediately, because retrying a
+	malformed request only buries the bug.
 
 	The return is ``Any`` on purpose: this is a JSON-decode boundary, and GitHub hands back an
 	object here and an array there. Narrowing it to ``dict | list`` would only force a cast at
@@ -326,17 +357,34 @@ def _api(str_method: str, str_url: str, dict_body: dict | None = None) -> Any:  
 	Raises
 	------
 	OSError
-		If the request fails.
+		If the request still fails after the retries (``HTTPError``/``URLError`` are subclasses).
 	"""
 	bytes_body = json.dumps(dict_body).encode() if dict_body is not None else None
-	cls_req = urllib.request.Request(str_url, data=bytes_body, method=str_method)  # noqa: S310
-	cls_req.add_header("Authorization", f"Bearer {os.environ['GITHUB_TOKEN']}")
-	cls_req.add_header("Accept", "application/vnd.github+json")
-	if bytes_body is not None:
-		cls_req.add_header("Content-Type", "application/json")
-	with urllib.request.urlopen(cls_req) as cls_resp:  # noqa: S310
-		bytes_out = cls_resp.read()
-	return json.loads(bytes_out) if bytes_out else {}
+	for int_attempt in range(_API_ATTEMPTS):
+		cls_req = urllib.request.Request(str_url, data=bytes_body, method=str_method)  # noqa: S310
+		cls_req.add_header("Authorization", f"Bearer {os.environ['GITHUB_TOKEN']}")
+		cls_req.add_header("Accept", "application/vnd.github+json")
+		if bytes_body is not None:
+			cls_req.add_header("Content-Type", "application/json")
+		bool_last = int_attempt == _API_ATTEMPTS - 1
+		try:
+			with urllib.request.urlopen(cls_req) as cls_resp:  # noqa: S310
+				bytes_out = cls_resp.read()
+		except urllib.error.HTTPError as cls_exc:
+			if bool_last or not is_retryable_status(cls_exc.code):
+				raise
+			print(f"{str_method} {str_url} -> {cls_exc.code}, retrying", file=sys.stderr)
+		except urllib.error.URLError:
+			# A transport-level failure — DNS, a reset connection — is transient by the same logic.
+			if bool_last:
+				raise
+			print(f"{str_method} {str_url} -> transport error, retrying", file=sys.stderr)
+		else:
+			return json.loads(bytes_out) if bytes_out else {}
+		time.sleep(_API_BACKOFF_S * 2**int_attempt)
+	raise OSError(
+		f"{str_method} {str_url} failed after {_API_ATTEMPTS} attempts"
+	)  # pragma: no cover
 
 
 # Axis label → the check-run name prefix that feeds it.
@@ -433,14 +481,22 @@ def main() -> int:
 	str_state = "pending"
 	str_last_body = ""
 	for int_poll in range(int_max_polls):
-		list_checks = _api("GET", f"{str_api}/commits/{str_sha}/check-runs?per_page=100")
-		list_axes = _axes_from_checks(list_checks["check_runs"])
-		str_state = gate_state(list_axes)
-		str_body = render_comment(str_risk, str_size, list_axes, bool_merge)
-		if str_body != str_last_body:
-			_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
-			_upsert_comment(str_api, int_pr, str_body)
-			str_last_body = str_body
+		# The gate REPORTS, the ruleset BLOCKS. An API failure here must never fail this job and
+		# red the PR — a 502 on the sticky comment's PATCH once did exactly that, on a PR whose
+		# every real check was green. Retries live in the API seam; this is the backstop for what
+		# survives them. Log, stop reporting, exit 0 — a lost comment is cosmetic, a red PR is not.
+		try:
+			list_checks = _api("GET", f"{str_api}/commits/{str_sha}/check-runs?per_page=100")
+			list_axes = _axes_from_checks(list_checks["check_runs"])
+			str_state = gate_state(list_axes)
+			str_body = render_comment(str_risk, str_size, list_axes, bool_merge)
+			if str_body != str_last_body:
+				_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
+				_upsert_comment(str_api, int_pr, str_body)
+				str_last_body = str_body
+		except OSError as cls_exc:  # HTTPError / URLError are subclasses
+			print(f"gate reporting failed (non-fatal): {cls_exc}", file=sys.stderr)
+			break
 		# Stop ONLY when every axis has finished — never on the first red while others still run,
 		# or a transient red freezes the sticky comment on "Blocked". See the helper's docstring.
 		if axes_are_terminal(list_axes):
