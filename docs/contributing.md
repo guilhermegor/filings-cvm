@@ -152,6 +152,38 @@ Como obter revisão automática de fato:
 > de uso de **conta** → depende do plano, e não se resolve do repositório. As demais regras do gate
 > (PR obrigatório, CI verde, CodeQL limpo) funcionam **independentemente** do Copilot.
 
+### O painel de Quality Gate e o auto-merge
+
+Todo PR recebe, automaticamente (workflow `pr-gate.yaml` → `bin/pr_gate.py`):
+
+- **Rótulos**: `risk:*` (classe de risco pelos caminhos alterados), `size:*` (XS…XL, pelo volume do
+  diff) e `gate:passing` / `gate:failing`.
+- **Um comentário fixo** (atualizado no lugar, nunca empilhado) com a tabela por eixo — testes nos 3
+  SOs, build da documentação, CodeQL.
+
+**Auto-merge — por caminho, nunca por tamanho.** Um diff pequeno **não** é um diff seguro aqui: a
+falha real desta biblioteca é semântica (uma coluna de `FileContract` aterrada errado, um `date_ref`
+pegando a partição errada). Uma mudança de **um caractere** em `_internal/config/contracts/` é
+minúscula e catastrófica — e **todos os testes passam**, porque os testes afirmam o contrato que foi
+escrito. Por isso a classificação é por **caminho**:
+
+| Classe | Caminhos | Auto-merge? |
+|---|---|---|
+| `docs` | `docs/**`, `*.md`, `mkdocs.yml` | ✅ |
+| `ci` | `.github/**`, `bin/**`, `Makefile`, `tasks.sh`, configs de lint | ✅ |
+| `deps` | `poetry.lock`, `pyproject.toml` | ✅ (os testes são o gate) |
+| `tests` | `tests/**` | ❌ — definem o que "passar" significa |
+| `src` | `src/filings_cvm/**` | ❌ **nunca**, em nenhum tamanho |
+| `other` | qualquer outro | ❌ (desconhecido = inseguro) |
+
+Mesmo numa classe auto-fundível, o auto-merge **só acontece com o rótulo `automerge`** (opt-in
+explícito — a classificação não é consentimento), nunca com `do-not-merge`, e nunca num diff `XL`.
+
+E ele **não burla nada**: usa o **auto-merge nativo** do GitHub, que segura o merge até *todos* os
+checks obrigatórios do ruleset ficarem verdes. O script decide apenas *elegibilidade*; quem decide
+*se passou* continua sendo o ruleset. (Auto-**aprovação** seria inútil aqui: o ruleset exige **0**
+aprovações, então uma aprovação de bot não destravaria nada.)
+
 Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segunda fonte de verdade:
 *Require code quality results* (severidade subjetiva de IA no caminho do merge — `ruff`, `mypy` e os
 gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o

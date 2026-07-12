@@ -1,0 +1,66 @@
+name: PR Quality Gate
+
+# Labels the PR (risk / size / gate), publishes ONE sticky status comment, and — only for low-risk
+# change classes that opted in with the `automerge` label — enables GitHub's NATIVE auto-merge.
+#
+# Native auto-merge bypasses nothing: GitHub holds the merge until every required check of the
+# `pr-quality-gate` ruleset is green, then merges. This workflow only decides *eligibility* (which
+# paths changed, did the author opt in) — never *whether the checks passed*. `src/` is never
+# auto-merged at any size: a one-character change to a FileContract is tiny AND catastrophic, and
+# every test still passes because the tests assert the contract that was written.
+#
+# Two triggers, on purpose:
+#   - pull_request       — classify + label + comment as soon as the PR changes (incl. (un)labeled,
+#                          so adding `automerge` takes effect immediately).
+#   - workflow_run       — re-run once the test/docs workflows FINISH, so the sticky comment shows
+#                          the final per-axis result instead of freezing on "em execução".
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  workflow_run:
+    workflows: ["Run Tests", "Docs - Build Check"]
+    types: [completed]
+
+permissions:
+  contents: write        # enable auto-merge
+  pull-requests: write   # labels + the sticky comment
+  checks: read
+
+jobs:
+  gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # On `pull_request` the number is right there. On `workflow_run` it is not, so resolve it from
+      # the head SHA the finished run reported — skipping cleanly when that run wasn't for a PR.
+      - name: Resolve PR Number
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          PR_FROM_EVENT: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            echo "number=$PR_FROM_EVENT" >> "$GITHUB_OUTPUT"
+          else
+            NUM=$(gh api "repos/$REPO/commits/$HEAD_SHA/pulls" --jq '.[0].number // empty')
+            echo "number=$NUM" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Quality Gate
+        if: steps.pr.outputs.number != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: python bin/pr_gate.py
