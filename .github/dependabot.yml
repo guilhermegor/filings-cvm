@@ -1,30 +1,53 @@
-# Dependabot version updates (weekly). Distinct from Dependabot *security* updates (auto-PRs for
-# known CVEs), which are toggled via the API in bin/enable_security.sh — these are routine bumps
-# of dependencies and Actions, keeping the lockfile and CI current.
+# Dependabot **version** updates (routine bumps) — distinct from Dependabot **security** updates
+# (CVE-triggered auto-PRs), which are toggled via the API in bin/enable_security.sh.
 #
-# Two ecosystems:
-#   - pip           — Poetry is detected here via pyproject.toml + poetry.lock (Dependabot reads
-#                     Poetry projects under the "pip" ecosystem).
-#   - github-actions — bumps the action versions pinned in .github/workflows/* (this repo saw a
-#                      Node-20-deprecation warning on download-artifact; version updates fix that).
+# WHY THIS MATTERS HERE: poetry.lock is committed and CI installs FROM it (poetry install --no-root)
+# and refuses to re-lock (see .github/workflows/tests.yaml). So CI tests the frozen locked versions,
+# while a consumer running `pip install filings-cvm` gets the latest the loose `>=` ranges allow.
+# Those drift apart. This file keeps the lock fresh so CI tests ~what consumers actually install —
+# WITHOUT narrowing the library's ranges (versioning-strategy: lockfile-only leaves pyproject alone,
+# which also keeps it in sync with the lock, so the CI lock-sync guard is never tripped).
 version: 2
 updates:
+  # CI action versions — the low-noise win: keeps workflows off deprecated runtimes (this repo hit
+  # a Node-20 deprecation on download-artifact). Grouped so all action bumps arrive as one PR.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    labels:
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
+
+  # Python deps (Poetry). lockfile-only: bump poetry.lock, never rewrite the `>=` ranges — a library
+  # must not narrow its ranges for consumers. Minor/patch are grouped into one PR; a MAJOR arrives on
+  # its own PR so it gets scrutiny (majors are where breakage lives). CI runs the full gate on each
+  # PR, so a bump that breaks lint/tests reddens the dependabot PR — never main.
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+    versioning-strategy: "lockfile-only"
+    groups:
+      python-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # We deliberately support pandas 2.x AND 3.x (tested on both) — a major bump is a manual,
+      # reviewed decision, not an automated one. Minor/patch pandas still flow through.
+      - dependency-name: "pandas"
+        update-types:
+          - "version-update:semver-major"
     open-pull-requests-limit: 5
     labels:
       - "deps"
     commit-message:
       prefix: "chore(deps)"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "ci"
-    commit-message:
-      prefix: "chore(ci)"
