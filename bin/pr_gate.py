@@ -198,6 +198,35 @@ def gate_state(list_axes: list[tuple[str, str, str]]) -> str:
 	return "passing"
 
 
+def axes_are_terminal(list_axes: list[tuple[str, str, str]]) -> bool:
+	"""Say whether every axis has finished — the ONLY condition that may stop the poll loop.
+
+	**Not the same question as** :func:`gate_state` ``!= "pending"``. ``gate_state`` deliberately
+	lets a red axis outrank a pending one *for display* (a known failure is not "still deciding"),
+	so a transient ❌ on one axis makes the state ``failing`` while other axes are still running.
+	Stopping the loop on that is the freeze bug this function exists to prevent: a CodeQL analysis
+	that is momentarily red — or simply has not reported a result for the new head SHA yet — froze
+	the sticky comment on "Blocked" seconds before every check went green, and nothing ever
+	revisited it (the gate only runs on a push; no push, no re-render).
+
+	So: keep polling while ANY axis is pending, even when another is already red. A red that turns
+	green then corrects itself; a red that stays red still renders as ``failing`` at the end.
+
+	Parameters
+	----------
+	list_axes : list of tuple of (str, str, str)
+		One ``(name, icon, detail)`` per checked axis.
+
+	Returns
+	-------
+	bool
+		True when at least one axis exists and none is still pending.
+	"""
+	if not list_axes:
+		return False
+	return all(str_icon != "⏳" for _, str_icon, _ in list_axes)
+
+
 def render_comment(
 	str_risk: str,
 	str_size: str,
@@ -310,8 +339,27 @@ def _api(str_method: str, str_url: str, dict_body: dict | None = None) -> Any:  
 	return json.loads(bytes_out) if bytes_out else {}
 
 
+# Axis label → the check-run name prefix that feeds it.
+#
+# The CodeQL axis tracks the **Analyze** runs, NOT the check literally named `CodeQL`. Under
+# code-scanning default setup, `CodeQL` is an *umbrella* status that completes in ~2 seconds — long
+# before the real analyses finish — and it flaps to a non-success state while it waits for a result
+# on a new head SHA. Reading that umbrella is what made the gate report "CodeQL failing" on a PR
+# whose CodeQL was, seconds later, entirely green. The Analyze runs are the analyses themselves:
+# they run to completion, and their conclusion is the real answer.
+_AXIS_PREFIXES: dict[str, str] = {
+	"Tests (3 OSes)": "Run Automated Tests",
+	"Docs (build)": "build",
+	"Security (CodeQL)": "Analyze",
+}
+
+
 def _axes_from_checks(list_check_runs: list[dict]) -> list[tuple[str, str, str]]:
 	"""Fold the head commit's check-runs into the gate's display axes.
+
+	A failing axis **names the checks that failed** rather than only counting them: the point of
+	the sticky comment is that a reader learns *why* the gate is red without opening the checks
+	tab.
 
 	Parameters
 	----------
@@ -323,38 +371,40 @@ def _axes_from_checks(list_check_runs: list[dict]) -> list[tuple[str, str, str]]
 	list of tuple of (str, str, str)
 		One ``(name, icon, detail)`` per axis, in display order.
 	"""
-	dict_axes = {
-		"Tests (3 OSes)": "Run Automated Tests",
-		"Docs (build)": "build",
-		"Security (CodeQL)": "CodeQL",
-	}
 	list_out: list[tuple[str, str, str]] = []
-	for str_label, str_prefix in dict_axes.items():
+	for str_label, str_prefix in _AXIS_PREFIXES.items():
 		list_matching = [c for c in list_check_runs if c["name"].startswith(str_prefix)]
 		if not list_matching:
-			list_out.append((str_label, "⏳", "queued"))
+			# No check-run has reported for this axis on this head SHA yet. That is PENDING, not a
+			# failure — a fresh push has a window where the analyses simply have not registered.
+			list_out.append((str_label, "⏳", "awaiting result"))
 			continue
 		if any(c["status"] != "completed" for c in list_matching):
 			list_out.append((str_label, "⏳", "running"))
 		elif all(c["conclusion"] == "success" for c in list_matching):
 			list_out.append((str_label, "✅", f"{len(list_matching)} check(s) OK"))
 		else:
-			list_int_failed = [c for c in list_matching if c["conclusion"] != "success"]
-			list_out.append((str_label, "❌", f"{len(list_int_failed)} check(s) failing"))
+			list_failed = [c for c in list_matching if c["conclusion"] != "success"]
+			str_why = ", ".join(f"`{c['name']}` {c['conclusion']}" for c in list_failed)
+			list_out.append((str_label, "❌", str_why))
 	return list_out
 
 
 def main() -> int:
 	"""Classify the PR, label it, publish the sticky comment, and enable auto-merge when eligible.
 
-	Auto-merge is enabled once, up front — it is independent of the axes, because GitHub gates the
-	actual merge on the ruleset's required checks. The axes are then **polled in-run** until they
-	reach a terminal state, so the sticky comment lands on the final result instead of freezing on
-	"running". Polling is self-contained on purpose: a ``workflow_run`` trigger only fires from the
-	default branch's copy of the file, so it can never fire for the PR that introduces the gate.
-	The comment and labels are rewritten only when the rendered body changes (a slow check does not
-	spam edits), and ``GATE_MAX_POLLS`` / ``GATE_POLL_SECONDS`` bound the wait (~13 min by default)
-	so a check that never registers cannot hang the job.
+	Auto-merge is enabled once, up front — it is independent of the axes, because GitHub gates
+	the actual merge on the ruleset's required checks. The axes are then **polled in-run until
+	EVERY axis is terminal** (:func:`axes_are_terminal`) — *not* until the state stops being
+	``pending``, which is the bug this loop used to have: a red axis outranks a pending one for
+	display, so a momentarily-red CodeQL broke the loop while other checks were still running,
+	freezing the sticky comment on "Blocked" for a PR that went green seconds later.
+
+	Polling is self-contained on purpose: a ``workflow_run`` trigger only fires from the default
+	branch's copy of the file, so it can never fire for the PR that introduces the gate. The
+	comment and labels are rewritten only when the rendered body changes (a slow check does not
+	spam edits), and ``GATE_MAX_POLLS`` / ``GATE_POLL_SECONDS`` bound the wait (~13 min by
+	default) so a check that never registers cannot hang the job.
 
 	Returns
 	-------
@@ -391,7 +441,9 @@ def main() -> int:
 			_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
 			_upsert_comment(str_api, int_pr, str_body)
 			str_last_body = str_body
-		if str_state != "pending":
+		# Stop ONLY when every axis has finished — never on the first red while others still run,
+		# or a transient red freezes the sticky comment on "Blocked". See the helper's docstring.
+		if axes_are_terminal(list_axes):
 			break
 		if int_poll < int_max_polls - 1:
 			time.sleep(int_poll_s)

@@ -222,7 +222,7 @@ def test_axes_from_checks_folds_matrix_runs_into_one_axis() -> None:
 			"conclusion": "success",
 		},
 		{"name": "build", "status": "completed", "conclusion": "success"},
-		{"name": "CodeQL", "status": "completed", "conclusion": "success"},
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "success"},
 	]
 
 	list_axes = pr_gate._axes_from_checks(list_runs)
@@ -239,7 +239,7 @@ def test_axes_from_checks_reports_a_failing_check() -> None:
 			"conclusion": "failure",
 		},
 		{"name": "build", "status": "completed", "conclusion": "success"},
-		{"name": "CodeQL", "status": "completed", "conclusion": "success"},
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "success"},
 	]
 
 	list_axes = pr_gate._axes_from_checks(list_runs)
@@ -260,3 +260,71 @@ def test_axes_from_checks_marks_a_pending_check() -> None:
 	list_axes = pr_gate._axes_from_checks(list_runs)
 
 	assert list_axes[0][1] == "⏳"
+
+
+def test_codeql_axis_tracks_the_analyze_runs_not_the_umbrella_check() -> None:
+	"""The CodeQL axis reads `Analyze (…)`, never the 2-second `CodeQL` umbrella check.
+
+	Regression (#76): under code-scanning default setup, the check named `CodeQL` completes in ~2
+	seconds and flaps while awaiting a result for a new head SHA, long before the real analysis
+	finishes. Reading it made the gate report "CodeQL failing" on a PR whose CodeQL went fully
+	green seconds later.
+	"""
+	list_runs = [
+		{"name": "CodeQL", "status": "completed", "conclusion": "failure"},
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "success"},
+		{"name": "Analyze (actions)", "status": "completed", "conclusion": "success"},
+	]
+
+	str_label, str_icon, _ = pr_gate._axes_from_checks(list_runs)[2]
+
+	assert str_label == "Security (CodeQL)"
+	assert str_icon == "✅"
+
+
+def test_codeql_axis_is_pending_before_any_analysis_reports() -> None:
+	"""No `Analyze (…)` run yet on this head SHA is PENDING, not a failure."""
+	list_runs = [{"name": "build", "status": "completed", "conclusion": "success"}]
+
+	_, str_icon, str_detail = pr_gate._axes_from_checks(list_runs)[2]
+
+	assert str_icon == "⏳"
+	assert str_detail == "awaiting result"
+
+
+def test_failing_axis_names_the_failing_checks() -> None:
+	"""A red axis says WHICH check failed — the comment must explain itself."""
+	list_runs = [
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "failure"},
+	]
+
+	_, _, str_detail = pr_gate._axes_from_checks(list_runs)[2]
+
+	assert "Analyze (python)" in str_detail
+	assert "failure" in str_detail
+
+
+def test_axes_are_terminal_is_false_while_any_axis_still_runs() -> None:
+	"""THE freeze regression (#76): a red axis beside a pending one is NOT terminal.
+
+	`gate_state` reports `failing` here (a red outranks a pending, for display), and the old loop
+	broke on `state != "pending"` — freezing the sticky comment on "Blocked" seconds before the
+	pending checks went green, with nothing left to revisit it. The loop must keep polling.
+	"""
+	list_mixed = [("Tests", "⏳", "running"), ("CodeQL", "❌", "1 failing")]
+
+	assert pr_gate.gate_state(list_mixed) == "failing"
+	assert pr_gate.axes_are_terminal(list_mixed) is False
+
+
+def test_axes_are_terminal_when_every_axis_finished() -> None:
+	"""All axes done — green or red — is terminal; the loop may stop."""
+	list_red = [("Tests", "✅", "ok"), ("CodeQL", "❌", "1 failing")]
+
+	assert pr_gate.axes_are_terminal(list_red) is True
+	assert pr_gate.axes_are_terminal([("Tests", "✅", "ok"), ("CodeQL", "✅", "ok")]) is True
+
+
+def test_axes_are_terminal_is_false_with_no_axes() -> None:
+	"""Nothing reported yet is not "finished" — keep polling, never render a vacuous verdict."""
+	assert pr_gate.axes_are_terminal([]) is False
