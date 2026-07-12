@@ -222,7 +222,7 @@ def test_axes_from_checks_folds_matrix_runs_into_one_axis() -> None:
 			"conclusion": "success",
 		},
 		{"name": "build", "status": "completed", "conclusion": "success"},
-		{"name": "CodeQL", "status": "completed", "conclusion": "success"},
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "success"},
 	]
 
 	list_axes = pr_gate._axes_from_checks(list_runs)
@@ -239,7 +239,7 @@ def test_axes_from_checks_reports_a_failing_check() -> None:
 			"conclusion": "failure",
 		},
 		{"name": "build", "status": "completed", "conclusion": "success"},
-		{"name": "CodeQL", "status": "completed", "conclusion": "success"},
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "success"},
 	]
 
 	list_axes = pr_gate._axes_from_checks(list_runs)
@@ -260,3 +260,98 @@ def test_axes_from_checks_marks_a_pending_check() -> None:
 	list_axes = pr_gate._axes_from_checks(list_runs)
 
 	assert list_axes[0][1] == "⏳"
+
+
+def test_codeql_axis_tracks_the_analyze_runs_not_the_umbrella_check() -> None:
+	"""The CodeQL axis reads `Analyze (…)`, never the 2-second `CodeQL` umbrella check.
+
+	Regression (#76): under code-scanning default setup, the check named `CodeQL` completes in ~2
+	seconds and flaps while awaiting a result for a new head SHA, long before the real analysis
+	finishes. Reading it made the gate report "CodeQL failing" on a PR whose CodeQL went fully
+	green seconds later.
+	"""
+	list_runs = [
+		{"name": "CodeQL", "status": "completed", "conclusion": "failure"},
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "success"},
+		{"name": "Analyze (actions)", "status": "completed", "conclusion": "success"},
+	]
+
+	str_label, str_icon, _ = pr_gate._axes_from_checks(list_runs)[2]
+
+	assert str_label == "Security (CodeQL)"
+	assert str_icon == "✅"
+
+
+def test_codeql_axis_is_pending_before_any_analysis_reports() -> None:
+	"""No `Analyze (…)` run yet on this head SHA is PENDING, not a failure."""
+	list_runs = [{"name": "build", "status": "completed", "conclusion": "success"}]
+
+	_, str_icon, str_detail = pr_gate._axes_from_checks(list_runs)[2]
+
+	assert str_icon == "⏳"
+	assert str_detail == "awaiting result"
+
+
+def test_failing_axis_names_the_failing_checks() -> None:
+	"""A red axis says WHICH check failed — the comment must explain itself."""
+	list_runs = [
+		{"name": "Analyze (python)", "status": "completed", "conclusion": "failure"},
+	]
+
+	_, _, str_detail = pr_gate._axes_from_checks(list_runs)[2]
+
+	assert "Analyze (python)" in str_detail
+	assert "failure" in str_detail
+
+
+def test_axes_are_terminal_is_false_while_any_axis_still_runs() -> None:
+	"""THE freeze regression (#76): a red axis beside a pending one is NOT terminal.
+
+	`gate_state` reports `failing` here (a red outranks a pending, for display), and the old loop
+	broke on `state != "pending"` — freezing the sticky comment on "Blocked" seconds before the
+	pending checks went green, with nothing left to revisit it. The loop must keep polling.
+	"""
+	list_mixed = [("Tests", "⏳", "running"), ("CodeQL", "❌", "1 failing")]
+
+	assert pr_gate.gate_state(list_mixed) == "failing"
+	assert pr_gate.axes_are_terminal(list_mixed) is False
+
+
+def test_axes_are_terminal_when_every_axis_finished() -> None:
+	"""All axes done — green or red — is terminal; the loop may stop."""
+	list_red = [("Tests", "✅", "ok"), ("CodeQL", "❌", "1 failing")]
+
+	assert pr_gate.axes_are_terminal(list_red) is True
+	assert pr_gate.axes_are_terminal([("Tests", "✅", "ok"), ("CodeQL", "✅", "ok")]) is True
+
+
+def test_axes_are_terminal_is_false_with_no_axes() -> None:
+	"""Nothing reported yet is not "finished" — keep polling, never render a vacuous verdict."""
+	assert pr_gate.axes_are_terminal([]) is False
+
+
+@pytest.mark.parametrize("int_status", [429, 500, 502, 503, 504])
+def test_transient_status_is_retryable(int_status: int) -> None:
+	"""A rate-limit or server-side error is retried.
+
+	Regression: a GitHub **502** on the sticky comment's PATCH killed the whole gate job, reddening
+	a PR whose every real check was green.
+
+	Parameters
+	----------
+	int_status : int
+		The transient HTTP status under test.
+	"""
+	assert pr_gate.is_retryable_status(int_status) is True
+
+
+@pytest.mark.parametrize("int_status", [400, 401, 403, 404, 422])
+def test_client_error_is_not_retryable(int_status: int) -> None:
+	"""A 4xx is a bug in the request — raise at once instead of burying it under retries.
+
+	Parameters
+	----------
+	int_status : int
+		The client-error HTTP status under test.
+	"""
+	assert pr_gate.is_retryable_status(int_status) is False

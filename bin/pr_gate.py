@@ -198,6 +198,35 @@ def gate_state(list_axes: list[tuple[str, str, str]]) -> str:
 	return "passing"
 
 
+def axes_are_terminal(list_axes: list[tuple[str, str, str]]) -> bool:
+	"""Say whether every axis has finished — the ONLY condition that may stop the poll loop.
+
+	**Not the same question as** :func:`gate_state` ``!= "pending"``. ``gate_state`` deliberately
+	lets a red axis outrank a pending one *for display* (a known failure is not "still deciding"),
+	so a transient ❌ on one axis makes the state ``failing`` while other axes are still running.
+	Stopping the loop on that is the freeze bug this function exists to prevent: a CodeQL analysis
+	that is momentarily red — or simply has not reported a result for the new head SHA yet — froze
+	the sticky comment on "Blocked" seconds before every check went green, and nothing ever
+	revisited it (the gate only runs on a push; no push, no re-render).
+
+	So: keep polling while ANY axis is pending, even when another is already red. A red that turns
+	green then corrects itself; a red that stays red still renders as ``failing`` at the end.
+
+	Parameters
+	----------
+	list_axes : list of tuple of (str, str, str)
+		One ``(name, icon, detail)`` per checked axis.
+
+	Returns
+	-------
+	bool
+		True when at least one axis exists and none is still pending.
+	"""
+	if not list_axes:
+		return False
+	return all(str_icon != "⏳" for _, str_icon, _ in list_axes)
+
+
 def render_comment(
 	str_risk: str,
 	str_size: str,
@@ -273,8 +302,49 @@ def render_comment(
 	)
 
 
+# HTTP statuses worth retrying: GitHub's API returns a transient 5xx or a rate-limit 429 often
+# enough that a single unlucky call must not decide the gate's fate. A real 4xx — 404, 422, … — is
+# a bug in the request and is raised at once, since retrying it would only hide it.
+#
+# YES, THE LIBRARY ALREADY HAS A RETRY SEAM, and no, it cannot be reused here. The proper seam is
+# `filings_cvm._internal.utils.retry.call_with_backoff` — but this script runs in CI as a bare
+# `python bin/pr_gate.py` with only `actions/setup-python`: the package is NEVER installed in that
+# job. Importing the seam would first execute `filings_cvm/__init__`, which pulls in pandas and
+# pydantic, so the import dies. Reusing it would mean installing the whole library — pandas, numpy,
+# pydantic — into a job whose only purpose is to post one comment, and coupling the CI gate to the
+# library's dependency tree. The stdlib lines below are the cheaper trade and keep this script's
+# zero-dependency contract (see the module docstring). Revisit only if the gate ever needs the
+# installed package for something else anyway.
+RETRYABLE_STATUS: frozenset[int] = frozenset({429, 500, 502, 503, 504})
+
+# Attempts per API call, and the base of the exponential backoff between them (1 s, 2 s, 4 s).
+_API_ATTEMPTS = 4
+_API_BACKOFF_S = 1.0
+
+
+def is_retryable_status(int_status: int) -> bool:
+	"""Say whether an HTTP status is a transient failure worth retrying.
+
+	Parameters
+	----------
+	int_status : int
+		The HTTP status code returned by the API.
+
+	Returns
+	-------
+	bool
+		True for a rate-limit or a server-side error, False for a client error.
+	"""
+	return int_status in RETRYABLE_STATUS
+
+
 def _api(str_method: str, str_url: str, dict_body: dict | None = None) -> Any:  # noqa: ANN401
-	"""Call the GitHub REST API with the workflow token.
+	"""Call the GitHub REST API with the workflow token, retrying transient failures.
+
+	A GitHub 502/503/429 is a fact of life on a busy API, and one of them once killed this whole
+	job mid-poll (a 502 on the sticky comment's PATCH). Transient statuses are retried on a capped
+	exponential backoff; a client error (4xx other than 429) raises immediately, because retrying a
+	malformed request only buries the bug.
 
 	The return is ``Any`` on purpose: this is a JSON-decode boundary, and GitHub hands back an
 	object here and an array there. Narrowing it to ``dict | list`` would only force a cast at
@@ -297,21 +367,57 @@ def _api(str_method: str, str_url: str, dict_body: dict | None = None) -> Any:  
 	Raises
 	------
 	OSError
-		If the request fails.
+		If the request still fails after the retries (``HTTPError``/``URLError`` are subclasses).
 	"""
 	bytes_body = json.dumps(dict_body).encode() if dict_body is not None else None
-	cls_req = urllib.request.Request(str_url, data=bytes_body, method=str_method)  # noqa: S310
-	cls_req.add_header("Authorization", f"Bearer {os.environ['GITHUB_TOKEN']}")
-	cls_req.add_header("Accept", "application/vnd.github+json")
-	if bytes_body is not None:
-		cls_req.add_header("Content-Type", "application/json")
-	with urllib.request.urlopen(cls_req) as cls_resp:  # noqa: S310
-		bytes_out = cls_resp.read()
-	return json.loads(bytes_out) if bytes_out else {}
+	for int_attempt in range(_API_ATTEMPTS):
+		cls_req = urllib.request.Request(str_url, data=bytes_body, method=str_method)  # noqa: S310
+		cls_req.add_header("Authorization", f"Bearer {os.environ['GITHUB_TOKEN']}")
+		cls_req.add_header("Accept", "application/vnd.github+json")
+		if bytes_body is not None:
+			cls_req.add_header("Content-Type", "application/json")
+		bool_last = int_attempt == _API_ATTEMPTS - 1
+		try:
+			with urllib.request.urlopen(cls_req) as cls_resp:  # noqa: S310
+				bytes_out = cls_resp.read()
+		except urllib.error.HTTPError as cls_exc:
+			if bool_last or not is_retryable_status(cls_exc.code):
+				raise
+			print(f"{str_method} {str_url} -> {cls_exc.code}, retrying", file=sys.stderr)
+		except urllib.error.URLError:
+			# A transport-level failure — DNS, a reset connection — is transient by the same logic.
+			if bool_last:
+				raise
+			print(f"{str_method} {str_url} -> transport error, retrying", file=sys.stderr)
+		else:
+			return json.loads(bytes_out) if bytes_out else {}
+		time.sleep(_API_BACKOFF_S * 2**int_attempt)
+	raise OSError(
+		f"{str_method} {str_url} failed after {_API_ATTEMPTS} attempts"
+	)  # pragma: no cover
+
+
+# Axis label → the check-run name prefix that feeds it.
+#
+# The CodeQL axis tracks the **Analyze** runs, NOT the check literally named `CodeQL`. Under
+# code-scanning default setup, `CodeQL` is an *umbrella* status that completes in ~2 seconds — long
+# before the real analyses finish — and it flaps to a non-success state while it waits for a result
+# on a new head SHA. Reading that umbrella is what made the gate report "CodeQL failing" on a PR
+# whose CodeQL was, seconds later, entirely green. The Analyze runs are the analyses themselves:
+# they run to completion, and their conclusion is the real answer.
+_AXIS_PREFIXES: dict[str, str] = {
+	"Tests (3 OSes)": "Run Automated Tests",
+	"Docs (build)": "build",
+	"Security (CodeQL)": "Analyze",
+}
 
 
 def _axes_from_checks(list_check_runs: list[dict]) -> list[tuple[str, str, str]]:
 	"""Fold the head commit's check-runs into the gate's display axes.
+
+	A failing axis **names the checks that failed** rather than only counting them: the point of
+	the sticky comment is that a reader learns *why* the gate is red without opening the checks
+	tab.
 
 	Parameters
 	----------
@@ -323,38 +429,40 @@ def _axes_from_checks(list_check_runs: list[dict]) -> list[tuple[str, str, str]]
 	list of tuple of (str, str, str)
 		One ``(name, icon, detail)`` per axis, in display order.
 	"""
-	dict_axes = {
-		"Tests (3 OSes)": "Run Automated Tests",
-		"Docs (build)": "build",
-		"Security (CodeQL)": "CodeQL",
-	}
 	list_out: list[tuple[str, str, str]] = []
-	for str_label, str_prefix in dict_axes.items():
+	for str_label, str_prefix in _AXIS_PREFIXES.items():
 		list_matching = [c for c in list_check_runs if c["name"].startswith(str_prefix)]
 		if not list_matching:
-			list_out.append((str_label, "⏳", "queued"))
+			# No check-run has reported for this axis on this head SHA yet. That is PENDING, not a
+			# failure — a fresh push has a window where the analyses simply have not registered.
+			list_out.append((str_label, "⏳", "awaiting result"))
 			continue
 		if any(c["status"] != "completed" for c in list_matching):
 			list_out.append((str_label, "⏳", "running"))
 		elif all(c["conclusion"] == "success" for c in list_matching):
 			list_out.append((str_label, "✅", f"{len(list_matching)} check(s) OK"))
 		else:
-			list_int_failed = [c for c in list_matching if c["conclusion"] != "success"]
-			list_out.append((str_label, "❌", f"{len(list_int_failed)} check(s) failing"))
+			list_failed = [c for c in list_matching if c["conclusion"] != "success"]
+			str_why = ", ".join(f"`{c['name']}` {c['conclusion']}" for c in list_failed)
+			list_out.append((str_label, "❌", str_why))
 	return list_out
 
 
 def main() -> int:
 	"""Classify the PR, label it, publish the sticky comment, and enable auto-merge when eligible.
 
-	Auto-merge is enabled once, up front — it is independent of the axes, because GitHub gates the
-	actual merge on the ruleset's required checks. The axes are then **polled in-run** until they
-	reach a terminal state, so the sticky comment lands on the final result instead of freezing on
-	"running". Polling is self-contained on purpose: a ``workflow_run`` trigger only fires from the
-	default branch's copy of the file, so it can never fire for the PR that introduces the gate.
-	The comment and labels are rewritten only when the rendered body changes (a slow check does not
-	spam edits), and ``GATE_MAX_POLLS`` / ``GATE_POLL_SECONDS`` bound the wait (~13 min by default)
-	so a check that never registers cannot hang the job.
+	Auto-merge is enabled once, up front — it is independent of the axes, because GitHub gates
+	the actual merge on the ruleset's required checks. The axes are then **polled in-run until
+	EVERY axis is terminal** (:func:`axes_are_terminal`) — *not* until the state stops being
+	``pending``, which is the bug this loop used to have: a red axis outranks a pending one for
+	display, so a momentarily-red CodeQL broke the loop while other checks were still running,
+	freezing the sticky comment on "Blocked" for a PR that went green seconds later.
+
+	Polling is self-contained on purpose: a ``workflow_run`` trigger only fires from the default
+	branch's copy of the file, so it can never fire for the PR that introduces the gate. The
+	comment and labels are rewritten only when the rendered body changes (a slow check does not
+	spam edits), and ``GATE_MAX_POLLS`` / ``GATE_POLL_SECONDS`` bound the wait (~13 min by
+	default) so a check that never registers cannot hang the job.
 
 	Returns
 	-------
@@ -383,15 +491,25 @@ def main() -> int:
 	str_state = "pending"
 	str_last_body = ""
 	for int_poll in range(int_max_polls):
-		list_checks = _api("GET", f"{str_api}/commits/{str_sha}/check-runs?per_page=100")
-		list_axes = _axes_from_checks(list_checks["check_runs"])
-		str_state = gate_state(list_axes)
-		str_body = render_comment(str_risk, str_size, list_axes, bool_merge)
-		if str_body != str_last_body:
-			_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
-			_upsert_comment(str_api, int_pr, str_body)
-			str_last_body = str_body
-		if str_state != "pending":
+		# The gate REPORTS, the ruleset BLOCKS. An API failure here must never fail this job and
+		# red the PR — a 502 on the sticky comment's PATCH once did exactly that, on a PR whose
+		# every real check was green. Retries live in the API seam; this is the backstop for what
+		# survives them. Log, stop reporting, exit 0 — a lost comment is cosmetic, a red PR is not.
+		try:
+			list_checks = _api("GET", f"{str_api}/commits/{str_sha}/check-runs?per_page=100")
+			list_axes = _axes_from_checks(list_checks["check_runs"])
+			str_state = gate_state(list_axes)
+			str_body = render_comment(str_risk, str_size, list_axes, bool_merge)
+			if str_body != str_last_body:
+				_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
+				_upsert_comment(str_api, int_pr, str_body)
+				str_last_body = str_body
+		except OSError as cls_exc:  # HTTPError / URLError are subclasses
+			print(f"gate reporting failed (non-fatal): {cls_exc}", file=sys.stderr)
+			break
+		# Stop ONLY when every axis has finished — never on the first red while others still run,
+		# or a transient red freezes the sticky comment on "Blocked". See the helper's docstring.
+		if axes_are_terminal(list_axes):
 			break
 		if int_poll < int_max_polls - 1:
 			time.sleep(int_poll_s)
