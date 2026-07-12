@@ -1,0 +1,30 @@
+# Dependabot version updates (weekly). Distinct from Dependabot *security* updates (auto-PRs for
+# known CVEs), which are toggled via the API in bin/enable_security.sh — these are routine bumps
+# of dependencies and Actions, keeping the lockfile and CI current.
+#
+# Two ecosystems:
+#   - pip           — Poetry is detected here via pyproject.toml + poetry.lock (Dependabot reads
+#                     Poetry projects under the "pip" ecosystem).
+#   - github-actions — bumps the action versions pinned in .github/workflows/* (this repo saw a
+#                      Node-20-deprecation warning on download-artifact; version updates fix that).
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "deps"
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
