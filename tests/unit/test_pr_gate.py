@@ -90,45 +90,41 @@ def test_size_bucket_maps_diff_volume(int_add: int, int_del: int, str_expected: 
 	assert pr_gate.size_bucket(int_add, int_del) == str_expected
 
 
-def test_src_is_never_auto_mergeable_even_when_tiny_and_opted_in() -> None:
-	"""THE core safety rule: a one-line `src/` change with the opt-in label still needs a human."""
-	assert pr_gate.is_auto_mergeable("src", "XS", [pr_gate.OPT_IN_LABEL]) is False
+def test_src_is_never_auto_mergeable_even_when_tiny() -> None:
+	"""THE core safety rule: a one-line `src/` change still needs a human — no label can arm it."""
+	assert pr_gate.is_auto_mergeable("src", "XS", []) is False
 
 
 def test_tests_class_is_not_auto_mergeable() -> None:
 	"""Test-only changes also wait for review — they define what "passing" means."""
-	assert pr_gate.is_auto_mergeable("tests", "S", [pr_gate.OPT_IN_LABEL]) is False
+	assert pr_gate.is_auto_mergeable("tests", "S", []) is False
 
 
-def test_auto_merge_requires_the_opt_in_label() -> None:
-	"""Classification alone is not consent — the label is."""
-	assert pr_gate.is_auto_mergeable("docs", "S", []) is False
-	assert pr_gate.is_auto_mergeable("docs", "S", [pr_gate.OPT_IN_LABEL]) is True
+def test_safe_class_auto_merges_without_a_label() -> None:
+	"""Opt-out model: classification IS the consent — a safe class merges with no label."""
+	assert pr_gate.is_auto_mergeable("docs", "S", []) is True
 
 
-def test_block_label_overrides_the_opt_in() -> None:
-	"""`do-not-merge` wins over `automerge`, whatever the class."""
-	assert (
-		pr_gate.is_auto_mergeable("docs", "S", [pr_gate.OPT_IN_LABEL, pr_gate.BLOCK_LABEL])
-		is False
-	)
+def test_do_not_merge_label_opts_out() -> None:
+	"""`do-not-merge` is the escape hatch — it holds an otherwise-eligible PR back."""
+	assert pr_gate.is_auto_mergeable("docs", "S", [pr_gate.BLOCK_LABEL]) is False
 
 
 def test_xl_diff_is_never_auto_merged() -> None:
-	"""A huge docs/CI diff still deserves a look."""
-	assert pr_gate.is_auto_mergeable("docs", "XL", [pr_gate.OPT_IN_LABEL]) is False
+	"""A huge docs/CI diff still deserves a look, no matter the class."""
+	assert pr_gate.is_auto_mergeable("docs", "XL", []) is False
 
 
 @pytest.mark.parametrize("str_class", sorted(pr_gate.AUTO_MERGEABLE))
-def test_every_auto_mergeable_class_merges_when_opted_in(str_class: str) -> None:
-	"""Each declared auto-mergeable class does merge once opted in.
+def test_every_auto_mergeable_class_merges_without_a_label(str_class: str) -> None:
+	"""Each declared auto-mergeable class merges by default — no label required.
 
 	Parameters
 	----------
 	str_class : str
 		A class from AUTO_MERGEABLE.
 	"""
-	assert pr_gate.is_auto_mergeable(str_class, "M", [pr_gate.OPT_IN_LABEL]) is True
+	assert pr_gate.is_auto_mergeable(str_class, "M", []) is True
 
 
 def test_gate_state_pending_is_not_failing() -> None:
@@ -190,11 +186,26 @@ def test_render_comment_explains_why_src_is_not_auto_merged() -> None:
 	assert "Human review required" in str_body
 
 
-def test_render_comment_invites_the_opt_in_when_eligible_but_unlabelled() -> None:
-	"""An eligible class without the label is told how to opt in."""
+def test_render_comment_says_enabled_when_auto_merge_is_on() -> None:
+	"""An armed PR's comment states auto-merge is enabled (the default for a safe class)."""
+	str_body = pr_gate.render_comment("docs", "S", [("Tests", "✅", "ok")], True)
+
+	assert "Auto-merge enabled" in str_body
+
+
+def test_render_comment_explains_an_xl_hold() -> None:
+	"""An auto-mergeable class held only by an `XL` diff says a human must look."""
+	str_body = pr_gate.render_comment("docs", "XL", [("Tests", "✅", "ok")], False)
+
+	assert "Human review required" in str_body
+
+
+def test_render_comment_explains_a_do_not_merge_hold() -> None:
+	"""A non-XL auto-mergeable class with auto-merge off is held by the opt-out label."""
 	str_body = pr_gate.render_comment("docs", "S", [("Tests", "✅", "ok")], False)
 
-	assert pr_gate.OPT_IN_LABEL in str_body
+	assert "Auto-merge held" in str_body
+	assert pr_gate.BLOCK_LABEL in str_body
 
 
 def test_axes_from_checks_folds_matrix_runs_into_one_axis() -> None:

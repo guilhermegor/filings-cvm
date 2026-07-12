@@ -45,8 +45,9 @@ enable_pages() {
 
 enable_repo_rules() {
 	# Apply the `pr-quality-gate` branch ruleset (PR required, CI green, CodeQL clean, Copilot
-	# review on every push) instead of clicking through Settings -> Rules. Lives in
-	# bin/enable_repo_rules.sh; idempotent (updates an existing ruleset in place) + non-blocking
+	# review on every push) AND the repo merge policy the gate's auto-merge needs (allow_auto_merge
+	# + delete_branch_on_merge + the `do-not-merge` opt-out label) instead of clicking through
+	# Settings. Lives in bin/enable_repo_rules.sh; idempotent (PUT/PATCH in place) + non-blocking
 	# (skips without gh/auth/admin). Every rule is REST-settable — nothing needs a manual click.
 	bash "$SCRIPT_DIR/bin/enable_repo_rules.sh"
 }
@@ -270,7 +271,7 @@ Virtual Environment
   update_venv          Update all Poetry dependencies
   precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)
   enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin
-  enable_repo_rules    Apply the pr-quality-gate branch ruleset (PR + CI + CodeQL + Copilot review); needs gh + repo admin
+  enable_repo_rules    Apply the pr-quality-gate ruleset + merge policy (auto-merge, delete-branch, do-not-merge label); needs gh + repo admin
   enable_security      Enable private vuln reporting + Dependabot alerts/security updates; needs gh + repo admin
   changelog            Regenerate CHANGELOG.md from git tags (cz changelog)
 
