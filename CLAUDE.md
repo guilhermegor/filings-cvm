@@ -146,6 +146,23 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   `CNPJ_Classe`). O informe (133 colunas) traz uma linha por classe/mês; a subclasse (6 colunas) é
   longa. Grafias da CVM preservadas verbatim (`Provisoes_Contigencias`, `A_Vencer_Acima1080_Dias`)
 
+**Fundos de Investimento Especialmente constituídos (FIE)** — portal root `fie/` ✅ **COMPLETO
+(3/3 datasets)**; **open-data only** (a CVM não publica padrão XML de envio). **Não há `FIE/CAD`**
+(tanto `DADOS/` quanto `META/` estão vazios). Os 3 datasets, um reader cada (6 colunas, grão único):
+- Balancete FIE — ✅ **ingestion** `balancete_fie_AAAAMM.zip` (ZIP de 1 membro, **mensal** a partir de
+  202401) — `ingestion/fie/doc/balancete.py` (`BalanceteFieReader`); contract
+  `_internal/config/contracts/balancete_fie.py`. Balancete contábil (uma linha por fundo/classe × mês
+  × conta); nomenclatura **pós-RCVM 175** (`TP_FUNDO_CLASSE`/`CNPJ_FUNDO_CLASSE`). Inaugura `fie/`
+- Balanço FIE — ✅ **ingestion** `balanco_fie_AAAA.zip` (ZIP de 1 membro, **anual**) —
+  `ingestion/fie/doc/balanco.py` (`BalancoFieReader`); contract `_internal/config/contracts/balanco_fie.py`.
+  Balanço patrimonial; **descontinuado em 2020** (série 2005–2020), nomenclatura **pré-175**
+  (`TP_FUNDO`/`CNPJ_FUNDO`)
+- Medidas Mensais FIE — ✅ **ingestion** `medidas_mes_fie_AAAAMM.csv` (**CSV solto, não ZIP**, mensal)
+  — `ingestion/fie/medidas.py` (`MedidasMesFieReader`); contract `_internal/config/contracts/medidas_mes_fie.py`.
+  Patrimônio líquido + nº de cotistas; `FIE/MEDIDAS` é irmão de `FIE/DOC`, então o reader mora no root
+  `fie/`. **Com este, o portal root `fie/` está completo (3/3)** e a Wave 1 do #41 encerra
+  (FIDC→FII→FIP→FIAGRO→FIE)
+
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/fi/doc/lamina/lamina_carteira.py`
@@ -190,6 +207,7 @@ src/filings_cvm/
         fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
+        fie/               #   FIE/ — COMPLETO: doc/{balancete,balanco} (ZIP) + medidas (flat CSV); no CAD
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

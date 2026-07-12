@@ -578,6 +578,43 @@ df_ = InfMensalFiagroReader(date_ref=date(2025, 6, 1)).read()   # o MÊS 2025-06
 # df_[["CNPJ_Classe", "Data_Referencia", "Patrimonio_Liquido", "Valor_Patrimonial_Cotas"]]
 ```
 
+### `BalanceteFieReader` · `BalancoFieReader` · `MedidasMesFieReader` (3 readers)
+
+`filings_cvm.ingestion.BalanceteFieReader` · `filings_cvm.ingestion.BalancoFieReader` ·
+`filings_cvm.ingestion.MedidasMesFieReader`
+
+Os três datasets dos **FIE** (Fundos de Investimento Especialmente constituídos), que **completam o
+portal root `fie/`**. Página completa: [FIE](ingestion/fie.md). Não há `FIE/CAD`.
+
+- `BalanceteFieReader` — `balancete_fie_AAAAMM.zip` (ZIP de 1 membro), **mensal** (202401→), balancete
+  contábil. Pós-RCVM 175 (`CNPJ_FUNDO_CLASSE`).
+- `BalancoFieReader` — `balanco_fie_AAAA.zip` (ZIP de 1 membro), **anual**, balanço patrimonial.
+  **Descontinuado em 2020**; pré-175 (`CNPJ_FUNDO`).
+- `MedidasMesFieReader` — `medidas_mes_fie_AAAAMM.csv` (CSV solto), **mensal**, patrimônio líquido e
+  número de cotistas. `FIE/MEDIDAS` é irmão de `FIE/DOC`.
+
+#### `BalanceteFieReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros dois)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Balancete/medidas: qualquer dia do **mês**; balanço: qualquer dia do **ano**. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o artefato bruto (ZIP ou CSV) da camada *bronze*. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas do período. Só `DT_COMPTC` vira `date`; saldos, contagens e códigos ficam texto
+exato. Levanta `OSError`, `ContractError` ou (nos balanços) `ValueError` se o membro do ZIP faltar.
+
+```python
+from datetime import date
+from filings_cvm import BalanceteFieReader
+
+df_ = BalanceteFieReader(date_ref=date(2026, 6, 1)).read()   # o MÊS 2026-06
+# df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "CD_CONTA_BALCTE", "VL_SALDO_BALCTE"]]
+```
+
 ---
 
 ## Modelos de schema (Pydantic)

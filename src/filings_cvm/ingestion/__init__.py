@@ -64,6 +64,11 @@ from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabX11Reader,
 	InfMensalFidcTabXReader,
 )
+from filings_cvm.ingestion.fie import (
+	BalanceteFieReader,
+	BalancoFieReader,
+	MedidasMesFieReader,
+)
 from filings_cvm.ingestion.fii import (
 	DfinFiiReader,
 	InfAnualFiiAtivoAdquiridoReader,
@@ -105,6 +110,8 @@ from filings_cvm.ingestion.fip import (
 
 
 __all__ = [
+	"BalanceteFieReader",
+	"BalancoFieReader",
 	"CadastroFiHistAdminReader",
 	"CadastroFiHistAuditorReader",
 	"CadastroFiHistClasseReader",
@@ -182,6 +189,7 @@ __all__ = [
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
+	"MedidasMesFieReader",
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",
