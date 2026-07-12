@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-# Provision the `pr-quality-gate` branch ruleset for this repo — once.
+# Provision the `pr-quality-gate` branch ruleset AND the repo merge policy for this repo — once.
+#
+# Two things: (1) the branch ruleset (PR required, CI green, CodeQL clean, Copilot review), and
+# (2) the merge policy the gate's NATIVE auto-merge depends on — `allow_auto_merge` +
+# `delete_branch_on_merge` on the repo, plus the `do-not-merge` opt-out label. `allow_auto_merge` is
+# the one the gate CANNOT set itself: without it, GitHub's `enablePullRequestAutoMerge` mutation
+# silently no-ops, which left auto-merge inert repo-wide until this script set it.
 #
 # WHY THIS EXISTS: the default branch needs guardrails (every change via a PR, CI green,
 # CodeQL clean, Copilot review requested). Clicking ~10 checkboxes in Settings -> Rules is
@@ -141,6 +147,29 @@ apply_ruleset() {
 	return 0
 }
 
+enable_merge_policy() {
+	# Provision the repo-level settings the gate's native auto-merge depends on, plus the opt-out
+	# label. `allow_auto_merge` is the prerequisite the gate cannot set itself (without it the
+	# enablePullRequestAutoMerge mutation silently no-ops); `delete_branch_on_merge` removes the head
+	# branch after the squash; the `do-not-merge` label must exist for a maintainer to apply the
+	# opt-out. All idempotent + non-blocking.
+	local str_repo="$1"
+
+	if gh api -X PATCH "repos/$str_repo" -F allow_auto_merge=true -F delete_branch_on_merge=true >/dev/null 2>&1; then
+		print_status "success" "Merge policy: auto-merge + delete-branch-on-merge enabled"
+	else
+		print_status "warning" "Could not set merge policy on $str_repo (needs repo-admin) — enable 'Allow auto-merge' and 'Automatically delete head branches' in Settings -> General"
+	fi
+
+	# POST is create-only; a 422 (label already exists) is the idempotent no-op, not a failure.
+	if gh api -X POST "repos/$str_repo/labels" -f name="do-not-merge" -f color="b60205" \
+		-f description="Hold auto-merge for this PR (opt-out escape hatch)" >/dev/null 2>&1; then
+		print_status "success" "Label 'do-not-merge' created"
+	else
+		print_status "info" "Label 'do-not-merge' already present"
+	fi
+}
+
 enable_repo_rules() {
 	local str_repo
 	str_repo="$(resolve_repo)"
@@ -152,6 +181,9 @@ enable_repo_rules() {
 	print_status "info" "Applying the '$STR_RULESET_NAME' ruleset to $str_repo..."
 	print_status "config" "PR required (0 approvals — a solo maintainer cannot approve their own PR), conversations resolved, CI green, CodeQL clean, Copilot review on every push"
 	apply_ruleset "$str_repo"
+
+	print_status "info" "Provisioning the repo merge policy (auto-merge, delete-branch, do-not-merge label)..."
+	enable_merge_policy "$str_repo"
 }
 
 main() {

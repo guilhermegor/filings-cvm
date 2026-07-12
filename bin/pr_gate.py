@@ -10,10 +10,14 @@ Three things happen here, in order:
    checks in-place** until they finish, so the comment lands on the FINAL result instead of
    freezing on "running" — deliberately self-contained, because a `workflow_run` trigger only fires
    from the default branch's copy of the file and can never fire for the PR that introduces it.
-3. **Auto-merge**: when the class is auto-mergeable AND the author opted in with the ``automerge``
-   label, enable GitHub's *native* auto-merge (``PUT .../pulls/:n/merge`` is NOT used — the
-   ``enablePullRequestAutoMerge`` mutation is). GitHub then holds the merge until **every required
-   check of the `pr-quality-gate` ruleset is green** and merges by itself.
+3. **Auto-merge**: when the class is auto-mergeable (and the diff is not ``XL`` and nobody applied
+   the ``do-not-merge`` opt-out), enable GitHub's *native* auto-merge (the
+   ``enablePullRequestAutoMerge`` mutation, not ``PUT .../pulls/:n/merge``). GitHub holds it until
+   **every required check of the `pr-quality-gate` ruleset is green** and merges by itself. This is
+   **opt-OUT**: a `ci`/`deps`/`docs` PR auto-merges by default (no label), so routine changes —
+   Dependabot's weekly bumps included — flow hands-free; ``do-not-merge`` stops a specific PR. It
+   rests on two repo settings (`allow_auto_merge`, `delete_branch_on_merge`) provisioned by
+   ``bin/enable_repo_rules.sh`` — without the first, the mutation silently no-ops.
 
 **Why auto-MERGE and not auto-APPROVE.** The ruleset requires *0* approvals (a solo maintainer
 cannot approve their own PR), so a bot approval would unblock nothing — it would be decorative.
@@ -73,9 +77,9 @@ _RISK_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
 # Change classes a machine may merge. `src` and `tests` are deliberately absent: source needs eyes.
 AUTO_MERGEABLE: frozenset[str] = frozenset({"docs", "ci", "deps"})
 
-# Opt-in / opt-out labels. Auto-merge NEVER happens without OPT_IN_LABEL — the classification alone
-# is not consent.
-OPT_IN_LABEL = "automerge"
+# Opt-OUT label. A safe class auto-merges by default (classification IS the standing consent); this
+# label is the escape hatch that holds a specific PR back. Auto-merge is opt-out, not opt-in — the
+# point is that routine ci/deps/docs changes (Dependabot bumps included) need no manual touch.
 BLOCK_LABEL = "do-not-merge"
 
 # Diff-volume buckets, by (additions + deletions). XL is never auto-merged regardless of class: a
@@ -140,9 +144,11 @@ def size_bucket(int_additions: int, int_deletions: int) -> str:
 def is_auto_mergeable(str_risk: str, str_size: str, list_labels: list[str]) -> bool:
 	"""Decide whether this PR may be handed to GitHub's native auto-merge.
 
-	All four conditions must hold: the class is auto-mergeable, the diff is not ``XL``, the author
-	opted in, and nobody blocked it. **This says nothing about whether the checks passed** — the
-	ruleset enforces that, and GitHub holds the merge until they are green.
+	**Opt-out, not opt-in.** A safe class auto-merges by default — all three conditions must hold:
+	the class is auto-mergeable, the diff is not ``XL``, and nobody applied the ``do-not-merge``
+	opt-out. No label is required to *enable* it (classification is the standing consent); a label
+	only *disables* it. **This says nothing about whether the checks passed** — the ruleset does,
+	and GitHub holds the merge until they are green.
 
 	Parameters
 	----------
@@ -162,9 +168,8 @@ def is_auto_mergeable(str_risk: str, str_size: str, list_labels: list[str]) -> b
 		return False
 	if str_size == "XL":
 		return False
-	if BLOCK_LABEL in list_labels:
-		return False
-	return OPT_IN_LABEL in list_labels
+	# Eligible unless the maintainer applied the opt-out.
+	return BLOCK_LABEL not in list_labels
 
 
 def gate_state(list_axes: list[tuple[str, str, str]]) -> str:
@@ -229,17 +234,22 @@ def render_comment(
 	if bool_auto_merge:
 		str_merge = (
 			"🤖 **Auto-merge enabled** — GitHub merges on its own as soon as the required checks "
-			"go green."
+			f"go green, then deletes the branch. Add the `{BLOCK_LABEL}` label to hold it."
 		)
 	elif str_risk not in AUTO_MERGEABLE:
 		str_merge = (
 			f"👤 **Human review required** — class `{str_risk}` is never auto-merged "
 			"(a one-character diff in `src/` can break a contract without failing a single test)."
 		)
+	elif str_size == "XL":
+		str_merge = (
+			"👤 **Human review required** — auto-mergeable class, but an `XL` diff still gets a "
+			"look before it merges."
+		)
 	else:
 		str_merge = (
-			f"💤 **Auto-merge available** — add the `{OPT_IN_LABEL}` label and GitHub will merge "
-			"on its own once the gate is green."
+			f"🚫 **Auto-merge held** — the `{BLOCK_LABEL}` label is set; remove it and GitHub "
+			"merges on its own once the gate is green."
 		)
 
 	return "\n".join(

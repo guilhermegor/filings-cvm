@@ -1,7 +1,8 @@
 name: PR Quality Gate
 
-# Labels the PR (risk / size / gate), publishes ONE sticky status comment, and — only for low-risk
-# change classes that opted in with the `automerge` label — enables GitHub's NATIVE auto-merge.
+# Labels the PR (risk / size / gate), publishes ONE sticky status comment, and — for low-risk change
+# classes (ci / deps / docs), by default and with no label — enables GitHub's NATIVE auto-merge.
+# Auto-merge is OPT-OUT: the `do-not-merge` label holds a specific PR; `src` / `tests` never merge.
 #
 # Native auto-merge bypasses nothing: GitHub holds the merge until every required check of the
 # `pr-quality-gate` ruleset is green, then merges. This workflow only decides *eligibility* (which

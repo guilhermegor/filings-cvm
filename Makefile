@@ -38,10 +38,11 @@ enable_pages:
 	@bash bin/enable_pages.sh
 
 # Provision the `pr-quality-gate` branch ruleset (PR required, CI green, CodeQL clean, Copilot
-# review on every push) instead of clicking ~10 boxes in Settings -> Rules. EVERY rule is REST-
-# settable, including the Copilot auto-review (its own `copilot_code_review` rule type), so nothing
-# here needs a manual click. CI's GITHUB_TOKEN can't write rulesets; this uses the maintainer's gh
-# auth. bin/enable_repo_rules.sh is idempotent (updates an existing ruleset in place) + non-blocking.
+# review on every push) AND the repo merge policy the gate's auto-merge needs (allow_auto_merge +
+# delete_branch_on_merge + the `do-not-merge` opt-out label) instead of clicking through Settings.
+# EVERY rule is REST-settable, including the Copilot auto-review (its own `copilot_code_review` rule
+# type), so nothing here needs a manual click. CI's GITHUB_TOKEN can't write these; this uses the
+# maintainer's gh auth. bin/enable_repo_rules.sh is idempotent (PUT/PATCH in place) + non-blocking.
 enable_repo_rules:
 	@bash bin/enable_repo_rules.sh
 
@@ -193,7 +194,7 @@ help:
 	@echo "  update_venv          Update all Poetry dependencies"
 	@echo "  precommit            Install pre-commit hooks (commit-msg + pre-push; skips off a git tree)"
 	@echo "  enable_pages         Point GitHub Pages at the gh-pages branch (mike docs) once; needs gh + repo admin"
-	@echo "  enable_repo_rules    Apply the pr-quality-gate branch ruleset (PR + CI + CodeQL + Copilot review); needs gh + repo admin"
+	@echo "  enable_repo_rules    Apply the pr-quality-gate ruleset + merge policy (auto-merge, delete-branch, do-not-merge label); needs gh + repo admin"
 	@echo "  enable_security      Enable private vuln reporting + Dependabot alerts/security updates; needs gh + repo admin"
 	@echo "  changelog            Regenerate CHANGELOG.md from git tags (cz changelog)"
 	@echo ""
