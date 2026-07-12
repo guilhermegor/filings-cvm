@@ -5,8 +5,11 @@ Three things happen here, in order:
 
 1. **Classify** the PR from its changed paths (**risk class**) and its diff volume (**size
    bucket**), and apply the corresponding labels — ``risk:*``, ``size:*``, ``gate:*``.
-2. **Report**: publish/update ONE sticky comment carrying the per-axis table (tests, lint, types,
-   CodeQL, docs build), so the state of the gate is readable without opening the checks tab.
+2. **Report**: publish/update ONE sticky comment carrying the per-axis table (tests, CodeQL, docs
+   build), so the gate's state is readable without opening the checks tab. The run **polls the
+   checks in-place** until they finish, so the comment lands on the FINAL result instead of
+   freezing on "running" — deliberately self-contained, because a `workflow_run` trigger only fires
+   from the default branch's copy of the file and can never fire for the PR that introduces it.
 3. **Auto-merge**: when the class is auto-mergeable AND the author opted in with the ``automerge``
    label, enable GitHub's *native* auto-merge (``PUT .../pulls/:n/merge`` is NOT used — the
    ``enablePullRequestAutoMerge`` mutation is). GitHub then holds the merge until **every required
@@ -38,6 +41,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from typing import Any
 import urllib.error
 import urllib.request
@@ -333,6 +337,15 @@ def _axes_from_checks(list_check_runs: list[dict]) -> list[tuple[str, str, str]]
 def main() -> int:
 	"""Classify the PR, label it, publish the sticky comment, and enable auto-merge when eligible.
 
+	Auto-merge is enabled once, up front — it is independent of the axes, because GitHub gates the
+	actual merge on the ruleset's required checks. The axes are then **polled in-run** until they
+	reach a terminal state, so the sticky comment lands on the final result instead of freezing on
+	"running". Polling is self-contained on purpose: a ``workflow_run`` trigger only fires from the
+	default branch's copy of the file, so it can never fire for the PR that introduces the gate.
+	The comment and labels are rewritten only when the rendered body changes (a slow check does not
+	spam edits), and ``GATE_MAX_POLLS`` / ``GATE_POLL_SECONDS`` bound the wait (~13 min by default)
+	so a check that never registers cannot hang the job.
+
 	Returns
 	-------
 	int
@@ -346,19 +359,33 @@ def main() -> int:
 	list_files = _api("GET", f"{str_api}/pulls/{int_pr}/files?per_page=100")
 	list_paths = [f["filename"] for f in list_files]
 	list_labels = [lbl["name"] for lbl in dict_pr["labels"]]
+	str_sha = dict_pr["head"]["sha"]
 
 	str_risk = classify_risk(list_paths)
 	str_size = size_bucket(dict_pr["additions"], dict_pr["deletions"])
-	list_checks = _api("GET", f"{str_api}/commits/{dict_pr['head']['sha']}/check-runs")
-	list_axes = _axes_from_checks(list_checks["check_runs"])
-	str_state = gate_state(list_axes)
 
 	bool_merge = is_auto_mergeable(str_risk, str_size, list_labels)
 	if bool_merge:
 		_enable_auto_merge(dict_pr["node_id"])
 
-	_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
-	_upsert_comment(str_api, int_pr, render_comment(str_risk, str_size, list_axes, bool_merge))
+	int_max_polls = int(os.environ.get("GATE_MAX_POLLS", "40"))
+	int_poll_s = int(os.environ.get("GATE_POLL_SECONDS", "20"))
+	str_state = "pending"
+	str_last_body = ""
+	for int_poll in range(int_max_polls):
+		list_checks = _api("GET", f"{str_api}/commits/{str_sha}/check-runs?per_page=100")
+		list_axes = _axes_from_checks(list_checks["check_runs"])
+		str_state = gate_state(list_axes)
+		str_body = render_comment(str_risk, str_size, list_axes, bool_merge)
+		if str_body != str_last_body:
+			_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
+			_upsert_comment(str_api, int_pr, str_body)
+			str_last_body = str_body
+		if str_state != "pending":
+			break
+		if int_poll < int_max_polls - 1:
+			time.sleep(int_poll_s)
+
 	print(f"risk={str_risk} size={str_size} gate={str_state} auto_merge={bool_merge}")
 	return 0
 
