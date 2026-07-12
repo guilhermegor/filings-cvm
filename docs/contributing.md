@@ -157,9 +157,14 @@ Como obter revisão automática de fato:
 Todo PR recebe, automaticamente (workflow `pr-gate.yaml` → `bin/pr_gate.py`):
 
 - **Rótulos**: `risk:*` (classe de risco pelos caminhos alterados), `size:*` (XS…XL, pelo volume do
-  diff) e `gate:passing` / `gate:failing`.
+  diff) e `gate:passing` / `gate:pending` / `gate:failing` — **`pending` não é `failing`**: um check
+  ainda rodando não diz nada sobre o resultado.
 - **Um comentário fixo** (atualizado no lugar, nunca empilhado) com a tabela por eixo — testes nos 3
   SOs, build da documentação, CodeQL.
+
+> **Idioma.** O bot escreve em **inglês**, como todo o resto voltado a quem contribui (código,
+> mensagens de commit, saída de CI). Só a **documentação publicada** segue o idioma do site
+> (`mkdocs.yml` → `theme.language`, pt-BR). A fronteira é o **público**, não o repositório.
 
 **Auto-merge — por caminho, nunca por tamanho.** Um diff pequeno **não** é um diff seguro aqui: a
 falha real desta biblioteca é semântica (uma coluna de `FileContract` aterrada errado, um `date_ref`

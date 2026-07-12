@@ -138,21 +138,21 @@ def test_gate_state_pending_is_not_failing() -> None:
 	were still queued. Pending says nothing about the outcome — reporting it as a failure cries
 	wolf on every newly-opened PR.
 	"""
-	list_running = [("Testes", "⏳", "em execução"), ("CodeQL", "✅", "ok")]
+	list_running = [("Tests", "⏳", "running"), ("CodeQL", "✅", "ok")]
 
 	assert pr_gate.gate_state(list_running) == "pending"
 
 
 def test_gate_state_failing_beats_pending() -> None:
 	"""A red axis wins over a pending one — a known failure is not "still deciding"."""
-	list_mixed = [("Testes", "❌", "1 falhando"), ("CodeQL", "⏳", "em execução")]
+	list_mixed = [("Tests", "❌", "1 failing"), ("CodeQL", "⏳", "running")]
 
 	assert pr_gate.gate_state(list_mixed) == "failing"
 
 
 def test_gate_state_passing_needs_every_axis_finished_green() -> None:
 	"""`passing` is only claimed when every axis actually completed green."""
-	assert pr_gate.gate_state([("Testes", "✅", "ok"), ("CodeQL", "✅", "ok")]) == "passing"
+	assert pr_gate.gate_state([("Tests", "✅", "ok"), ("CodeQL", "✅", "ok")]) == "passing"
 
 
 def test_gate_state_of_no_axes_is_pending() -> None:
@@ -161,44 +161,44 @@ def test_gate_state_of_no_axes_is_pending() -> None:
 
 
 def test_render_comment_headline_reflects_the_pending_state() -> None:
-	"""The sticky comment says "em execução" while checks run, not "Bloqueado"."""
-	str_body = pr_gate.render_comment("docs", "S", [("Testes", "⏳", "em execução")], False)
+	"""The sticky comment says "Running" while checks run, not "Blocked"."""
+	str_body = pr_gate.render_comment("docs", "S", [("Tests", "⏳", "running")], False)
 
-	assert "Em execução" in str_body
-	assert "Bloqueado" not in str_body
+	assert "Running" in str_body
+	assert "Blocked" not in str_body
 
 
 def test_render_comment_carries_the_marker_for_in_place_updates() -> None:
 	"""The hidden marker is what lets the gate update one comment instead of stacking new ones."""
-	str_body = pr_gate.render_comment("docs", "S", [("Testes", "✅", "ok")], False)
+	str_body = pr_gate.render_comment("docs", "S", [("Tests", "✅", "ok")], False)
 
 	assert pr_gate._MARKER in str_body
 
 
 def test_render_comment_reports_green_only_when_every_axis_passed() -> None:
 	"""One failing axis flips the headline to blocked."""
-	list_mixed = [("Testes", "✅", "ok"), ("CodeQL", "❌", "1 falhando")]
+	list_mixed = [("Tests", "✅", "ok"), ("CodeQL", "❌", "1 failing")]
 
-	assert "Gate verde" in pr_gate.render_comment("docs", "S", [("Testes", "✅", "ok")], False)
-	assert "Bloqueado" in pr_gate.render_comment("docs", "S", list_mixed, False)
+	assert "Gate green" in pr_gate.render_comment("docs", "S", [("Tests", "✅", "ok")], False)
+	assert "Blocked" in pr_gate.render_comment("docs", "S", list_mixed, False)
 
 
 def test_render_comment_explains_why_src_is_not_auto_merged() -> None:
 	"""A `src` PR's comment states that human review is mandatory, not merely absent."""
-	str_body = pr_gate.render_comment("src", "XS", [("Testes", "✅", "ok")], False)
+	str_body = pr_gate.render_comment("src", "XS", [("Tests", "✅", "ok")], False)
 
-	assert "Revisão humana obrigatória" in str_body
+	assert "Human review required" in str_body
 
 
 def test_render_comment_invites_the_opt_in_when_eligible_but_unlabelled() -> None:
 	"""An eligible class without the label is told how to opt in."""
-	str_body = pr_gate.render_comment("docs", "S", [("Testes", "✅", "ok")], False)
+	str_body = pr_gate.render_comment("docs", "S", [("Tests", "✅", "ok")], False)
 
 	assert pr_gate.OPT_IN_LABEL in str_body
 
 
 def test_axes_from_checks_folds_matrix_runs_into_one_axis() -> None:
-	"""The 3-OS test matrix collapses to a single "Testes" axis."""
+	"""The 3-OS test matrix collapses to a single "Tests" axis."""
 	list_runs = [
 		{
 			"name": "Run Automated Tests (ubuntu-latest)",
