@@ -99,6 +99,64 @@ make install_dist_locally    # python -m build → instala → smoke-import → 
 3. Garanta que os checks de CI (testes, lint, build da documentação) passem — eles são o gate de
    merge.
 
+### O ruleset `pr-quality-gate` (revisão automática e proteção da branch)
+
+A branch padrão é protegida por um **branch ruleset** chamado `pr-quality-gate`, provisionado
+**inteiramente por código** — nenhuma caixinha marcada à mão:
+
+```bash
+make enable_repo_rules     # ou: bash tasks.sh enable_repo_rules
+```
+
+Já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente** (um ruleset existente é
+atualizado no lugar, não duplicado) e **não-bloqueante** (sem `gh`, sem auth ou sem permissão de
+admin, ele avisa e sai com 0 — o `init` completa). Exige `gh` autenticado com direitos de admin no
+repositório: o `GITHUB_TOKEN` do CI **não** consegue escrever rulesets, por isso isto é um passo do
+mantenedor, não um job de workflow.
+
+O que o ruleset aplica:
+
+| Regra | Efeito |
+|---|---|
+| `pull_request` | Toda mudança passa por PR. **0 aprovações exigidas** — o GitHub não deixa o autor aprovar o próprio PR, então exigir ≥1 travaria um mantenedor solo. As conversas precisam estar resolvidas (`required_review_thread_resolution`), o que torna os comentários do Copilot **vinculantes**. |
+| `required_status_checks` | Os testes (`Run Automated Tests`, nos 3 SOs) e o `build` da documentação **bloqueiam** o merge de fato. |
+| `code_scanning` | CodeQL: alertas de segurança `high_or_higher` e alertas de erro bloqueiam o merge. |
+| `copilot_code_review` | **Revisão automática do Copilot** em todo PR, revisando cada novo push (`review_on_push`). Grátis em repositórios públicos. |
+| `non_fast_forward` + `deletion` | Sem force-push e sem deletar a branch padrão. |
+
+**Automático × manual — a fronteira é *repositório* × *conta*.** Tudo que é **configuração do
+repositório** é gravável pela REST API e já vem no script — inclusive a revisão do Copilot, que é um
+**rule type próprio** (`copilot_code_review`), e **não** um parâmetro de `pull_request` (essa grafia
+devolve HTTP 422, o que faz a regra *parecer* exclusiva da UI). **Nenhuma caixinha precisa ser
+marcada à mão.** O outro pré-requisito de repositório — habilitar o CodeQL (*default setup*), sem o
+qual a regra `code_scanning` não tem ferramenta para checar — também é API:
+
+```bash
+gh api -X PATCH repos/:owner/:repo/code-scanning/default-setup -f state=configured
+```
+
+O que **não** dá para automatizar daqui é o **direito de uso na conta**, não no repositório: a regra
+`copilot_code_review` só dispara "*se o autor tiver acesso ao Copilot code review*" — e o **code
+review não está incluído no Copilot Free** (a própria tela de planos lista "*AI reviews*" como
+recurso de upgrade). Sem um plano que o inclua (Pro / Pro+ / Business), a regra fica **configurada e
+correta, porém inerte: nenhuma revisão aparece e nada dá erro** — o silêncio é a armadilha.
+
+Como obter revisão automática de fato:
+
+- **Copilot Pro gratuito** — é gratuito para estudantes, professores e mantenedores de projetos
+  open-source populares (verificação em [github.com/settings/billing](https://github.com/settings/billing)).
+- **Sem plano nenhum** — um workflow de `pull_request` chamando um LLM de tier gratuito (ex.: Gemini
+  Flash) para comentar o PR. Independe do Copilot.
+
+> **Regra geral:** configuração de **repositório** → script (é o que este helper faz, 100%). Direito
+> de uso de **conta** → depende do plano, e não se resolve do repositório. As demais regras do gate
+> (PR obrigatório, CI verde, CodeQL limpo) funcionam **independentemente** do Copilot.
+
+Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segunda fonte de verdade:
+*Require code quality results* (severidade subjetiva de IA no caminho do merge — `ruff`, `mypy` e os
+gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o
+piso já é single-source em `.coveragerc`, aplicado por pre-commit + CI).
+
 ## Lançando
 
 Os releases são **dirigidos por tag** quando o projeto está conectado a um remoto no GitHub:

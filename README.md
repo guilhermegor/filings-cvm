@@ -151,6 +151,13 @@ make lint            # ruff, codespell, pydocstyle
 make unit_tests      # pytest tests/unit/
 ```
 
+Toda mudança entra por **pull request**: a branch padrão é protegida pelo ruleset
+`pr-quality-gate` (PR obrigatório, testes nos 3 SOs + build da doc verdes, CodeQL limpo e
+**revisão automática do Copilot** a cada push). Ele é provisionado por código — `make init` já o
+aplica, e `make enable_repo_rules` o (re)aplica sozinho; nenhuma configuração manual na UI do
+GitHub é necessária. Detalhes em
+[docs/contributing.md](docs/contributing.md#o-ruleset-pr-quality-gate-revisão-automática-e-proteção-da-branch).
+
 ## 👨‍💻 Autores
 
 **Guilherme Rodrigues**
