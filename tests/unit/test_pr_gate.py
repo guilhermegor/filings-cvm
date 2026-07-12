@@ -131,6 +131,43 @@ def test_every_auto_mergeable_class_merges_when_opted_in(str_class: str) -> None
 	assert pr_gate.is_auto_mergeable(str_class, "M", [pr_gate.OPT_IN_LABEL]) is True
 
 
+def test_gate_state_pending_is_not_failing() -> None:
+	"""A still-running check is `pending`, never `failing`.
+
+	Regression: the gate's own first live run labelled a fresh PR `gate:failing` while its checks
+	were still queued. Pending says nothing about the outcome — reporting it as a failure cries
+	wolf on every newly-opened PR.
+	"""
+	list_running = [("Testes", "⏳", "em execução"), ("CodeQL", "✅", "ok")]
+
+	assert pr_gate.gate_state(list_running) == "pending"
+
+
+def test_gate_state_failing_beats_pending() -> None:
+	"""A red axis wins over a pending one — a known failure is not "still deciding"."""
+	list_mixed = [("Testes", "❌", "1 falhando"), ("CodeQL", "⏳", "em execução")]
+
+	assert pr_gate.gate_state(list_mixed) == "failing"
+
+
+def test_gate_state_passing_needs_every_axis_finished_green() -> None:
+	"""`passing` is only claimed when every axis actually completed green."""
+	assert pr_gate.gate_state([("Testes", "✅", "ok"), ("CodeQL", "✅", "ok")]) == "passing"
+
+
+def test_gate_state_of_no_axes_is_pending() -> None:
+	"""No checks reported yet is pending, not a vacuous pass."""
+	assert pr_gate.gate_state([]) == "pending"
+
+
+def test_render_comment_headline_reflects_the_pending_state() -> None:
+	"""The sticky comment says "em execução" while checks run, not "Bloqueado"."""
+	str_body = pr_gate.render_comment("docs", "S", [("Testes", "⏳", "em execução")], False)
+
+	assert "Em execução" in str_body
+	assert "Bloqueado" not in str_body
+
+
 def test_render_comment_carries_the_marker_for_in_place_updates() -> None:
 	"""The hidden marker is what lets the gate update one comment instead of stacking new ones."""
 	str_body = pr_gate.render_comment("docs", "S", [("Testes", "✅", "ok")], False)

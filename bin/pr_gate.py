@@ -158,6 +158,32 @@ def is_auto_mergeable(str_risk: str, str_size: str, list_labels: list[str]) -> b
 	return OPT_IN_LABEL in list_labels
 
 
+def gate_state(list_axes: list[tuple[str, str, str]]) -> str:
+	"""Fold the axes into the gate's overall state.
+
+	**Pending is not failing.** A check that is still running says nothing about the outcome, and
+	reporting it as ``failing`` would cry wolf on every freshly-opened PR (a real defect caught on
+	this gate's own first live run). So a red axis wins over a pending one, but a pending one wins
+	over green — the gate only claims ``passing`` once every axis has actually finished green.
+
+	Parameters
+	----------
+	list_axes : list of tuple of (str, str, str)
+		One ``(name, icon, detail)`` per checked axis.
+
+	Returns
+	-------
+	str
+		``passing``, ``pending`` or ``failing``.
+	"""
+	list_icons = [str_icon for _, str_icon, _ in list_axes]
+	if "❌" in list_icons:
+		return "failing"
+	if "⏳" in list_icons or not list_icons:
+		return "pending"
+	return "passing"
+
+
 def render_comment(
 	str_risk: str,
 	str_size: str,
@@ -182,12 +208,13 @@ def render_comment(
 	str
 		The full Markdown body, carrying the hidden marker used to find and update it in place.
 	"""
-	bool_all_green = all(str_icon == "✅" for _, str_icon, _ in list_axes)
-	str_headline = (
-		"✅ **Gate verde** — todos os eixos passaram."
-		if bool_all_green
-		else "❌ **Bloqueado** — algum eixo do gate não passou."
-	)
+	str_state = gate_state(list_axes)
+	dict_headline = {
+		"passing": "✅ **Gate verde** — todos os eixos passaram.",
+		"pending": "⏳ **Em execução** — aguardando os checks obrigatórios.",
+		"failing": "❌ **Bloqueado** — algum eixo do gate não passou.",
+	}
+	str_headline = dict_headline[str_state]
 	list_rows = [f"| {name} | {icon} {detail} |" for name, icon, detail in list_axes]
 
 	if bool_auto_merge:
@@ -319,15 +346,15 @@ def main() -> int:
 	str_size = size_bucket(dict_pr["additions"], dict_pr["deletions"])
 	list_checks = _api("GET", f"{str_api}/commits/{dict_pr['head']['sha']}/check-runs")
 	list_axes = _axes_from_checks(list_checks["check_runs"])
-	bool_green = all(icon == "✅" for _, icon, _ in list_axes)
+	str_state = gate_state(list_axes)
 
 	bool_merge = is_auto_mergeable(str_risk, str_size, list_labels)
 	if bool_merge:
 		_enable_auto_merge(dict_pr["node_id"])
 
-	_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, bool_green)
+	_apply_labels(str_api, int_pr, list_labels, str_risk, str_size, str_state)
 	_upsert_comment(str_api, int_pr, render_comment(str_risk, str_size, list_axes, bool_merge))
-	print(f"risk={str_risk} size={str_size} green={bool_green} auto_merge={bool_merge}")
+	print(f"risk={str_risk} size={str_size} gate={str_state} auto_merge={bool_merge}")
 	return 0
 
 
@@ -362,7 +389,7 @@ def _apply_labels(
 	list_current: list[str],
 	str_risk: str,
 	str_size: str,
-	bool_green: bool,
+	str_state: str,
 ) -> None:
 	"""Replace the gate's own labels, leaving every other label untouched.
 
@@ -378,14 +405,14 @@ def _apply_labels(
 		Risk class.
 	str_size : str
 		Size bucket.
-	bool_green : bool
-		Whether every axis passed.
+	str_state : str
+		Gate state from :func:`gate_state` — ``passing``, ``pending`` or ``failing``.
 	"""
 	list_owned = [lbl for lbl in list_current if lbl.startswith(("risk:", "size:", "gate:"))]
 	list_wanted = [
 		f"risk:{str_risk}",
 		f"size:{str_size}",
-		f"gate:{'passing' if bool_green else 'failing'}",
+		f"gate:{str_state}",
 	]
 	if sorted(list_owned) == sorted(list_wanted):
 		return

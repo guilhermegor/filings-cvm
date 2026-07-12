@@ -38,12 +38,23 @@ comment + GitHub's **native** auto-merge for low-risk classes, behind an explici
 - [x] Gates: ruff (check+format), mypy, check_typing, check_provenance, check_docstrings, codespell,
       yamllint — all clean. **820 unit tests pass** (785 + 35).
 
+## First live run — it found a real bug (that is the point)
+
+Ran on its own PR (#72) and labelled it `["risk:tests", "size:XL", "gate:failing"]`:
+
+- `risk:tests` — **correct**, and it corrected me: the PR adds `tests/unit/test_pr_gate.py`, and
+  `tests` outranks `ci` in the most-dangerous-first ordering. I had predicted `ci`; the code was
+  right.
+- `size:XL` — correct (790 insertions).
+- [x] `gate:failing` — **WRONG, and fixed**: the checks were still *running*. Pending was being
+      reported as failing, which would cry wolf on every freshly-opened PR. Added a pure
+      `gate_state()` with **three** states (`passing` / `pending` / `failing`): a red axis beats a
+      pending one, a pending one beats green, and `passing` is claimed only once every axis has
+      actually finished green. Locked by 5 regression tests.
+
 ## Open / next
 
 - [ ] User review of PR (approval gate).
-- [ ] First live run: this PR is class `ci` (touches `bin/` + `.github/`), so it should get
-      `risk:ci` + a size label + the sticky comment. Auto-merge will NOT fire (no `automerge` label)
-      — which is itself the correct, conservative default to observe.
 - [ ] Labels are auto-created by the GitHub API on first use (default grey). Recolour them by hand
       once if desired — not worth a script.
 
