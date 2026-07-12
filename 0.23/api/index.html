@@ -1,0 +1,3610 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Biblioteca Python para os padrões de arquivo XML regulatórios da CVM.">
+      
+      
+      
+        <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.23/api/">
+      
+      
+        <link rel="prev" href="../ingestion/inf_mensal_fiagro/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/cvm-logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Referência da API - filings-cvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#referencia-da-api" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href=".." title="filings-cvm" class="md-header__button md-logo" aria-label="filings-cvm" data-md-component="logo">
+      
+  <img src="../assets/cvm-logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            filings-cvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Referência da API
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Alternar para o modo escuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Alternar para o modo escuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Alternar para o modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Alternar para o modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m3.55 19.09 1.41 1.41 1.8-1.79-1.42-1.42M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6c0-3.32-2.69-6-6-6m8 7h3v-2h-3m-2.76 7.71 1.8 1.79 1.41-1.41-1.79-1.8M20.45 5l-1.41-1.4-1.8 1.79 1.42 1.42M13 1h-2v3h2M6.76 5.39 4.96 3.6 3.55 5l1.79 1.81zM1 13h3v-2H1m12 9h-2v3h2"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/guilhermegor/filings-cvm" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="filings-cvm" class="md-nav__button md-logo" aria-label="filings-cvm" data-md-component="logo">
+      
+  <img src="../assets/cvm-logo.png" alt="logo">
+
+    </a>
+    filings-cvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/guilhermegor/filings-cvm" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Início
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uso
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Envio (→ CVM)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Envio (→ CVM)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submission/perfil_mensal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perfil Mensal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submission/informe_diario/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Diário
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Leitura (← CVM)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Leitura (← CVM)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Visão geral
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/informe_diario/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Diário FIF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/cda/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CDA FIF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/lamina_carteira/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lâmina carteira FIF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/lamina/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lâmina FIF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/cadastro_fi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Fundos (CAD/FI)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/registro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registro RCVM 175
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/cad_fi_hist/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CAD/FI histórico
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_mensal_fidc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal FIDC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_mensal_fii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal FII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/dfin_fii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DFIN FII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_trimestral_fii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Trimestral FII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_anual_fii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Anual FII
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_fip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informes periódicos FIP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_mensal_fiagro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal FIAGRO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referência da API
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referência da API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#serializador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serializador
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Serializador">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perfilmensal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PerfilMensal
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PerfilMensal">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportdoc-output_pathnone-versao40-str-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export(doc, output_path=None, versao="4.0") -&gt; str | None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#informediario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InformeDiario
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InformeDiario">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportdoc-output_pathnone-versao40-str-none_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export(doc, output_path=None, versao="4.0") -&gt; str | None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leitor-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Leitor (ingestion)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Leitor (ingestion)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#informediarioreader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InformeDiarioReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InformeDiarioReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#informediarioreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InformeDiarioReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cdareader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CdaReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CdaReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cdareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CdaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#laminacarteirareader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaCarteiraReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LaminaCarteiraReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laminacarteirareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaCarteiraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#laminareader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LaminaReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laminareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofireader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CadastroFiReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofireaderpath_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiReader(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registrofundoreader-registroclassereader-registrosubclassereader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegistroFundoReader · RegistroClasseReader · RegistroSubclasseReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RegistroFundoReader · RegistroClasseReader · RegistroSubclasseReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registrofundoreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-classe-e-subclasse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegistroFundoReader(path_raw=None, retry_policy=None, cls_logger=None) (idem para Classe e Subclasse)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofihistreader-19-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiHist*Reader (19 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CadastroFiHist*Reader (19 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofihistsitreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiHistSitReader(path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 18)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfidctabreader-17-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFidcTab*Reader (17 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalFidcTab*Reader (17 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfidctabireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 16)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiireader-3-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFii*Reader (3 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalFii*Reader (3 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 2)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfinfiireader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinFiiReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DfinFiiReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfinfiireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinFiiReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfiireader-16-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFii*Reader (16 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfTrimestralFii*Reader (16 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 15)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infanualfiireader-12-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfAnualFii*Reader (12 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfAnualFii*Reader (12 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infanualfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfAnualFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 11)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfipreader-infquadrimestralfipreader-2-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFipReader · InfQuadrimestralFipReader (2 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfTrimestralFipReader · InfQuadrimestralFipReader (2 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfipreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-o-quadrimestral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFipReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para o quadrimestral)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiagroreader-infmensalfiagrosubclassereader-2-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFiagroReader · InfMensalFiagroSubclasseReader (2 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalFiagroReader · InfMensalFiagroSubclasseReader (2 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiagroreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-a-subclasse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFiagroReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para a subclasse)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelos-de-schema-pydantic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modelos de schema (Pydantic)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modelos de schema (Pydantic)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perfil-mensal-documento-e-cabecalho" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Perfil Mensal — documento e cabeçalho
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perfil-mensal-blocos-e-listas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Perfil Mensal — blocos e listas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#informe-diario-documento-e-blocos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Informe Diário — documento e blocos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validacao-e-precisao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validação e precisão
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#estendendo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estendendo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perguntas frequentes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribuindo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Histórico de versões
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#serializador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serializador
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Serializador">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perfilmensal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PerfilMensal
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PerfilMensal">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportdoc-output_pathnone-versao40-str-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export(doc, output_path=None, versao="4.0") -&gt; str | None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#informediario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InformeDiario
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InformeDiario">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportdoc-output_pathnone-versao40-str-none_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export(doc, output_path=None, versao="4.0") -&gt; str | None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#leitor-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Leitor (ingestion)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Leitor (ingestion)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#informediarioreader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InformeDiarioReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InformeDiarioReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#informediarioreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InformeDiarioReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cdareader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CdaReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CdaReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cdareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CdaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#laminacarteirareader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaCarteiraReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LaminaCarteiraReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laminacarteirareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaCarteiraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#laminareader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LaminaReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#laminareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LaminaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s30-pddataframe_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=30) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofireader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CadastroFiReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofireaderpath_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiReader(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registrofundoreader-registroclassereader-registrosubclassereader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegistroFundoReader · RegistroClasseReader · RegistroSubclasseReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RegistroFundoReader · RegistroClasseReader · RegistroSubclasseReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registrofundoreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-classe-e-subclasse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RegistroFundoReader(path_raw=None, retry_policy=None, cls_logger=None) (idem para Classe e Subclasse)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofihistreader-19-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiHist*Reader (19 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CadastroFiHist*Reader (19 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cadastrofihistsitreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroFiHistSitReader(path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 18)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfidctabreader-17-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFidcTab*Reader (17 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalFidcTab*Reader (17 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfidctabireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 16)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiireader-3-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFii*Reader (3 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalFii*Reader (3 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 2)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfinfiireader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinFiiReader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DfinFiiReader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfinfiireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinFiiReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfiireader-16-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFii*Reader (16 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfTrimestralFii*Reader (16 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 15)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infanualfiireader-12-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfAnualFii*Reader (12 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfAnualFii*Reader (12 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infanualfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfAnualFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 11)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfipreader-infquadrimestralfipreader-2-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFipReader · InfQuadrimestralFipReader (2 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfTrimestralFipReader · InfQuadrimestralFipReader (2 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inftrimestralfipreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-o-quadrimestral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfTrimestralFipReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para o quadrimestral)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiagroreader-infmensalfiagrosubclassereader-2-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFiagroReader · InfMensalFiagroSubclasseReader (2 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalFiagroReader · InfMensalFiagroSubclasseReader (2 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalfiagroreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-a-subclasse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalFiagroReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para a subclasse)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modelos-de-schema-pydantic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modelos de schema (Pydantic)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modelos de schema (Pydantic)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perfil-mensal-documento-e-cabecalho" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Perfil Mensal — documento e cabeçalho
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perfil-mensal-blocos-e-listas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Perfil Mensal — blocos e listas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#informe-diario-documento-e-blocos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Informe Diário — documento e blocos
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validacao-e-precisao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validação e precisão
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#estendendo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estendendo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="referencia-da-api"><strong>Referência da API</strong><a class="headerlink" href="#referencia-da-api" title="Permanent link">&para;</a></h1>
+<p>Interface pública da biblioteca. Os serializadores e modelos abaixo são importáveis de
+<code>filings_cvm.submission</code>, e os leitores de <code>filings_cvm.ingestion</code>; os nomes principais também
+são reexportados no topo de <code>filings_cvm</code>.</p>
+<blockquote>
+<p><strong>Veja também:</strong> <a href="../usage/">Uso</a> · Envio: <a href="../submission/perfil_mensal/">Perfil Mensal</a>, <a href="../submission/informe_diario/">Informe Diário</a> · Leitura: <a href="../ingestion/informe_diario/">Informe Diário FIF</a>, <a href="../ingestion/cda/">CDA FIF</a>, <a href="../ingestion/lamina_carteira/">Lâmina carteira FIF</a>, <a href="../ingestion/lamina/">Lâmina FIF</a>, <a href="../ingestion/cadastro_fi/">CAD/FI</a>, <a href="../ingestion/registro/">Registro RCVM 175</a>, <a href="../ingestion/cad_fi_hist/">CAD/FI histórico</a>, <a href="../ingestion/inf_mensal_fidc/">Informe Mensal FIDC</a>, <a href="../ingestion/inf_mensal_fii/">Informe Mensal FII</a>, <a href="../ingestion/dfin_fii/">DFIN FII</a>, <a href="../ingestion/inf_trimestral_fii/">Informe Trimestral FII</a>, <a href="../ingestion/inf_anual_fii/">Informe Anual FII</a>, <a href="../ingestion/inf_fip/">Informes periódicos FIP</a></p>
+</blockquote>
+<hr />
+<h2 id="serializador">Serializador<a class="headerlink" href="#serializador" title="Permanent link">&para;</a></h2>
+<h3 id="perfilmensal"><code>PerfilMensal</code><a class="headerlink" href="#perfilmensal" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.submission.PerfilMensal</code></p>
+<p>Serializa um documento validado para XML compatível com a CVM (padrão Perfil Mensal V4).</p>
+<h4 id="exportdoc-output_pathnone-versao40-str-none"><code>export(doc, output_path=None, versao="4.0") -&gt; str | None</code><a class="headerlink" href="#exportdoc-output_pathnone-versao40-str-none" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>doc</code></td>
+<td><code>PerfilMensalDocument</code></td>
+<td>Documento totalmente validado.</td>
+</tr>
+<tr>
+<td><code>output_path</code></td>
+<td><code>str \| None</code></td>
+<td>Se informado, grava o arquivo em <code>windows-1252</code> e retorna <code>None</code>. Caso contrário, retorna a <code>str</code> XML (UTF-8 em memória).</td>
+</tr>
+<tr>
+<td><code>versao</code></td>
+<td><code>str</code></td>
+<td>Versão do formato colocada na tag <code>VERSAO</code>. Padrão <code>"4.0"</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.submission</span><span class="w"> </span><span class="kn">import</span> <span class="n">PerfilMensal</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">xml</span> <span class="o">=</span> <span class="n">PerfilMensal</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>                       <span class="c1"># retorna str</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">PerfilMensal</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;perfil.xml&quot;</span><span class="p">)</span>   <span class="c1"># grava arquivo, retorna None</span>
+</span></code></pre></div>
+<p>Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.</p>
+<h3 id="informediario"><code>InformeDiario</code><a class="headerlink" href="#informediario" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.submission.InformeDiario</code></p>
+<p>Serializa um documento validado para XML compatível com a CVM (padrão Informe Diário V4).</p>
+<h4 id="exportdoc-output_pathnone-versao40-str-none_1"><code>export(doc, output_path=None, versao="4.0") -&gt; str | None</code><a class="headerlink" href="#exportdoc-output_pathnone-versao40-str-none_1" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>doc</code></td>
+<td><code>InformeDiarioDocument</code></td>
+<td>Documento totalmente validado.</td>
+</tr>
+<tr>
+<td><code>output_path</code></td>
+<td><code>str \| None</code></td>
+<td>Se informado, grava o arquivo em <code>windows-1252</code> e retorna <code>None</code>. Caso contrário, retorna a <code>str</code> XML (UTF-8 em memória).</td>
+</tr>
+<tr>
+<td><code>versao</code></td>
+<td><code>str</code></td>
+<td>Versão do formato colocada na tag <code>VERSAO</code>. Padrão <code>"4.0"</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.submission</span><span class="w"> </span><span class="kn">import</span> <span class="n">InformeDiario</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">xml</span> <span class="o">=</span> <span class="n">InformeDiario</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>                          <span class="c1"># retorna str</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">InformeDiario</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;informe.xml&quot;</span><span class="p">)</span>     <span class="c1"># grava arquivo, retorna None</span>
+</span></code></pre></div>
+<p>O XML usa o namespace <code>urn:infdiario</code> e <code>COD_DOC=1</code>. Mesma borda de I/O do <code>PerfilMensal</code>.</p>
+<hr />
+<h2 id="leitor-ingestion">Leitor (ingestion)<a class="headerlink" href="#leitor-ingestion" title="Permanent link">&para;</a></h2>
+<h3 id="informediarioreader"><code>InformeDiarioReader</code><a class="headerlink" href="#informediarioreader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InformeDiarioReader</code></p>
+<p>Lê o dump mensal de <em>open-data</em> do Informe Diário de fundos (<code>inf_diario_fi_AAAAMM</code>) e o devolve
+como um <code>DataFrame</code> tipado e validado por contrato.</p>
+<h4 id="informediarioreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone"><code>InformeDiarioReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#informediarioreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do mês de referência (só ano/mês selecionam o dump). Padrão: hoje. O mês corrente pode ainda não estar publicado — use um mês passado para dados completos.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o artefato bruto (o <code>.zip</code> baixado e o CSV extraído), para a camada <em>bronze</em> de um <em>datalake</em>. Criado junto com os pais. Padrão <code>None</code>: usa um diretório temporário e descarta tudo.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável (<code>log_message(msg, level)</code>). Padrão: um <code>LogEmitter</code> sobre a stdlib.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s30-pddataframe"><code>read(int_timeout_s=30) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s30-pddataframe" title="Permanent link">&para;</a></h4>
+<p>Baixa, descompacta e faz o parse do mês de referência. Valida o contrato (colunas obrigatórias +
+coluna de CNPJ coercível) antes de aplicar os tipos declarados. Colunas monetárias são mantidas
+como <strong>texto exato</strong> (nunca <code>float</code>); <code>DT_COMPTC</code> vira <code>date</code>; <code>NR_COTST</code> usa <code>Int64</code> (nulável).</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int_timeout_s</code></td>
+<td><code>int</code></td>
+<td>Timeout de socket do download, em segundos. Padrão <code>30</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Levanta <code>OSError</code> (falha de download), <code>ContractError</code> (CSV viola o contrato) ou <code>ValueError</code>
+(o ZIP não contém CSV).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">InformeDiarioReader</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InformeDiarioReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span></code></pre></div>
+<h3 id="cdareader"><code>CdaReader</code><a class="headerlink" href="#cdareader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.CdaReader</code></p>
+<p>Lê o dump mensal de <em>open-data</em> do CDA (<code>cda_fi_AAAAMM</code>), consolida os blocos de ativos
+<code>BLC_1</code>…<code>BLC_8</code> numa única granularidade (fundo × data × ativo) e traz o <code>VL_PATRIM_LIQ</code> do fundo
+junto de cada posição, via <em>left join</em> do membro <code>PL</code>.</p>
+<h4 id="cdareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone"><code>CdaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#cdareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do mês de referência. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o artefato bruto (o <code>.zip</code> e todos os CSVs extraídos). Padrão <code>None</code>: diretório temporário, descartado.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável. Recebe o <code>warning</code> de cobertura do <code>PL</code>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s30-pddataframe_1"><code>read(int_timeout_s=30) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s30-pddataframe_1" title="Permanent link">&para;</a></h4>
+<p>Devolve uma linha por posição em carteira, com a coluna sintética <code>BLOCO</code> (<code>BLC_1</code>…<code>BLC_8</code>) e a
+coluna <code>VL_PATRIM_LIQ</code>. As colunas específicas de um bloco ficam nulas nas linhas dos demais. O
+membro <code>cda_fie</code> é ignorado — é um <em>layout</em> distinto.</p>
+<p>Se um fundo da carteira não constar de <code>PL</code>, o <code>VL_PATRIM_LIQ</code> fica nulo e o leitor <strong>emite um
+<code>warning</code> nomeando os CNPJs</strong> em vez de falhar — você não perde as demais linhas boas do mês.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int_timeout_s</code></td>
+<td><code>int</code></td>
+<td>Timeout de socket do download, em segundos. Padrão <code>30</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Levanta <code>OSError</code> (falha de download), <code>ContractError</code> (CSV viola o contrato), <code>ValueError</code> (o ZIP
+não contém bloco <code>BLC_*</code> ou membro <code>PL</code>) ou <code>pandas.errors.MergeError</code> (o <code>PL</code> não tem uma linha
+por fundo/data).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdaReader</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">CdaReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;PCT_PL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;VL_MERC_POS_FINAL&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">Decimal</span><span class="p">)</span> <span class="o">/</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;VL_PATRIM_LIQ&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">Decimal</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="laminacarteirareader"><code>LaminaCarteiraReader</code><a class="headerlink" href="#laminacarteirareader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.LaminaCarteiraReader</code></p>
+<p>Lê o membro <code>lamina_fi_carteira_AAAAMM</code> do dump mensal da Lâmina (<code>lamina_fi_AAAAMM.zip</code>) e devolve
+a alocação de cada fundo <strong>por tipo de ativo</strong>. Complementa o <code>CdaReader</code>: este traz o percentual
+por classe de ativo, aquele a posição título a título.</p>
+<h4 id="laminacarteirareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone"><code>LaminaCarteiraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#laminacarteirareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do mês de referência. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o artefato bruto (o <code>.zip</code> e todos os CSVs extraídos, não só o membro lido). Padrão <code>None</code>: diretório temporário, descartado.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s30-pddataframe_2"><code>read(int_timeout_s=30) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s30-pddataframe_2" title="Permanent link">&para;</a></h4>
+<p>Devolve uma linha por fundo × <code>TP_ATIVO</code>, com <code>PR_PL_ATIVO</code> — o percentual <strong>sinalizado</strong> do
+patrimônio líquido, como texto exato da CVM. Os totais por fundo <strong>não</strong> somam 100: alavancagem e
+posições vendidas são comuns (em 2025-04, de -37,08 a 1123,00). Os membros irmãos do ZIP
+(<code>lamina_fi_*</code>, <code>lamina_fi_rentab_*</code>) são ignorados.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int_timeout_s</code></td>
+<td><code>int</code></td>
+<td>Timeout de socket do download, em segundos. Padrão <code>30</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Levanta <code>OSError</code> (falha de download), <code>ContractError</code> (CSV viola o contrato) ou <code>ValueError</code> (o ZIP
+não contém o membro <code>lamina_fi_carteira_*</code>).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaminaCarteiraReader</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">LaminaCarteiraReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;PCT&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;PR_PL_ATIVO&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">Decimal</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="laminareader"><code>LaminaReader</code><a class="headerlink" href="#laminareader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.LaminaReader</code></p>
+<p>Lê o membro <code>lamina_fi_AAAAMM</code> do dump mensal da Lâmina (<code>lamina_fi_AAAAMM.zip</code>) — a lâmina
+propriamente dita — e devolve uma linha por classe de fundo, com as suas <strong>78 colunas</strong>. Lê um
+membro <strong>diferente</strong> do mesmo ZIP que o <code>LaminaCarteiraReader</code>.</p>
+<h4 id="laminareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone"><code>LaminaReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#laminareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do mês de referência. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o artefato bruto (o <code>.zip</code> e todos os CSVs extraídos). Padrão <code>None</code>: diretório temporário, descartado.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s30-pddataframe_3"><code>read(int_timeout_s=30) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s30-pddataframe_3" title="Permanent link">&para;</a></h4>
+<p>Devolve uma linha por classe de fundo. As quatro colunas <code>DT_*</code> viram <code>datetime.date</code> (vazio →
+<code>NaT</code>); as outras 74 são texto exato da CVM. O arquivo é lido com <code>QUOTE_NONE</code>: os campos de texto
+livre contêm aspas soltas que, com o <em>quoting</em> padrão, fundem dois registros.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int_timeout_s</code></td>
+<td><code>int</code></td>
+<td>Timeout de socket do download, em segundos. Padrão <code>30</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Levanta <code>OSError</code> (falha de download), <code>ContractError</code> (CSV viola o contrato) ou <code>ValueError</code> (o ZIP
+não contém o membro <code>lamina_fi_AAAAMM.csv</code>).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaminaReader</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">LaminaReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">df_</span><span class="p">[[</span><span class="s2">&quot;DENOM_SOCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;TAXA_ADM&quot;</span><span class="p">,</span> <span class="s2">&quot;VL_PATRIM_LIQ&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</span></code></pre></div>
+<h3 id="cadastrofireader"><code>CadastroFiReader</code><a class="headerlink" href="#cadastrofireader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.CadastroFiReader</code></p>
+<p>Lê <code>cad_fi.csv</code>, o <strong>retrato do estado atual</strong> do cadastro de fundos. É o único leitor <strong>sem
+<code>date_ref</code></strong>: o artefato não é particionado por mês.</p>
+<h4 id="cadastrofireaderpath_rawnone-retry_policynone-cls_loggernone"><code>CadastroFiReader(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#cadastrofireaderpath_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o retrato. A CVM sobrescreve o arquivo no lugar, então o que não for gravado <strong>não pode ser recuperado</strong>.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe" title="Permanent link">&para;</a></h4>
+<p>Devolve uma linha por entrada do cadastro (46.809 × 41 hoje). <strong>Não é indexado por
+<code>CNPJ_FUNDO</code></strong>: um fundo mantém o CNPJ ao migrar de regime e reaparece com novo <code>TP_FUNDO</code> e
+<code>CD_CVM</code>, então um <code>merge</code> só por essa coluna multiplica linhas. As nove colunas <code>DT_*</code> viram
+<code>datetime.date</code> (vazio → <code>NaT</code>); as demais são texto exato. <code>SIT</code> é <code>CANCELADA</code> na maioria das
+linhas — filtre antes de tratar como fundos vivos.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int_timeout_s</code></td>
+<td><code>int</code></td>
+<td>Timeout de socket, em segundos. Padrão <code>60</code> (o arquivo tem ~18 MB e não é zipado).</td>
+</tr>
+</tbody>
+</table>
+<p>Levanta <code>OSError</code> (falha de download) ou <code>ContractError</code> (CSV viola o contrato).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">CadastroFiReader</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">CadastroFiReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">ativos</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;SIT&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EM FUNCIONAMENTO NORMAL&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<h3 id="registrofundoreader-registroclassereader-registrosubclassereader"><code>RegistroFundoReader</code> · <code>RegistroClasseReader</code> · <code>RegistroSubclasseReader</code><a class="headerlink" href="#registrofundoreader-registroclassereader-registrosubclassereader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.RegistroFundoReader</code> · <code>…RegistroClasseReader</code> · <code>…RegistroSubclasseReader</code></p>
+<p>Lêem os três membros de <code>registro_fundo_classe.zip</code> — o cadastro pós-<strong>Resolução CVM 175</strong>, na
+hierarquia <code>fundo → classe → subclasse</code>. É onde estão os fundos <strong>vivos</strong> (o <code>registro_fundo</code> tinha
+~34 mil <code>Em Funcionamento Normal</code>, contra 22 no <code>cad_fi.csv</code>). Página completa:
+<a href="../ingestion/registro/">Registro RCVM 175</a>.</p>
+<h4 id="registrofundoreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-classe-e-subclasse"><code>RegistroFundoReader(path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para Classe e Subclasse)<a class="headerlink" href="#registrofundoreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-classe-e-subclasse" title="Permanent link">&para;</a></h4>
+<p>Como o <code>CadastroFiReader</code>, <strong>sem <code>date_ref</code></strong> (retrato do estado atual). Os três baixam o <strong>mesmo</strong>
+ZIP, então um <code>path_raw</code> gravado por qualquer um serve aos outros.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP e os três CSVs. A CVM sobrescreve o arquivo no lugar.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_1"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_1" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Leitor</th>
+<th>Membro</th>
+<th>Colunas</th>
+<th>FK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RegistroFundoReader</code></td>
+<td><code>registro_fundo.csv</code></td>
+<td>21</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>RegistroClasseReader</code></td>
+<td><code>registro_classe.csv</code></td>
+<td>30</td>
+<td><code>ID_Registro_Fundo</code></td>
+</tr>
+<tr>
+<td><code>RegistroSubclasseReader</code></td>
+<td><code>registro_subclasse.csv</code></td>
+<td>14</td>
+<td><code>ID_Registro_Classe</code></td>
+</tr>
+</tbody>
+</table>
+<p>Os três <strong>não</strong> são unidos num único frame — a hierarquia é um-para-muitos, então um <code>join</code>
+multiplicaria linhas; junte nas chaves substitutas você mesmo. As colunas <code>Data_*</code> viram
+<code>datetime.date</code>; as demais são texto exato. <code>ID_Registro_Fundo</code> <strong>não</strong> é estritamente único
+(re-registro entre regimes). Cada <code>read</code> levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code> (membro
+ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistroFundoReader</span><span class="p">,</span> <span class="n">RegistroClasseReader</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">fundos</span> <span class="o">=</span> <span class="n">RegistroFundoReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">classes</span> <span class="o">=</span> <span class="n">RegistroClasseReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">fc</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">fundos</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;ID_Registro_Fundo&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;_classe&quot;</span><span class="p">,</span> <span class="s2">&quot;_fundo&quot;</span><span class="p">))</span>
+</span></code></pre></div>
+<h3 id="cadastrofihistreader-19-readers"><code>CadastroFiHist*Reader</code> (19 readers)<a class="headerlink" href="#cadastrofihistreader-19-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.CadastroFiHist{Admin,Auditor,Classe,Condom,Controlador,Custodiante,DenomComerc,DenomSocial,DiretorResp,Exclusivo,ExercSocial,Fic,Gestor,PublicoAlvo,Rentab,Sit,TaxaAdm,TaxaPerfm,TribLprazo}Reader</code></p>
+<p>Os 19 membros de <code>cad_fi_hist.zip</code> — o <strong>log de alterações</strong> de cada atributo mutável do cadastro
+CAD/FI legado (situação, denominação, taxas, gestor, …), um reader por membro. Página completa:
+<a href="../ingestion/cad_fi_hist/">CAD/FI histórico</a>.</p>
+<p>Todos têm a mesma assinatura, sem <code>date_ref</code> (retrato do estado atual), e baixam o <strong>mesmo</strong> ZIP:</p>
+<h4 id="cadastrofihistsitreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-18"><code>CadastroFiHistSitReader(path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 18)<a class="headerlink" href="#cadastrofihistsitreaderpath_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-18" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP e os 19 CSVs. Um <code>path_raw</code> de qualquer reader serve aos outros.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_2"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_2" title="Permanent link">&para;</a></h4>
+<p>Devolve o log daquele atributo — muitas linhas por fundo (uma por período de vigência), <strong>sem grão
+único</strong>. As colunas <code>DT_*</code> viram <code>datetime.date</code>; as demais são texto exato. Levanta <code>OSError</code>,
+<code>ContractError</code> ou <code>ValueError</code> (membro ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion</span><span class="w"> </span><span class="kn">import</span> <span class="n">CadastroFiHistSitReader</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">sit</span> <span class="o">=</span> <span class="n">CadastroFiHistSitReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">janelas</span> <span class="o">=</span> <span class="n">sit</span><span class="p">[</span><span class="n">sit</span><span class="p">[</span><span class="s2">&quot;SIT&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EM FUNCIONAMENTO NORMAL&quot;</span><span class="p">]</span>   <span class="c1"># DT_INI_SIT / DT_FIM_SIT</span>
+</span></code></pre></div>
+<h3 id="infmensalfidctabreader-17-readers"><code>InfMensalFidcTab*Reader</code> (17 readers)<a class="headerlink" href="#infmensalfidctabreader-17-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfMensalFidcTab{I,II,III,IV,V,VI,VII,IX,X,X1,X11,X2,X3,X4,X5,X6,X7}Reader</code></p>
+<p>Os 17 membros de <code>inf_mensal_fidc_AAAAMM.zip</code> — as tabelas do <strong>Informe Mensal FIDC</strong> (Tabelas I–X
+mais as sub-tabelas de X), um reader por membro. Inaugura o <em>portal root</em> <code>fidc/</code>. Página completa:
+<a href="../ingestion/inf_mensal_fidc/">Informe Mensal FIDC</a>.</p>
+<p>Todos têm a mesma assinatura, <strong>com <code>date_ref</code></strong> (dump particionado por mês), e baixam o <strong>mesmo</strong>
+ZIP mensal:</p>
+<h4 id="infmensalfidctabireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-16"><code>InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 16)<a class="headerlink" href="#infmensalfidctabireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-16" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do mês de referência seleciona o dump <code>AAAAMM</code>. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP e os 17 CSVs. Um <code>path_raw</code> de qualquer reader serve aos outros.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por tabela</strong> — veja a página.</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_3"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_3" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas daquela tabela no mês. <code>DT_COMPTC</code> vira <code>datetime.date</code>; as demais são texto
+exato (monetários/quantidades/percentuais/contagens <strong>nunca <code>float</code></strong>). As sub-tabelas são longas
+(muitas linhas por fundo), <strong>sem grão único</strong>. Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code>
+(membro do mês ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalFidcTabIVReader</span><span class="p">,</span> <span class="n">RetryPolicy</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">pl</span> <span class="o">=</span> <span class="n">InfMensalFidcTabIVReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>          <span class="c1"># padrão do módulo</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">cls_retry_policy</span> <span class="o">=</span> <span class="n">RetryPolicy</span><span class="p">(</span><span class="n">int_max_attempts</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">float_max_wait_s</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">pl</span> <span class="o">=</span> <span class="n">InfMensalFidcTabIVReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">retry_policy</span><span class="o">=</span><span class="n">cls_retry_policy</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># override</span>
+</span></code></pre></div>
+<h3 id="infmensalfiireader-3-readers"><code>InfMensalFii*Reader</code> (3 readers)<a class="headerlink" href="#infmensalfiireader-3-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfMensalFii{Geral,AtivoPassivo,Complemento}Reader</code></p>
+<p>Os 3 membros de <code>inf_mensal_fii_AAAA.zip</code> — o <strong>Informe Mensal FII</strong>, um reader por membro.
+Inaugura o <em>portal root</em> <code>fii/</code>. Página completa: <a href="../ingestion/inf_mensal_fii/">Informe Mensal FII</a>.</p>
+<p>⚠️ <strong>O dump é particionado por ANO, não por mês</strong>, apesar de ser o informe mensal: um
+<code>inf_mensal_fii_2025.zip</code> traz os doze meses de 2025. O <code>date_ref</code> seleciona o <strong>ano</strong> (mês e dia
+são ignorados); filtre <code>Data_Referencia</code> no frame para um único mês.</p>
+<h4 id="infmensalfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-2"><code>InfMensalFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 2)<a class="headerlink" href="#infmensalfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-2" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje. O ano corrente é parcial por definição.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP e os 3 CSVs. Um <code>path_raw</code> de qualquer reader serve aos outros.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas). <strong>Ajustável por reader.</strong></td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_4"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_4" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas daquele membro no <strong>ano</strong> — todos os doze meses, uma linha por (fundo, mês,
+versão). <strong>Sem chave única:</strong> um mês reenviado repete (filtre por <code>Versao</code>). As colunas <code>Data_*</code>
+viram <code>datetime.date</code> (vazios → <code>NaT</code>); as demais são texto exato. Levanta <code>OSError</code>,
+<code>ContractError</code> ou <code>ValueError</code> (membro do ano ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalFiiComplementoReader</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfMensalFiiComplementoReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">junho</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;Data_Referencia&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+</span></code></pre></div>
+<h3 id="dfinfiireader"><code>DfinFiiReader</code><a class="headerlink" href="#dfinfiireader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.DfinFiiReader</code></p>
+<p>O <strong>índice</strong> das demonstrações financeiras dos FII (<code>dfin_fii_AAAA.csv</code>) — uma linha por documento
+entregue. Página completa: <a href="../ingestion/dfin_fii/">DFIN FII</a>.</p>
+<p>⚠️ <strong>É um índice, não uma demonstração.</strong> A coluna <code>Link_Download</code> aponta para o documento no fnet
+da B3; o reader a <strong>devolve como texto e não a segue</strong>. É um <strong>CSV solto</strong> (não ZIP), particionado
+por <strong>ano</strong> (<code>date_ref</code> seleciona o ano).</p>
+<h4 id="dfinfiireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone"><code>DfinFiiReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#dfinfiireaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o <code>.csv</code> baixado. Padrão <code>None</code>: diretório temporário, descartado.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas).</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_5"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_5" title="Permanent link">&para;</a></h4>
+<p>Devolve uma linha por documento entregue no ano. <code>Data_Referencia</code> e <code>Data_Entrega</code> viram
+<code>datetime.date</code>; as demais colunas — incluindo <code>Link_Download</code> e <code>Versao</code> — são texto exato.
+<strong>Sem chave única:</strong> um fundo entrega muitos documentos, e um reenvio repete com <code>Versao</code> maior.
+Levanta <code>OSError</code> ou <code>ContractError</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DfinFiiReader</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">DfinFiiReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1"># df_[[&quot;CNPJ_Fundo_Classe&quot;, &quot;Data_Referencia&quot;, &quot;Versao&quot;, &quot;Link_Download&quot;]]</span>
+</span></code></pre></div>
+<h3 id="inftrimestralfiireader-16-readers"><code>InfTrimestralFii*Reader</code> (16 readers)<a class="headerlink" href="#inftrimestralfiireader-16-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfTrimestralFii{Geral,Complemento,Ativo,AtivoGarantiaRentabilidade,Direito,Imovel,ImovelDesempenho,ImovelRendaAcabadoContrato,ImovelRendaAcabadoInquilino,Terreno,AquisicaoImovel,AquisicaoTerreno,AlienacaoImovel,AlienacaoTerreno,RentabilidadeEfetiva,ResultadoContabilFinanceiro}Reader</code></p>
+<p>Os 16 membros de <code>inf_trimestral_fii_AAAA.zip</code> — o <strong>Informe Trimestral FII</strong>, um reader por membro.
+Página completa: <a href="../ingestion/inf_trimestral_fii/">Informe Trimestral FII</a>.</p>
+<p>⚠️ <strong>Particionado por ANO, não por trimestre.</strong> O <code>date_ref</code> seleciona o <strong>ano</strong>; filtre
+<code>Data_Referencia</code> no frame para um único trimestre. <code>CNPJ_Fundo_Classe</code> é a única coluna validada
+como CNPJ.</p>
+<h4 id="inftrimestralfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-15"><code>InfTrimestralFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 15)<a class="headerlink" href="#inftrimestralfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-15" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP e os 16 CSVs. Um <code>path_raw</code> de qualquer reader serve aos outros.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas).</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_6"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_6" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas daquele membro no <strong>ano</strong> — todos os quatro trimestres. <strong>Sem chave única:</strong> a
+maioria dos membros é longa (um ativo/imóvel/contrato/inquilino/transação por linha). As <code>Data_*</code>
+viram <code>datetime.date</code> (vazios → <code>NaT</code>); as demais são texto exato. Levanta <code>OSError</code>,
+<code>ContractError</code> ou <code>ValueError</code> (membro do ano ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfTrimestralFiiImovelReader</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfTrimestralFiiImovelReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="n">primeiro_tri</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;Data_Referencia&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">31</span><span class="p">)]</span>
+</span></code></pre></div>
+<h3 id="infanualfiireader-12-readers"><code>InfAnualFii*Reader</code> (12 readers)<a class="headerlink" href="#infanualfiireader-12-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfAnualFii{Geral,Complemento,AtivoAdquirido,AtivoTransacao,AtivoValorContabil,DistribuicaoCotistas,DiretorResponsavel,ExperienciaProfissional,PrestadorServico,Processo,ProcessoSemelhante,RepresentanteCotista}Reader</code></p>
+<p>Os 12 membros de <code>inf_anual_fii_AAAA.zip</code> — o <strong>Informe Anual FII</strong>, um reader por membro. <strong>Com ele
+o portal root <code>fii/</code> fica completo (4/4).</strong> Página completa:
+<a href="../ingestion/inf_anual_fii/">Informe Anual FII</a>.</p>
+<p>Particionado por <strong>ano</strong> — aqui a partição é natural (é o informe <em>anual</em>). ⚠️ Dois pontos:
+<code>Link_Download_Anexo</code> (em <code>complemento</code>) é <strong>devolvido como texto e não seguido</strong>; e o <strong><code>CPF</code></strong> (em
+<code>diretor_responsavel</code> / <code>representante_cotista</code>) é <strong>dado pessoal</strong>, lido como texto exato e nunca
+validado como CNPJ.</p>
+<h4 id="infanualfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-11"><code>InfAnualFiiGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 11)<a class="headerlink" href="#infanualfiigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-11" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP e os 12 CSVs. Um <code>path_raw</code> de qualquer reader serve aos outros.</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas).</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_7"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_7" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas daquele membro no ano. <strong>Sem chave única:</strong> a maioria dos membros é longa (um
+ativo/transação/processo/prestador/diretor por linha). As <code>Data_*</code> viram <code>datetime.date</code> (vazios →
+<code>NaT</code>); as demais são texto exato. Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code> (membro do ano
+ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfAnualFiiProcessoReader</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfAnualFiiProcessoReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1"># uma linha por processo: Juizo, Instancia, Data_Instauracao, Valor_Causa, Chance_Perda…</span>
+</span></code></pre></div>
+<h3 id="inftrimestralfipreader-infquadrimestralfipreader-2-readers"><code>InfTrimestralFipReader</code> · <code>InfQuadrimestralFipReader</code> (2 readers)<a class="headerlink" href="#inftrimestralfipreader-infquadrimestralfipreader-2-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfTrimestralFipReader</code> · <code>filings_cvm.ingestion.InfQuadrimestralFipReader</code></p>
+<p>Os dois informes periódicos dos <strong>FIP</strong> (<code>inf_trimestral_fip_AAAA.csv</code>, <code>inf_quadrimestral_fip_AAAA.csv</code>),
+que <strong>inauguram o portal root <code>fip/</code></strong>. O trimestral é o regime <strong>pré-RCVM 175</strong> (2010–2023); o
+quadrimestral o substituiu no <strong>pós-175</strong> (a partir de 2024). Conteúdo quase idêntico — a única
+diferença estrutural é o identificador do fundo (<code>CNPJ_FUNDO</code> vs <code>TP_FUNDO_CLASSE</code> +
+<code>CNPJ_FUNDO_CLASSE</code>). Página completa: <a href="../ingestion/inf_fip/">Informes periódicos FIP</a>.</p>
+<p>CSVs soltos (não ZIP), particionados por <strong>ano</strong> — o <code>date_ref</code> seleciona o ano. Apenas <code>DT_COMPTC</code>
+vira <code>date</code>; dinheiro e cota ficam texto exato.</p>
+<h4 id="inftrimestralfipreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-o-quadrimestral"><code>InfTrimestralFipReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para o quadrimestral)<a class="headerlink" href="#inftrimestralfipreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-o-quadrimestral" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o CSV bruto (camada <em>bronze</em>).</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas).</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_8"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_8" title="Permanent link">&para;</a></h4>
+<p>Devolve uma linha por fundo (ou fundo/classe) por período de competência. <strong>Sem chave única.</strong>
+Levanta <code>OSError</code> ou <code>ContractError</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfQuadrimestralFipReader</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfQuadrimestralFipReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2024</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="c1"># df_[[&quot;CNPJ_FUNDO_CLASSE&quot;, &quot;DT_COMPTC&quot;, &quot;VL_PATRIM_LIQ&quot;, &quot;VL_CAP_INTEGR&quot;]]</span>
+</span></code></pre></div>
+<h3 id="infmensalfiagroreader-infmensalfiagrosubclassereader-2-readers"><code>InfMensalFiagroReader</code> · <code>InfMensalFiagroSubclasseReader</code> (2 readers)<a class="headerlink" href="#infmensalfiagroreader-infmensalfiagrosubclassereader-2-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfMensalFiagroReader</code> · <code>filings_cvm.ingestion.InfMensalFiagroSubclasseReader</code></p>
+<p>Os dois membros do Informe Mensal dos <strong>FIAGRO</strong> (<code>inf_mensal_fiagro_AAAAMM.zip</code>), que
+<strong>inauguram o portal root <code>fiagro/</code></strong>. <code>InfMensalFiagroReader</code> lê o informe proper (133 colunas,
+uma linha por classe por mês); <code>InfMensalFiagroSubclasseReader</code> lê o desdobramento por subclasse
+(6 colunas, longo). Página completa: <a href="../ingestion/inf_mensal_fiagro/">Informe Mensal FIAGRO</a>.</p>
+<p>ZIP <strong>particionado por mês</strong> (<code>AAAAMM</code>, série a partir de <code>202505</code>) — o <code>date_ref</code> seleciona o
+mês; o membro é escolhido por <strong>nome exato</strong>. Nomenclatura pós-RCVM 175 (chave <code>CNPJ_Classe</code>).</p>
+<h4 id="infmensalfiagroreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-a-subclasse"><code>InfMensalFiagroReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para a subclasse)<a class="headerlink" href="#infmensalfiagroreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-a-subclasse" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>mês</strong> de referência — só ano e mês são lidos. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP bruto e os CSVs (camada <em>bronze</em>).</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff do download. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do próprio reader (padrão paciente: 5 tentativas).</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_9"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_9" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas do mês para o membro. <strong>Sem chave única</strong> (a subclasse é naturalmente longa).
+Datas viram <code>date</code> (três colunas no informe, uma na subclasse); dinheiro/quantidade/percentual
+ficam texto exato. Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalFiagroReader</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfMensalFiagroReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o MÊS 2025-06</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="c1"># df_[[&quot;CNPJ_Classe&quot;, &quot;Data_Referencia&quot;, &quot;Patrimonio_Liquido&quot;, &quot;Valor_Patrimonial_Cotas&quot;]]</span>
+</span></code></pre></div>
+<hr />
+<h2 id="modelos-de-schema-pydantic">Modelos de schema (Pydantic)<a class="headerlink" href="#modelos-de-schema-pydantic" title="Permanent link">&para;</a></h2>
+<p>Todos são modelos <a href="https://docs.pydantic.dev/">Pydantic v2</a> — a validação acontece na
+construção. Cada grupo espelha um padrão CVM: <code>PadrãoXMLPerfil</code> (V4) e
+<code>PadrãoXMLInfoDiarioNet</code> (V4).</p>
+<h3 id="perfil-mensal-documento-e-cabecalho">Perfil Mensal — documento e cabeçalho<a class="headerlink" href="#perfil-mensal-documento-e-cabecalho" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>Tag XML</th>
+<th>Papel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PerfilMensalDocument</code></td>
+<td><code>DOC_ARQ</code></td>
+<td>Documento completo: <code>header</code> + <code>rows</code>.</td>
+</tr>
+<tr>
+<td><code>DocumentHeader</code></td>
+<td><code>CAB_INFORM</code></td>
+<td>Cabeçalho. <code>dt_compt</code> no formato <code>MM/AAAA</code>; <code>dt_gerac_arq</code> no formato <code>DD/MM/AAAA</code>.</td>
+</tr>
+<tr>
+<td><code>PerfilMensalRow</code></td>
+<td><code>ROW_PERFIL</code></td>
+<td>Uma entrada de perfil mensal por classe de fundo.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Campos obrigatórios de <code>PerfilMensalRow</code>:</strong> <code>cnpj_fdo</code> (validado por dígito verificador,
+armazenado sem máscara), <code>nr_client</code>, <code>total_recurs_exter</code>, <code>total_recurs_br</code>,
+<code>tot_ativos_p_relac</code>, <code>tot_ativos_cred_priv</code>. Os demais são opcionais.</p>
+<h3 id="perfil-mensal-blocos-e-listas">Perfil Mensal — blocos e listas<a class="headerlink" href="#perfil-mensal-blocos-e-listas" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>Tag XML</th>
+<th>Papel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ClientCount</code></td>
+<td><code>NR_CLIENT</code></td>
+<td>Contagem de clientes por tipo de investidor (16 campos, obrigatórios, ≥ 0).</td>
+</tr>
+<tr>
+<td><code>PatrimonyDistribution</code></td>
+<td><code>DISTR_PATRIM</code></td>
+<td>Percentual de patrimônio por tipo de cliente (bloco opcional).</td>
+</tr>
+<tr>
+<td><code>VarPercValCota</code></td>
+<td><code>VARIACAO_PERC_VAL_COTA</code></td>
+<td>Cenário de estresse com fatores primitivos de risco.</td>
+</tr>
+<tr>
+<td><code>PrimitiveRiskFactor</code></td>
+<td><code>FATOR_PRIMIT_RISCO</code></td>
+<td>Um fator primitivo de risco (IBOVESPA, JUROS-PRE, CUPOM CAMBIAL, DOLAR, OUTROS).</td>
+</tr>
+<tr>
+<td><code>VarOutros</code></td>
+<td><code>VARIACAO_..._N_OUTROS</code></td>
+<td>Sensibilidade a um fator de risco não padronizado.</td>
+</tr>
+<tr>
+<td><code>NominalRiskBlock</code></td>
+<td><code>VALOR_NOC_TOT_CONTRAT_DERIV_MANT_FDO</code></td>
+<td>Exposição nocional em derivativos de balcão.</td>
+</tr>
+<tr>
+<td><code>NominalRiskFactor</code></td>
+<td><code>FATOR_RISCO_NOC</code></td>
+<td>Um fator de risco nocional (pernas long e short).</td>
+</tr>
+<tr>
+<td><code>OtcOperation</code></td>
+<td><code>OPER_CURS_MERC_BALCAO</code></td>
+<td>Contraparte de balcão sem contraparte central (até 3).</td>
+</tr>
+<tr>
+<td><code>PrivateCreditIssuer</code></td>
+<td><code>EMISSORES_TIT_CRED_PRIV</code></td>
+<td>Emissor de título de crédito privado (até 3).</td>
+</tr>
+<tr>
+<td><code>PerformanceFeeDetails</code></td>
+<td><code>RESP_VED_REGUL_COBR_TAXA_PERFORM</code></td>
+<td>Data e valor da cota na última cobrança de taxa de performance.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="informe-diario-documento-e-blocos">Informe Diário — documento e blocos<a class="headerlink" href="#informe-diario-documento-e-blocos" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>Tag XML</th>
+<th>Papel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>InformeDiarioDocument</code></td>
+<td><code>DOC_ARQ</code></td>
+<td>Documento completo: <code>header</code> + <code>informs</code> (até 100 fundos).</td>
+</tr>
+<tr>
+<td><code>InformeDiarioHeader</code></td>
+<td><code>CAB_INFORM</code></td>
+<td>Cabeçalho. <code>dt_compt</code> e <code>dt_gerac_arq</code> no formato <code>DD/MM/AAAA</code>; <code>COD_DOC=1</code>.</td>
+</tr>
+<tr>
+<td><code>InformeDiarioInform</code></td>
+<td><code>INFORM</code></td>
+<td>O informe diário de um fundo.</td>
+</tr>
+<tr>
+<td><code>SignificantShareholder</code></td>
+<td><code>COTST_SIGNIF</code></td>
+<td>Um cotista com participação ≥ 20% do PL (bloco opcional).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Campos de <code>InformeDiarioInform</code>:</strong> identifique o fundo por <strong>exatamente um</strong> de <code>cnpj_fdo</code>
+(classe, validado por dígito verificador) <strong>ou</strong> <code>cod_subclasse</code> (subclasse) — informar ambos ou
+nenhum levanta <code>ValidationError</code>. Obrigatórios: <code>data_prox_pl</code> (<code>DD/MM/AAAA</code>), <code>vl_total</code>,
+<code>vl_quota</code> (até 12 casas), <code>patrim_liq</code>, <code>captc_dia</code>, <code>resg_dia</code>, <code>vl_total_sai</code>, <code>vl_total_atv</code>
+(monetários, 2 casas) e <code>nr_cotst</code> (inteiro ≥ 0). <code>lista_cotst_signif</code> é opcional; <code>pr_cotst</code>
+tem até 4 casas.</p>
+<hr />
+<h2 id="validacao-e-precisao">Validação e precisão<a class="headerlink" href="#validacao-e-precisao" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Datas</strong> são validadas por regex (<code>MM/AAAA</code> ou <code>DD/MM/AAAA</code>).</li>
+<li><strong>CNPJ/CPF</strong> passam pelos validadores de dígito verificador próprios da biblioteca
+  (<code>_internal.utils.br_identifiers</code>, cientes do CNPJ alfanumérico de 2026) e são armazenados
+  na forma nua, sem máscara — como a CVM espera no XML.</li>
+<li><strong>Decimais</strong> têm a escala fixada por campo conforme o padrão CVM; precisão excedente é
+  <strong>truncada em direção a zero</strong> (<code>ROUND_DOWN</code>), nunca arredondada. Passe valores como <code>str</code>
+  ou <code>Decimal</code>, nunca <code>float</code>.</li>
+<li>Na serialização, decimais saem com <strong>vírgula</strong> como separador (<code>10,99</code>).</li>
+</ul>
+<hr />
+<h2 id="estendendo">Estendendo<a class="headerlink" href="#estendendo" title="Permanent link">&para;</a></h2>
+<p>Novos padrões da CVM entram como novos módulos:</p>
+<ul>
+<li>O schema compartilhado (neutro em relação à direção) vai em
+  <code>src/filings_cvm/_internal/config/schemas/&lt;padrao&gt;.py</code>.</li>
+<li>O escritor de envio vai em <code>src/filings_cvm/submission/&lt;padrao&gt;.py</code> (uma classe pública por
+  arquivo, nomeada como o arquivo).</li>
+<li>Reexporte os símbolos públicos em <code>filings_cvm/submission/__init__.py</code> e, quando fizer sentido,
+  no <code>filings_cvm/__init__.py</code>.</li>
+</ul>
+<p>O catálogo completo de padrões (implementados e pendentes) está no <code>CLAUDE.md</code> do repositório.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
