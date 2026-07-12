@@ -1,0 +1,50 @@
+name: PR Quality Gate
+
+# Labels the PR (risk / size / gate), publishes ONE sticky status comment, and — only for low-risk
+# change classes that opted in with the `automerge` label — enables GitHub's NATIVE auto-merge.
+#
+# Native auto-merge bypasses nothing: GitHub holds the merge until every required check of the
+# `pr-quality-gate` ruleset is green, then merges. This workflow only decides *eligibility* (which
+# paths changed, did the author opt in) — never *whether the checks passed*. `src/` is never
+# auto-merged at any size: a one-character change to a FileContract is tiny AND catastrophic, and
+# every test still passes because the tests assert the contract that was written.
+#
+# One trigger, on purpose. Adding `automerge` fires `labeled`, so opting in takes effect at once.
+# The gate does NOT use a `workflow_run` trigger to catch check completion: that only fires from the
+# workflow file on the DEFAULT branch, so it can never fire for the PR that introduces the gate, and
+# is fragile even after merge. Instead `bin/pr_gate.py` polls the checks in-run until they finish, so
+# the sticky comment lands on the final result. Works on any branch, testable on this very PR.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: write        # enable auto-merge
+  pull-requests: write   # labels + the sticky comment
+  checks: read
+
+# The gate polls in-run for several minutes, so a new push must cancel the previous PR's still-polling
+# run — otherwise two gates would race on the same sticky comment.
+concurrency:
+  group: pr-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run Quality Gate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python bin/pr_gate.py
