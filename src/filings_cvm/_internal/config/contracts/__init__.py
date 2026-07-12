@@ -55,6 +55,10 @@ from filings_cvm._internal.config.contracts.inf_anual_fii import (
 	INF_ANUAL_FII_PROCESSO_SEMELHANTE,
 	INF_ANUAL_FII_REPRESENTANTE_COTISTA,
 )
+from filings_cvm._internal.config.contracts.inf_mensal_fiagro import (
+	INF_MENSAL_FIAGRO,
+	INF_MENSAL_FIAGRO_SUBCLASSE,
+)
 from filings_cvm._internal.config.contracts.inf_mensal_fidc import (
 	INF_MENSAL_FIDC_TAB_I,
 	INF_MENSAL_FIDC_TAB_II,
@@ -149,6 +153,8 @@ __all__ = [
 	"INF_ANUAL_FII_PROCESSO",
 	"INF_ANUAL_FII_PROCESSO_SEMELHANTE",
 	"INF_ANUAL_FII_REPRESENTANTE_COTISTA",
+	"INF_MENSAL_FIAGRO",
+	"INF_MENSAL_FIAGRO_SUBCLASSE",
 	"INF_MENSAL_FIDC_TAB_I",
 	"INF_MENSAL_FIDC_TAB_II",
 	"INF_MENSAL_FIDC_TAB_III",

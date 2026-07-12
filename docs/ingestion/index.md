@@ -51,6 +51,11 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `fip/`**. O trimestral é o regime pré-RCVM 175 (2010–2023); o quadrimestral o substituiu no pós-175
   (2024→). Quase idênticos — só muda o identificador do fundo (`CNPJ_FUNDO` vs `TP_FUNDO_CLASSE` +
   `CNPJ_FUNDO_CLASSE`).
+- **[Informe Mensal FIAGRO](inf_mensal_fiagro.md)** — 2 readers `InfMensalFiagroReader` +
+  `InfMensalFiagroSubclasseReader`: o informe mensal dos FIAGRO (`inf_mensal_fiagro_AAAAMM.zip`,
+  membros `inf_mensal_fiagro` + `inf_mensal_fiagro_subclasse`), que **inauguram o portal root
+  `fiagro/`**. Particionado por **mês** (série a partir de `202505`); nomenclatura pós-RCVM 175
+  (chave `CNPJ_Classe`).
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).

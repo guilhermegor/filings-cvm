@@ -136,6 +136,16 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   (split fundo/classe da RCVM 175) no lugar de `CNPJ_FUNDO`. **Com este, o portal root `fip/` está
   completo (2/2 datasets)**
 
+**Fundos de Investimento nas Cadeias Produtivas Agroindustriais (FIAGRO)** — portal root `fiagro/`;
+**open-data only** (a CVM não publica padrão XML de envio). Sob `FIAGRO/DOC/`:
+- Informe Mensal FIAGRO — ✅ **ingestion** `inf_mensal_fiagro_AAAAMM.zip` (**2 membros**: informe +
+  subclasse) — `ingestion/fiagro/doc/inf_mensal/*` (`InfMensalFiagroReader`,
+  `InfMensalFiagroSubclasseReader`, base privada `_base_inf_mensal_fiagro_reader.py`); contracts
+  `_internal/config/contracts/inf_mensal_fiagro.py`. Inaugura o portal root `fiagro/`.
+  **Particionado por mês** (`_AAAAMM`, série a partir de 2025-05); nomenclatura pós-RCVM 175 (chave
+  `CNPJ_Classe`). O informe (133 colunas) traz uma linha por classe/mês; a subclasse (6 colunas) é
+  longa. Grafias da CVM preservadas verbatim (`Provisoes_Contigencias`, `A_Vencer_Acima1080_Dias`)
+
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/fi/doc/lamina/lamina_carteira.py`
@@ -179,6 +189,7 @@ src/filings_cvm/
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
         fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
+        fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

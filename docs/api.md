@@ -543,6 +543,41 @@ df_ = InfQuadrimestralFipReader(date_ref=date(2024, 8, 15)).read()   # o ANO de 
 # df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "VL_PATRIM_LIQ", "VL_CAP_INTEGR"]]
 ```
 
+### `InfMensalFiagroReader` · `InfMensalFiagroSubclasseReader` (2 readers)
+
+`filings_cvm.ingestion.InfMensalFiagroReader` · `filings_cvm.ingestion.InfMensalFiagroSubclasseReader`
+
+Os dois membros do Informe Mensal dos **FIAGRO** (`inf_mensal_fiagro_AAAAMM.zip`), que
+**inauguram o portal root `fiagro/`**. `InfMensalFiagroReader` lê o informe proper (133 colunas,
+uma linha por classe por mês); `InfMensalFiagroSubclasseReader` lê o desdobramento por subclasse
+(6 colunas, longo). Página completa: [Informe Mensal FIAGRO](ingestion/inf_mensal_fiagro.md).
+
+ZIP **particionado por mês** (`AAAAMM`, série a partir de `202505`) — o `date_ref` seleciona o
+mês; o membro é escolhido por **nome exato**. Nomenclatura pós-RCVM 175 (chave `CNPJ_Classe`).
+
+#### `InfMensalFiagroReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para a subclasse)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **mês** de referência — só ano e mês são lidos. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP bruto e os CSVs (camada *bronze*). |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas do mês para o membro. **Sem chave única** (a subclasse é naturalmente longa).
+Datas viram `date` (três colunas no informe, uma na subclasse); dinheiro/quantidade/percentual
+ficam texto exato. Levanta `OSError`, `ContractError` ou `ValueError`.
+
+```python
+from datetime import date
+from filings_cvm import InfMensalFiagroReader
+
+df_ = InfMensalFiagroReader(date_ref=date(2025, 6, 1)).read()   # o MÊS 2025-06
+# df_[["CNPJ_Classe", "Data_Referencia", "Patrimonio_Liquido", "Valor_Patrimonial_Cotas"]]
+```
+
 ---
 
 ## Modelos de schema (Pydantic)
