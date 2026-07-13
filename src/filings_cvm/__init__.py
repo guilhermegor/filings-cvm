@@ -14,6 +14,7 @@ from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm.ingestion import (
 	BalanceteFieReader,
 	BalancoFieReader,
+	CadastroEmissorCepacReader,
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
 	CadastroFiHistClasseReader,
@@ -35,6 +36,8 @@ from filings_cvm.ingestion import (
 	CadastroFiHistTribLprazoReader,
 	CadastroFiReader,
 	CdaReader,
+	DfinCraReader,
+	DfinCriReader,
 	DfinFiiReader,
 	InfAnualFiiAtivoAdquiridoReader,
 	InfAnualFiiAtivoTransacaoReader,
@@ -113,6 +116,7 @@ except PackageNotFoundError:  # pragma: no cover - source tree without an instal
 __all__ = [
 	"BalanceteFieReader",
 	"BalancoFieReader",
+	"CadastroEmissorCepacReader",
 	"CadastroFiHistAdminReader",
 	"CadastroFiHistAuditorReader",
 	"CadastroFiHistClasseReader",
@@ -134,6 +138,8 @@ __all__ = [
 	"CadastroFiHistTribLprazoReader",
 	"CadastroFiReader",
 	"CdaReader",
+	"DfinCraReader",
+	"DfinCriReader",
 	"DfinFiiReader",
 	"InfAnualFiiAtivoAdquiridoReader",
 	"InfAnualFiiAtivoTransacaoReader",
