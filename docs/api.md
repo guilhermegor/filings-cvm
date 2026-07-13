@@ -651,6 +651,40 @@ df_ = DfinCraReader(date_ref=date(2025, 6, 1)).read()   # índice de DF dos CRA 
 cad = CadastroEmissorCepacReader().read()               # snapshot dos emissores de CEPAC
 ```
 
+### `InfMensalOts*Reader` (8 readers)
+
+`filings_cvm.ingestion.InfMensalOts{Geral,AtivoPassivo,Classe,DireitosCreditorios,Desembolso,FluxoCaixa,Derivativos,CedenteDevedor}Reader`
+
+As 8 seções do Informe Mensal das operações de securitização não-CRA/CRI
+(`inf_mensal_ots_AAAA.zip`). Página completa:
+[Informe Mensal OTS](ingestion/inf_mensal_ots.md). Todos partilham a base privada
+`_base_inf_mensal_ots_reader` e o prefixo-chave `CNPJ_Securitizadora`,
+`Codigo_Identificacao_Certificado`, `Data_Referencia`, `Versao`. ⚠️ Particionado por **ano** apesar
+de mensal (o `date_ref` seleciona o ano). `cedente_devedor.CNPJ` guarda CPF (não validado como
+CNPJ); `Indice_Subordinacao_Data_Base` não é data.
+
+#### `InfMensalOtsGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 7)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP bruto e os 8 CSVs (camada *bronze*). |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff. Se `None`, usa o `_RETRY_POLICY` do reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas do ano para a seção. Datas viram `date` (por membro); o restante fica texto exato.
+Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from datetime import date
+from filings_cvm import InfMensalOtsClasseReader
+
+df_ = InfMensalOtsClasseReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
+# muitas linhas por certificado — uma por classe/série.
+```
+
 ---
 
 ## Modelos de schema (Pydantic)

@@ -68,6 +68,12 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   de URL fixa, sem `date_ref`). **Inauguram** os *portal roots* `securit/` e `emissor_cepac/`; primeira
   fatia da Wave 2 do #41.
 
+- **[Informe Mensal OTS (Securitização)](inf_mensal_ots.md)** — 8 readers `InfMensalOts*Reader`
+  (geral, ativo/passivo, classe, direitos creditórios, desembolso, fluxo de caixa, derivativos,
+  cedente/devedor): as seções do informe mensal das operações de securitização não-CRA/CRI. ⚠️
+  Particionado por **ano** apesar de mensal. `cedente_devedor.CNPJ` guarda CPF (dado pessoal, não
+  validado como CNPJ); `Indice_Subordinacao_Data_Base` não é data. Segunda fatia da Wave 2 do #41.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

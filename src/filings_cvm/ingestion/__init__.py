@@ -111,6 +111,14 @@ from filings_cvm.ingestion.fip import (
 from filings_cvm.ingestion.securit import (
 	DfinCraReader,
 	DfinCriReader,
+	InfMensalOtsAtivoPassivoReader,
+	InfMensalOtsCedenteDevedorReader,
+	InfMensalOtsClasseReader,
+	InfMensalOtsDerivativosReader,
+	InfMensalOtsDesembolsoReader,
+	InfMensalOtsDireitosCreditoriosReader,
+	InfMensalOtsFluxoCaixaReader,
+	InfMensalOtsGeralReader,
 )
 
 
@@ -176,6 +184,14 @@ __all__ = [
 	"InfMensalFiiAtivoPassivoReader",
 	"InfMensalFiiComplementoReader",
 	"InfMensalFiiGeralReader",
+	"InfMensalOtsAtivoPassivoReader",
+	"InfMensalOtsCedenteDevedorReader",
+	"InfMensalOtsClasseReader",
+	"InfMensalOtsDerivativosReader",
+	"InfMensalOtsDesembolsoReader",
+	"InfMensalOtsDireitosCreditoriosReader",
+	"InfMensalOtsFluxoCaixaReader",
+	"InfMensalOtsGeralReader",
 	"InfQuadrimestralFipReader",
 	"InfTrimestralFiiAlienacaoImovelReader",
 	"InfTrimestralFiiAlienacaoTerrenoReader",
