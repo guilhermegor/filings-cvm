@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.25/api/">
       
       
-        <link rel="prev" href="../ingestion/fie/">
+        <link rel="prev" href="../ingestion/securit_cepac_flat/">
       
       
         <link rel="next" href="../faq/">
@@ -914,6 +914,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/securit_cepac_flat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DFIN Securit (CRA/CRI) + Emissor CEPAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1643,6 +1671,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfincrareader-dfincrireader-cadastroemissorcepacreader-3-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinCraReader · DfinCriReader · CadastroEmissorCepacReader (3 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DfinCraReader · DfinCriReader · CadastroEmissorCepacReader (3 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfincrareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-cadastroemissorcepacreaderpath_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinCraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) · CadastroEmissorCepacReader(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -2505,6 +2572,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfincrareader-dfincrireader-cadastroemissorcepacreader-3-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinCraReader · DfinCriReader · CadastroEmissorCepacReader (3 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DfinCraReader · DfinCriReader · CadastroEmissorCepacReader (3 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfincrareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-cadastroemissorcepacreaderpath_rawnone-retry_policynone-cls_loggernone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DfinCraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) · CadastroEmissorCepacReader(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -3551,6 +3657,59 @@ exato. Levanta <code>OSError</code>, <code>ContractError</code> ou (nos balanço
 </span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
 </span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">BalanceteFieReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o MÊS 2026-06</span>
 </span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="c1"># df_[[&quot;CNPJ_FUNDO_CLASSE&quot;, &quot;DT_COMPTC&quot;, &quot;CD_CONTA_BALCTE&quot;, &quot;VL_SALDO_BALCTE&quot;]]</span>
+</span></code></pre></div>
+<h3 id="dfincrareader-dfincrireader-cadastroemissorcepacreader-3-readers"><code>DfinCraReader</code> · <code>DfinCriReader</code> · <code>CadastroEmissorCepacReader</code> (3 readers)<a class="headerlink" href="#dfincrareader-dfincrireader-cadastroemissorcepacreader-3-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.DfinCraReader</code> · <code>filings_cvm.ingestion.DfinCriReader</code> ·
+<code>filings_cvm.ingestion.CadastroEmissorCepacReader</code></p>
+<p>Os três datasets de <strong>CSV solto</strong> da Securitização + emissores de CEPAC, que <strong>inauguram</strong> os portal
+roots <code>securit/</code> e <code>emissor_cepac/</code>. Página completa:
+<a href="../ingestion/securit_cepac_flat/">DFIN Securit + Emissor CEPAC</a>.</p>
+<ul>
+<li><code>DfinCraReader</code> / <code>DfinCriReader</code> — <code>dfin_{cra,cri}_AAAA.csv</code>, índices anuais das demonstrações
+  financeiras dos CRA/CRI. <code>date_ref</code> seleciona o <strong>ano</strong>; <code>Link_Download</code> devolvido como texto,
+  <strong>não seguido</strong>.</li>
+<li><code>CadastroEmissorCepacReader</code> — <code>cad_emissor_cepac.csv</code>, <strong>snapshot</strong> de URL fixa dos emissores de
+  CEPAC (municípios). <strong>Sem <code>date_ref</code></strong> (a CVM sobrescreve no lugar).</li>
+</ul>
+<h4 id="dfincrareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-cadastroemissorcepacreaderpath_rawnone-retry_policynone-cls_loggernone"><code>DfinCraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> · <code>CadastroEmissorCepacReader(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#dfincrareaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-cadastroemissorcepacreaderpath_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>DFIN: qualquer dia do <strong>ano</strong>. <strong>Ausente</strong> no CEPAC (snapshot).</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o CSV bruto (camada <em>bronze</em>).</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do reader.</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_11"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_11" title="Permanent link">&para;</a></h4>
+<p>Só as colunas de data viram <code>date</code>; o restante fica texto exato. Levanta <code>OSError</code> ou <code>ContractError</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DfinCraReader</span><span class="p">,</span> <span class="n">CadastroEmissorCepacReader</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">DfinCraReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># índice de DF dos CRA de 2025</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="n">cad</span> <span class="o">=</span> <span class="n">CadastroEmissorCepacReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>               <span class="c1"># snapshot dos emissores de CEPAC</span>
 </span></code></pre></div>
 <hr />
 <h2 id="modelos-de-schema-pydantic">Modelos de schema (Pydantic)<a class="headerlink" href="#modelos-de-schema-pydantic" title="Permanent link">&para;</a></h2>
