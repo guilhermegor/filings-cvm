@@ -172,8 +172,16 @@ XML de envio). Não há `SECURIT/CAD`. Wave 2 do #41 (em andamento). Sob `SECURI
 - DFIN CRI — ✅ **ingestion** `dfin_cri_AAAA.csv` (CSV solto, anual) — `ingestion/securit/doc/dfin_cri.py`
   (`DfinCriReader`); contract `_internal/config/contracts/dfin_cri.py`. Idêntico ao CRA (9 colunas),
   para os CRI
-- ⬜ **ingestion** `INF_MENSAL_CRA` (8 membros), `INF_MENSAL_CRI` (11), `INF_MENSAL_OTS` (8) — dumps
-  mensais multi-membro (zips particionados por ano); um reader por membro, PRs seguintes da Wave 2
+- INF_MENSAL_OTS — ✅ **ingestion** `inf_mensal_ots_AAAA.zip` (**8 membros**: geral, ativo_passivo,
+  classe, direitos_creditorios, desembolso, fluxo_caixa, derivativos, cedente_devedor) —
+  `ingestion/securit/doc/inf_mensal_ots/*` (`InfMensalOts*Reader`, base privada
+  `_base_inf_mensal_ots_reader.py`); contracts `_internal/config/contracts/inf_mensal_ots.py`.
+  Operações de securitização não-CRA/CRI. **Particionado por ANO apesar de mensal** (`date_ref` = o
+  ano). Armadilhas honradas: `cedente_devedor.CNPJ` guarda CPF (não é coluna de CNPJ; é dado
+  pessoal), `Indice_Subordinacao_Data_Base` NÃO é data, e a grafia `Outras_Contigencias_Relevantes`
+  é preservada verbatim
+- ⬜ **ingestion** `INF_MENSAL_CRA` (8 membros), `INF_MENSAL_CRI` (11) — dumps mensais multi-membro
+  (zips particionados por ano); um reader por membro, PRs seguintes da Wave 2
 
 **Emissor de CEPAC (EMISSOR_CEPAC)** — portal root `emissor_cepac/`; **open-data only**. Publica só
 um cadastro:
@@ -228,7 +236,7 @@ src/filings_cvm/
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
         fie/               #   FIE/ — COMPLETO: doc/{balancete,balanco} (ZIP) + medidas (flat CSV); no CAD
-        securit/           #   SECURIT/ — doc/{dfin_cra,dfin_cri} (flat); INF_MENSAL_* zips pending (Wave 2)
+        securit/           #   SECURIT/ — doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8 members); CRA/CRI zips pending
         emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
