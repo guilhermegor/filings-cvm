@@ -1046,6 +1046,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="inf_mensal_ots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal OTS (Securitização)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1331,6 +1359,13 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
   não seguido) e <code>CadastroEmissorCepacReader</code> (retrato dos emissores de CEPAC — municípios — snapshot
   de URL fixa, sem <code>date_ref</code>). <strong>Inauguram</strong> os <em>portal roots</em> <code>securit/</code> e <code>emissor_cepac/</code>; primeira
   fatia da Wave 2 do #41.</p>
+</li>
+<li>
+<p><strong><a href="inf_mensal_ots/">Informe Mensal OTS (Securitização)</a></strong> — 8 readers <code>InfMensalOts*Reader</code>
+  (geral, ativo/passivo, classe, direitos creditórios, desembolso, fluxo de caixa, derivativos,
+  cedente/devedor): as seções do informe mensal das operações de securitização não-CRA/CRI. ⚠️
+  Particionado por <strong>ano</strong> apesar de mensal. <code>cedente_devedor.CNPJ</code> guarda CPF (dado pessoal, não
+  validado como CNPJ); <code>Indice_Subordinacao_Data_Base</code> não é data. Segunda fatia da Wave 2 do #41.</p>
 </li>
 </ul>
 <p>Cada padrão de leitura ganha a sua própria página, com <strong>Descrição</strong> e <strong>Exemplos</strong>, no mesmo
