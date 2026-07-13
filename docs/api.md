@@ -615,6 +615,42 @@ df_ = BalanceteFieReader(date_ref=date(2026, 6, 1)).read()   # o MÊS 2026-06
 # df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "CD_CONTA_BALCTE", "VL_SALDO_BALCTE"]]
 ```
 
+### `DfinCraReader` · `DfinCriReader` · `CadastroEmissorCepacReader` (3 readers)
+
+`filings_cvm.ingestion.DfinCraReader` · `filings_cvm.ingestion.DfinCriReader` ·
+`filings_cvm.ingestion.CadastroEmissorCepacReader`
+
+Os três datasets de **CSV solto** da Securitização + emissores de CEPAC, que **inauguram** os portal
+roots `securit/` e `emissor_cepac/`. Página completa:
+[DFIN Securit + Emissor CEPAC](ingestion/securit_cepac_flat.md).
+
+- `DfinCraReader` / `DfinCriReader` — `dfin_{cra,cri}_AAAA.csv`, índices anuais das demonstrações
+  financeiras dos CRA/CRI. `date_ref` seleciona o **ano**; `Link_Download` devolvido como texto,
+  **não seguido**.
+- `CadastroEmissorCepacReader` — `cad_emissor_cepac.csv`, **snapshot** de URL fixa dos emissores de
+  CEPAC (municípios). **Sem `date_ref`** (a CVM sobrescreve no lugar).
+
+#### `DfinCraReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` · `CadastroEmissorCepacReader(path_raw=None, retry_policy=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | DFIN: qualquer dia do **ano**. **Ausente** no CEPAC (snapshot). |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o CSV bruto (camada *bronze*). |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff. Se `None`, usa o `_RETRY_POLICY` do reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Só as colunas de data viram `date`; o restante fica texto exato. Levanta `OSError` ou `ContractError`.
+
+```python
+from datetime import date
+from filings_cvm import DfinCraReader, CadastroEmissorCepacReader
+
+df_ = DfinCraReader(date_ref=date(2025, 6, 1)).read()   # índice de DF dos CRA de 2025
+cad = CadastroEmissorCepacReader().read()               # snapshot dos emissores de CEPAC
+```
+
 ---
 
 ## Modelos de schema (Pydantic)

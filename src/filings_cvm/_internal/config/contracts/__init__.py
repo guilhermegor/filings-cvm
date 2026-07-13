@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
+from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
 from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
 from filings_cvm._internal.config.contracts.cad_fi_hist import (
 	CAD_FI_HIST_ADMIN,
@@ -41,6 +42,8 @@ from filings_cvm._internal.config.contracts.cad_fi_hist import (
 	CAD_FI_HIST_TRIB_LPRAZO,
 )
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
+from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
+from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
 from filings_cvm._internal.config.contracts.inf_anual_fii import (
@@ -122,6 +125,7 @@ from filings_cvm._internal.utils.tabular_reader import (
 __all__ = [
 	"BALANCETE_FIE",
 	"BALANCO_FIE",
+	"CAD_EMISSOR_CEPAC",
 	"CAD_FI",
 	"CAD_FI_HIST_ADMIN",
 	"CAD_FI_HIST_AUDITOR",
@@ -143,6 +147,8 @@ __all__ = [
 	"CAD_FI_HIST_TAXA_PERFM",
 	"CAD_FI_HIST_TRIB_LPRAZO",
 	"CDA_FIF",
+	"DFIN_CRA",
+	"DFIN_CRI",
 	"DFIN_FII",
 	"EXAMPLE_SOURCE",
 	"INFORME_DIARIO_FIF",

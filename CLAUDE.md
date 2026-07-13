@@ -163,6 +163,26 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   `fie/`. **Com este, o portal root `fie/` está completo (3/3)** e a Wave 1 do #41 encerra
   (FIDC→FII→FIP→FIAGRO→FIE)
 
+**Securitização (SECURIT)** — portal root `securit/`; **open-data only** (a CVM não publica padrão
+XML de envio). Não há `SECURIT/CAD`. Wave 2 do #41 (em andamento). Sob `SECURIT/DOC/`:
+- DFIN CRA — ✅ **ingestion** `dfin_cra_AAAA.csv` (CSV solto, anual) — `ingestion/securit/doc/dfin_cra.py`
+  (`DfinCraReader`); contract `_internal/config/contracts/dfin_cra.py`. Índice das demonstrações
+  financeiras dos CRA (uma linha por documento); `Link_Download` devolvido como texto, **não seguido**.
+  Inaugura o portal root `securit/`
+- DFIN CRI — ✅ **ingestion** `dfin_cri_AAAA.csv` (CSV solto, anual) — `ingestion/securit/doc/dfin_cri.py`
+  (`DfinCriReader`); contract `_internal/config/contracts/dfin_cri.py`. Idêntico ao CRA (9 colunas),
+  para os CRI
+- ⬜ **ingestion** `INF_MENSAL_CRA` (8 membros), `INF_MENSAL_CRI` (11), `INF_MENSAL_OTS` (8) — dumps
+  mensais multi-membro (zips particionados por ano); um reader por membro, PRs seguintes da Wave 2
+
+**Emissor de CEPAC (EMISSOR_CEPAC)** — portal root `emissor_cepac/`; **open-data only**. Publica só
+um cadastro:
+- Cadastro de Emissor CEPAC — ✅ **ingestion** `cad_emissor_cepac.csv` (CSV solto, **snapshot de URL
+  fixa, sem `date_ref`**) — `ingestion/emissor_cepac/cad/cadastro.py` (`CadastroEmissorCepacReader`);
+  contract `_internal/config/contracts/cad_emissor_cepac.py`. Retrato dos emissores de CEPAC
+  (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
+  estado. Inaugura o portal root `emissor_cepac/`
+
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/fi/doc/lamina/lamina_carteira.py`
@@ -208,6 +228,8 @@ src/filings_cvm/
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
         fie/               #   FIE/ — COMPLETO: doc/{balancete,balanco} (ZIP) + medidas (flat CSV); no CAD
+        securit/           #   SECURIT/ — doc/{dfin_cra,dfin_cri} (flat); INF_MENSAL_* zips pending (Wave 2)
+        emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

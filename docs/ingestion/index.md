@@ -62,6 +62,12 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `fie/`**. Não há `FIE/CAD`. `FIE/MEDIDAS` é irmão de `FIE/DOC`, então o seu reader mora no *root*
   `fie/`.
 
+- **[DFIN Securit (CRA/CRI) + Emissor CEPAC](securit_cepac_flat.md)** — 3 readers `DfinCraReader`,
+  `DfinCriReader` (índices das demonstrações financeiras dos CRA/CRI, CSV solto anual, `Link_Download`
+  não seguido) e `CadastroEmissorCepacReader` (retrato dos emissores de CEPAC — municípios — snapshot
+  de URL fixa, sem `date_ref`). **Inauguram** os *portal roots* `securit/` e `emissor_cepac/`; primeira
+  fatia da Wave 2 do #41.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
