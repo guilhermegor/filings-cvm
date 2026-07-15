@@ -127,3 +127,39 @@ Rules:
 
 Why: no long-lived secret to store, leak, or rotate; the upload token is short-lived and bound to
 this repo/workflow/environment. This is each registry's own recommended path.
+
+## The staging rehearsal only rehearses the steps it SHARES
+
+`release-test-pypi.yaml` is the dress rehearsal for `release-pypi.yaml`, and the two-step
+(Test PyPI → verify by install → PyPI) is mandatory. But it proves **only the steps the two
+workflows have in common**. **A step that exists only in `release-pypi.yaml` has its first run in
+production, every single time.**
+
+Today that delta is the **`Create GitHub Release` step** (`softprops/action-gh-release`): Test PyPI
+publishes a package but cuts no GitHub Release, so nothing rehearses it.
+
+This is not theoretical. When Dependabot bumped six actions at once (#79), the shared
+`upload-artifact` ↔ `download-artifact` pair *was* genuinely validated by the Test PyPI run — while
+`action-gh-release@v1→v3`, living only in the production workflow, debuted on the real 0.25.4 release
+and **failed** (#102).
+
+So, when changing anything on the release path:
+
+- **Diff the two workflows first — the delta is the size of the hole.**
+- Either mirror the step into the rehearsal, or **consciously accept that it debuts in production**
+  and say so. What you may not do is claim the rehearsal covers it.
+- **Verify the artifact and the tag, never the run's colour.** `pypi: success` coexisted with a
+  broken release: `action-gh-release@v3` creates the release as a **draft**, uploads assets, and only
+  then promotes it — so a mid-upload failure leaves `draft=true`, and **GitHub creates no tag for a
+  draft**. The wheel shipped to PyPI with **no `vX.Y.Z` tag**, which silently breaks
+  `poetry-dynamic-versioning` (it derives the version *from the tag*) and the release gate
+  (`git diff v<LAST>..HEAD -- src/`). Recovery: `gh release edit vX.Y.Z --draft=false` (promoting
+  creates the tag). Same family as #86: **a green run is not a shipped artifact.**
+
+### Never glob a build directory into release assets
+
+Publish the artifacts **by name** (`dist/*.whl`, `dist/*.tar.gz`) — never `dist/*`. A build directory
+holds build scaffolding by construction: this repo tracks a **0-byte `dist/.keep`** (see
+`.gitignore`: `dist/*` + `!dist/.keep`) so the directory exists in git, it rides along in the
+artifact, and **GitHub's API rejects a 0-byte release asset** (`size must be greater than or equal to
+1`). `@v1` ignored it; `@v3` fails hard. The `.keep` is deliberate — the glob was the bug.
