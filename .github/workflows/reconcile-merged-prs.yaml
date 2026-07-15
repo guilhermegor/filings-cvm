@@ -1,0 +1,55 @@
+name: Reconcile Merged PRs
+
+# Closes the linked issues and deletes the head branch of a merged PR — the housekeeping GitHub
+# normally does itself, but SILENTLY SKIPS when the merge is performed by the GITHUB_TOKEN bot.
+# `bin/pr_gate.py` arms native auto-merge with `github.token`, so every auto-merged ci/deps/docs PR
+# merges *as the bot*: its `Closes #N` never fires and its branch survives, freezing the kanban card
+# in "In review" (the native "closed → Done" keys on the issue closing). See issue #104.
+#
+# Two triggers, one job:
+#   * pull_request:[closed]  — the fast path, reconcile the PR that just merged. This event is ITSELF
+#     subject to the same GITHUB_TOKEN suppression, so a run may not start for a bot merge — hence:
+#   * schedule (daily)       — the GUARANTEED backstop. Scheduled events are EXEMPT from the
+#     GITHUB_TOKEN "no new workflow runs" rule, so this sweep runs whether or not the event path did,
+#     and reconciles anything the event path missed. This is the one time-triggered job in the repo,
+#     and this paragraph is the "write down why" the .github/CLAUDE.md scheduling policy requires.
+# workflow_dispatch lets us reconcile on demand without waiting for the next tick.
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: "17 4 * * *"   # 04:17 UTC daily (UTC always; offset from a round hour to dodge load spikes)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write        # delete the merged head branch (git refs)
+  issues: write          # close the linked issues
+  pull-requests: read    # list recently-merged PRs in the sweep
+
+# One reconcile at a time — a schedule tick and a merge event must not race on the same branch/issue.
+concurrency:
+  group: reconcile-merged-prs
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Reconcile
+    # On a PR event, only merged PRs need reconciling; schedule/dispatch always run.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Reconcile Merged PRs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          # Empty on schedule/dispatch → the script sweeps; set on a PR event → it reconciles that PR.
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python bin/reconcile_merged_prs.py
