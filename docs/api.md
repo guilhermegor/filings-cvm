@@ -685,6 +685,44 @@ df_ = InfMensalOtsClasseReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 20
 # muitas linhas por certificado — uma por classe/série.
 ```
 
+### `InfMensalCra*Reader` (8 readers)
+
+`filings_cvm.ingestion.InfMensalCra{Geral,AtivoPassivo,Classe,DireitosCreditorios,Desembolso,FluxoCaixa,Derivativos,CedenteDevedor}Reader`
+
+As 8 seções do Informe Mensal das operações de **CRA** (*Certificado de Recebíveis do Agronegócio*,
+`inf_mensal_cra_AAAA.zip`). Página completa:
+[Informe Mensal CRA](ingestion/inf_mensal_cra.md). Todos partilham a base privada
+`_base_inf_mensal_cra_reader` e o prefixo-chave `CNPJ_Emissora`,
+`Codigo_Identificacao_Certificado`, `Data_Referencia`, `Versao`. ⚠️ Particionado por **ano** apesar
+de mensal (o `date_ref` seleciona o ano).
+
+⚠️ **Mesmas 8 seções do OTS, nenhuma lista de colunas igual** (o CRA é agro): `CNPJ_Emissora` no
+lugar de `CNPJ_Securitizadora` nos 8, `direitos_creditorios` com **56** colunas contra 43,
+`*_Commodities_Agricolas` em `derivativos`. `cedente_devedor.CNPJ` guarda CPF e texto sujo (não
+validado como CNPJ); `Indice_Subordinacao_Data_Base` não é data.
+
+#### `InfMensalCraGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 7)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP bruto e os 8 CSVs (camada *bronze*). |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff. Se `None`, usa o `_RETRY_POLICY` do reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas do ano para a seção. Datas viram `date` (por membro); o restante fica texto exato.
+Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from datetime import date
+from filings_cvm import InfMensalCraDireitosCreditoriosReader
+
+df_ = InfMensalCraDireitosCreditoriosReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
+# 56 colunas — inclui os baldes agro (produção, comercialização, beneficiamento, industrialização).
+```
+
 ---
 
 ## Modelos de schema (Pydantic)
