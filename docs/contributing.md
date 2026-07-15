@@ -202,6 +202,40 @@ Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segu
 gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o
 piso já é single-source em `.coveragerc`, aplicado por pre-commit + CI).
 
+### Higiene de branches — apagar depois do merge, **arquivar** as de incidente
+
+Depois do merge, a branch vai embora. Só o `main` e a `gh-pages` vivem no remoto.
+
+> ⚠️ **Ancestralidade não diz nada aqui — o repo faz squash-merge.** Um squash cria um commit **novo**,
+> então os commits originais de uma branch **nunca** são ancestrais do `main`, por mais que o conteúdo
+> tenha entrado por completo. Portanto `git branch -d` **sempre** recusa, `git log main..branch`
+> **sempre** mostra "N commits à frente" e o `git cherry` **sempre** marca `+` (o squash muda o
+> *patch-id*). **Nenhum dos três é evidência de perda.** Os testes honestos são: *a PR dela mergeou?*
+> (`gh pr list --head <branch> --state all`) e a comparação de **conteúdo** (o blob de cada arquivo
+> tocado está no `main`?).
+
+**Branch de incidente vira tag de arquivo.** Se a branch tem história que vale preservar — um merge
+parcial, commits órfãos, uma recuperação — **não** é preciso escolher entre guardar o registro e
+limpar a lista:
+
+1. `git tag archive/<issue>-<slug> <sha-do-tip>` e publique a tag;
+2. **só então** apague a branch.
+
+A tag deixa os commits **alcançáveis para sempre** (imunes ao GC) e a lista de branches limpa. Depois,
+`git log archive/<issue>-<slug>` devolve tudo. Precedente: `archive/49-retry-strategy` (o incidente do
+#49 — mergeou com 1 de 3 commits; o resto foi recuperado pelo #50). Custa ~10 segundos e transforma
+"posso apagar essa branch?" de decisão corajosa em decisão trivial.
+
+> ⚠️ **Uma PR auto-fundida não apaga a própria branch nem fecha a issue linkada** — o merge é feito
+> pelo bot, e ações do `GITHUB_TOKEN` não cascateiam para as automações a jusante. Até isso ser
+> resolvido, depois de **toda** PR auto-fundida: feche a issue (`gh issue close <N>`) e apague a ref
+> (`gh api -X DELETE repos/:owner/:repo/git/refs/heads/<branch>`). Sem o fechamento da issue, o card
+> **nunca** chega a "Done" — o workflow nativo do Projects depende dele.
+
+> ℹ️ `git push origin --delete <branch>` é bloqueado pelo hook local de proteção de branch quando o
+> `main` está em checkout (falso positivo — apagar a ref de outra branch não escreve no `main`). Use a
+> API do `gh`, como acima.
+
 ## Lançando
 
 Os releases são **dirigidos por tag** quando o projeto está conectado a um remoto no GitHub:
