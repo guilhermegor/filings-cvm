@@ -218,12 +218,21 @@ jobs:
           name: dist
           path: dist/
 
+      # Name the artifacts; never glob `dist/*`. The repo tracks a 0-byte `dist/.keep` (see
+      # .gitignore) so the directory ships with the scaffold, and it rides along in the artifact —
+      # but GitHub's API REJECTS a 0-byte release asset ("size must be greater than or equal to 1").
+      # action-gh-release@v1 ignored it; @v3 fails hard, and because @v3 creates the release as a
+      # DRAFT and only promotes it after every upload succeeds, that failure left v0.25.4 published
+      # on PyPI with NO git tag (GitHub creates no tag for a draft) — see #102. A build directory
+      # holds build scaffolding by construction, so publish what we mean, not what happens to be
+      # in the folder.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            dist/*
+            dist/*.whl
+            dist/*.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
