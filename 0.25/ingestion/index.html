@@ -1074,6 +1074,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="inf_mensal_cra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal CRA (Securitização)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1366,6 +1394,16 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
   cedente/devedor): as seções do informe mensal das operações de securitização não-CRA/CRI. ⚠️
   Particionado por <strong>ano</strong> apesar de mensal. <code>cedente_devedor.CNPJ</code> guarda CPF (dado pessoal, não
   validado como CNPJ); <code>Indice_Subordinacao_Data_Base</code> não é data. Segunda fatia da Wave 2 do #41.</p>
+</li>
+<li>
+<p><strong><a href="inf_mensal_cra/">Informe Mensal CRA (Securitização)</a></strong> — 8 readers <code>InfMensalCra*Reader</code>
+  (as mesmas 8 seções do OTS): o informe mensal das operações de <strong>CRA</strong> (recebíveis do
+  agronegócio). ⚠️ Particionado por <strong>ano</strong> apesar de mensal. ⚠️ <strong>Mesmos nomes de seção do OTS, mas
+  nenhuma lista de colunas igual</strong> (<code>CNPJ_Emissora</code> no lugar de <code>CNPJ_Securitizadora</code> nos 8;
+  <code>direitos_creditorios</code> com 56 colunas contra 43) — por isso cada contract é <strong>gerado do header
+  publicado</strong> e <strong>pinado</strong> a um fixture verbatim. <code>cedente_devedor.CNPJ</code> guarda CPF (dado pessoal,
+  não validado como CNPJ); <code>Indice_Subordinacao_Data_Base</code> não é data. Terceira fatia da Wave 2 do
+  #41.</p>
 </li>
 </ul>
 <p>Cada padrão de leitura ganha a sua própria página, com <strong>Descrição</strong> e <strong>Exemplos</strong>, no mesmo

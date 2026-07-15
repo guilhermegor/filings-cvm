@@ -970,6 +970,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_mensal_cra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal CRA (Securitização)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1622,8 +1650,15 @@ escrito. Por isso a classificação é por <strong>caminho</strong>:</p>
 </tr>
 </tbody>
 </table>
-<p>Mesmo numa classe auto-fundível, o auto-merge <strong>só acontece com o rótulo <code>automerge</code></strong> (opt-in
-explícito — a classificação não é consentimento), nunca com <code>do-not-merge</code>, e nunca num diff <code>XL</code>.</p>
+<p>Numa classe auto-fundível, o auto-merge é <strong>opt-out</strong>: a classificação <strong>é</strong> o consentimento, então
+nenhum rótulo é preciso para armá-lo — as bumps semanais do Dependabot fundem sozinhas. O rótulo
+<code>do-not-merge</code> é a válvula de escape que segura um PR específico.</p>
+<p>Um diff <code>XL</code> também não funde — <strong>exceto quando o único arquivo alterado é o <code>poetry.lock</code></strong>. O veto
+por tamanho pergunta "esse diff é grande o bastante para um humano olhar?"; num lockfile regenerado
+a pergunta não significa nada, porque o tamanho acompanha quantos <em>hashes</em> de dependência se
+moveram, não quanto risco chegou — uma bump de 3 ferramentas de dev deu 579 linhas (<code>XL</code>, vetada)
+enquanto uma de 2 pacotes deu menos de 500 (<code>L</code>, fundida). O <code>pyproject.toml</code> <strong>não</strong> entra na
+exceção: é lá, num range editado à mão, que o risco de dependência de fato mora.</p>
 <p>E ele <strong>não burla nada</strong>: usa o <strong>auto-merge nativo</strong> do GitHub, que segura o merge até <em>todos</em> os
 checks obrigatórios do ruleset ficarem verdes. O script decide apenas <em>elegibilidade</em>; quem decide
 <em>se passou</em> continua sendo o ruleset. (Auto-<strong>aprovação</strong> seria inútil aqui: o ruleset exige <strong>0</strong>

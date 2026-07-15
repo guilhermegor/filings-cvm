@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.25/api/">
       
       
-        <link rel="prev" href="../ingestion/inf_mensal_ots/">
+        <link rel="prev" href="../ingestion/inf_mensal_cra/">
       
       
         <link rel="next" href="../faq/">
@@ -970,6 +970,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/inf_mensal_cra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal CRA (Securitização)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1777,6 +1805,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalcrareader-8-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalCra*Reader (8 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalCra*Reader (8 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalcrageralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalCraGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 7)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -2717,6 +2784,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infmensalcrareader-8-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalCra*Reader (8 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="InfMensalCra*Reader (8 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalcrageralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalCraGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 7)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -3866,6 +3972,59 @@ Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</co
 </span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
 </span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfMensalOtsClasseReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
 </span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="c1"># muitas linhas por certificado — uma por classe/série.</span>
+</span></code></pre></div>
+<h3 id="infmensalcrareader-8-readers"><code>InfMensalCra*Reader</code> (8 readers)<a class="headerlink" href="#infmensalcrareader-8-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfMensalCra{Geral,AtivoPassivo,Classe,DireitosCreditorios,Desembolso,FluxoCaixa,Derivativos,CedenteDevedor}Reader</code></p>
+<p>As 8 seções do Informe Mensal das operações de <strong>CRA</strong> (<em>Certificado de Recebíveis do Agronegócio</em>,
+<code>inf_mensal_cra_AAAA.zip</code>). Página completa:
+<a href="../ingestion/inf_mensal_cra/">Informe Mensal CRA</a>. Todos partilham a base privada
+<code>_base_inf_mensal_cra_reader</code> e o prefixo-chave <code>CNPJ_Emissora</code>,
+<code>Codigo_Identificacao_Certificado</code>, <code>Data_Referencia</code>, <code>Versao</code>. ⚠️ Particionado por <strong>ano</strong> apesar
+de mensal (o <code>date_ref</code> seleciona o ano).</p>
+<p>⚠️ <strong>Mesmas 8 seções do OTS, nenhuma lista de colunas igual</strong> (o CRA é agro): <code>CNPJ_Emissora</code> no
+lugar de <code>CNPJ_Securitizadora</code> nos 8, <code>direitos_creditorios</code> com <strong>56</strong> colunas contra 43,
+<code>*_Commodities_Agricolas</code> em <code>derivativos</code>. <code>cedente_devedor.CNPJ</code> guarda CPF e texto sujo (não
+validado como CNPJ); <code>Indice_Subordinacao_Data_Base</code> não é data.</p>
+<h4 id="infmensalcrageralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-7"><code>InfMensalCraGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 7)<a class="headerlink" href="#infmensalcrageralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-7" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP bruto e os 8 CSVs (camada <em>bronze</em>).</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do reader.</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_13"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_13" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas do ano para a seção. Datas viram <code>date</code> (por membro); o restante fica texto exato.
+Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code> (membro ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalCraDireitosCreditoriosReader</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfMensalCraDireitosCreditoriosReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1"># 56 colunas — inclui os baldes agro (produção, comercialização, beneficiamento, industrialização).</span>
 </span></code></pre></div>
 <hr />
 <h2 id="modelos-de-schema-pydantic">Modelos de schema (Pydantic)<a class="headerlink" href="#modelos-de-schema-pydantic" title="Permanent link">&para;</a></h2>
