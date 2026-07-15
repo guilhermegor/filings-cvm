@@ -3,9 +3,8 @@
 ## Supported versions
 
 `filings-cvm` is published on [PyPI](https://pypi.org/project/filings-cvm/) and is still in
-the `0.x` series, where **every release is a minor bump** and only the newest one receives
-fixes. Always upgrade to the latest release before reporting — a fix will not be backported
-to an older `0.x` line.
+the `0.x` series, where **only the newest release receives fixes**. Always upgrade to the
+latest release before reporting — a fix will not be backported to an older `0.x` line.
 
 | Version | Supported |
 |---------|-----------|

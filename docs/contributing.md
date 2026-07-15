@@ -181,8 +181,16 @@ escrito. Por isso a classificação é por **caminho**:
 | `src` | `src/filings_cvm/**` | ❌ **nunca**, em nenhum tamanho |
 | `other` | qualquer outro | ❌ (desconhecido = inseguro) |
 
-Mesmo numa classe auto-fundível, o auto-merge **só acontece com o rótulo `automerge`** (opt-in
-explícito — a classificação não é consentimento), nunca com `do-not-merge`, e nunca num diff `XL`.
+Numa classe auto-fundível, o auto-merge é **opt-out**: a classificação **é** o consentimento, então
+nenhum rótulo é preciso para armá-lo — as bumps semanais do Dependabot fundem sozinhas. O rótulo
+`do-not-merge` é a válvula de escape que segura um PR específico.
+
+Um diff `XL` também não funde — **exceto quando o único arquivo alterado é o `poetry.lock`**. O veto
+por tamanho pergunta "esse diff é grande o bastante para um humano olhar?"; num lockfile regenerado
+a pergunta não significa nada, porque o tamanho acompanha quantos *hashes* de dependência se
+moveram, não quanto risco chegou — uma bump de 3 ferramentas de dev deu 579 linhas (`XL`, vetada)
+enquanto uma de 2 pacotes deu menos de 500 (`L`, fundida). O `pyproject.toml` **não** entra na
+exceção: é lá, num range editado à mão, que o risco de dependência de fato mora.
 
 E ele **não burla nada**: usa o **auto-merge nativo** do GitHub, que segura o merge até *todos* os
 checks obrigatórios do ruleset ficarem verdes. O script decide apenas *elegibilidade*; quem decide

@@ -115,6 +115,57 @@ def test_xl_diff_is_never_auto_merged() -> None:
 	assert pr_gate.is_auto_mergeable("docs", "XL", []) is False
 
 
+def test_xl_lockfile_only_diff_still_auto_merges() -> None:
+	"""The XL veto measures nothing on a lockfile — its size is hash count, not risk.
+
+	Dependabot's grouped bump of 3 dev packages was 579 lines of hashes in `poetry.lock`
+	alone (PR #94) → XL → vetoed, while a 2-package bump landed at L → merged. Whether the
+	weekly bump self-merged came down to how many packages happened to move that week.
+	"""
+	assert pr_gate.is_auto_mergeable("deps", "XL", [], bool_lockfile_only=True) is True
+
+
+def test_xl_deps_diff_touching_more_than_the_lockfile_is_not_auto_merged() -> None:
+	"""The exemption is lockfile-ONLY: a hand-edited `pyproject.toml` is where dep risk lives."""
+	assert pr_gate.is_auto_mergeable("deps", "XL", [], bool_lockfile_only=False) is False
+
+
+def test_lockfile_exemption_never_rescues_an_unsafe_class() -> None:
+	"""Class veto outranks the exemption — `src` never auto-merges, whatever else is true."""
+	assert pr_gate.is_auto_mergeable("src", "XL", [], bool_lockfile_only=True) is False
+
+
+def test_do_not_merge_label_still_opts_out_of_a_lockfile_diff() -> None:
+	"""The escape hatch must survive the exemption, or a maintainer cannot hold a bump back."""
+	assert (
+		pr_gate.is_auto_mergeable("deps", "XL", [pr_gate.BLOCK_LABEL], bool_lockfile_only=True)
+		is False
+	)
+
+
+@pytest.mark.parametrize(
+	("list_paths", "bool_expected"),
+	[
+		(["poetry.lock"], True),
+		(["poetry.lock", "pyproject.toml"], False),
+		(["pyproject.toml"], False),
+		(["src/filings_cvm/__init__.py"], False),
+		([], False),
+	],
+)
+def test_is_lockfile_only(list_paths: list[str], bool_expected: bool) -> None:
+	"""Only a diff whose sole file is the lockfile qualifies for the XL exemption.
+
+	Parameters
+	----------
+	list_paths : list of str
+		Changed paths.
+	bool_expected : bool
+		Expected verdict.
+	"""
+	assert pr_gate.is_lockfile_only(list_paths) is bool_expected
+
+
 @pytest.mark.parametrize("str_class", sorted(pr_gate.AUTO_MERGEABLE))
 def test_every_auto_mergeable_class_merges_without_a_label(str_class: str) -> None:
 	"""Each declared auto-mergeable class merges by default — no label required.

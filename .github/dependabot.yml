@@ -1,6 +1,12 @@
 # Dependabot **version** updates (routine bumps) — distinct from Dependabot **security** updates
 # (CVE-triggered auto-PRs), which are toggled via the API in bin/enable_security.sh.
 #
+# NO `labels:` KEY HERE, deliberately. bin/pr_gate.py labels every PR from its changed PATHS
+# (`risk:*` / `size:*` / `gate:*`) and keys auto-merge off that classification, not off any label
+# Dependabot adds. A `labels: ["deps"]` would be a second taxonomy nothing reads — and Dependabot
+# refuses to apply a label that does not exist in the repo, so it posted an error comment on every
+# PR it opened (#79, #80) until these keys were removed. Do not re-add them.
+#
 # WHY THIS MATTERS HERE: poetry.lock is committed and CI installs FROM it (poetry install --no-root)
 # and refuses to re-lock (see .github/workflows/tests.yaml). So CI tests the frozen locked versions,
 # while a consumer running `pip install filings-cvm` gets the latest the loose `>=` ranges allow.
@@ -19,8 +25,6 @@ updates:
       github-actions:
         patterns:
           - "*"
-    labels:
-      - "ci"
     commit-message:
       prefix: "chore(ci)"
 
@@ -47,7 +51,5 @@ updates:
         update-types:
           - "version-update:semver-major"
     open-pull-requests-limit: 5
-    labels:
-      - "deps"
     commit-message:
       prefix: "chore(deps)"
