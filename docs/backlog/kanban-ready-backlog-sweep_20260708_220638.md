@@ -30,16 +30,33 @@ buries feedback, risks building later work on an approach the user may still cha
 the branch/main state ambiguous. **When a PR is open, the default action is to wait, not to
 proceed.**
 
-## Release gate — every merge to `main` ships, Test PyPI first
+## Release gate — release only when `src/` ships, Test PyPI first
 
-**Standing instruction from the user (2026-07-09). Applies after *every* PR merge in this
-sweep**, not just at the end. It slots between step 4 (sync `main`) and step 5 (start the next
-issue) of the lifecycle above:
+**Standing instruction from the user (revised 2026-07-12). This SUPERSEDES the original
+2026-07-09 rule of "every merge to `main` ships, with a minor bump" — that rule is revoked; do
+not follow it.** A merge triggers a release **only when it changes the distributed package**:
+`ci` / `docs` / `chore` / `test` merges ship nothing and get **no release at all** (#82 and #83
+would otherwise have burned two versions on byte-identical wheels). It slots between step 4
+(sync `main`) and step 5 (start the next issue) of the lifecycle above:
 
-4a. Compute the next version: a **minor** semver bump of the currently published version
-    (`0.4.0` → `0.5.0` → `0.6.0` …). The version is **not** in `pyproject.toml` (it is a
-    `0.0.0` stub; `poetry-dynamic-versioning` derives it from the `vX.Y.Z` git tag), so read
-    the truth from the index, not the repo.
+4a. **First decide whether to release at all**, then compute the version.
+
+    **Release or not:** diff the shipped surface against the last release tag. An empty diff
+    means **no release** — stop here and go to step 5.
+
+    ```bash
+    rtk git diff --name-only v<LAST_RELEASE>..HEAD -- src/ pyproject.toml
+    ```
+
+    **Version, if releasing:** pre-1.0, a `feat`/`fix` is a **PATCH** bump
+    (`0.25.3` → `0.25.4`); only a **breaking** change is a **MINOR** bump. The version is
+    **not** in `pyproject.toml` (it is a `0.0.0` stub; `poetry-dynamic-versioning` derives it
+    from the `vX.Y.Z` git tag), so read the truth from the index, not the repo.
+
+    Compute against the **maximum of BOTH indices**, not PyPI alone: Test PyPI can hold an
+    un-promoted rehearsal that PyPI never received, and its floor has outranked PyPI before
+    (0.25.0 on Test PyPI vs 0.24.0 on PyPI → the next release had to be 0.25.1). A version
+    already taken on Test PyPI will fail the publish.
 
     **Use the `/simple/` index, never `/pypi/<pkg>/json`.** The JSON endpoint is CDN-cached
     and lags a fresh upload by minutes: on 2026-07-09 it still reported `0.4.0` *after* a
@@ -56,7 +73,7 @@ issue) of the lifecycle above:
     Both release workflows call `tests.yaml` as a hard gate, so a red suite blocks the publish.
 
     ```bash
-    rtk gh workflow run release-test-pypi.yaml -f version=X.Y.0
+    rtk gh workflow run release-test-pypi.yaml -f version=X.Y.Z
     ```
 
 4c. **Verify it actually landed on Test PyPI** before going further — the workflow going green
@@ -71,7 +88,7 @@ issue) of the lifecycle above:
 
     python3 -m venv /tmp/smoke && /tmp/smoke/bin/pip install \
       --index-url https://test.pypi.org/simple/ \
-      --extra-index-url https://pypi.org/simple/ "filings-cvm==X.Y.0"
+      --extra-index-url https://pypi.org/simple/ "filings-cvm==X.Y.Z"
     /tmp/smoke/bin/python -c "import filings_cvm as f; print(f.__version__, f.__all__)"
     ```
 
@@ -80,15 +97,16 @@ issue) of the lifecycle above:
     versions are immutable once taken):
 
     ```bash
-    rtk gh workflow run release-pypi.yaml -f version=X.Y.0
+    rtk gh workflow run release-pypi.yaml -f version=X.Y.Z
     ```
 
 4e. Confirm the version on PyPI, then — and only then — start the next backlog issue.
 
 Rationale: Test PyPI is the only place a bad wheel is still recoverable. A PyPI version number
-can never be reused or overwritten, so a broken publish burns that version permanently. Bumping
-minor (not patch) on every merge is deliberate: each merged issue adds a new public reader or
-writer to `__all__`, which is a feature addition, not a fix.
+can never be reused or overwritten, so a broken publish burns that version permanently — hence
+the rehearsal, and hence never publishing a version the shipped bytes don't justify. Releasing
+only on a `src/` diff is the same instinct: a version that ships a byte-identical wheel buys
+nothing and spends a number that can never be reclaimed.
 
 ## Standing decisions (apply to every issue in this sweep)
 
@@ -276,6 +294,6 @@ Each needs its `PadraoXML*.asp` spec page fetched first; the CVM catalog page is
   decimal scales carry residual risk even when taken from the spec page. Flag any writer PR
   that could not be checked against a real CVM-accepted document.
 - [x] *Resolved 2026-07-09:* the PyPI release that ran after the #35 merge was **`0.4.0`**, and
-  it was intentional — the user has since made publishing a standing post-merge step (see
-  "Release gate" above). Local tags lag the published versions; `git fetch --tags` before
+  it was intentional — publishing was a standing post-merge step at
+  the time (that rule was revoked 2026-07-12 — see "Release gate" above for the current one). Local tags lag the published versions; `git fetch --tags` before
   reasoning about the current version, or just query the index.

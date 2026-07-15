@@ -51,13 +51,17 @@ import urllib.error
 import urllib.request
 
 
+# The dependency lockfile. Named once: it is both a `deps` trigger path and the sole file whose
+# diff is exempt from the XL veto (see is_auto_mergeable), and those two must never drift apart.
+LOCKFILE = "poetry.lock"
+
 # Risk classes, most dangerous first — the PR's class is the FIRST one any changed path matches, so
 # a PR touching both docs and src is classified `src`. Only the classes in AUTO_MERGEABLE may ever
 # be merged without a human; `src` and `tests` always wait for review.
 _RISK_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
 	("src", ("src/",)),
 	("tests", ("tests/",)),
-	("deps", ("poetry.lock", "pyproject.toml")),
+	("deps", (LOCKFILE, "pyproject.toml")),
 	(
 		"ci",
 		(
@@ -141,14 +145,44 @@ def size_bucket(int_additions: int, int_deletions: int) -> str:
 	return "XL"
 
 
-def is_auto_mergeable(str_risk: str, str_size: str, list_labels: list[str]) -> bool:
+def is_lockfile_only(list_paths: list[str]) -> bool:
+	"""Report whether the diff touches the lockfile and nothing else.
+
+	Parameters
+	----------
+	list_paths : list of str
+		Changed paths.
+
+	Returns
+	-------
+	bool
+		True when ``poetry.lock`` is the only changed file.
+	"""
+	return set(list_paths) == {LOCKFILE}
+
+
+def is_auto_mergeable(
+	str_risk: str,
+	str_size: str,
+	list_labels: list[str],
+	bool_lockfile_only: bool = False,
+) -> bool:
 	"""Decide whether this PR may be handed to GitHub's native auto-merge.
 
 	**Opt-out, not opt-in.** A safe class auto-merges by default — all three conditions must hold:
-	the class is auto-mergeable, the diff is not ``XL``, and nobody applied the ``do-not-merge``
-	opt-out. No label is required to *enable* it (classification is the standing consent); a label
-	only *disables* it. **This says nothing about whether the checks passed** — the ruleset does,
-	and GitHub holds the merge until they are green.
+	the class is auto-mergeable, the diff is not ``XL`` (unless it is lockfile-only), and nobody
+	applied the ``do-not-merge`` opt-out. No label is required to *enable* it (classification is
+	the standing consent); a label only *disables* it. **This says nothing about whether the checks
+	passed** — the ruleset does, and GitHub holds the merge until they are green.
+
+	The XL veto asks "is this diff big enough that a human should look?". That question is
+	meaningful for hand-written code and meaningless for a regenerated lockfile, whose size tracks
+	how many dependency *hashes* moved, not how much risk arrived: Dependabot's routine bump of 3
+	dev tools spanned 579 lines of ``poetry.lock`` (XL, vetoed) while a 2-package bump spanned
+	fewer than 500 (L, merged). Left alone, the weekly bump self-merges or not depending on how
+	many packages happened to move that week. So the veto is waived for a lockfile-ONLY diff —
+	``pyproject.toml`` is deliberately not included, since a hand-edited version range is exactly
+	where dependency risk does live.
 
 	Parameters
 	----------
@@ -158,6 +192,8 @@ def is_auto_mergeable(str_risk: str, str_size: str, list_labels: list[str]) -> b
 		Size bucket from :func:`size_bucket`.
 	list_labels : list of str
 		Labels currently on the pull request.
+	bool_lockfile_only : bool, default False
+		Whether the lockfile is the only changed file, from :func:`is_lockfile_only`.
 
 	Returns
 	-------
@@ -166,7 +202,7 @@ def is_auto_mergeable(str_risk: str, str_size: str, list_labels: list[str]) -> b
 	"""
 	if str_risk not in AUTO_MERGEABLE:
 		return False
-	if str_size == "XL":
+	if str_size == "XL" and not bool_lockfile_only:
 		return False
 	# Eligible unless the maintainer applied the opt-out.
 	return BLOCK_LABEL not in list_labels
@@ -482,7 +518,9 @@ def main() -> int:
 	str_risk = classify_risk(list_paths)
 	str_size = size_bucket(dict_pr["additions"], dict_pr["deletions"])
 
-	bool_merge = is_auto_mergeable(str_risk, str_size, list_labels)
+	bool_merge = is_auto_mergeable(
+		str_risk, str_size, list_labels, bool_lockfile_only=is_lockfile_only(list_paths)
+	)
 	if bool_merge:
 		_enable_auto_merge(dict_pr["node_id"])
 
