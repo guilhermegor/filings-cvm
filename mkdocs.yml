@@ -28,6 +28,7 @@ nav:
       - FIE (balancete, balanço, medidas): ingestion/fie.md
       - DFIN Securit (CRA/CRI) + Emissor CEPAC: ingestion/securit_cepac_flat.md
       - Informe Mensal OTS (Securitização): ingestion/inf_mensal_ots.md
+      - Informe Mensal CRA (Securitização): ingestion/inf_mensal_cra.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md

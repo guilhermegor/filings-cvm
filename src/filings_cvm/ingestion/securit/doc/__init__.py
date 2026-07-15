@@ -10,6 +10,16 @@ The `INF_MENSAL_CRA` / `INF_MENSAL_CRI` dumps land as later PRs. Re-exported fro
 
 from filings_cvm.ingestion.securit.doc.dfin_cra import DfinCraReader
 from filings_cvm.ingestion.securit.doc.dfin_cri import DfinCriReader
+from filings_cvm.ingestion.securit.doc.inf_mensal_cra import (
+	InfMensalCraAtivoPassivoReader,
+	InfMensalCraCedenteDevedorReader,
+	InfMensalCraClasseReader,
+	InfMensalCraDerivativosReader,
+	InfMensalCraDesembolsoReader,
+	InfMensalCraDireitosCreditoriosReader,
+	InfMensalCraFluxoCaixaReader,
+	InfMensalCraGeralReader,
+)
 from filings_cvm.ingestion.securit.doc.inf_mensal_ots import (
 	InfMensalOtsAtivoPassivoReader,
 	InfMensalOtsCedenteDevedorReader,
@@ -25,6 +35,14 @@ from filings_cvm.ingestion.securit.doc.inf_mensal_ots import (
 __all__ = [
 	"DfinCraReader",
 	"DfinCriReader",
+	"InfMensalCraAtivoPassivoReader",
+	"InfMensalCraCedenteDevedorReader",
+	"InfMensalCraClasseReader",
+	"InfMensalCraDerivativosReader",
+	"InfMensalCraDesembolsoReader",
+	"InfMensalCraDireitosCreditoriosReader",
+	"InfMensalCraFluxoCaixaReader",
+	"InfMensalCraGeralReader",
 	"InfMensalOtsAtivoPassivoReader",
 	"InfMensalOtsCedenteDevedorReader",
 	"InfMensalOtsClasseReader",

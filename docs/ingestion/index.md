@@ -74,6 +74,15 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   Particionado por **ano** apesar de mensal. `cedente_devedor.CNPJ` guarda CPF (dado pessoal, não
   validado como CNPJ); `Indice_Subordinacao_Data_Base` não é data. Segunda fatia da Wave 2 do #41.
 
+- **[Informe Mensal CRA (Securitização)](inf_mensal_cra.md)** — 8 readers `InfMensalCra*Reader`
+  (as mesmas 8 seções do OTS): o informe mensal das operações de **CRA** (recebíveis do
+  agronegócio). ⚠️ Particionado por **ano** apesar de mensal. ⚠️ **Mesmos nomes de seção do OTS, mas
+  nenhuma lista de colunas igual** (`CNPJ_Emissora` no lugar de `CNPJ_Securitizadora` nos 8;
+  `direitos_creditorios` com 56 colunas contra 43) — por isso cada contract é **gerado do header
+  publicado** e **pinado** a um fixture verbatim. `cedente_devedor.CNPJ` guarda CPF (dado pessoal,
+  não validado como CNPJ); `Indice_Subordinacao_Data_Base` não é data. Terceira fatia da Wave 2 do
+  #41.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

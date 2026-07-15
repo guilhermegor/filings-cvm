@@ -180,8 +180,24 @@ XML de envio). Não há `SECURIT/CAD`. Wave 2 do #41 (em andamento). Sob `SECURI
   ano). Armadilhas honradas: `cedente_devedor.CNPJ` guarda CPF (não é coluna de CNPJ; é dado
   pessoal), `Indice_Subordinacao_Data_Base` NÃO é data, e a grafia `Outras_Contigencias_Relevantes`
   é preservada verbatim
-- ⬜ **ingestion** `INF_MENSAL_CRA` (8 membros), `INF_MENSAL_CRI` (11) — dumps mensais multi-membro
-  (zips particionados por ano); um reader por membro, PRs seguintes da Wave 2
+- INF_MENSAL_CRA — ✅ **ingestion** `inf_mensal_cra_AAAA.zip` (**8 membros**, os mesmos nomes de seção
+  do OTS: geral, ativo_passivo, classe, direitos_creditorios, desembolso, fluxo_caixa, derivativos,
+  cedente_devedor) — `ingestion/securit/doc/inf_mensal_cra/*` (`InfMensalCra*Reader`, base privada
+  `_base_inf_mensal_cra_reader.py`); contracts `_internal/config/contracts/inf_mensal_cra.py`.
+  Operações de **CRA** (recebíveis do agronegócio). **Particionado por ANO apesar de mensal**.
+  ⚠️ **Mesmos nomes de seção do OTS e NENHUMA lista de colunas igual** — o CRA é agro:
+  `CNPJ_Securitizadora`→`CNPJ_Emissora` nos 8; `direitos_creditorios` com **56** colunas contra 43
+  (13 baldes agro); `derivativos` com `*_Commodities_Agricolas`; `geral` derruba o bloco de
+  contingências do OTS (logo a typo `Outras_Contigencias_Relevantes` **não existe aqui**). Copiar os
+  contracts do irmão embarcaria 8 errados **com todos os testes verdes** → cada contract é **gerado
+  do header publicado** e **pinado** a `tests/fixtures/inf_mensal_cra/*_header.csv` (bytes verbatim
+  da CVM — o único oráculo não-tautológico). Armadilhas honradas: `cedente_devedor.CNPJ` **não é
+  coluna de CNPJ** (guarda CPF, `'0'`, `','`, valores malformados e dois ids na mesma célula),
+  `Indice_Subordinacao_Data_Base` NÃO é data, e as 3 colunas `CNPJ_*` 100% vazias de `geral` ficam
+  fora de `tuple_cnpj_cols`
+- ⬜ **ingestion** `INF_MENSAL_CRI` (11 membros) — dump mensal multi-membro (zip particionado por
+  ano); um reader por membro, **PR 4/4 da Wave 2** (fecha o root `securit/`). Construir **META-first**
+  (#97/#98) — é o maior alvo de "copiar do irmão" que resta
 
 **Emissor de CEPAC (EMISSOR_CEPAC)** — portal root `emissor_cepac/`; **open-data only**. Publica só
 um cadastro:
@@ -236,7 +252,8 @@ src/filings_cvm/
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
         fie/               #   FIE/ — COMPLETO: doc/{balancete,balanco} (ZIP) + medidas (flat CSV); no CAD
-        securit/           #   SECURIT/ — doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8 members); CRA/CRI zips pending
+        securit/           #   SECURIT/ — doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8) +
+                           #     inf_mensal_cra/ (8, contracts pinned to real-header fixtures); CRI zip pending
         emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
