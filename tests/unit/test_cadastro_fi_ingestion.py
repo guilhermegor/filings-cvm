@@ -86,7 +86,9 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_csv: str) -> None:
 		path_dest.write_bytes(str_csv.encode("ISO-8859-1"))
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.fi.cad.cadastro_fi.download_file", _fake_download)
+	monkeypatch.setattr(
+		"filings_cvm.ingestion.fi.cad.cadastro_fi.cadastro_fi.download_file", _fake_download
+	)
 
 
 def _read_default(monkeypatch: pytest.MonkeyPatch):  # noqa: ANN202 - pandas DataFrame
@@ -205,7 +207,7 @@ def test_read_keeps_money_columns_as_exact_source_text(
 
 def test_dtype_map_covers_every_non_date_column() -> None:
 	"""The derived dtype map and the date columns together span the whole contract."""
-	from filings_cvm.ingestion.fi.cad.cadastro_fi import _DATE_COLS, _DTYPES
+	from filings_cvm.ingestion.fi.cad.cadastro_fi.cadastro_fi import _DATE_COLS, _DTYPES
 
 	assert set(_DTYPES) | set(_DATE_COLS) == set(CAD_FI.tuple_required)
 	assert not set(_DTYPES) & set(_DATE_COLS)

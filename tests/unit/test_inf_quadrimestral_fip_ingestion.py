@@ -72,7 +72,8 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_text: str) -> list[str]
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fip.doc.inf_quadrimestral.download_file", _fake_download
+		"filings_cvm.ingestion.fip.doc.inf_quadrimestral.inf_quadrimestral.download_file",
+		_fake_download,
 	)
 	return list_urls
 
