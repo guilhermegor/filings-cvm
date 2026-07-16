@@ -279,11 +279,17 @@ def _read(str_name: str) -> str:
 	return (_FIXTURES / str_name).read_bytes().decode("ISO-8859-1")
 
 
-def test_parse_meta_blocks_returns_one_record_per_field() -> None:
-	"""Every `Campo:` block becomes exactly one record, in document order."""
+def test_parse_meta_blocks_returns_one_record_per_field_in_document_order() -> None:
+	"""Every `Campo:` block becomes exactly one record, in the order CVM wrote them.
+
+	The order is CVM's own and is **not** the real artifact's column order — verified: the META
+	opens with `Data_Entrega` while the `DFIN_CRA` contract opens with `CNPJ_Emissora` (8th here).
+	That is exactly why the real header stays the oracle for order; the parser must not re-sort.
+	"""
 	list_rows = parse_meta_blocks(_read("meta_dfin_cra.txt"), "dfin_cra")
 	assert len(list_rows) == 9
-	assert list_rows[0]["field"] == "CNPJ_Emissora"
+	assert list_rows[0]["field"] == "Data_Entrega"
+	assert [r["field"] for r in list_rows].index("CNPJ_Emissora") == 7
 	assert {r["section"] for r in list_rows} == {"dfin_cra"}
 
 
@@ -389,9 +395,11 @@ _ATTRIBUTE_COLUMNS: dict[str, str] = {
 	"Scale": "scale",
 }
 
-# The output record's keys, in column order. `section` and `field` are positional; the rest come
-# from _ATTRIBUTE_COLUMNS, so the two cannot drift.
-_RECORD_COLUMNS: tuple[str, ...] = ("section", "field", *_ATTRIBUTE_COLUMNS.values())
+# The output record's keys, in column order. `section` and `field` are positional; the rest are
+# derived from _ATTRIBUTE_COLUMNS, so the two cannot drift. PUBLIC within `_internal`: the META
+# contracts import this as their `tuple_required` rather than restating the list, so the parsed
+# shape has exactly ONE definition.
+RECORD_COLUMNS: tuple[str, ...] = ("section", "field", *_ATTRIBUTE_COLUMNS.values())
 
 _RE_FIELD = re.compile(r"^Campo:[ \t]*(?P<field>.+?)[ \t]*$", re.MULTILINE)
 _RE_ATTRIBUTE = re.compile(
@@ -416,7 +424,7 @@ def parse_meta_blocks(str_text: str, str_section: str) -> list[dict[str, str]]:
 	-------
 	list of dict of (str, str)
 		One record per ``Campo:`` block, in document order, each carrying exactly
-		:data:`_RECORD_COLUMNS`. An attribute the block omits is ``""`` (never ``None``) — a varchar
+		:data:`RECORD_COLUMNS`. An attribute the block omits is ``""`` (never ``None``) — a varchar
 		block has no ``Precisão``/``Scale``, a numeric one has no ``Tamanho``. Text with no block at
 		all yields ``[]`` rather than raising: a META that changes shape must not crash a datalake
 		run.
@@ -431,7 +439,7 @@ def parse_meta_blocks(str_text: str, str_section: str) -> list[dict[str, str]]:
 			if int_index + 1 < len(list_matches)
 			else len(str_normalised)
 		)
-		dict_record = dict.fromkeys(_RECORD_COLUMNS, "")
+		dict_record = dict.fromkeys(RECORD_COLUMNS, "")
 		dict_record["section"] = str_section
 		dict_record["field"] = cls_match.group("field")
 		for cls_attribute in _RE_ATTRIBUTE.finditer(str_normalised[cls_match.end() : int_block_end]):
@@ -524,22 +532,15 @@ downstream — the precise ambiguity ``source_key`` exists to prevent.
 
 from __future__ import annotations
 
+from filings_cvm._internal.utils.meta_parser import RECORD_COLUMNS
 from filings_cvm._internal.utils.tabular_reader import FileContract
 
 
-# The parsed META frame's source columns, in order — see `utils.meta_parser._RECORD_COLUMNS`.
+# The parsed META frame's source columns, in order. Imported from the parser that produces them, so
+# the shape has ONE definition and the contract cannot drift from the records it validates.
 # The six provenance columns are appended later by `stamp_provenance` and are deliberately NOT here
 # (tuple_required validates the parsed source; provenance is added after).
-META_COLUMNS: tuple[str, ...] = (
-	"section",
-	"field",
-	"description",
-	"domain",
-	"data_type",
-	"size",
-	"precision",
-	"scale",
-)
+META_COLUMNS: tuple[str, ...] = RECORD_COLUMNS
 
 
 def _meta_contract(str_dataset: str, str_label: str) -> FileContract:
@@ -777,7 +778,7 @@ precedent).
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 import zipfile
 
 import pandas as pd
@@ -790,9 +791,6 @@ from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter, RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import FileContract
 
-
-if TYPE_CHECKING:
-	pass
 
 # CVM encodes every META in ISO-8859-1 (Latin-1), like the data dumps.
 _ENCODING = "ISO-8859-1"
@@ -822,6 +820,12 @@ class BaseMetaReader(IngestionReader):
 	_META_URL: ClassVar[str]
 	_CONTRACT: ClassVar[FileContract]
 	_RETRY_POLICY: ClassVar[RetryPolicy | None] = _DEFAULT_RETRY_POLICY
+
+	# The stem CVM repeats on every member of this dataset's META ZIP, stripped to leave the bare
+	# section (`meta_inf_mensal_cra_fluxo_caixa.txt` -> `fluxo_caixa`). Declared, never derived: the
+	# stems are irregular — `meta_cad_fi.zip`'s members are `meta_cad_fi_hist_*`, so the file's own
+	# name does not predict them. Empty for a flat `.txt`, which has no members.
+	_MEMBER_STEM: ClassVar[str] = ""
 
 	def __init__(
 		self,
@@ -915,51 +919,13 @@ class BaseMetaReader(IngestionReader):
 				)
 		return list_records
 
-	@staticmethod
-	def _section_of(str_member: str) -> str:
-		"""Turn a META ZIP member's filename into its section label.
-
-		``meta_inf_mensal_cra_fluxo_caixa.txt`` → ``fluxo_caixa``: strip the ``meta_`` prefix, the
-		``.txt`` suffix, and the dataset stem CVM repeats on every member.
-
-		Parameters
-		----------
-		str_member : str
-			The ZIP member's name.
-
-		Returns
-		-------
-		str
-			The section label.
-		"""
-		str_stem = Path(str_member).stem.removeprefix("meta_")
-		return str_stem
-```
-
-> **Note for the implementer — `_section_of` is deliberately naive.** It returns
-> ``inf_mensal_cra_fluxo_caixa``, not ``fluxo_caixa``, because the dataset stem varies per dataset
-> (``meta_cad_fi_hist_admin.txt`` → ``cad_fi_hist_admin``). Step 4 fixes this properly.
-
-- [ ] **Step 4: Make the section label the member's own name**
-
-Give the subclass the stem to strip, so no guessing is needed. Add a class attribute and use it:
-
-```python
-	# The stem CVM repeats on every member of this dataset's META ZIP, stripped to leave the bare
-	# section (`meta_inf_mensal_cra_fluxo_caixa.txt` -> `fluxo_caixa`). Empty for a flat `.txt`.
-	_MEMBER_STEM: ClassVar[str] = ""
-```
-
-and replace `_section_of` with:
-
-```python
 	def _section_of(self, str_member: str) -> str:
 		"""Turn a META ZIP member's filename into its section label.
 
 		``meta_inf_mensal_cra_fluxo_caixa.txt`` → ``fluxo_caixa``. The dataset stem CVM repeats on
-		every member is declared by the subclass (:attr:`_MEMBER_STEM`) rather than guessed: the
-		stems are irregular (``meta_cad_fi_hist_admin.txt`` belongs to ``cad_fi_hist``, whose own
-		META file is named ``meta_cad_fi.zip``).
+		every member is declared by the subclass (:attr:`_MEMBER_STEM`) rather than derived from the
+		filename: the stems are irregular — ``meta_cad_fi.zip``'s members are ``meta_cad_fi_hist_*``
+		(a different dataset from ``meta_cad_fi.txt``), so the archive's name does not predict them.
 
 		Parameters
 		----------
@@ -969,7 +935,8 @@ and replace `_section_of` with:
 		Returns
 		-------
 		str
-			The section label, or the whole stem when it does not carry the expected prefix.
+			The section label, or the whole stem when it does not carry the expected prefix (a
+			member CVM names unexpectedly is labelled by its stem rather than dropped).
 		"""
 		str_stem = Path(str_member).stem.removeprefix("meta_")
 		if self._MEMBER_STEM and str_stem.startswith(f"{self._MEMBER_STEM}_"):
@@ -977,7 +944,7 @@ and replace `_section_of` with:
 		return str_stem
 ```
 
-- [ ] **Step 5: Run the tests**
+- [ ] **Step 4: Run the tests**
 
 Run: `poetry run pytest tests/unit/test_meta_readers.py -q`
 Expected: still FAIL — the `meta.py` subclasses do not exist yet (Task 5). The base itself must
@@ -985,7 +952,7 @@ import cleanly:
 Run: `poetry run python -c "from filings_cvm.ingestion._base_meta_reader import BaseMetaReader; print('ok')"`
 Expected: `ok`.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add src/filings_cvm/ingestion/_base_meta_reader.py tests/unit/test_meta_readers.py
@@ -1293,13 +1260,26 @@ prefix → T3 · real-byte fixtures + truncation lock → T2 · two commits → 
 **Corrections applied during review:**
 - **23 → 22 datasets.** `INF_MENSAL_CRI` has no readers yet, so a `meta.py` there would create a
   readerless package; it ships with the CRI PR. Noted in T5 and to be fixed in the spec (T6 Step 5).
-- **`_section_of` needed `_MEMBER_STEM`.** The first draft returned `inf_mensal_cra_fluxo_caixa`
-  because the repeated stem varies per dataset — and `meta_cad_fi.zip`'s members are
-  `cad_fi_hist_*`, so it cannot be derived from the filename. Declared by the subclass instead.
+- **`_section_of` needed `_MEMBER_STEM`.** The stem CVM repeats varies per dataset — and
+  `meta_cad_fi.zip`'s members are `cad_fi_hist_*` — so it cannot be derived from the archive name.
+  Declared by the subclass instead, in one correct implementation.
 - **Type consistency checked**: `parse_meta_blocks(str_text, str_section)` is called with exactly
   that signature in T4; `_META_URL`/`_CONTRACT`/`_MEMBER_STEM`/`_RETRY_POLICY` are declared in T4
   and used with the same names in T5; `META_COLUMNS`/`_meta_contract` defined in T3 and consumed in
   T3/T5.
+
+**Corrections applied in the pre-flight scan (2026-07-15), before any dispatch:**
+- **A test asserted a wrong value — the plan fell into its own trap.** T2 expected
+  `list_rows[0]["field"] == "CNPJ_Emissora"`, inferred from the *contract's* order. The real META
+  opens with `Data_Entrega` (`CNPJ_Emissora` is 8th) — precisely the "META order never matches the
+  header" finding this spec is built on. Fixed against the real bytes, and the test now *asserts*
+  the divergence instead of tripping over it.
+- **DRY: the column tuple had two definitions.** `meta_parser._RECORD_COLUMNS` and
+  `contracts.meta.META_COLUMNS` restated the same 8 columns and could drift. The parser now owns
+  `RECORD_COLUMNS` (public within `_internal`) and the contract imports it.
+- **T4 wrote dead code by construction**: Step 3 wrote `_section_of` naive, Step 4 replaced it.
+  Collapsed into one correct implementation with `_MEMBER_STEM` declared up front.
+- **Removed a leftover `if TYPE_CHECKING: pass`** from the base's imports (ruff would flag it).
 
 **Known risk carried deliberately:** the 22 URLs are hardcoded. That is the design (the filenames
 are irregular and `meta_cad_fi.txt`/`.zip` are different datasets), and T5 Step 9 live-verifies
