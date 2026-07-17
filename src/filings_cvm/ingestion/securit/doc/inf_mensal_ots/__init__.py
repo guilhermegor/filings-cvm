@@ -3,8 +3,8 @@
 One reader per section of the monthly report of the *Operações de Securitização* that are neither
 CRA nor CRI (geral, ativo/passivo, classe, direitos creditórios, desembolso, fluxo de caixa,
 derivativos, cedente/devedor), over a shared private base (`_base_inf_mensal_ots_reader`).
-⚠️ The dump is **yearly-partitioned** despite the monthly report. Re-exported from
-`filings_cvm.ingestion`.
+⚠️ The dump is **yearly-partitioned** despite the monthly report. Plus its META reader.
+Re-exported from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.securit.doc.inf_mensal_ots.inf_mensal_ots_ativo_passivo import (
@@ -31,6 +31,7 @@ from filings_cvm.ingestion.securit.doc.inf_mensal_ots.inf_mensal_ots_fluxo_caixa
 from filings_cvm.ingestion.securit.doc.inf_mensal_ots.inf_mensal_ots_geral import (
 	InfMensalOtsGeralReader,
 )
+from filings_cvm.ingestion.securit.doc.inf_mensal_ots.meta import MetaInfMensalOtsReader
 
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
 	"InfMensalOtsDireitosCreditoriosReader",
 	"InfMensalOtsFluxoCaixaReader",
 	"InfMensalOtsGeralReader",
+	"MetaInfMensalOtsReader",
 ]

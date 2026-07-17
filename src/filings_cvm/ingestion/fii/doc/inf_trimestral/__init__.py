@@ -2,8 +2,8 @@
 
 One reader per table of the FII quarterly report (cadastro, ativos, imóveis/terrenos and their
 transactions, rentabilidade, resultado), over a shared private base
-(`_base_inf_trimestral_fii_reader`). The dump is partitioned by **year**, not quarter. Re-exported
-from `filings_cvm.ingestion`.
+(`_base_inf_trimestral_fii_reader`), plus its META reader. The dump is partitioned by **year**,
+not quarter. Re-exported from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.fii.doc.inf_trimestral.inf_trimestral_fii_alienacao_imovel import (
@@ -54,6 +54,7 @@ from filings_cvm.ingestion.fii.doc.inf_trimestral.inf_trimestral_fii_resultado_c
 from filings_cvm.ingestion.fii.doc.inf_trimestral.inf_trimestral_fii_terreno import (
 	InfTrimestralFiiTerrenoReader,
 )
+from filings_cvm.ingestion.fii.doc.inf_trimestral.meta import MetaInfTrimestralFiiReader
 
 
 __all__ = [
@@ -73,4 +74,5 @@ __all__ = [
 	"InfTrimestralFiiRentabilidadeEfetivaReader",
 	"InfTrimestralFiiResultadoContabilFinanceiroReader",
 	"InfTrimestralFiiTerrenoReader",
+	"MetaInfTrimestralFiiReader",
 ]

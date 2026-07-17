@@ -98,3 +98,36 @@ def test_meta_reader_output_columns_match_the_contract(monkeypatch: pytest.Monke
 	)
 	df_ = MetaDfinCraReader().read()
 	assert tuple(df_.columns) == MetaDfinCraReader._CONTRACT.output_columns
+
+
+def test_every_meta_reader_is_public_and_declares_its_url() -> None:
+	"""Discovery, not a hand list: a new Meta*Reader that forgets a constant fails CI.
+
+	Mirrors `test_reader_retry_policy.py` — the convention is enforced structurally, so it cannot
+	rot the way a documented rule does.
+	"""
+	import filings_cvm
+
+	list_meta = [
+		getattr(filings_cvm, str_name)
+		for str_name in filings_cvm.__all__
+		if str_name.startswith("Meta") and str_name.endswith("Reader")
+	]
+	assert len(list_meta) == 22
+	for cls_reader in list_meta:
+		assert cls_reader._META_URL.startswith("https://dados.cvm.gov.br/dados/")
+		assert "/META/" in cls_reader._META_URL
+		assert cls_reader._CONTRACT.str_source_key.startswith("meta_")
+		assert cls_reader._RETRY_POLICY is not None
+
+
+def test_meta_source_keys_are_unique_across_every_reader() -> None:
+	"""Two datasets sharing a source_key would be indistinguishable in the bronze table."""
+	import filings_cvm
+
+	list_keys = [
+		getattr(filings_cvm, str_name)._CONTRACT.str_source_key
+		for str_name in filings_cvm.__all__
+		if str_name.startswith("Meta") and str_name.endswith("Reader")
+	]
+	assert len(list_keys) == len(set(list_keys))

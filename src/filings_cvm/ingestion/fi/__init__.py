@@ -8,7 +8,7 @@ dumps (:mod:`filings_cvm.ingestion.fi.doc`) and the cadastro
 `filings_cvm.ingestion`.
 """
 
-from filings_cvm.ingestion.fi.cad import CadastroFiReader
+from filings_cvm.ingestion.fi.cad import CadastroFiReader, MetaCadastroFiReader
 from filings_cvm.ingestion.fi.cad.cad_fi_hist import (
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
@@ -29,8 +29,10 @@ from filings_cvm.ingestion.fi.cad.cad_fi_hist import (
 	CadastroFiHistTaxaAdmReader,
 	CadastroFiHistTaxaPerfmReader,
 	CadastroFiHistTribLprazoReader,
+	MetaCadFiHistReader,
 )
 from filings_cvm.ingestion.fi.cad.registro import (
+	MetaRegistroReader,
 	RegistroClasseReader,
 	RegistroFundoReader,
 	RegistroSubclasseReader,
@@ -40,6 +42,9 @@ from filings_cvm.ingestion.fi.doc import (
 	InformeDiarioReader,
 	LaminaCarteiraReader,
 	LaminaReader,
+	MetaCdaReader,
+	MetaInformeDiarioReader,
+	MetaLaminaReader,
 )
 
 
@@ -68,6 +73,12 @@ __all__ = [
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
+	"MetaCadFiHistReader",
+	"MetaCadastroFiReader",
+	"MetaCdaReader",
+	"MetaInformeDiarioReader",
+	"MetaLaminaReader",
+	"MetaRegistroReader",
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",

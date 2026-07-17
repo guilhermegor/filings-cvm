@@ -12,7 +12,10 @@ public API stays flat regardless of nesting::
     from filings_cvm.ingestion import InformeDiarioReader
 """
 
-from filings_cvm.ingestion.emissor_cepac import CadastroEmissorCepacReader
+from filings_cvm.ingestion.emissor_cepac import (
+	CadastroEmissorCepacReader,
+	MetaCadEmissorCepacReader,
+)
 from filings_cvm.ingestion.fi import (
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
@@ -38,6 +41,12 @@ from filings_cvm.ingestion.fi import (
 	InformeDiarioReader,
 	LaminaCarteiraReader,
 	LaminaReader,
+	MetaCadastroFiReader,
+	MetaCadFiHistReader,
+	MetaCdaReader,
+	MetaInformeDiarioReader,
+	MetaLaminaReader,
+	MetaRegistroReader,
 	RegistroClasseReader,
 	RegistroFundoReader,
 	RegistroSubclasseReader,
@@ -45,6 +54,7 @@ from filings_cvm.ingestion.fi import (
 from filings_cvm.ingestion.fiagro import (
 	InfMensalFiagroReader,
 	InfMensalFiagroSubclasseReader,
+	MetaInfMensalFiagroReader,
 )
 from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabIIIReader,
@@ -64,11 +74,15 @@ from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabX7Reader,
 	InfMensalFidcTabX11Reader,
 	InfMensalFidcTabXReader,
+	MetaInfMensalFidcReader,
 )
 from filings_cvm.ingestion.fie import (
 	BalanceteFieReader,
 	BalancoFieReader,
 	MedidasMesFieReader,
+	MetaBalanceteFieReader,
+	MetaBalancoFieReader,
+	MetaMedidasMesFieReader,
 )
 from filings_cvm.ingestion.fii import (
 	DfinFiiReader,
@@ -103,10 +117,16 @@ from filings_cvm.ingestion.fii import (
 	InfTrimestralFiiRentabilidadeEfetivaReader,
 	InfTrimestralFiiResultadoContabilFinanceiroReader,
 	InfTrimestralFiiTerrenoReader,
+	MetaDfinFiiReader,
+	MetaInfAnualFiiReader,
+	MetaInfMensalFiiReader,
+	MetaInfTrimestralFiiReader,
 )
 from filings_cvm.ingestion.fip import (
 	InfQuadrimestralFipReader,
 	InfTrimestralFipReader,
+	MetaInfQuadrimestralFipReader,
+	MetaInfTrimestralFipReader,
 )
 from filings_cvm.ingestion.securit import (
 	DfinCraReader,
@@ -127,6 +147,10 @@ from filings_cvm.ingestion.securit import (
 	InfMensalOtsDireitosCreditoriosReader,
 	InfMensalOtsFluxoCaixaReader,
 	InfMensalOtsGeralReader,
+	MetaDfinCraReader,
+	MetaDfinCriReader,
+	MetaInfMensalCraReader,
+	MetaInfMensalOtsReader,
 )
 
 
@@ -230,6 +254,28 @@ __all__ = [
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"MedidasMesFieReader",
+	"MetaBalanceteFieReader",
+	"MetaBalancoFieReader",
+	"MetaCadEmissorCepacReader",
+	"MetaCadFiHistReader",
+	"MetaCadastroFiReader",
+	"MetaCdaReader",
+	"MetaDfinCraReader",
+	"MetaDfinCriReader",
+	"MetaDfinFiiReader",
+	"MetaInfAnualFiiReader",
+	"MetaInfMensalCraReader",
+	"MetaInfMensalFiagroReader",
+	"MetaInfMensalFidcReader",
+	"MetaInfMensalFiiReader",
+	"MetaInfMensalOtsReader",
+	"MetaInfQuadrimestralFipReader",
+	"MetaInfTrimestralFiiReader",
+	"MetaInfTrimestralFipReader",
+	"MetaInformeDiarioReader",
+	"MetaLaminaReader",
+	"MetaMedidasMesFieReader",
+	"MetaRegistroReader",
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",

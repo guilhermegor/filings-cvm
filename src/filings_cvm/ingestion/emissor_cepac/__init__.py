@@ -2,13 +2,17 @@
 
 Mirrors the `dados.cvm.gov.br/dados/EMISSOR_CEPAC/` portal branch — one sibling among the portal's
 other roots. It publishes only a registry (`EMISSOR_CEPAC/CAD`,
-:mod:`filings_cvm.ingestion.emissor_cepac.cad`) of the CEPAC issuers (municipalities). The reader
-is re-exported flat from `filings_cvm.ingestion`.
+:mod:`filings_cvm.ingestion.emissor_cepac.cad`) of the CEPAC issuers (municipalities), plus its
+META reader. Every reader is re-exported flat from `filings_cvm.ingestion`.
 """
 
-from filings_cvm.ingestion.emissor_cepac.cad import CadastroEmissorCepacReader
+from filings_cvm.ingestion.emissor_cepac.cad import (
+	CadastroEmissorCepacReader,
+	MetaCadEmissorCepacReader,
+)
 
 
 __all__ = [
 	"CadastroEmissorCepacReader",
+	"MetaCadEmissorCepacReader",
 ]
