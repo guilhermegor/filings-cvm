@@ -31,6 +31,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+        with:
+          # Full history so the work-ledger gate can resolve merge-base(HEAD, origin/main); a
+          # shallow clone has no common ancestor to diff the branch against.
+          fetch-depth: 0
 
       - name: Set Up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -114,6 +118,16 @@ jobs:
         # read_table must also call stamp_provenance, so no ingested frame ships without its
         # url/updated_at/source_key/... columns. Explicit CI step (gate parity with pre-commit).
         run: poetry run python bin/check_provenance.py
+
+      - name: Run Work-Ledger Enforcement
+        if: runner.os == 'Linux' && github.event_name == 'pull_request'
+        # Mirrors the `check-backlog-ledger` pre-commit hook: a branch touching any src/ci path
+        # must add or edit a docs/backlog work ledger. Diff-based, so the PR base SHA is the
+        # comparison point — passed via env (never inline in run:) and reachable from the
+        # fetch-depth:0 merge checkout. Explicit CI step (gate parity with pre-commit).
+        env:
+          LEDGER_BASE_REF: ${{ github.event.pull_request.base.sha }}
+        run: poetry run python bin/check_backlog_ledger.py
 
       - name: Run Ruff Linting
         if: runner.os == 'Linux'
