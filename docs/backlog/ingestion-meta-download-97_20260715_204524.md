@@ -63,10 +63,10 @@ real *não* carrega.
   `CadastroFiReader` / `CadastroEmissorCepacReader`. Logo `__init__(path_raw, retry_policy,
   cls_logger)`, e um `path_raw` persistido é o **único** registro do que a spec dizia naquele dia.
 - [x] **Base privada em `ingestion/_base_meta_reader.py`** (raiz de `ingestion/`): as bases
-  existentes são escopadas ao seu pacote, mas esta é compartilhada pelas 23 subclasses de todos os
+  existentes são escopadas ao seu pacote, mas esta é compartilhada pelas 22 subclasses de todos os
   portal roots.
-- [x] **Contracts**: **um módulo** `_internal/config/contracts/meta.py` com as 23 instâncias vindas
-  de um factory sobre a tupla compartilhada. A forma do frame parseado é **nossa** e idêntica nos 23;
+- [x] **Contracts**: **um módulo** `_internal/config/contracts/meta.py` com as 22 instâncias vindas
+  de um factory sobre a tupla compartilhada. A forma do frame parseado é **nossa** e idêntica nos 22;
   o que difere é o `str_source_key` (que o `stamp_provenance` exige para desambiguar no bronze).
   Precedente: `cad_fi_hist.py` (19 contracts num módulo só).
 - [x] **PR shape**: **um PR, dois commits** (1º os moves puros, 2º o META). A promoção só existe
@@ -81,18 +81,18 @@ fabricaria um dado que a CVM nunca escreveu e destruiria o valor de oráculo. Re
 
 ## Escopo
 
-- [ ] Promover os 12 datasets módulo-soltos a pacotes (`git mv`), API pública plana via re-export
-- [ ] `ingestion/_base_meta_reader.py` — base privada com toda a máquina: `raw_workspace` →
+- [x] Promover os 12 datasets módulo-soltos a pacotes (`git mv`), API pública plana via re-export
+- [x] `ingestion/_base_meta_reader.py` — base privada com toda a máquina: `raw_workspace` →
       `download_file` → `hash_artifact` → parser de blocos (`.txt` ou `.zip` pelo sufixo da URL) →
       `stamp_provenance`
-- [ ] 23 `meta.py` finos (só `_META_URL` + `_SOURCE_KEY` + docstring), um por dataset
-- [ ] `_internal/config/contracts/meta.py` — 23 contracts via factory
-- [ ] Re-export na API pública (`ingestion/__init__` + `filings_cvm/__init__`, `__all__`)
-- [ ] Testes: parser contra **fixtures de bytes reais** da CVM; `download_file` mockado; um teste
+- [x] **22** `meta.py` finos (só `_META_URL` + `_SOURCE_KEY` + docstring), um por dataset
+- [x] `_internal/config/contracts/meta.py` — **22** contracts via factory
+- [x] Re-export na API pública (`ingestion/__init__` + `filings_cvm/__init__`, `__all__`)
+- [x] Testes: parser contra **fixtures de bytes reais** da CVM; `download_file` mockado; um teste
       trava a **truncagem em 50 preservada verbatim** (o único oráculo não-tautológico)
-- [ ] Gates: ruff/format/check_typing/check_provenance/mypy/codespell + pytest nas **duas majors do
+- [x] Gates: ruff/format/check_typing/check_provenance/mypy/codespell + pytest nas **duas majors do
       pandas** + mkdocs --strict
-- [ ] Docs: página + nav do mkdocs + api.md + índice de ingestion + catálogo do CLAUDE.md raiz
+- [x] Docs: página + nav do mkdocs + api.md + índice de ingestion + catálogo do CLAUDE.md raiz
 - [ ] PR (`Closes #97`) → **esperar aprovação+merge do usuário** → release **PATCH** (Test PyPI →
       verificar por install → PyPI → verificar)
 
@@ -105,7 +105,7 @@ fabricaria um dado que a CVM nunca escreveu e destruiria o valor de oráculo. Re
       nenhuma), como as 6 colunas de proveniência — que já são inglês (`url`, `updated_at`,
       `source_key`). Os **valores** seguem verbatim da CVM (`field="Provisoes_Contigencias"`,
       `description` em pt-BR como ela escreveu).
-- [x] **`FIE/MEDIDAS` → usar o `.txt`**, o formato que os 23 têm em comum (o `.csv` é exceção de 1
+- [x] **`FIE/MEDIDAS` → usar o `.txt`**, o formato que os 22 têm em comum (o `.csv` é exceção de 1
       dataset; uma segunda regra de formato para um caso só é a troca ruim). O `.csv` fica
       registrado aqui como conscientemente não usado.
 - [x] **`_SOURCE_KEY` com prefixo `meta_`** (`meta_inf_mensal_cri`): sem prefixo colidiria com o

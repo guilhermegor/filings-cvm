@@ -117,6 +117,11 @@ class BaseMetaReader(IngestionReader):
 		------
 		OSError
 			If the download fails (network error, non-2xx status, redirect, timeout).
+		ValueError
+			If the download seam rejects :attr:`_META_URL` (bad scheme, internal host). Not
+			reachable in practice — the URL is a per-subclass constant, not caller input.
+		UnicodeDecodeError
+			If the artifact is not decodable as ISO-8859-1, i.e. CVM changed the encoding.
 		"""
 		str_filename = self._str_url.rsplit("/", 1)[-1]
 		self._cls_logger.log_message(f"Downloading META from {self._str_url}", "info")

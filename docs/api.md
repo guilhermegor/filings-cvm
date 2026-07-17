@@ -725,6 +725,45 @@ df_ = InfMensalCraDireitosCreditoriosReader(date_ref=date(2025, 6, 1)).read()   
 
 ---
 
+### `Meta*Reader` (22 readers)
+
+Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
+por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
+
+`MetaInformeDiarioReader` · `MetaCdaReader` · `MetaLaminaReader` · `MetaCadastroFiReader` ·
+`MetaCadFiHistReader` · `MetaRegistroReader` · `MetaInfMensalFidcReader` · `MetaInfMensalFiiReader` ·
+`MetaDfinFiiReader` · `MetaInfTrimestralFiiReader` · `MetaInfAnualFiiReader` ·
+`MetaInfTrimestralFipReader` · `MetaInfQuadrimestralFipReader` · `MetaInfMensalFiagroReader` ·
+`MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
+`MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
+`MetaCadEmissorCepacReader`
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — o META fica numa URL fixa que a CVM sobrescreve no lugar (o precedente do
+`CadastroFiReader`), então um `path_raw` gravado é o **único** registro do que a spec dizia naquele
+dia.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por campo declarado, colunas `section`, `field`, `description`, `domain`, `data_type`,
+`size`, `precision`, `scale` (+ as seis de proveniência). Um META `.zip` multi-membro volta como
+**um único frame longo**, com o membro em `section`. Levanta `OSError` (download).
+
+```python
+from filings_cvm import MetaInfMensalCraReader
+
+df_meta = MetaInfMensalCraReader().read()
+# 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.
+```
+
+> ⚠️ **A CVM trunca o nome do campo em 50 caracteres** (o header real vai até 60) e a **ordem do
+> META nunca é a do arquivo real**. O reader devolve os dois fatos como estão: o header real segue
+> sendo a fonte da ordem e dos nomes longos; a reconciliação é do consumidor e precisa ser
+> *truncation-aware* (`header[:50] == meta`).
+
+---
+
 ## Modelos de schema (Pydantic)
 
 Todos são modelos [Pydantic v2](https://docs.pydantic.dev/) — a validação acontece na

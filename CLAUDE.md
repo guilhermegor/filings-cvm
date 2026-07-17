@@ -207,6 +207,26 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **22 readers** (`Meta*Reader`), um por
+dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
+`ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
+`_internal/config/contracts/meta.py` (22 instâncias de um factory sobre uma tupla compartilhada —
+o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
+`docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
+**ISO-8859-1 + CRLF**, num `.txt` solto (12) ou `.zip` multi-membro (10); volta como **um frame
+longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
+⚠️ **Três fatos da fonte, honrados verbatim e nunca "consertados":**
+  1. **A CVM trunca o nome do campo em exatamente 50 caracteres** (provado 8/8 no CRA; o header real
+     vai até 60). Logo o META **não pode ser gate duro de nomes** — reconciliar é do consumidor
+     (#98) e tem de ser *truncation-aware* (`header[:50] == meta`).
+  2. **A ordem do META nunca é a do arquivo real** (0/8 seções; `meta_cad_fi.txt` é alfabético) → o
+     **header real segue sendo a fonte da ordem** e dos nomes longos. Oráculos complementares.
+  3. **A URL é constante por dataset, jamais derivada:** os nomes são irregulares
+     (`meta_cda_fi_txt.zip`, infixo `_txt`) e **`meta_cad_fi.txt` (41 campos = `cad_fi`) vs
+     `meta_cad_fi.zip` (19 membros = `cad_fi_hist`) são datasets DIFERENTES** com o mesmo radical —
+     uma regra "derive o nome"/"prefira o zip" entregaria o metadado errado com os testes verdes.
+  `SECURIT/DOC/INF_MENSAL_CRI` fica de fora (22, não 23) — o seu `meta.py` chega com os readers do CRI
+
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
   por tipo de ativo do dump `lamina_fi_AAAAMM.zip`) — `ingestion/fi/doc/lamina/lamina_carteira.py`
@@ -243,6 +263,10 @@ src/filings_cvm/
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); __init__ FLAT public API
+        _base_meta_reader.py   # PRIVATE base for the 22 Meta*Reader (shared across every root)
+                           #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
+                           #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
+                           #   directory per dataset. Public API stays flat via re-exports.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
