@@ -154,6 +154,14 @@ class BaseMetaReader(IngestionReader):
 		-------
 		list of dict of (str, str)
 			The parsed records of every member, concatenated in member order.
+
+		Notes
+		-----
+		The flat branch derives its ``section`` from ``str_source_key`` rather than a declared
+		constant like the ZIP path's :attr:`_MEMBER_STEM`. This is a deliberate asymmetry, not the
+		derivation the "never derive" rule warns against: ``str_source_key`` is a hand-written
+		per-dataset literal (see ``contracts/meta.py``), so it never reproduces the same-stem
+		trap a filename-derived value would.
 		"""
 		if path_meta.suffix.lower() != ".zip":
 			str_section = self._CONTRACT.str_source_key.removeprefix("meta_")
