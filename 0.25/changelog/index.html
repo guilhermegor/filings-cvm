@@ -996,6 +996,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/meta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    META (metadados da CVM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1319,6 +1347,7 @@ Regenere ou visualize localmente quando quiser com <code>make changelog</code> (
 <h2 id="unreleased">Unreleased<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
 <h3 id="feat">Feat<a class="headerlink" href="#feat" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>ingestion</strong>: public META download module (22 readers) (#109)</li>
 <li><strong>ingestion</strong>: SECURIT INF_MENSAL_CRA readers (8 members) (#99)</li>
 <li><strong>ingestion</strong>: SECURIT INF_MENSAL_OTS readers (8 members) (#92)</li>
 <li><strong>ingestion</strong>: SECURIT DFIN (CRA/CRI) + EMISSOR_CEPAC CAD readers (#88)</li>
@@ -1348,6 +1377,8 @@ Regenere ou visualize localmente quando quiser com <code>make changelog</code> (
 </ul>
 <h3 id="fix">Fix<a class="headerlink" href="#fix" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>ci</strong>: reconcile merged PRs — close linked issue + delete branch (#107)</li>
+<li><strong>ci</strong>: publish named artifacts, never glob dist/* into a release (#103)</li>
 <li><strong>ci</strong>: poll gate axes until terminal; track Analyze not CodeQL (#83)</li>
 <li>gerar e versionar coverage.svg para o badge do README (#17)</li>
 </ul>

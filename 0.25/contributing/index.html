@@ -998,6 +998,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/meta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    META (metadados da CVM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1214,28 +1242,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#lancando" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lançando
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Lançando">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#configuracao-do-mantenedor-trusted-publisher-uma-vez-antes-do-primeiro-release" class="md-nav__link">
+  <a href="#higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuração do mantenedor — trusted publisher (uma vez, antes do primeiro release)
+        Higiene de branches — apagar depois do merge, arquivar as de incidente
       
     </span>
   </a>
@@ -1397,28 +1408,11 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#lancando" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Lançando
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Lançando">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#configuracao-do-mantenedor-trusted-publisher-uma-vez-antes-do-primeiro-release" class="md-nav__link">
+  <a href="#higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuração do mantenedor — trusted publisher (uma vez, antes do primeiro release)
+        Higiene de branches — apagar depois do merge, arquivar as de incidente
       
     </span>
   </a>
@@ -1667,6 +1661,38 @@ aprovações, então uma aprovação de bot não destravaria nada.)</p>
 <em>Require code quality results</em> (severidade subjetiva de IA no caminho do merge — <code>ruff</code>, <code>mypy</code> e os
 gates de <code>bin/check_*.py</code> já cobrem qualidade de forma determinística) e <em>Restrict code coverage</em> (o
 piso já é single-source em <code>.coveragerc</code>, aplicado por pre-commit + CI).</p>
+<h3 id="higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente">Higiene de branches — apagar depois do merge, <strong>arquivar</strong> as de incidente<a class="headerlink" href="#higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente" title="Permanent link">&para;</a></h3>
+<p>Depois do merge, a branch vai embora. Só o <code>main</code> e a <code>gh-pages</code> vivem no remoto.</p>
+<blockquote>
+<p>⚠️ <strong>Ancestralidade não diz nada aqui — o repo faz squash-merge.</strong> Um squash cria um commit <strong>novo</strong>,
+então os commits originais de uma branch <strong>nunca</strong> são ancestrais do <code>main</code>, por mais que o conteúdo
+tenha entrado por completo. Portanto <code>git branch -d</code> <strong>sempre</strong> recusa, <code>git log main..branch</code>
+<strong>sempre</strong> mostra "N commits à frente" e o <code>git cherry</code> <strong>sempre</strong> marca <code>+</code> (o squash muda o
+<em>patch-id</em>). <strong>Nenhum dos três é evidência de perda.</strong> Os testes honestos são: <em>a PR dela mergeou?</em>
+(<code>gh pr list --head &lt;branch&gt; --state all</code>) e a comparação de <strong>conteúdo</strong> (o blob de cada arquivo
+tocado está no <code>main</code>?).</p>
+</blockquote>
+<p><strong>Branch de incidente vira tag de arquivo.</strong> Se a branch tem história que vale preservar — um merge
+parcial, commits órfãos, uma recuperação — <strong>não</strong> é preciso escolher entre guardar o registro e
+limpar a lista:</p>
+<ol>
+<li><code>git tag archive/&lt;issue&gt;-&lt;slug&gt; &lt;sha-do-tip&gt;</code> e publique a tag;</li>
+<li><strong>só então</strong> apague a branch.</li>
+</ol>
+<p>A tag deixa os commits <strong>alcançáveis para sempre</strong> (imunes ao GC) e a lista de branches limpa. Depois,
+<code>git log archive/&lt;issue&gt;-&lt;slug&gt;</code> devolve tudo. Precedente: <code>archive/49-retry-strategy</code> (o incidente do</p>
+<h1 id="49-mergeou-com-1-de-3-commits-o-resto-foi-recuperado-pelo-50-custa-10-segundos-e-transforma">49 — mergeou com 1 de 3 commits; o resto foi recuperado pelo #50). Custa ~10 segundos e transforma<a class="headerlink" href="#49-mergeou-com-1-de-3-commits-o-resto-foi-recuperado-pelo-50-custa-10-segundos-e-transforma" title="Permanent link">&para;</a></h1>
+<p>"posso apagar essa branch?" de decisão corajosa em decisão trivial.</p>
+<blockquote>
+<p>⚠️ <strong>Uma PR auto-fundida não apaga a própria branch nem fecha a issue linkada</strong> — o merge é feito
+pelo bot, e ações do <code>GITHUB_TOKEN</code> não cascateiam para as automações a jusante. Até isso ser
+resolvido, depois de <strong>toda</strong> PR auto-fundida: feche a issue (<code>gh issue close &lt;N&gt;</code>) e apague a ref
+(<code>gh api -X DELETE repos/:owner/:repo/git/refs/heads/&lt;branch&gt;</code>). Sem o fechamento da issue, o card
+<strong>nunca</strong> chega a "Done" — o workflow nativo do Projects depende dele.</p>
+<p>ℹ️ <code>git push origin --delete &lt;branch&gt;</code> é bloqueado pelo hook local de proteção de branch quando o
+<code>main</code> está em checkout (falso positivo — apagar a ref de outra branch não escreve no <code>main</code>). Use a
+API do <code>gh</code>, como acima.</p>
+</blockquote>
 <h2 id="lancando">Lançando<a class="headerlink" href="#lancando" title="Permanent link">&para;</a></h2>
 <p>Os releases são <strong>dirigidos por tag</strong> quando o projeto está conectado a um remoto no GitHub:</p>
 <ul>
