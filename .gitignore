@@ -81,3 +81,4 @@ docs/bedrock-fm-lessons.md
 # Local dev SQLite artifact (config.connection_db default DB_PATH=./data/app.db when
 # DB_BACKEND=sqlite). The runtime DB is never committed; .env.example documents DB_PATH.
 data/app.db
+.superpowers/

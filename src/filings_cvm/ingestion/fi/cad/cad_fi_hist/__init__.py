@@ -1,7 +1,7 @@
 """CVM CAD/FI **histórico** readers — the 19 per-attribute change-logs of `cad_fi_hist.zip`.
 
 One reader per mutable attribute of the legacy CAD/FI registry, over a shared private base
-(`_base_cad_fi_hist_reader`). Re-exported from `filings_cvm.ingestion`.
+(`_base_cad_fi_hist_reader`), plus its META reader. Re-exported from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.fi.cad.cad_fi_hist.cad_fi_hist_admin import CadastroFiHistAdminReader
@@ -47,6 +47,7 @@ from filings_cvm.ingestion.fi.cad.cad_fi_hist.cad_fi_hist_taxa_perfm import (
 from filings_cvm.ingestion.fi.cad.cad_fi_hist.cad_fi_hist_trib_lprazo import (
 	CadastroFiHistTribLprazoReader,
 )
+from filings_cvm.ingestion.fi.cad.cad_fi_hist.meta import MetaCadFiHistReader
 
 
 __all__ = [
@@ -69,4 +70,5 @@ __all__ = [
 	"CadastroFiHistTaxaAdmReader",
 	"CadastroFiHistTaxaPerfmReader",
 	"CadastroFiHistTribLprazoReader",
+	"MetaCadFiHistReader",
 ]

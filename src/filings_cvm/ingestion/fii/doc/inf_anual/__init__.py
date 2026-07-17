@@ -1,8 +1,8 @@
 """CVM Informe Anual FII readers — the 12 members of ``inf_anual_fii_AAAA.zip``.
 
 One reader per table of the FII annual report (cadastro, ativos, cotistas, diretor/prestadores,
-processos, representante), over a shared private base (`_base_inf_anual_fii_reader`). Re-exported
-from `filings_cvm.ingestion`.
+processos, representante), over a shared private base (`_base_inf_anual_fii_reader`), plus its
+META reader. Re-exported from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.fii.doc.inf_anual.inf_anual_fii_ativo_adquirido import (
@@ -39,6 +39,7 @@ from filings_cvm.ingestion.fii.doc.inf_anual.inf_anual_fii_processo_semelhante i
 from filings_cvm.ingestion.fii.doc.inf_anual.inf_anual_fii_representante_cotista import (
 	InfAnualFiiRepresentanteCotistaReader,
 )
+from filings_cvm.ingestion.fii.doc.inf_anual.meta import MetaInfAnualFiiReader
 
 
 __all__ = [
@@ -54,4 +55,5 @@ __all__ = [
 	"InfAnualFiiProcessoReader",
 	"InfAnualFiiProcessoSemelhanteReader",
 	"InfAnualFiiRepresentanteCotistaReader",
+	"MetaInfAnualFiiReader",
 ]

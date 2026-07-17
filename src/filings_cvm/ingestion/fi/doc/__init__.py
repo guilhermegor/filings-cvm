@@ -5,9 +5,16 @@ family (`LAMINA`, nested in :mod:`filings_cvm.ingestion.fi.doc.lamina`). Re-expo
 `filings_cvm.ingestion`.
 """
 
-from filings_cvm.ingestion.fi.doc.cda import CdaReader
-from filings_cvm.ingestion.fi.doc.informe_diario import InformeDiarioReader
-from filings_cvm.ingestion.fi.doc.lamina import LaminaCarteiraReader, LaminaReader
+from filings_cvm.ingestion.fi.doc.cda import CdaReader, MetaCdaReader
+from filings_cvm.ingestion.fi.doc.informe_diario import (
+	InformeDiarioReader,
+	MetaInformeDiarioReader,
+)
+from filings_cvm.ingestion.fi.doc.lamina import (
+	LaminaCarteiraReader,
+	LaminaReader,
+	MetaLaminaReader,
+)
 
 
 __all__ = [
@@ -15,4 +22,7 @@ __all__ = [
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
+	"MetaCdaReader",
+	"MetaInformeDiarioReader",
+	"MetaLaminaReader",
 ]

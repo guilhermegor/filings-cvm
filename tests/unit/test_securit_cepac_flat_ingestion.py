@@ -53,7 +53,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		DfinCraReader,
 		DFIN_CRA,
-		"filings_cvm.ingestion.securit.doc.dfin_cra",
+		"filings_cvm.ingestion.securit.doc.dfin_cra.dfin_cra",
 		"https://dados.cvm.gov.br/dados/SECURIT/DOC/DFIN_CRA/DADOS/dfin_cra_2025.csv",
 		"dfin_cra_2025.csv",
 		"CNPJ_Emissora",
@@ -63,7 +63,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		DfinCriReader,
 		DFIN_CRI,
-		"filings_cvm.ingestion.securit.doc.dfin_cri",
+		"filings_cvm.ingestion.securit.doc.dfin_cri.dfin_cri",
 		"https://dados.cvm.gov.br/dados/SECURIT/DOC/DFIN_CRI/DADOS/dfin_cri_2025.csv",
 		"dfin_cri_2025.csv",
 		"CNPJ_Emissora",
@@ -73,7 +73,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		CadastroEmissorCepacReader,
 		CAD_EMISSOR_CEPAC,
-		"filings_cvm.ingestion.emissor_cepac.cad.cadastro",
+		"filings_cvm.ingestion.emissor_cepac.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/EMISSOR_CEPAC/CAD/DADOS/cad_emissor_cepac.csv",
 		"cad_emissor_cepac.csv",
 		"CNPJ",

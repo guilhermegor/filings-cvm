@@ -1,0 +1,186 @@
+-----------------------
+Campo: Data_Referencia
+-----------------------
+   Descrição : Data de referência do documento
+   Domínio   : AAAA-MM-DD
+   Tipo Dados: date
+   Tamanho   : 10
+
+-----------------------
+Campo: Versao
+-----------------------
+   Descrição : Versão do documento
+   Domínio   : Numérico
+   Tipo Dados: tinyint
+   Precisão  : 3
+   Scale     : 0
+
+-----------------------
+Campo: Variacao_Liquida_Caixa
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Subordinada_Junior_Amortizacao_P
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Subordinada_Mezanino_Juros
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Despesas
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Aquisicao_Novos_Direitos_Creditorios
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Senior
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Aquisicao_Caixa
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Recebimentos_Alienacao_Caixa
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Outros_Pagamentos
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Senior_Juros
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Subordinada_Junior_Juros
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Subordinada_Mezanino
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Outros_Recebimentos
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: CNPJ_Emissora
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: varchar
+   Tamanho   : 18
+
+-----------------------
+Campo: Codigo_Identificacao_Certificado
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: varchar
+   Tamanho   : 255
+
+-----------------------
+Campo: Pagamentos_Classe_Subordinada_Junior
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Recebimentos_Direitos_Creditorios
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Senior_Amortizacao_Principal
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+
+-----------------------
+Campo: Pagamentos_Classe_Subordinada_Mezanino_Amortizacao
+-----------------------
+   Descrição : 
+   Domínio   : 
+   Tipo Dados: numeric
+   Precisão  : 38
+   Scale     : 2
+

@@ -60,7 +60,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_text: str) -> list[str]
 		path_dest.write_bytes(str_text.encode("ISO-8859-1"))
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.fii.doc.dfin.download_file", _fake_download)
+	monkeypatch.setattr("filings_cvm.ingestion.fii.doc.dfin.dfin.download_file", _fake_download)
 	return list_urls
 
 

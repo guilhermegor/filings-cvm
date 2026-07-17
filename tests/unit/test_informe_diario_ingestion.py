@@ -54,7 +54,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.informe_diario.download_file", _fake_download
+		"filings_cvm.ingestion.fi.doc.informe_diario.informe_diario.download_file", _fake_download
 	)
 
 
@@ -80,7 +80,8 @@ def test_read_forwards_retry_policy_to_download(monkeypatch: pytest.MonkeyPatch)
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.informe_diario.download_file", _capturing_download
+		"filings_cvm.ingestion.fi.doc.informe_diario.informe_diario.download_file",
+		_capturing_download,
 	)
 	cls_policy = RetryPolicy(int_max_attempts=7, str_strategy="linear")
 

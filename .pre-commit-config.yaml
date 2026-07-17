@@ -17,7 +17,13 @@ repos:
       - id: trailing-whitespace
         args:
           - --markdown-linebreak-ext=md
+        # Fixtures under tests/fixtures/ are VERBATIM external bytes (CVM META/header
+        # captures — the non-tautological oracle the contracts are pinned to). Stripping
+        # their trailing whitespace or CRLF would make them "the artifact as our hooks
+        # re-touched it", not the artifact. Never normalise a captured fixture.
+        exclude: ^tests/fixtures/
       - id: end-of-file-fixer
+        exclude: ^tests/fixtures/
       - id: check-xml
       - id: check-yaml
         args:

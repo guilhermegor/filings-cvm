@@ -1,8 +1,8 @@
 """CVM open-data **document-dump** readers for FIDC (`FIDC/DOC/*`).
 
 Today the monthly Informe Mensal FIDC (`INF_MENSAL`), nested in
-:mod:`filings_cvm.ingestion.fidc.doc.inf_mensal` (17 table members). Re-exported from
-`filings_cvm.ingestion`.
+:mod:`filings_cvm.ingestion.fidc.doc.inf_mensal` (17 table members), plus its META reader.
+Re-exported from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.fidc.doc.inf_mensal import (
@@ -23,6 +23,7 @@ from filings_cvm.ingestion.fidc.doc.inf_mensal import (
 	InfMensalFidcTabX7Reader,
 	InfMensalFidcTabX11Reader,
 	InfMensalFidcTabXReader,
+	MetaInfMensalFidcReader,
 )
 
 
@@ -44,4 +45,5 @@ __all__ = [
 	"InfMensalFidcTabX6Reader",
 	"InfMensalFidcTabX7Reader",
 	"InfMensalFidcTabXReader",
+	"MetaInfMensalFidcReader",
 ]

@@ -4,8 +4,8 @@ One reader per section of the monthly report of the **CRA** (*Certificado de Rec
 Agronegócio*) operations (geral, ativo/passivo, classe, direitos creditórios, desembolso, fluxo de
 caixa, derivativos, cedente/devedor), over a shared private base (`_base_inf_mensal_cra_reader`).
 ⚠️ The dump is **yearly-partitioned** despite the monthly report, and — despite sharing the OTS
-section names — **none of the 8 column lists matches OTS's**. Re-exported from
-`filings_cvm.ingestion`.
+section names — **none of the 8 column lists matches OTS's**. Plus its META reader. Re-exported
+from `filings_cvm.ingestion`.
 """
 
 from filings_cvm.ingestion.securit.doc.inf_mensal_cra.inf_mensal_cra_ativo_passivo import (
@@ -32,6 +32,7 @@ from filings_cvm.ingestion.securit.doc.inf_mensal_cra.inf_mensal_cra_fluxo_caixa
 from filings_cvm.ingestion.securit.doc.inf_mensal_cra.inf_mensal_cra_geral import (
 	InfMensalCraGeralReader,
 )
+from filings_cvm.ingestion.securit.doc.inf_mensal_cra.meta import MetaInfMensalCraReader
 
 
 __all__ = [
@@ -43,4 +44,5 @@ __all__ = [
 	"InfMensalCraDireitosCreditoriosReader",
 	"InfMensalCraFluxoCaixaReader",
 	"InfMensalCraGeralReader",
+	"MetaInfMensalCraReader",
 ]
