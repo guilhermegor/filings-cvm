@@ -130,6 +130,15 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-backlog-ledger
+        name: every non-trivial (src/ci) branch keeps a work ledger
+        entry: bash bin/poetry_exec.sh run python bin/check_backlog_ledger.py
+        language: system
+        # Branch-state check (diff vs merge-base), not a per-file check: run it on every commit and
+        # let the script no-op when the branch touches no src/ci path. pass_filenames stays off.
+        always_run: true
+        pass_filenames: false
+
       - id: mypy
         name: mypy (static type check)
         # Run from src/ so it is the single package base (bare config.x/utils.x imports
