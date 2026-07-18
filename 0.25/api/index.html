@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.25/api/">
       
       
-        <link rel="prev" href="../ingestion/meta/">
+        <link rel="prev" href="../ingestion/contract_drift/">
       
       
         <link rel="next" href="../faq/">
@@ -1005,6 +1005,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ingestion/inf_mensal_cri/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal CRI (Securitização)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ingestion/meta/" class="md-nav__link">
         
   
@@ -1013,6 +1041,34 @@
     
   
     META (metadados da CVM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/contract_drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deriva de contrato (job semanal)
   
 
     
@@ -1887,15 +1943,54 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#metareader-22-readers" class="md-nav__link">
+  <a href="#infmensalcrireader-11-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Meta*Reader (22 readers)
+        InfMensalCri*Reader (11 readers)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Meta*Reader (22 readers)">
+    <nav class="md-nav" aria-label="InfMensalCri*Reader (11 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalcrigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalCriGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 10)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metareader-23-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Meta*Reader (23 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta*Reader (23 readers)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1910,7 +2005,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#readint_timeout_s60-pddataframe_14" class="md-nav__link">
+  <a href="#readint_timeout_s60-pddataframe_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -2905,15 +3000,54 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#metareader-22-readers" class="md-nav__link">
+  <a href="#infmensalcrireader-11-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Meta*Reader (22 readers)
+        InfMensalCri*Reader (11 readers)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Meta*Reader (22 readers)">
+    <nav class="md-nav" aria-label="InfMensalCri*Reader (11 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infmensalcrigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InfMensalCriGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None) (idem para os outros 10)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metareader-23-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Meta*Reader (23 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta*Reader (23 readers)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2928,7 +3062,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#readint_timeout_s60-pddataframe_14" class="md-nav__link">
+  <a href="#readint_timeout_s60-pddataframe_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -4133,7 +4267,63 @@ Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</co
 </span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1"># 56 colunas — inclui os baldes agro (produção, comercialização, beneficiamento, industrialização).</span>
 </span></code></pre></div>
 <hr />
-<h3 id="metareader-22-readers"><code>Meta*Reader</code> (22 readers)<a class="headerlink" href="#metareader-22-readers" title="Permanent link">&para;</a></h3>
+<h3 id="infmensalcrireader-11-readers"><code>InfMensalCri*Reader</code> (11 readers)<a class="headerlink" href="#infmensalcrireader-11-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.InfMensalCri{Geral,AtivoPassivo,Classe,Creditos,Carteira,CarteiraModificacao,Desembolso,FluxoCaixa,Derivativos,CedenteDevedor,Responsavel}Reader</code></p>
+<p>As 11 seções do Informe Mensal das operações de <strong>CRI</strong> (<em>Certificado de Recebíveis Imobiliários</em>,
+<code>inf_mensal_cri_AAAA.zip</code>). Página completa:
+<a href="../ingestion/inf_mensal_cri/">Informe Mensal CRI</a>. Todos partilham a base privada
+<code>_base_inf_mensal_cri_reader</code> e o prefixo-chave <code>CNPJ_Emissora</code>,
+<code>Codigo_Identificacao_Certificado</code>, <code>Data_Referencia</code>, <code>Versao</code>. ⚠️ Particionado por <strong>ano</strong> apesar
+de mensal (o <code>date_ref</code> seleciona o ano). <strong>Fecha o portal root <code>securit/</code> (4/4).</strong></p>
+<p>⚠️ <strong>Compartilha 7 nomes de seção com CRA/OTS mas o CRI é imobiliário</strong>: não tem
+<code>direitos_creditorios</code> (a seção de recebíveis é <code>creditos</code>, 51 colunas) e acrescenta <code>carteira</code>,
+<code>carteira_modificacao</code>, <code>creditos</code> e <code>responsavel</code>. Cada contract é <strong>gerado do header</strong> e <strong>pinado</strong>
+a um fixture verbatim. <code>cedente_devedor.CNPJ</code> pode guardar CPF (não validado como CNPJ);
+<code>Indice_Subordinacao_Data_Base</code> e <code>Data_LTV</code> (varchar no META) não são datas;
+<code>carteira_modificacao</code>/<code>responsavel</code> são header-only (sem coluna de CNPJ validada).</p>
+<h4 id="infmensalcrigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-10"><code>InfMensalCriGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)</code> (idem para os outros 10)<a class="headerlink" href="#infmensalcrigeralreaderdate_refnone-path_rawnone-retry_policynone-cls_loggernone-idem-para-os-outros-10" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date_ref</code></td>
+<td><code>datetime.date \| None</code></td>
+<td>Qualquer dia do <strong>ano</strong> de referência — só o ano é lido. Padrão: hoje.</td>
+</tr>
+<tr>
+<td><code>path_raw</code></td>
+<td><code>pathlib.Path \| None</code></td>
+<td>Diretório onde <strong>persistir</strong> o ZIP bruto e os 11 CSVs (camada <em>bronze</em>).</td>
+</tr>
+<tr>
+<td><code>retry_policy</code></td>
+<td><code>RetryPolicy \| None</code></td>
+<td>Agenda de retry/backoff. Se <code>None</code>, usa o <code>_RETRY_POLICY</code> do reader.</td>
+</tr>
+<tr>
+<td><code>cls_logger</code></td>
+<td><code>LogEmitter \| None</code></td>
+<td>Emissor de log injetável.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="readint_timeout_s60-pddataframe_14"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_14" title="Permanent link">&para;</a></h4>
+<p>Devolve as linhas do ano para a seção. Datas viram <code>date</code> (por membro); o restante fica texto exato.
+Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code> (membro ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalCriCreditosReader</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">InfMensalCriCreditosReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>   <span class="c1"># o ANO de 2025</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="c1"># 51 colunas — a carteira de recebíveis imobiliários (incorporação, aluguéis, aquisição, …).</span>
+</span></code></pre></div>
+<hr />
+<h3 id="metareader-23-readers"><code>Meta*Reader</code> (23 readers)<a class="headerlink" href="#metareader-23-readers" title="Permanent link">&para;</a></h3>
 <p>Os <strong>META</strong> — a spec que a própria CVM publica para cada dataset (<code>.../&lt;DATASET&gt;/META/</code>). Um reader
 por dataset; página completa em <a href="../ingestion/meta/">META (metadados da CVM)</a>.</p>
 <p><code>MetaInformeDiarioReader</code> · <code>MetaCdaReader</code> · <code>MetaLaminaReader</code> · <code>MetaCadastroFiReader</code> ·
@@ -4142,19 +4332,19 @@ por dataset; página completa em <a href="../ingestion/meta/">META (metadados da
 <code>MetaInfTrimestralFipReader</code> · <code>MetaInfQuadrimestralFipReader</code> · <code>MetaInfMensalFiagroReader</code> ·
 <code>MetaBalanceteFieReader</code> · <code>MetaBalancoFieReader</code> · <code>MetaMedidasMesFieReader</code> · <code>MetaDfinCraReader</code> ·
 <code>MetaDfinCriReader</code> · <code>MetaInfMensalOtsReader</code> · <code>MetaInfMensalCraReader</code> ·
-<code>MetaCadEmissorCepacReader</code></p>
+<code>MetaInfMensalCriReader</code> · <code>MetaCadEmissorCepacReader</code></p>
 <h4 id="__init__path_rawnone-retry_policynone-cls_loggernone"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone" title="Permanent link">&para;</a></h4>
 <p><strong>Sem <code>date_ref</code></strong> — o META fica numa URL fixa que a CVM sobrescreve no lugar (o precedente do
 <code>CadastroFiReader</code>), então um <code>path_raw</code> gravado é o <strong>único</strong> registro do que a spec dizia naquele
 dia.</p>
-<h4 id="readint_timeout_s60-pddataframe_14"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_14" title="Permanent link">&para;</a></h4>
+<h4 id="readint_timeout_s60-pddataframe_15"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_15" title="Permanent link">&para;</a></h4>
 <p>Uma linha por campo declarado, colunas <code>section</code>, <code>field</code>, <code>description</code>, <code>domain</code>, <code>data_type</code>,
 <code>size</code>, <code>precision</code>, <code>scale</code> (+ as seis de proveniência). Um META <code>.zip</code> multi-membro volta como
 <strong>um único frame longo</strong>, com o membro em <code>section</code>. Levanta <code>OSError</code> (download).</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaInfMensalCraReader</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">df_meta</span> <span class="o">=</span> <span class="n">MetaInfMensalCraReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaInfMensalCraReader</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="n">df_meta</span> <span class="o">=</span> <span class="n">MetaInfMensalCraReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="c1"># 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.</span>
 </span></code></pre></div>
 <blockquote>
 <p>⚠️ <strong>A CVM trunca o nome do campo em 50 caracteres</strong> (o header real vai até 60) e a <strong>ordem do

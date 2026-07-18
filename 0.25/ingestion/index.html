@@ -1109,6 +1109,34 @@
   
   
     <li class="md-nav__item">
+      <a href="inf_mensal_cri/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal CRI (Securitização)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="meta/" class="md-nav__link">
         
   
@@ -1117,6 +1145,34 @@
     
   
     META (metadados da CVM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="contract_drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deriva de contrato (job semanal)
   
 
     
@@ -1432,6 +1488,16 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
   publicado</strong> e <strong>pinado</strong> a um fixture verbatim. <code>cedente_devedor.CNPJ</code> guarda CPF (dado pessoal,
   não validado como CNPJ); <code>Indice_Subordinacao_Data_Base</code> não é data. Terceira fatia da Wave 2 do
   #41.</p>
+</li>
+<li>
+<p><strong><a href="inf_mensal_cri/">Informe Mensal CRI (Securitização)</a></strong> — 11 readers <code>InfMensalCri*Reader</code>: o
+  informe mensal das operações de <strong>CRI</strong> (recebíveis imobiliários). ⚠️ Particionado por <strong>ano</strong>
+  apesar de mensal. Compartilha 7 nomes de seção com CRA/OTS mas <strong>não tem <code>direitos_creditorios</code></strong>
+  (a seção de recebíveis é <code>creditos</code>, 51 colunas) e acrescenta 4 membros (<code>carteira</code>,
+  <code>carteira_modificacao</code>, <code>creditos</code>, <code>responsavel</code>) — contracts <strong>gerados do header</strong> e <strong>pinados</strong>
+  a fixtures verbatim. <code>cedente_devedor.CNPJ</code> pode guardar CPF; <code>Indice_Subordinacao_Data_Base</code> e
+  <code>Data_LTV</code> (varchar no META) não são datas; <code>carteira_modificacao</code>/<code>responsavel</code> são header-only.
+  <strong>Quarta e última fatia da Wave 2 — fecha o portal root <code>securit/</code> (4/4).</strong></p>
 </li>
 </ul>
 <p>Cada padrão de leitura ganha a sua própria página, com <strong>Descrição</strong> e <strong>Exemplos</strong>, no mesmo
