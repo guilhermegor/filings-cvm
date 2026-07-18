@@ -1,0 +1,61 @@
+# Weekly, NON-BLOCKING contract-drift detector — issue #98.
+#
+# Fetches both oracles CVM publishes (each dataset's META and the real artifact header), compares
+# them to every `FileContract`, and — on any divergence — opens or updates ONE tracking issue. It
+# is deliberately kept OUT of the PR gate and the release path:
+#   * `tests/conftest.py` blocks the network on purpose, so this can never run at test time; and
+#   * a CVM outage and a real drift are indistinguishable in a red check, so a red check must
+#     never gate a PR (issue #86 burned us once: a cosmetic external fetch skipped a publish).
+# Failure here is an OPENED ISSUE, never a failed required check. `check_contract_drift.py` always
+# exits 0 on detected drift; only an unhandled crash reddens the run, and a scheduled run reddening
+# blocks nothing.
+#
+# Why a SCHEDULED job at all (the repo's CI is otherwise event-driven — see .github/CLAUDE.md):
+# nothing at PR time can see CVM changing a data contract AFTER we shipped it. The pinned-header
+# fixtures (#96) prove a contract matched what CVM published the day it was written; only a job
+# that goes back and looks again can catch a change made since. This is that job. The `schedule`
+# trigger GitHub auto-disables after ~60 days without a push to the repo — acceptable here (the
+# repo is active); `workflow_dispatch` re-runs it on demand meanwhile.
+
+name: Contract Drift
+
+on:
+  schedule:
+    - cron: "23 5 * * 1" # 05:23 UTC every Monday (UTC always; odd minute to dodge load spikes)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read # read the package source
+  issues: write # open / update the single tracking issue
+
+concurrency:
+  group: contract-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    name: Detect contract drift
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set Up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+          version: 2.2.1
+
+      - name: Install the package
+        run: poetry install --no-interaction
+
+      - name: Run the drift sweep
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: poetry run python bin/check_contract_drift.py

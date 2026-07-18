@@ -30,6 +30,7 @@ nav:
       - Informe Mensal OTS (Securitização): ingestion/inf_mensal_ots.md
       - Informe Mensal CRA (Securitização): ingestion/inf_mensal_cra.md
       - META (metadados da CVM): ingestion/meta.md
+      - Deriva de contrato (job semanal): ingestion/contract_drift.md
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md
