@@ -725,7 +725,49 @@ df_ = InfMensalCraDireitosCreditoriosReader(date_ref=date(2025, 6, 1)).read()   
 
 ---
 
-### `Meta*Reader` (22 readers)
+### `InfMensalCri*Reader` (11 readers)
+
+`filings_cvm.ingestion.InfMensalCri{Geral,AtivoPassivo,Classe,Creditos,Carteira,CarteiraModificacao,Desembolso,FluxoCaixa,Derivativos,CedenteDevedor,Responsavel}Reader`
+
+As 11 seções do Informe Mensal das operações de **CRI** (*Certificado de Recebíveis Imobiliários*,
+`inf_mensal_cri_AAAA.zip`). Página completa:
+[Informe Mensal CRI](ingestion/inf_mensal_cri.md). Todos partilham a base privada
+`_base_inf_mensal_cri_reader` e o prefixo-chave `CNPJ_Emissora`,
+`Codigo_Identificacao_Certificado`, `Data_Referencia`, `Versao`. ⚠️ Particionado por **ano** apesar
+de mensal (o `date_ref` seleciona o ano). **Fecha o portal root `securit/` (4/4).**
+
+⚠️ **Compartilha 7 nomes de seção com CRA/OTS mas o CRI é imobiliário**: não tem
+`direitos_creditorios` (a seção de recebíveis é `creditos`, 51 colunas) e acrescenta `carteira`,
+`carteira_modificacao`, `creditos` e `responsavel`. Cada contract é **gerado do header** e **pinado**
+a um fixture verbatim. `cedente_devedor.CNPJ` pode guardar CPF (não validado como CNPJ);
+`Indice_Subordinacao_Data_Base` e `Data_LTV` (varchar no META) não são datas;
+`carteira_modificacao`/`responsavel` são header-only (sem coluna de CNPJ validada).
+
+#### `InfMensalCriGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 10)
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência — só o ano é lido. Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP bruto e os 11 CSVs (camada *bronze*). |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff. Se `None`, usa o `_RETRY_POLICY` do reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Devolve as linhas do ano para a seção. Datas viram `date` (por membro); o restante fica texto exato.
+Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from datetime import date
+from filings_cvm import InfMensalCriCreditosReader
+
+df_ = InfMensalCriCreditosReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
+# 51 colunas — a carteira de recebíveis imobiliários (incorporação, aluguéis, aquisição, …).
+```
+
+---
+
+### `Meta*Reader` (23 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -736,7 +778,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfTrimestralFipReader` · `MetaInfQuadrimestralFipReader` · `MetaInfMensalFiagroReader` ·
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
-`MetaCadEmissorCepacReader`
+`MetaInfMensalCriReader` · `MetaCadEmissorCepacReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

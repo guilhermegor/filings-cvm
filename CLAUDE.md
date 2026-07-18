@@ -163,8 +163,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   `fie/`. **Com este, o portal root `fie/` está completo (3/3)** e a Wave 1 do #41 encerra
   (FIDC→FII→FIP→FIAGRO→FIE)
 
-**Securitização (SECURIT)** — portal root `securit/`; **open-data only** (a CVM não publica padrão
-XML de envio). Não há `SECURIT/CAD`. Wave 2 do #41 (em andamento). Sob `SECURIT/DOC/`:
+**Securitização (SECURIT)** — portal root `securit/` ✅ **COMPLETO (4/4 datasets)**; **open-data
+only** (a CVM não publica padrão XML de envio). Não há `SECURIT/CAD`. Encerra a Wave 2 do #41. Sob
+`SECURIT/DOC/`:
 - DFIN CRA — ✅ **ingestion** `dfin_cra_AAAA.csv` (CSV solto, anual) — `ingestion/securit/doc/dfin_cra.py`
   (`DfinCraReader`); contract `_internal/config/contracts/dfin_cra.py`. Índice das demonstrações
   financeiras dos CRA (uma linha por documento); `Link_Download` devolvido como texto, **não seguido**.
@@ -195,9 +196,21 @@ XML de envio). Não há `SECURIT/CAD`. Wave 2 do #41 (em andamento). Sob `SECURI
   coluna de CNPJ** (guarda CPF, `'0'`, `','`, valores malformados e dois ids na mesma célula),
   `Indice_Subordinacao_Data_Base` NÃO é data, e as 3 colunas `CNPJ_*` 100% vazias de `geral` ficam
   fora de `tuple_cnpj_cols`
-- ⬜ **ingestion** `INF_MENSAL_CRI` (11 membros) — dump mensal multi-membro (zip particionado por
-  ano); um reader por membro, **PR 4/4 da Wave 2** (fecha o root `securit/`). Construir **META-first**
-  (#97/#98) — é o maior alvo de "copiar do irmão" que resta
+- INF_MENSAL_CRI — ✅ **ingestion** `inf_mensal_cri_AAAA.zip` (**11 membros**: geral, ativo_passivo,
+  classe, creditos, carteira, carteira_modificacao, desembolso, fluxo_caixa, derivativos,
+  cedente_devedor, responsavel) — `ingestion/securit/doc/inf_mensal_cri/*` (`InfMensalCri*Reader`,
+  base privada `_base_inf_mensal_cri_reader.py`); contracts `_internal/config/contracts/inf_mensal_cri.py`.
+  Operações de **CRI** (recebíveis imobiliários). **Particionado por ANO apesar de mensal**.
+  ⚠️ **Compartilha 7 nomes de seção com CRA/OTS mas NÃO é cópia** — não tem `direitos_creditorios`
+  (a seção de recebíveis é `creditos`, 51 cols) e acrescenta 4 membros (`carteira`,
+  `carteira_modificacao`, `creditos`, `responsavel`); 5 das 7 seções compartilhadas diferem do CRA e
+  2 (`desembolso`, `cedente_devedor`) são de fato **idênticas** (estruturas genéricas — a coincidência
+  é da fonte, provada pelo header pinado). Contracts **gerados do header** e **pinados** a
+  `tests/fixtures/inf_mensal_cri/*_header.csv`. Armadilhas honradas: `cedente_devedor.CNPJ` pode ser
+  CPF (fora de `tuple_cnpj_cols`), `Indice_Subordinacao_Data_Base` e `Data_LTV` (varchar no META) NÃO
+  são datas, `carteira_modificacao`/`responsavel` são **header-only** em 2025 → `tuple_cnpj_cols`
+  vazio (senão um arquivo legitimamente vazio falharia). **Com este, o root `securit/` está completo
+  (4/4) e a Wave 2 do #41 encerra**
 
 **Emissor de CEPAC (EMISSOR_CEPAC)** — portal root `emissor_cepac/`; **open-data only**. Publica só
 um cadastro:
@@ -207,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **22 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **23 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (22 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (23 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (12) ou `.zip` multi-membro (10); volta como **um frame
@@ -225,7 +238,9 @@ longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescre
      (`meta_cda_fi_txt.zip`, infixo `_txt`) e **`meta_cad_fi.txt` (41 campos = `cad_fi`) vs
      `meta_cad_fi.zip` (19 membros = `cad_fi_hist`) são datasets DIFERENTES** com o mesmo radical —
      uma regra "derive o nome"/"prefira o zip" entregaria o metadado errado com os testes verdes.
-  `SECURIT/DOC/INF_MENSAL_CRI` fica de fora (22, não 23) — o seu `meta.py` chega com os readers do CRI
+  Inclui `MetaInfMensalCriReader` (`meta_inf_mensal_cri.zip`, 11 membros), que fecha o root
+  `securit/` junto com os readers do CRI. `Data_LTV` do CRI é declarado **`varchar`** no META
+  (confirmou o `str`), e `Indice_Subordinacao_Data_Base` é **`numeric`** — o META como oráculo de tipo
 
 **Lâmina de Fundos**
 - Lâmina — ✅ **ingestion** carteira FIF open-data CSV (`lamina_fi_carteira_*`, o membro de alocação
@@ -276,8 +291,8 @@ src/filings_cvm/
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
         fie/               #   FIE/ — COMPLETO: doc/{balancete,balanco} (ZIP) + medidas (flat CSV); no CAD
-        securit/           #   SECURIT/ — doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8) +
-                           #     inf_mensal_cra/ (8, contracts pinned to real-header fixtures); CRI zip pending
+        securit/           #   SECURIT/ — COMPLETO: doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8)
+                           #     + inf_mensal_cra/ (8) + inf_mensal_cri/ (11); contracts pinned to real headers
         emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,

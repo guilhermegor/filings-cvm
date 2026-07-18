@@ -83,6 +83,15 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   não validado como CNPJ); `Indice_Subordinacao_Data_Base` não é data. Terceira fatia da Wave 2 do
   #41.
 
+- **[Informe Mensal CRI (Securitização)](inf_mensal_cri.md)** — 11 readers `InfMensalCri*Reader`: o
+  informe mensal das operações de **CRI** (recebíveis imobiliários). ⚠️ Particionado por **ano**
+  apesar de mensal. Compartilha 7 nomes de seção com CRA/OTS mas **não tem `direitos_creditorios`**
+  (a seção de recebíveis é `creditos`, 51 colunas) e acrescenta 4 membros (`carteira`,
+  `carteira_modificacao`, `creditos`, `responsavel`) — contracts **gerados do header** e **pinados**
+  a fixtures verbatim. `cedente_devedor.CNPJ` pode guardar CPF; `Indice_Subordinacao_Data_Base` e
+  `Data_LTV` (varchar no META) não são datas; `carteira_modificacao`/`responsavel` são header-only.
+  **Quarta e última fatia da Wave 2 — fecha o portal root `securit/` (4/4).**
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
