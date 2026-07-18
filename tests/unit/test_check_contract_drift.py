@@ -10,6 +10,7 @@ import inspect
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
@@ -38,11 +39,13 @@ def _fake_reader(
 	frame: pd.DataFrame | None = None,
 	error: Exception | None = None,
 	dated: bool = False,
+	name: str = "_Fake",
 ) -> type:
 	"""Build a stand-in reader class: no network, returns a preset frame or raises a preset error.
 
 	``dated`` gives the constructor a ``date_ref`` parameter, so ``check_real_header`` treats it as
-	a period-partitioned reader and probes reference dates.
+	a period-partitioned reader and probes reference dates. ``name`` sets the class name, which the
+	partial-dataset lookups key on.
 	"""
 
 	def read(self: object, int_timeout_s: int = 60) -> pd.DataFrame:
@@ -61,7 +64,7 @@ def _fake_reader(
 		def __init__(self: object) -> None:
 			pass
 
-	return type("_Fake", (), {"_CONTRACT": contract, "__init__": __init__, "read": read})
+	return type(name, (), {"_CONTRACT": contract, "__init__": __init__, "read": read})
 
 
 # ---- real_header_drift: contract columns vs the real artifact header (order preserved) --------
@@ -123,6 +126,35 @@ def test_meta_names_flag_a_field_no_contract_column_covers() -> None:
 def test_meta_names_flag_a_contract_column_absent_from_meta() -> None:
 	"""A contract column whose truncated name is in no META field is drift."""
 	list_problems = ccd.meta_name_drift("X", ("A", "B"), frozenset({"A"}))
+
+	assert len(list_problems) == 1
+	assert "'B'" in list_problems[0]
+
+
+# ---- partial-coverage suppression of the extra-column direction -------------------------------
+
+
+def test_real_header_extra_column_suppressed_when_report_extra_false() -> None:
+	"""A partial contract (subset of the header) does not flag the columns it doesn't require."""
+	assert ccd.real_header_drift("X", ("A", "B"), ("A", "B", "C"), bool_report_extra=False) == []
+
+
+def test_real_header_missing_required_still_flagged_when_report_extra_false() -> None:
+	"""Even for a partial contract, a REQUIRED column gone from the header is still drift."""
+	list_problems = ccd.real_header_drift("X", ("A", "B"), ("A",), bool_report_extra=False)
+
+	assert len(list_problems) == 1
+	assert "'B'" in list_problems[0]
+
+
+def test_meta_extra_field_suppressed_when_report_extra_false() -> None:
+	"""A partial dataset does not flag META fields it deliberately doesn't cover."""
+	assert ccd.meta_name_drift("X", ("A",), frozenset({"A", "B"}), bool_report_extra=False) == []
+
+
+def test_meta_missing_required_still_flagged_when_report_extra_false() -> None:
+	"""Even for a partial dataset, a contract column absent from META is still reported."""
+	list_problems = ccd.meta_name_drift("X", ("A", "B"), frozenset({"A"}), bool_report_extra=False)
 
 	assert len(list_problems) == 1
 	assert "'B'" in list_problems[0]
@@ -215,6 +247,45 @@ def test_check_meta_tolerates_unavailable_meta() -> None:
 	assert ccd.check_meta(cls_meta, (cls_member,)) == []
 
 
+def test_check_meta_suppresses_extra_for_a_partial_dataset(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A partial dataset does not report a META field it deliberately doesn't cover."""
+	df_meta = pd.DataFrame({"section": ["s", "s"], "field": ["A", "B"]})  # META has extra B
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._PARTIAL_DATASETS, "MetaFooReader", "test partial")
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	assert ccd.check_meta(cls_meta, (cls_member,)) == []
+
+
+def test_check_meta_partial_still_flags_a_missing_required_column(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""Even a partial dataset reports a contract column absent from META (load-bearing)."""
+	df_meta = pd.DataFrame({"section": ["s"], "field": ["A"]})  # contract is (A, B); META lacks B
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._PARTIAL_DATASETS, "MetaFooReader", "test partial")
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	list_problems = ccd.check_meta(cls_meta, (cls_member,))
+
+	assert len(list_problems) == 1
+	assert "'B'" in list_problems[0]
+
+
+def test_check_real_header_suppresses_extra_for_a_partial_dataset(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A partial dataset's reader does not flag a header column its subset contract omits."""
+	df_read = pd.DataFrame(columns=["A", "B", "C", *FileContract.PROVENANCE_COLUMNS])  # extra C
+	cls_reader = _fake_reader(_CONTRACT, frame=df_read, name="FooReader")
+	monkeypatch.setitem(ccd._READER_TO_META, "FooReader", "MetaFooReader")
+	monkeypatch.setitem(ccd._PARTIAL_DATASETS, "MetaFooReader", "test partial")
+
+	assert ccd.check_real_header(cls_reader) == []
+
+
 # ---- issue upsert logic (no network) ----------------------------------------------------------
 
 
@@ -276,3 +347,19 @@ def test_contract_of_resolves_for_every_real_reader() -> None:
 		if issubclass(cls, BaseMetaReader):
 			continue
 		assert isinstance(ccd.contract_of(cls), FileContract), cls.__name__
+
+
+def test_every_partial_dataset_is_a_real_meta_reader() -> None:
+	"""Each ``_PARTIAL_DATASETS`` key is a META reader in the registry (a typo can't hide here)."""
+	assert set(ccd._PARTIAL_DATASETS) <= set(ccd._META_MEMBERS)
+
+
+def test_reader_to_meta_is_the_exact_inverse_of_the_registry() -> None:
+	"""``_READER_TO_META`` maps every member reader to its dataset — derived, never restated."""
+	dict_expected = {
+		str_reader: str_meta
+		for str_meta, tuple_readers in ccd._META_MEMBERS.items()
+		for str_reader in tuple_readers
+	}
+
+	assert dict_expected == ccd._READER_TO_META

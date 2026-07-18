@@ -241,6 +241,30 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 }
 
+# Datasets whose columns/members we cover **partially, on purpose** — so a source column or META
+# field the contract does not list is *expected*, not drift. The extra-column direction of both
+# oracles is suppressed for these (a **required** column gone from the source is still reported).
+# Keyed by META reader name (the dataset's identity). ``tuple_required`` means "must contain at
+# least these", not "exactly these": a subset contract requires only the key columns, and a
+# dataset's META describes every member — including ones we have not implemented yet. This set is
+# grounded in the first live run (issue #115): every dataset here produced only expected
+# extra-column noise, never a required-column loss.
+_PARTIAL_DATASETS: dict[str, str] = {
+	# CdaReader requires only the four key columns of a ~60-column file — a deliberate subset.
+	"MetaCdaReader": "subset contract — requires only the key columns of a ~60-column file",
+	# The Lamina META describes the whole dataset, including the rentab members not implemented
+	# yet, whose fields therefore show as uncovered until those readers land.
+	"MetaLaminaReader": "partial member coverage — rentab_ano/rentab_mes not implemented yet",
+}
+
+# Reverse map: reader class name -> its dataset's META reader name. Lets the per-member header
+# check learn whether its dataset is partial. Derived from _META_MEMBERS so the two cannot drift.
+_READER_TO_META: dict[str, str] = {
+	str_reader: str_meta
+	for str_meta, tuple_readers in _META_MEMBERS.items()
+	for str_reader in tuple_readers
+}
+
 
 # ---------------------------------------------------------------------------------------------
 # Pure oracles (no network) — the two comparisons, unit-tested exhaustively.
@@ -248,7 +272,10 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 
 
 def real_header_drift(
-	str_label: str, tuple_contract: tuple[str, ...], tuple_real: tuple[str, ...]
+	str_label: str,
+	tuple_contract: tuple[str, ...],
+	tuple_real: tuple[str, ...],
+	bool_report_extra: bool = True,
 ) -> list[str]:
 	"""Compare a contract's columns against the real artifact header.
 
@@ -263,11 +290,18 @@ def real_header_drift(
 		The contract's ``tuple_required`` — the columns (and order) we recorded.
 	tuple_real : tuple of str
 		The columns CVM's artifact actually carries now, in source order.
+	bool_report_extra : bool, optional
+		Whether to report a real-header column the contract does not list. ``True`` (default) for a
+		**full-column** contract (an extra column means CVM added one — real signal). ``False`` for
+		a **partial-coverage** dataset, whose contract deliberately lists only a subset of the
+		header (see :data:`_PARTIAL_DATASETS`), so an unlisted column is expected, not drift. A
+		**required** column gone from the header is always reported, either way.
 
 	Returns
 	-------
 	list of str
-		One message per drift found; empty when the header matches the contract exactly.
+		One message per drift found; empty when the header matches the contract (subject to
+		``bool_report_extra``).
 	"""
 	list_problems: list[str] = []
 	set_contract, set_real = set(tuple_contract), set(tuple_real)
@@ -276,11 +310,12 @@ def real_header_drift(
 			list_problems.append(
 				f"{str_label}: contract column {str_col!r} is gone from the real header"
 			)
-	for str_col in tuple_real:
-		if str_col not in set_contract:
-			list_problems.append(
-				f"{str_label}: real header carries {str_col!r}, absent from the contract"
-			)
+	if bool_report_extra:
+		for str_col in tuple_real:
+			if str_col not in set_contract:
+				list_problems.append(
+					f"{str_label}: real header carries {str_col!r}, absent from the contract"
+				)
 	if set_contract == set_real and tuple_contract != tuple_real:
 		list_problems.append(
 			f"{str_label}: column order differs between the contract and the real header"
@@ -289,7 +324,10 @@ def real_header_drift(
 
 
 def meta_name_drift(
-	str_label: str, tuple_contract: tuple[str, ...], frozenset_meta: frozenset[str]
+	str_label: str,
+	tuple_contract: tuple[str, ...],
+	frozenset_meta: frozenset[str],
+	bool_report_extra: bool = True,
 ) -> list[str]:
 	"""Compare a contract's columns against META field names, truncation-aware.
 
@@ -305,20 +343,28 @@ def meta_name_drift(
 		The dataset's contract columns (across all its members, deduplicated).
 	frozenset_meta : frozenset of str
 		The field names CVM's META declares now (already 50-char truncated, verbatim).
+	bool_report_extra : bool, optional
+		Whether to report a META field no contract column covers. ``True`` (default) for a dataset
+		we cover in full. ``False`` for a **partial-coverage** dataset (see
+		:data:`_PARTIAL_DATASETS`) — one whose contract is a deliberate subset (only the key
+		columns) or whose META describes sibling members we do not implement yet — so an uncovered
+		field is expected, not drift. A contract column absent from META is always reported.
 
 	Returns
 	-------
 	list of str
-		One message per drift found; empty when META and the contract columns reconcile.
+		One message per drift found; empty when META and the contract columns reconcile (subject to
+		``bool_report_extra``).
 	"""
 	list_problems: list[str] = []
 	set_contract_prefixes = {str_col[:_META_NAME_MAX_LEN] for str_col in tuple_contract}
-	for str_field in sorted(frozenset_meta):
-		if str_field not in set_contract_prefixes:
-			list_problems.append(
-				f"{str_label}: META declares field {str_field!r}, matched by no contract column "
-				f"(CVM added or renamed a field?)"
-			)
+	if bool_report_extra:
+		for str_field in sorted(frozenset_meta):
+			if str_field not in set_contract_prefixes:
+				list_problems.append(
+					f"{str_label}: META declares field {str_field!r}, matched by no "
+					f"contract column (CVM added or renamed a field?)"
+				)
 	for str_col in tuple_contract:
 		if str_col[:_META_NAME_MAX_LEN] not in frozenset_meta:
 			list_problems.append(
@@ -433,8 +479,12 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 			return [f"{cls_contract.str_name}: read failed its contract — {cls_exc}"]
 		except OSError:
 			continue  # period not published (or transient) — try an older one
+		bool_report_extra = _READER_TO_META.get(cls_reader.__name__) not in _PARTIAL_DATASETS
 		return real_header_drift(
-			cls_contract.str_name, cls_contract.tuple_required, real_columns(df_read)
+			cls_contract.str_name,
+			cls_contract.tuple_required,
+			real_columns(df_read),
+			bool_report_extra=bool_report_extra,
 		)
 	return []  # no probed period available — not drift
 
@@ -479,7 +529,10 @@ def check_meta(
 			if str_col not in set_seen:
 				set_seen.add(str_col)
 				list_cols.append(str_col)
-	return meta_name_drift(str_label, tuple(list_cols), frozenset_fields)
+	bool_report_extra = cls_meta.__name__ not in _PARTIAL_DATASETS
+	return meta_name_drift(
+		str_label, tuple(list_cols), frozenset_fields, bool_report_extra=bool_report_extra
+	)
 
 
 def collect_drift(int_timeout_s: int = 60) -> list[str]:

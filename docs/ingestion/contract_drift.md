@@ -59,6 +59,24 @@ casam com **os dois** por prefixo), e os membros de `registro_fundo_classe` são
 (`tests/unit/test_check_contract_drift.py`) garante que a fiação continua completa: um reader novo
 não pode ser esquecido em silêncio.
 
+## Cobertura parcial — `tuple_required` é "pelo menos estas", não "exatamente estas"
+
+Um `FileContract` declara as colunas que o arquivo **precisa ter**, não necessariamente **todas** as
+que ele tem. Dois casos de cobertura deliberadamente parcial:
+
+- **Contract subset** — o `CdaReader` exige só as 4 colunas-chave (`TP_FUNDO_CLASSE`,
+  `CNPJ_FUNDO_CLASSE`, `DENOM_SOCIAL`, `DT_COMPTC`) de um arquivo de ~60; o resto passa como texto.
+- **Membros não implementados** — o META da Lâmina descreve o dataset inteiro, incluindo os membros
+  `rentab_ano`/`rentab_mes` ainda não implementados.
+
+Para esses datasets, "a fonte tem uma coluna/campo que o contract não lista" é **esperado, não
+deriva** — então a **direção de coluna-extra** de ambos os oráculos é **suprimida**. A direção que
+sustenta o job — **"uma coluna exigida sumiu da fonte"** — continua ativa para **todos**. Os
+datasets parciais moram em `_PARTIAL_DATASETS` (chaveado pelo Meta reader, com o porquê de cada um),
+e um teste estrutural garante que cada chave é um dataset real. Sem isso, o primeiro run real
+(issue #115) abriu **123 achados, ~120 falso-positivo** — a maioria por tratar contracts subset como
+se listassem o header inteiro (issue #117).
+
 ## Escopo
 
 Reporta deriva; **não conserta**. O conserto (agente propondo PR sobre contracts pinados ao header
