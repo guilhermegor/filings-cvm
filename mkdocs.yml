@@ -29,6 +29,7 @@ nav:
       - DFIN Securit (CRA/CRI) + Emissor CEPAC: ingestion/securit_cepac_flat.md
       - Informe Mensal OTS (Securitização): ingestion/inf_mensal_ots.md
       - Informe Mensal CRA (Securitização): ingestion/inf_mensal_cra.md
+      - Informe Mensal CRI (Securitização): ingestion/inf_mensal_cri.md
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
   - Referência da API: api.md
