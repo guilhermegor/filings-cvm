@@ -56,15 +56,24 @@ def _fake_reader(
 
 	if dated:
 
-		def __init__(self: object, date_ref: object = None) -> None:
-			pass
+		def __init__(self: object, date_ref: object = None, retry_policy: object = None) -> None:
+			type(self)._last_retry_policy = retry_policy
 
 	else:
 
-		def __init__(self: object) -> None:
-			pass
+		def __init__(self: object, retry_policy: object = None) -> None:
+			type(self)._last_retry_policy = retry_policy
 
-	return type(name, (), {"_CONTRACT": contract, "__init__": __init__, "read": read})
+	return type(
+		name,
+		(),
+		{
+			"_CONTRACT": contract,
+			"_last_retry_policy": None,
+			"__init__": __init__,
+			"read": read,
+		},
+	)
 
 
 # ---- real_header_drift: contract columns vs the real artifact header (order preserved) --------
@@ -245,6 +254,32 @@ def test_check_meta_tolerates_unavailable_meta() -> None:
 	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
 
 	assert ccd.check_meta(cls_meta, (cls_member,)) == []
+
+
+def test_drift_retry_policy_is_single_attempt() -> None:
+	"""The drift probe fails fast — one attempt, no patient backoff on an expected 404."""
+	assert ccd._DRIFT_RETRY_POLICY.int_max_attempts == 1
+
+
+def test_check_real_header_builds_the_reader_with_the_fast_fail_policy() -> None:
+	"""A probed reader is constructed with the drift fail-fast policy, not the patient default."""
+	df_read = pd.DataFrame(columns=["A", "B", *FileContract.PROVENANCE_COLUMNS])
+	cls_reader = _fake_reader(_CONTRACT, frame=df_read, dated=True)
+
+	ccd.check_real_header(cls_reader)
+
+	assert cls_reader._last_retry_policy is ccd._DRIFT_RETRY_POLICY
+
+
+def test_check_meta_builds_the_reader_with_the_fast_fail_policy() -> None:
+	"""The META reader is likewise constructed with the fail-fast policy."""
+	df_meta = pd.DataFrame({"section": ["s"], "field": ["A"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta)
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	ccd.check_meta(cls_meta, (cls_member,))
+
+	assert cls_meta._last_retry_policy is ccd._DRIFT_RETRY_POLICY
 
 
 def test_check_meta_suppresses_extra_for_a_partial_dataset(
