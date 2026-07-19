@@ -34,6 +34,13 @@ Nada no PR-time consegue saber que a CVM mudou desde então — só um job que v
 Cada oráculo é comparado com o `tuple_required` do contract. Header real: nome **e** ordem. META:
 conjunto de nomes, *truncation-aware*.
 
+> **Fail-fast, de propósito.** Sendo uma sondagem semanal best-effort, os readers são construídos
+> com `retry_policy` de **1 tentativa** (`_DRIFT_RETRY_POLICY`), não a política paciente de produção.
+> Sondar um período não publicado é um **404 esperado**, não um erro transitório — gastar o backoff
+> padrão (~24 s) em cada sondagem, por ~110 readers × várias datas, é o que fazia o primeiro run
+> levar ~40 min (issue #113). Uma tentativa: um 404 (ou um blip real) pula o dataset nesta semana, e
+> o run da semana seguinte pega o que era transitório.
+
 ---
 
 ## ⚠️ Não-bloqueante, de propósito

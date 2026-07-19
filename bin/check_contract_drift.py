@@ -59,6 +59,7 @@ from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLAS
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
 import filings_cvm.ingestion as ingestion
 from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
@@ -440,6 +441,13 @@ def real_columns(df_read: pd.DataFrame) -> tuple[str, ...]:
 # years (covers year-partitioned dumps, whose past year is complete).
 _PROBE_OFFSETS_DAYS = (0, 31, 62, 93, 365, 730, 1095)
 
+# This is a best-effort weekly probe, so readers are built to **fail fast** instead of using the
+# patient production retry policy. Probing an unpublished period is an EXPECTED 404, not a
+# transient error, and burning the default ~24 s of backoff on every such probe (across ~110
+# readers × several probe dates) is what made the first run take ~40 min. One attempt: a 404 (or a
+# real blip) skips the dataset this week, and next week's run catches anything that was transient.
+_DRIFT_RETRY_POLICY: RetryPolicy = RetryPolicy(int_max_attempts=1)
+
 
 def _probe_dates() -> tuple[date, ...]:
 	"""Candidate reference dates to try, newest first."""
@@ -472,7 +480,11 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 	list_dates: tuple[date | None, ...] = _probe_dates() if bool_dated else (None,)
 
 	for date_ref in list_dates:
-		cls_instance = cls_reader(date_ref=date_ref) if bool_dated else cls_reader()
+		cls_instance = (
+			cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
+			if bool_dated
+			else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
+		)
 		try:
 			df_read = cls_instance.read(int_timeout_s=int_timeout_s)
 		except ContractError as cls_exc:
@@ -517,7 +529,7 @@ def check_meta(
 	"""
 	str_label = cls_meta.__name__.removeprefix("Meta").removesuffix("Reader")
 	try:
-		df_meta = cls_meta().read(int_timeout_s=int_timeout_s)
+		df_meta = cls_meta(retry_policy=_DRIFT_RETRY_POLICY).read(int_timeout_s=int_timeout_s)
 	except OSError:
 		return []  # META unavailable (transient) — not drift
 	frozenset_fields = frozenset(df_meta["field"].astype(str))
