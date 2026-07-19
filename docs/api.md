@@ -767,7 +767,37 @@ df_ = InfMensalCriCreditosReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 
 
 ---
 
-### `Meta*Reader` (23 readers)
+### `AuditorPfReader` · `AuditorPjReader` (2 readers)
+
+`filings_cvm.ingestion.auditor`
+
+O cadastro dos **auditores independentes** (`AUDITOR/CAD`, `cad_auditor.zip`) — **snapshot** de URL
+fixa, sem `date_ref`. Inaugura o *portal root* `auditor/` e a **Wave 3** do #41. Página completa em
+[Cadastro de Auditores (AUDITOR)](ingestion/auditor.md).
+
+- `AuditorPfReader` — `cad_auditor_pf.csv`, auditores pessoa física (4 colunas; **sem CNPJ/CPF**).
+- `AuditorPjReader` — `cad_auditor_pj.csv`, firmas de auditoria (12 colunas; `CNPJ` mascarado).
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `cad_auditor.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por auditor. `DT_INI_SIT` vira `date`; o restante fica texto exato (`CEP`/`CD_CVM`
+preservam zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm import AuditorPjReader
+
+df_ = AuditorPjReader().read()
+# df_[["CD_CVM", "CNPJ", "DENOM_SOCIAL", "SIT", "UF"]]
+```
+
+---
+
+### `Meta*Reader` (24 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -778,7 +808,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfTrimestralFipReader` · `MetaInfQuadrimestralFipReader` · `MetaInfMensalFiagroReader` ·
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
-`MetaInfMensalCriReader` · `MetaCadEmissorCepacReader`
+`MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

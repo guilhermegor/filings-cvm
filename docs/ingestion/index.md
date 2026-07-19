@@ -92,6 +92,13 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `Data_LTV` (varchar no META) não são datas; `carteira_modificacao`/`responsavel` são header-only.
   **Quarta e última fatia da Wave 2 — fecha o portal root `securit/` (4/4).**
 
+- **[Cadastro de Auditores (AUDITOR)](auditor.md)** — 2 readers `AuditorPfReader` /
+  `AuditorPjReader` sobre o `cad_auditor.zip` (auditores pessoa física + firmas de auditoria).
+  **Snapshot** de URL fixa, **sem `date_ref`** (molde do `CadastroFiReader`). O membro `pf` **não tem
+  CPF** (identifica por `CD_CVM`+nome); `pj.CNPJ` chega mascarado. Contracts **gerados do header** e
+  **pinados** a fixtures verbatim. **Inaugura o portal root `auditor/` e a primeira fatia da Wave 3
+  do #41** (snapshots CAD de prestadores de serviço).
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

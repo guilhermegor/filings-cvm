@@ -1,7 +1,7 @@
 # **META (metadados da CVM) — leitura**
 
 Leitura (← CVM) dos **META** — a *especificação que a própria CVM publica* para cada dataset do
-[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **22 no total**,
+[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **24 no total**,
 todos sob `.../<DATASET>/META/`.
 
 > **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) · [Proveniência](index.md).
@@ -71,7 +71,7 @@ nunca derivada. Os nomes são irregulares de fato: `meta_inf_mensal_cri.zip`, ma
 
 ---
 
-## Os 22 readers
+## Os 24 readers
 
 Todos devolvem **o mesmo formato**: uma linha por campo declarado.
 
@@ -107,11 +107,12 @@ tabela alguma) — como as seis colunas de proveniência. Os **valores** seguem 
 | `SECURIT/DOC/DFIN_CRI` | `MetaDfinCriReader` | `.txt` |
 | `SECURIT/DOC/INF_MENSAL_OTS` | `MetaInfMensalOtsReader` | `.zip` |
 | `SECURIT/DOC/INF_MENSAL_CRA` | `MetaInfMensalCraReader` | `.zip` |
+| `SECURIT/DOC/INF_MENSAL_CRI` | `MetaInfMensalCriReader` | `.zip` (11 membros) |
 | `EMISSOR_CEPAC/CAD` | `MetaCadEmissorCepacReader` | `.txt` |
+| `AUDITOR/CAD` | `MetaAuditorReader` | `.zip` (2 membros) |
 
-> ℹ️ **`FIE/MEDIDAS`** publica `.csv` **e** `.txt`; usamos o **`.txt`**, o formato que os 22
-> compartilham. **`SECURIT/DOC/INF_MENSAL_CRI`** ainda não tem readers — o seu META chega junto com
-> eles.
+> ℹ️ **`FIE/MEDIDAS`** publica `.csv` **e** `.txt`; usamos o **`.txt`**, o formato que os 24
+> compartilham.
 
 ---
 

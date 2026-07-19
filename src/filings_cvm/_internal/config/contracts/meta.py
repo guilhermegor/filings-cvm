@@ -2,7 +2,7 @@
 
 Unlike every other contract here, ``tuple_required`` does **not** describe a CVM artifact's
 columns: the META is block text, not a table, so the parsed frame's shape is **ours** and is
-identical for all 22 datasets. What genuinely differs is ``str_source_key`` — which is exactly what
+identical for all 24 datasets. What genuinely differs is ``str_source_key`` — which is exactly what
 ``stamp_provenance`` writes onto every row so a datalake can tell two datasets apart when they land
 in one bronze table. Hence a factory over a shared tuple rather than 22 hand-copied literals.
 
@@ -79,3 +79,4 @@ META_INF_MENSAL_OTS = _meta_contract("inf_mensal_ots", "META — Informe Mensal 
 META_INF_MENSAL_CRA = _meta_contract("inf_mensal_cra", "META — Informe Mensal CRA")
 META_INF_MENSAL_CRI = _meta_contract("inf_mensal_cri", "META — Informe Mensal CRI")
 META_CAD_EMISSOR_CEPAC = _meta_contract("cad_emissor_cepac", "META — Cadastro Emissor CEPAC")
+META_CAD_AUDITOR = _meta_contract("cad_auditor", "META — Cadastro Auditor")
