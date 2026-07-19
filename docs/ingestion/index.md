@@ -172,3 +172,15 @@ Todo leitor aceita um `path_raw: Path | None = None` no construtor:
 Guardar o artefato bruto é o que torna a camada *bronze* de um *datalake* autoritativa: quando a
 fonte muda o contrato dos dados e a transformação quebra, os bytes exatos que causaram a falha
 continuam reproduzíveis em disco, em vez de perdidos num novo *download* de uma fonte já alterada.
+
+## Automação
+
+Dois jobs semanais vigiam a camada de leitura. Ambos **abrem/atualizam uma issue** e **nunca
+reprovam o CI** — "a CVM caiu" e "o nosso contract está errado" não podem virar o mesmo check
+vermelho:
+
+- **[Deriva de contrato](contract_drift.md)** — a CVM mudou um dataset **depois** que embarcamos o
+  seu `FileContract`? Compara META + header real contra os contracts. Nenhum check de PR consegue
+  pegar isso, porque a mudança acontece depois do merge.
+- **[Completude do portal](portal_completeness.md)** — a CVM publicou um dataset que ainda **não**
+  lemos? Enumera o portal via CKAN e lista o que falta.
