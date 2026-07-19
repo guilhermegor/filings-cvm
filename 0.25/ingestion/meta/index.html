@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.25/ingestion/meta/">
       
       
-        <link rel="prev" href="../inf_mensal_cri/">
+        <link rel="prev" href="../auditor/">
       
       
         <link rel="next" href="../contract_drift/">
@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/cvm-logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1032,6 +1032,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../auditor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Auditores (AUDITOR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1156,10 +1184,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-22-readers" class="md-nav__link">
+  <a href="#os-24-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 22 readers
+        Os 24 readers
       
     </span>
   </a>
@@ -1212,6 +1240,34 @@
     
   
     Deriva de contrato (job semanal)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portal_completeness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Completude do portal (job semanal)
   
 
     
@@ -1428,10 +1484,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-22-readers" class="md-nav__link">
+  <a href="#os-24-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 22 readers
+        Os 24 readers
       
     </span>
   </a>
@@ -1482,7 +1538,7 @@
 
 <h1 id="meta-metadados-da-cvm-leitura"><strong>META (metadados da CVM) — leitura</strong><a class="headerlink" href="#meta-metadados-da-cvm-leitura" title="Permanent link">&para;</a></h1>
 <p>Leitura (← CVM) dos <strong>META</strong> — a <em>especificação que a própria CVM publica</em> para cada dataset do
-<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>22 no total</strong>,
+<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>24 no total</strong>,
 todos sob <code>.../&lt;DATASET&gt;/META/</code>.</p>
 <blockquote>
 <p><strong>Veja também:</strong> <a href="../../api/">Referência da API</a> · <a href="../../usage/">Uso</a> · <a href="../">Proveniência</a>.</p>
@@ -1572,7 +1628,7 @@ do <strong>hist</strong> para quem pediu <code>cad_fi</code>. Por isso <strong>c
 nunca derivada. Os nomes são irregulares de fato: <code>meta_inf_mensal_cri.zip</code>, mas
 <code>meta_cda_fi_txt.zip</code> / <code>meta_lamina_fi_txt.zip</code> / <code>meta_inf_mensal_fidc_txt.zip</code> (infixo <code>_txt</code>).</p>
 <hr />
-<h2 id="os-22-readers">Os 22 readers<a class="headerlink" href="#os-22-readers" title="Permanent link">&para;</a></h2>
+<h2 id="os-24-readers">Os 24 readers<a class="headerlink" href="#os-24-readers" title="Permanent link">&para;</a></h2>
 <p>Todos devolvem <strong>o mesmo formato</strong>: uma linha por campo declarado.</p>
 <table>
 <thead>
@@ -1713,16 +1769,25 @@ tabela alguma) — como as seis colunas de proveniência. Os <strong>valores</st
 <td><code>.zip</code></td>
 </tr>
 <tr>
+<td><code>SECURIT/DOC/INF_MENSAL_CRI</code></td>
+<td><code>MetaInfMensalCriReader</code></td>
+<td><code>.zip</code> (11 membros)</td>
+</tr>
+<tr>
 <td><code>EMISSOR_CEPAC/CAD</code></td>
 <td><code>MetaCadEmissorCepacReader</code></td>
 <td><code>.txt</code></td>
 </tr>
+<tr>
+<td><code>AUDITOR/CAD</code></td>
+<td><code>MetaAuditorReader</code></td>
+<td><code>.zip</code> (2 membros)</td>
+</tr>
 </tbody>
 </table>
 <blockquote>
-<p>ℹ️ <strong><code>FIE/MEDIDAS</code></strong> publica <code>.csv</code> <strong>e</strong> <code>.txt</code>; usamos o <strong><code>.txt</code></strong>, o formato que os 22
-compartilham. <strong><code>SECURIT/DOC/INF_MENSAL_CRI</code></strong> ainda não tem readers — o seu META chega junto com
-eles.</p>
+<p>ℹ️ <strong><code>FIE/MEDIDAS</code></strong> publica <code>.csv</code> <strong>e</strong> <code>.txt</code>; usamos o <strong><code>.txt</code></strong>, o formato que os 24
+compartilham.</p>
 </blockquote>
 <hr />
 <h2 id="sem-date_ref-e-por-que-o-path_raw-importa-mais-aqui"><strong>Sem <code>date_ref</code></strong> — e por que o <code>path_raw</code> importa mais aqui<a class="headerlink" href="#sem-date_ref-e-por-que-o-path_raw-importa-mais-aqui" title="Permanent link">&para;</a></h2>
@@ -1803,7 +1868,7 @@ ficariam indistinguíveis na mesma tabela do <em>bronze</em>, que é exatamente 
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

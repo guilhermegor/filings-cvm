@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/cvm-logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -589,6 +589,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#automacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automação
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1137,6 +1148,34 @@
   
   
     <li class="md-nav__item">
+      <a href="auditor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Auditores (AUDITOR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="meta/" class="md-nav__link">
         
   
@@ -1173,6 +1212,34 @@
     
   
     Deriva de contrato (job semanal)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="portal_completeness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Completude do portal (job semanal)
   
 
     
@@ -1382,6 +1449,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#automacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automação
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1499,6 +1577,14 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
   <code>Data_LTV</code> (varchar no META) não são datas; <code>carteira_modificacao</code>/<code>responsavel</code> são header-only.
   <strong>Quarta e última fatia da Wave 2 — fecha o portal root <code>securit/</code> (4/4).</strong></p>
 </li>
+<li>
+<p><strong><a href="auditor/">Cadastro de Auditores (AUDITOR)</a></strong> — 2 readers <code>AuditorPfReader</code> /
+  <code>AuditorPjReader</code> sobre o <code>cad_auditor.zip</code> (auditores pessoa física + firmas de auditoria).
+  <strong>Snapshot</strong> de URL fixa, <strong>sem <code>date_ref</code></strong> (molde do <code>CadastroFiReader</code>). O membro <code>pf</code> <strong>não tem
+  CPF</strong> (identifica por <code>CD_CVM</code>+nome); <code>pj.CNPJ</code> chega mascarado. Contracts <strong>gerados do header</strong> e
+  <strong>pinados</strong> a fixtures verbatim. <strong>Inaugura o portal root <code>auditor/</code> e a primeira fatia da Wave 3
+  do #41</strong> (snapshots CAD de prestadores de serviço).</p>
+</li>
 </ul>
 <p>Cada padrão de leitura ganha a sua própria página, com <strong>Descrição</strong> e <strong>Exemplos</strong>, no mesmo
 formato das páginas de <a href="../submission/informe_diario/">Envio</a>.</p>
@@ -1592,6 +1678,17 @@ declarar o seu <code>_RETRY_POLICY</code>.</p>
 <p>Guardar o artefato bruto é o que torna a camada <em>bronze</em> de um <em>datalake</em> autoritativa: quando a
 fonte muda o contrato dos dados e a transformação quebra, os bytes exatos que causaram a falha
 continuam reproduzíveis em disco, em vez de perdidos num novo <em>download</em> de uma fonte já alterada.</p>
+<h2 id="automacao">Automação<a class="headerlink" href="#automacao" title="Permanent link">&para;</a></h2>
+<p>Dois jobs semanais vigiam a camada de leitura. Ambos <strong>abrem/atualizam uma issue</strong> e <strong>nunca
+reprovam o CI</strong> — "a CVM caiu" e "o nosso contract está errado" não podem virar o mesmo check
+vermelho:</p>
+<ul>
+<li><strong><a href="contract_drift/">Deriva de contrato</a></strong> — a CVM mudou um dataset <strong>depois</strong> que embarcamos o
+  seu <code>FileContract</code>? Compara META + header real contra os contracts. Nenhum check de PR consegue
+  pegar isso, porque a mudança acontece depois do merge.</li>
+<li><strong><a href="portal_completeness/">Completude do portal</a></strong> — a CVM publicou um dataset que ainda <strong>não</strong>
+  lemos? Enumera o portal via CKAN e lista o que falta.</li>
+</ul>
 
 
 
@@ -1644,7 +1741,7 @@ continuam reproduzíveis em disco, em vez de perdidos num novo <em>download</em>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

@@ -16,14 +16,14 @@
         <link rel="prev" href="../meta/">
       
       
-        <link rel="next" href="../../api/">
+        <link rel="next" href="../portal_completeness/">
       
       
         
       
       
       <link rel="icon" href="../../assets/cvm-logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1035,6 +1035,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../auditor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Auditores (AUDITOR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../meta/" class="md-nav__link">
         
   
@@ -1167,6 +1195,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cobertura parcial — tuple_required é "pelo menos estas", não "exatamente estas"
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#escopo" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1181,6 +1220,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portal_completeness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Completude do portal (job semanal)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1372,6 +1439,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cobertura parcial — tuple_required é "pelo menos estas", não "exatamente estas"
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#escopo" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1451,6 +1529,14 @@ Nada no PR-time consegue saber que a CVM mudou desde então — só um job que v
 </ul>
 <p>Cada oráculo é comparado com o <code>tuple_required</code> do contract. Header real: nome <strong>e</strong> ordem. META:
 conjunto de nomes, <em>truncation-aware</em>.</p>
+<blockquote>
+<p><strong>Fail-fast, de propósito.</strong> Sendo uma sondagem semanal best-effort, os readers são construídos
+com <code>retry_policy</code> de <strong>1 tentativa</strong> (<code>_DRIFT_RETRY_POLICY</code>), não a política paciente de produção.
+Sondar um período não publicado é um <strong>404 esperado</strong>, não um erro transitório — gastar o backoff
+padrão (~24 s) em cada sondagem, por ~110 readers × várias datas, é o que fazia o primeiro run
+levar ~40 min (issue #113). Uma tentativa: um 404 (ou um blip real) pula o dataset nesta semana, e
+o run da semana seguinte pega o que era transitório.</p>
+</blockquote>
 <hr />
 <h2 id="nao-bloqueante-de-proposito">⚠️ Não-bloqueante, de propósito<a class="headerlink" href="#nao-bloqueante-de-proposito" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1471,6 +1557,22 @@ casam com <strong>os dois</strong> por prefixo), e os membros de <code>registro_
 <code>registro_classe</code> / <code>registro_subclasse</code> — sem relação de prefixo. Um teste estrutural
 (<code>tests/unit/test_check_contract_drift.py</code>) garante que a fiação continua completa: um reader novo
 não pode ser esquecido em silêncio.</p>
+<h2 id="cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas">Cobertura parcial — <code>tuple_required</code> é "pelo menos estas", não "exatamente estas"<a class="headerlink" href="#cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas" title="Permanent link">&para;</a></h2>
+<p>Um <code>FileContract</code> declara as colunas que o arquivo <strong>precisa ter</strong>, não necessariamente <strong>todas</strong> as
+que ele tem. Dois casos de cobertura deliberadamente parcial:</p>
+<ul>
+<li><strong>Contract subset</strong> — o <code>CdaReader</code> exige só as 4 colunas-chave (<code>TP_FUNDO_CLASSE</code>,
+  <code>CNPJ_FUNDO_CLASSE</code>, <code>DENOM_SOCIAL</code>, <code>DT_COMPTC</code>) de um arquivo de ~60; o resto passa como texto.</li>
+<li><strong>Membros não implementados</strong> — o META da Lâmina descreve o dataset inteiro, incluindo os membros
+  <code>rentab_ano</code>/<code>rentab_mes</code> ainda não implementados.</li>
+</ul>
+<p>Para esses datasets, "a fonte tem uma coluna/campo que o contract não lista" é <strong>esperado, não
+deriva</strong> — então a <strong>direção de coluna-extra</strong> de ambos os oráculos é <strong>suprimida</strong>. A direção que
+sustenta o job — <strong>"uma coluna exigida sumiu da fonte"</strong> — continua ativa para <strong>todos</strong>. Os
+datasets parciais moram em <code>_PARTIAL_DATASETS</code> (chaveado pelo Meta reader, com o porquê de cada um),
+e um teste estrutural garante que cada chave é um dataset real. Sem isso, o primeiro run real
+(issue #115) abriu <strong>123 achados, ~120 falso-positivo</strong> — a maioria por tratar contracts subset como
+se listassem o header inteiro (issue #117).</p>
 <h2 id="escopo">Escopo<a class="headerlink" href="#escopo" title="Permanent link">&para;</a></h2>
 <p>Reporta deriva; <strong>não conserta</strong>. O conserto (agente propondo PR sobre contracts pinados ao header
 real) é o loop da bedrock-fm e fica fora daqui.</p>
@@ -1526,7 +1628,7 @@ real) é o loop da bedrock-fm e fica fora daqui.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

@@ -2,122 +2,130 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/api/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/changelog/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/contributing/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/faq/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/usage/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
+    </url>
+    <url>
+         <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/auditor/</loc>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/cad_fi_hist/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/cadastro_fi/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/cda/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/contract_drift/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/dfin_fii/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/fie/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_anual_fii/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_fip/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_mensal_cra/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_mensal_cri/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_mensal_fiagro/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_mensal_fidc/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_mensal_fii/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_mensal_ots/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/inf_trimestral_fii/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/informe_diario/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/lamina/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/lamina_carteira/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/meta/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
+    </url>
+    <url>
+         <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/portal_completeness/</loc>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/registro/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/ingestion/securit_cepac_flat/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/submission/informe_diario/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.25/submission/perfil_mensal/</loc>
-         <lastmod>2026-07-18</lastmod>
+         <lastmod>2026-07-19</lastmod>
     </url>
 </urlset>
