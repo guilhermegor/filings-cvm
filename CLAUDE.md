@@ -220,13 +220,13 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **23 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **24 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (23 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (24 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (12) ou `.zip` multi-membro (10); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
 ⚠️ **Três fatos da fonte, honrados verbatim e nunca "consertados":**
   1. **A CVM trunca o nome do campo em exatamente 50 caracteres** (provado 8/8 no CRA; o header real
@@ -256,8 +256,16 @@ longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescre
 - ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
 - ⬜ Extrato das Informações sobre o Fundo — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
-**Auditores**
-- ⬜ Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`)
+**Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
+XML de envio para o registro). Sob `AUDITOR/CAD/`:
+- Cadastro de Auditores — ✅ **ingestion** `cad_auditor.zip` (**2 membros**: `pf`, `pj`) —
+  `ingestion/auditor/cad/{auditor_pf,auditor_pj}.py` (`AuditorPfReader`, `AuditorPjReader`, base
+  privada `_base_auditor_reader.py`); contracts `_internal/config/contracts/cad_auditor.py`, pinados
+  aos headers em `tests/fixtures/cad_auditor/*_header.csv`. **Snapshot** de URL fixa, **sem
+  `date_ref`** (molde do `CadastroFiReader`). O membro `pf` **não tem CPF** (identifica por
+  `CD_CVM`+nome); `pj.CNPJ` chega mascarado. **Inaugura o portal root `auditor/` e a primeira fatia
+  da Wave 3 do #41** (snapshots CAD de prestadores de serviço)
+- ⬜ **submission** Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`)
 
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
@@ -278,7 +286,7 @@ src/filings_cvm/
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); __init__ FLAT public API
-        _base_meta_reader.py   # PRIVATE base for the 22 Meta*Reader (shared across every root)
+        _base_meta_reader.py   # PRIVATE base for the 24 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. Public API stays flat via re-exports.
@@ -294,6 +302,7 @@ src/filings_cvm/
         securit/           #   SECURIT/ — COMPLETO: doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8)
                            #     + inf_mensal_cra/ (8) + inf_mensal_cri/ (11); contracts pinned to real headers
         emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
+        auditor/           #   AUDITOR/ — cad/{auditor_pf,auditor_pj} (snapshot ZIP, 2 membros, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

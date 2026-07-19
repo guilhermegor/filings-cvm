@@ -12,6 +12,8 @@ from importlib.metadata import PackageNotFoundError, version
 
 from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm.ingestion import (
+	AuditorPfReader,
+	AuditorPjReader,
 	BalanceteFieReader,
 	BalancoFieReader,
 	CadastroEmissorCepacReader,
@@ -122,6 +124,7 @@ from filings_cvm.ingestion import (
 	LaminaCarteiraReader,
 	LaminaReader,
 	MedidasMesFieReader,
+	MetaAuditorReader,
 	MetaBalanceteFieReader,
 	MetaBalancoFieReader,
 	MetaCadastroFiReader,
@@ -164,6 +167,8 @@ except PackageNotFoundError:  # pragma: no cover - source tree without an instal
 
 
 __all__ = [
+	"AuditorPfReader",
+	"AuditorPjReader",
 	"BalanceteFieReader",
 	"BalancoFieReader",
 	"CadastroEmissorCepacReader",
@@ -276,6 +281,7 @@ __all__ = [
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"MedidasMesFieReader",
+	"MetaAuditorReader",
 	"MetaBalanceteFieReader",
 	"MetaBalancoFieReader",
 	"MetaCadEmissorCepacReader",
