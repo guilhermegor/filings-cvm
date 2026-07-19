@@ -1,0 +1,50 @@
+# Weekly, NON-BLOCKING portal-completeness detector — issue #111.
+#
+# Enumerates every dataset CVM's open-data portal publishes (via the CKAN API), subtracts the ones
+# this package implements, and opens or updates ONE tracking issue listing the gap. It automates the
+# manual portal survey (#41) and mirrors the contract-drift job (#98): a divergence is an OPENED
+# ISSUE, never a failed check. `check_portal_completeness.py` always exits 0; only an unhandled crash
+# reddens the run, and a scheduled run reddening blocks nothing.
+#
+# Why a SCHEDULED job (the repo's CI is otherwise event-driven — see .github/CLAUDE.md): the portal
+# grows on CVM's cadence, not ours; only a job that looks again on a clock notices a newly published
+# dataset. Detection only — no code generation (a generated reader touches header-pinned contracts
+# and `pr_gate` never auto-merges `src/`; that is a later, human-reviewed, post-1.0 phase).
+#
+# The script is pure standard library (urllib + json) and does not import the package, so this
+# workflow needs no `poetry install` — just Python. The `schedule` trigger GitHub auto-disables
+# after ~60 days without a push (acceptable — the repo is active); `workflow_dispatch` re-runs it.
+
+name: Portal Completeness
+
+on:
+  schedule:
+    - cron: "41 5 * * 1" # 05:41 UTC every Monday (UTC always; odd minute to dodge load spikes)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read # read the detector script
+  issues: write # open / update the single tracking issue
+
+concurrency:
+  group: portal-completeness
+  cancel-in-progress: false
+
+jobs:
+  survey:
+    name: Detect unimplemented portal datasets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set Up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run the portal survey
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python bin/check_portal_completeness.py
