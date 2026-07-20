@@ -99,6 +99,13 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   **pinados** a fixtures verbatim. **Inaugura o portal root `auditor/` e a primeira fatia da Wave 3
   do #41** (snapshots CAD de prestadores de serviço).
 
+- **[Cadastro de Agentes Fiduciários (AGENTE_FIDUC)](agente_fiduc.md)** — 2 readers
+  `AgenteFiducPfReader` / `AgenteFiducPjReader` sobre o `cad_agente_fiduc.zip` (agentes pessoa física
+  + firmas). **Snapshot** de URL fixa, **sem `date_ref`**. O membro `pf` **não tem CPF nem `CD_CVM`**
+  (identifica só pelo nome); `pj.CNPJ` chega mascarado. ⚠️ **Não é cópia do AUDITOR** — são **3
+  colunas de data** em vez de 1, sem `CD_CVM`, e o `pj` acrescenta `PAIS`/`DDD_TEL`/`TEL`; contracts
+  **gerados do header** e **pinados** a fixtures verbatim. **Segunda fatia da Wave 3 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

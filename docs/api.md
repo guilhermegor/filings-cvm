@@ -797,7 +797,39 @@ df_ = AuditorPjReader().read()
 
 ---
 
-### `Meta*Reader` (24 readers)
+### `AgenteFiducPfReader` · `AgenteFiducPjReader` (2 readers)
+
+`filings_cvm.ingestion.agente_fiduc`
+
+O cadastro dos **agentes fiduciários** (`AGENTE_FIDUC/CAD`, `cad_agente_fiduc.zip`) — **snapshot** de
+URL fixa, sem `date_ref`. Inaugura o *portal root* `agente_fiduc/` (2ª fatia da Wave 3 do #41).
+Página completa em [Cadastro de Agentes Fiduciários](ingestion/agente_fiduc.md).
+
+- `AgenteFiducPfReader` — `cad_agente_fiduc_pf.csv`, agentes pessoa física (5 colunas; **sem
+  CNPJ/CPF/`CD_CVM`**, identifica só pelo nome).
+- `AgenteFiducPjReader` — `cad_agente_fiduc_pj.csv`, firmas (15 colunas; `CNPJ` mascarado + endereço/telefone).
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `cad_agente_fiduc.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por agente. `DT_REG`/`DT_CANCEL`/`DT_INI_SIT` viram `date`; o restante fica texto exato
+(`CEP`/`DDD_TEL`/`TEL` preservam zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError`
+(membro ausente).
+
+```python
+from filings_cvm import AgenteFiducPjReader
+
+df_ = AgenteFiducPjReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF"]]
+```
+
+---
+
+### `Meta*Reader` (25 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -808,7 +840,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfTrimestralFipReader` · `MetaInfQuadrimestralFipReader` · `MetaInfMensalFiagroReader` ·
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
-`MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader`
+`MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

@@ -12,6 +12,11 @@ public API stays flat regardless of nesting::
     from filings_cvm.ingestion import InformeDiarioReader
 """
 
+from filings_cvm.ingestion.agente_fiduc import (
+	AgenteFiducPfReader,
+	AgenteFiducPjReader,
+	MetaAgenteFiducReader,
+)
 from filings_cvm.ingestion.auditor import (
 	AuditorPfReader,
 	AuditorPjReader,
@@ -172,6 +177,8 @@ from filings_cvm.ingestion.securit import (
 
 
 __all__ = [
+	"AgenteFiducPfReader",
+	"AgenteFiducPjReader",
 	"AuditorPfReader",
 	"AuditorPjReader",
 	"BalanceteFieReader",
@@ -284,6 +291,7 @@ __all__ = [
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"MedidasMesFieReader",
+	"MetaAgenteFiducReader",
 	"MetaAuditorReader",
 	"MetaBalanceteFieReader",
 	"MetaBalancoFieReader",

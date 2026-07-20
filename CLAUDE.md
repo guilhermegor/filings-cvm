@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **24 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **25 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (24 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (25 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -267,6 +267,17 @@ XML de envio para o registro). Sob `AUDITOR/CAD/`:
   da Wave 3 do #41** (snapshots CAD de prestadores de serviço)
 - ⬜ **submission** Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`)
 
+**Agentes Fiduciários** — portal root `agente_fiduc/`; **open-data only** (a CVM não publica padrão
+XML de envio). Não há submission. Sob `AGENTE_FIDUC/CAD/`:
+- Cadastro de Agentes Fiduciários — ✅ **ingestion** `cad_agente_fiduc.zip` (**2 membros**: `pf`, `pj`)
+  — `ingestion/agente_fiduc/cad/{agente_fiduc_pf,agente_fiduc_pj}.py` (`AgenteFiducPfReader`,
+  `AgenteFiducPjReader`, base privada `_base_agente_fiduc_reader.py`); contracts
+  `_internal/config/contracts/cad_agente_fiduc.py`, pinados aos headers em
+  `tests/fixtures/cad_agente_fiduc/*_header.csv`. **Snapshot** de URL fixa, **sem `date_ref`**. O
+  membro `pf` **não tem CPF nem `CD_CVM`** (identifica só pelo nome); `pj.CNPJ` chega mascarado.
+  ⚠️ **Não é cópia do AUDITOR** — **3 colunas de data** (`DT_REG`/`DT_CANCEL`/`DT_INI_SIT`) em vez de
+  1, sem `CD_CVM`, `pj` acrescenta `PAIS`/`DDD_TEL`/`TEL`. **Segunda fatia da Wave 3 do #41**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -286,7 +297,7 @@ src/filings_cvm/
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); __init__ FLAT public API
-        _base_meta_reader.py   # PRIVATE base for the 24 Meta*Reader (shared across every root)
+        _base_meta_reader.py   # PRIVATE base for the 25 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. Public API stays flat via re-exports.
@@ -303,6 +314,7 @@ src/filings_cvm/
                            #     + inf_mensal_cra/ (8) + inf_mensal_cri/ (11); contracts pinned to real headers
         emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
         auditor/           #   AUDITOR/ — cad/{auditor_pf,auditor_pj} (snapshot ZIP, 2 membros, no date_ref)
+        agente_fiduc/      #   AGENTE_FIDUC/ — cad/{agente_fiduc_pf,agente_fiduc_pj} (snapshot ZIP, 2 membros, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
