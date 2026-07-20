@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.25/ingestion/contract_drift/">
+        <link rel="canonical" href="https://guilhermegor.github.io/filings-cvm/0.25/ingestion/adm_cart/">
       
       
-        <link rel="prev" href="../meta/">
+        <link rel="prev" href="../intermed/">
       
       
-        <link rel="next" href="../portal_completeness/">
+        <link rel="next" href="../meta/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Deriva de contrato (job semanal) - filings-cvm</title>
+        <title>Cadastro de Administradores de Carteira (ADM_CART) - filings-cvm</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#deriva-de-contrato-deteccao-semanal-nao-bloqueante" class="md-skip">
+        <a href="#cadastro-de-administradores-de-carteira-adm_cart-leitura" class="md-skip">
           Pular para conteúdo
         </a>
       
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Deriva de contrato (job semanal)
+              Cadastro de Administradores de Carteira (ADM_CART)
             
           </span>
         </div>
@@ -1172,10 +1172,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../adm_cart/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Administradores de Carteira (ADM_CART)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1191,6 +1218,104 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#descricao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descrição
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Descrição">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tipagem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tipagem
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#politica-de-retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Política de retry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exemplos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exemplos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exemplos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#firmas-administradoras-pessoa-juridica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firmas administradoras (pessoa jurídica)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socios-persistir-a-camada-bronze" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sócios + persistir a camada bronze
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1228,37 +1353,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Deriva de contrato (job semanal)
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../contract_drift/" class="md-nav__link">
         
   
   
@@ -1274,92 +1372,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Índice">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Índice
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#as-duas-camadas-e-por-que-precisa-das-duas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        As duas camadas, e por que precisa das duas
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dois-oraculos-complementares" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dois oráculos, complementares
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#nao-bloqueante-de-proposito" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ⚠️ Não-bloqueante, de propósito
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fiacao-explicita-nunca-derivada" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fiação explícita, nunca derivada
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cobertura parcial — tuple_required é "pelo menos estas", não "exatamente estas"
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#escopo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Escopo
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1535,10 +1547,38 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#as-duas-camadas-e-por-que-precisa-das-duas" class="md-nav__link">
+  <a href="#descricao" class="md-nav__link">
     <span class="md-ellipsis">
       
-        As duas camadas, e por que precisa das duas
+        Descrição
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Descrição">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tipagem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tipagem
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#politica-de-retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Política de retry
       
     </span>
   </a>
@@ -1546,57 +1586,41 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dois-oraculos-complementares" class="md-nav__link">
+  <a href="#exemplos" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Dois oráculos, complementares
+        Exemplos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exemplos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#firmas-administradoras-pessoa-juridica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firmas administradoras (pessoa jurídica)
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#nao-bloqueante-de-proposito" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#socios-persistir-a-camada-bronze" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ⚠️ Não-bloqueante, de propósito
+        Sócios + persistir a camada bronze
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#fiacao-explicita-nunca-derivada" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fiação explícita, nunca derivada
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cobertura parcial — tuple_required é "pelo menos estas", não "exatamente estas"
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#escopo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Escopo
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1620,102 +1644,118 @@
   
 
 
-<h1 id="deriva-de-contrato-deteccao-semanal-nao-bloqueante"><strong>Deriva de contrato — detecção semanal, não-bloqueante</strong><a class="headerlink" href="#deriva-de-contrato-deteccao-semanal-nao-bloqueante" title="Permanent link">&para;</a></h1>
-<p>Job agendado que pega a <strong>CVM mudando o contrato de um dataset <em>depois</em> que a gente embarcou</strong> — o
-que <strong>nenhum check de PR consegue pegar</strong>. Roda <code>bin/check_contract_drift.py</code> via
-<code>.github/workflows/contract-drift.yaml</code>; ao encontrar divergência, <strong>abre (ou atualiza) uma única
-issue</strong>, nunca reprova o build.</p>
+<h1 id="cadastro-de-administradores-de-carteira-adm_cart-leitura"><strong>Cadastro de Administradores de Carteira (ADM_CART) — leitura</strong><a class="headerlink" href="#cadastro-de-administradores-de-carteira-adm_cart-leitura" title="Permanent link">&para;</a></h1>
+<p>Leitura (← CVM) do cadastro dos <strong>administradores de carteira</strong> supervisionados pela CVM, publicado
+no <a href="https://dados.cvm.gov.br/dados/">portal de dados abertos da CVM</a>. Estes readers <strong>inauguram</strong> o
+<em>portal root</em> <code>adm_cart/</code> (irmão de <code>fi/</code>, <code>auditor/</code>, <code>intermed/</code>, …).</p>
 <blockquote>
-<p><strong>Veja também:</strong> <a href="../meta/">META (metadados da CVM)</a> · <a href="../">Proveniência</a>.</p>
+<p>Sexta fatia da <strong>Wave 3</strong> do #41 e o <strong>primeiro root de 5 membros</strong> — degrau acima do padrão de 2
+membros do <a href="../auditor/">AUDITOR</a> / <a href="../invnr/">INVNR</a> / <a href="../intermed/">INTERMED</a>.</p>
+<p><strong>Veja também:</strong> <a href="../../api/">Referência da API</a> · <a href="../../usage/">Uso</a>.</p>
 </blockquote>
 <hr />
-<h2 id="as-duas-camadas-e-por-que-precisa-das-duas">As duas camadas, e por que precisa das duas<a class="headerlink" href="#as-duas-camadas-e-por-que-precisa-das-duas" title="Permanent link">&para;</a></h2>
+<h2 id="descricao">Descrição<a class="headerlink" href="#descricao" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>camada</th>
-<th>quando</th>
-<th>pega</th>
-<th>bloqueia?</th>
+<th>Reader</th>
+<th>Membro do <code>cad_adm_cart.zip</code></th>
+<th>Colunas</th>
+<th>Colunas de data</th>
+<th>Chave CNPJ</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>fixture de header pinado (issue #96)</td>
-<td>PR-time, offline</td>
-<td><strong>nós</strong> escrevendo o contract errado</td>
-<td>✅ sim</td>
+<td><code>AdmCartPfReader</code></td>
+<td><code>cad_adm_cart_pf.csv</code> (pessoa física)</td>
+<td>7</td>
+<td>3</td>
+<td>— (não há coluna)</td>
 </tr>
 <tr>
-<td><strong>este job</strong></td>
-<td>semanal, online</td>
-<td><strong>a CVM</strong> mudando o contract depois do ship</td>
-<td>❌ <strong>nunca</strong></td>
+<td><code>AdmCartPjReader</code></td>
+<td><code>cad_adm_cart_pj.csv</code> (pessoa jurídica)</td>
+<td>24</td>
+<td>4</td>
+<td><code>CNPJ</code> (mascarado)</td>
+</tr>
+<tr>
+<td><code>AdmCartDiretorReader</code></td>
+<td><code>cad_adm_cart_diretor.csv</code> (diretores)</td>
+<td>3</td>
+<td><strong>0</strong></td>
+<td><code>CNPJ</code> (do administrador)</td>
+</tr>
+<tr>
+<td><code>AdmCartRespReader</code></td>
+<td><code>cad_adm_cart_resp.csv</code> (responsáveis)</td>
+<td>3</td>
+<td><strong>0</strong></td>
+<td><code>CNPJ</code> (do administrador)</td>
+</tr>
+<tr>
+<td><code>AdmCartSociosReader</code></td>
+<td><code>cad_adm_cart_socios.csv</code> (sócios)</td>
+<td>2</td>
+<td><strong>0</strong></td>
+<td><code>CNPJ</code> (do administrador)</td>
 </tr>
 </tbody>
 </table>
-<p>O fixture pinado prova que o contract batia com o que a CVM publicava <strong>no dia em que foi escrito</strong>.
-Nada no PR-time consegue saber que a CVM mudou desde então — só um job que vai olhar de novo.</p>
+<p><code>ADM_CART/CAD</code> publica um <strong>ZIP de cinco membros</strong>: os administradores <strong>pessoa física</strong> (nome,
+datas e motivo de cancelamento, situação, categoria de registro) e as <strong>firmas</strong> (o mesmo mais
+<code>CNPJ</code> mascarado, denominação social/comercial, sub-categoria, controle acionário, endereço,
+telefone, patrimônio líquido, e-mail e site), acompanhados de três tabelas satélite — <strong>diretores</strong>,
+<strong>responsáveis</strong> e <strong>sócios</strong> — todas chaveadas pelo <code>CNPJ</code> do administrador. Como o <code>cad_fi.csv</code>, é
+um <strong>retrato do estado atual</strong> numa <strong>URL fixa</strong> que a CVM sobrescreve no lugar — por isso <strong>não há
+<code>date_ref</code></strong>, e um <code>path_raw</code> persistido é o único registro do que o cadastro dizia no dia da
+coleta. Nenhum grão é assumido.</p>
+<p>⚠️ <strong>Três dos cinco membros não têm NENHUMA coluna de data</strong> (<code>diretor</code>, <code>resp</code>, <code>socios</code>) — a
+primeira ocorrência dessa forma na biblioteca. Os readers correspondentes declaram <code>_DATE_COLS = ()</code>
+e <strong>todas</strong> as suas colunas voltam como texto exato. O META confirma: esses três não declaram
+nenhum campo <code>date</code>.</p>
+<p>⚠️ O membro <strong>pessoa física não tem CNPJ nem CPF</strong> — o cadastro identifica o administrador pessoa
+física pelo <code>ADMIN</code> (o nome), então <code>tuple_cnpj_cols</code> é vazio (explícito) e não há chave única. Os
+membros <code>diretor</code>/<code>resp</code>/<code>socios</code> carregam <strong>dado pessoal</strong> (<code>DIRETOR</code>, <code>RESP</code>, <code>SOCIOS</code> — nomes de
+pessoas; <code>SOCIOS</code> mistura pessoa física e jurídica) mas <strong>nenhuma coluna de CPF</strong>: o único <code>CNPJ</code> é
+o do administrador, mascarado.</p>
+<p>⚠️ <strong>Um CNPJ genuinamente malformado existe na fonte</strong> — <code>00.010.354/1901-72</code>, presente em <code>pj</code> e
+<code>resp</code>, reprova no dígito verificador. Como o contrato exige <strong>ao menos um</strong> CNPJ válido na coluna
+(não todos), a leitura passa e o valor é <strong>devolvido como publicado</strong>, nunca filtrado ou
+"corrigido".</p>
+<h3 id="tipagem">Tipagem<a class="headerlink" href="#tipagem" title="Permanent link">&para;</a></h3>
+<p>As colunas <code>DT_*</code> viram <code>date</code> puro (brancos viram <code>NaT</code>); nos três membros sem data, nada é
+convertido. Todo o restante mantém o <strong>texto exato da CVM</strong> — inclusive <code>CEP</code> e <code>TEL</code>, que o META
+declara <code>numeric</code> mas são <strong>identificadores, não quantidades</strong> (o <code>CEP</code> já chega sem o zero à
+esquerda, ex. <code>1451010</code>). Note que o <code>pj</code> usa <strong><code>DDD</code></strong> (como o AGENTE_AUTON), não o <code>DDD_TEL</code> do
+INVNR/INTERMED. O mapa de tipos é derivado do contrato, então os dois não podem divergir.</p>
 <hr />
-<h2 id="dois-oraculos-complementares">Dois oráculos, complementares<a class="headerlink" href="#dois-oraculos-complementares" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Header real do artefato</strong> — as colunas que um <code>read()</code> bem-sucedido devolve, em <strong>ordem da
-  fonte</strong>, antes das colunas de proveniência. Autoritativo para o <strong>conjunto</strong> e a <strong>ordem</strong> das
-  colunas, mas só existe para um período que a CVM já publicou.</li>
-<li><strong>META</strong> — os nomes de campo declarados. Fica numa <strong>URL fixa, sempre acessível</strong> (mesmo quando o
-  artefato do período corrente ainda não saiu), mas a CVM <strong>trunca o nome em exatamente 50
-  caracteres</strong> e não preserva ordem — então é um oráculo de <strong>conjunto de nomes</strong>, comparado no
-  prefixo de 50 (veja <a href="../meta/">META</a>).</li>
-</ul>
-<p>Cada oráculo é comparado com o <code>tuple_required</code> do contract. Header real: nome <strong>e</strong> ordem. META:
-conjunto de nomes, <em>truncation-aware</em>.</p>
-<blockquote>
-<p><strong>Fail-fast, de propósito.</strong> Sendo uma sondagem semanal best-effort, os readers são construídos
-com <code>retry_policy</code> de <strong>1 tentativa</strong> (<code>_DRIFT_RETRY_POLICY</code>), não a política paciente de produção.
-Sondar um período não publicado é um <strong>404 esperado</strong>, não um erro transitório — gastar o backoff
-padrão (~24 s) em cada sondagem, por ~110 readers × várias datas, é o que fazia o primeiro run
-levar ~40 min (issue #113). Uma tentativa: um 404 (ou um blip real) pula o dataset nesta semana, e
-o run da semana seguinte pega o que era transitório.</p>
-</blockquote>
+<h2 id="politica-de-retry">Política de retry<a class="headerlink" href="#politica-de-retry" title="Permanent link">&para;</a></h2>
+<p>Todo reader aceita <code>retry_policy: RetryPolicy | None = None</code> e declara o seu padrão em
+<code>_RETRY_POLICY</code> (padrão paciente: 5 tentativas, <em>backoff</em> ~2, 4, 8, 10 s). Veja a
+<a href="../#politica-de-retry-retry_policy-e-_retry_policy">visão geral da leitura</a>.</p>
 <hr />
-<h2 id="nao-bloqueante-de-proposito">⚠️ Não-bloqueante, de propósito<a class="headerlink" href="#nao-bloqueante-de-proposito" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>tests/conftest.py</code> <strong>bloqueia rede</strong> — este job jamais roda em teste.</li>
-<li>"A CVM caiu" e "nosso contract está errado" seriam <strong>indistinguíveis</strong> num check vermelho, e um
-  check vermelho não pode gatilhar release nem travar PR (issue #86 já nos queimou: um flake externo
-  pulou um publish).</li>
-</ul>
-<p>Logo: divergência ou falha → <strong>issue aberta</strong>, nunca CI vermelha. O script sai <code>0</code> na deriva; uma
-issue já aberta é <strong>atualizada</strong> (encontrada por label <code>contract-drift</code> + marcador oculto no corpo),
-nunca duplicada. Um outage da CVM vira ruído tolerável.</p>
-<hr />
-<h2 id="fiacao-explicita-nunca-derivada">Fiação explícita, nunca derivada<a class="headerlink" href="#fiacao-explicita-nunca-derivada" title="Permanent link">&para;</a></h2>
-<p>Quais readers um META descreve mora em <code>_META_MEMBERS</code>; o contract de um reader que não expõe
-<code>_CONTRACT</code> mora em <code>_UNEXPOSED_CONTRACTS</code>. Derivar por nome estaria <strong>errado</strong>: <code>cad_fi</code> e
-<code>cad_fi_hist</code> compartilham radical mas são datasets diferentes (os 19 readers <code>cad_fi_hist_*</code>
-casam com <strong>os dois</strong> por prefixo), e os membros de <code>registro_fundo_classe</code> são <code>registro_fundo</code> /
-<code>registro_classe</code> / <code>registro_subclasse</code> — sem relação de prefixo. Um teste estrutural
-(<code>tests/unit/test_check_contract_drift.py</code>) garante que a fiação continua completa: um reader novo
-não pode ser esquecido em silêncio.</p>
-<h2 id="cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas">Cobertura parcial — <code>tuple_required</code> é "pelo menos estas", não "exatamente estas"<a class="headerlink" href="#cobertura-parcial-tuple_required-e-pelo-menos-estas-nao-exatamente-estas" title="Permanent link">&para;</a></h2>
-<p>Um <code>FileContract</code> declara as colunas que o arquivo <strong>precisa ter</strong>, não necessariamente <strong>todas</strong> as
-que ele tem. Dois casos de cobertura deliberadamente parcial:</p>
-<ul>
-<li><strong>Contract subset</strong> — o <code>CdaReader</code> exige só as 4 colunas-chave (<code>TP_FUNDO_CLASSE</code>,
-  <code>CNPJ_FUNDO_CLASSE</code>, <code>DENOM_SOCIAL</code>, <code>DT_COMPTC</code>) de um arquivo de ~60; o resto passa como texto.</li>
-<li><strong>Membros não implementados</strong> — o META da Lâmina descreve o dataset inteiro, incluindo os membros
-  <code>rentab_ano</code>/<code>rentab_mes</code> ainda não implementados.</li>
-</ul>
-<p>Para esses datasets, "a fonte tem uma coluna/campo que o contract não lista" é <strong>esperado, não
-deriva</strong> — então a <strong>direção de coluna-extra</strong> de ambos os oráculos é <strong>suprimida</strong>. A direção que
-sustenta o job — <strong>"uma coluna exigida sumiu da fonte"</strong> — continua ativa para <strong>todos</strong>. Os
-datasets parciais moram em <code>_PARTIAL_DATASETS</code> (chaveado pelo Meta reader, com o porquê de cada um),
-e um teste estrutural garante que cada chave é um dataset real. Sem isso, o primeiro run real
-(issue #115) abriu <strong>123 achados, ~120 falso-positivo</strong> — a maioria por tratar contracts subset como
-se listassem o header inteiro (issue #117).</p>
-<h2 id="escopo">Escopo<a class="headerlink" href="#escopo" title="Permanent link">&para;</a></h2>
-<p>Reporta deriva; <strong>não conserta</strong>. O conserto (agente propondo PR sobre contracts pinados ao header
-real) é o loop da bedrock-fm e fica fora daqui.</p>
+<h2 id="exemplos">Exemplos<a class="headerlink" href="#exemplos" title="Permanent link">&para;</a></h2>
+<h3 id="firmas-administradoras-pessoa-juridica">Firmas administradoras (pessoa jurídica)<a class="headerlink" href="#firmas-administradoras-pessoa-juridica" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdmCartPjReader</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">AdmCartPjReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># df_[[&quot;CNPJ&quot;, &quot;DENOM_SOCIAL&quot;, &quot;CATEG_REG&quot;, &quot;SIT&quot;, &quot;MUN&quot;, &quot;UF&quot;]]</span>
+</span></code></pre></div>
+<h3 id="socios-persistir-a-camada-bronze">Sócios + persistir a camada <em>bronze</em><a class="headerlink" href="#socios-persistir-a-camada-bronze" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdmCartSociosReader</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">AdmCartSociosReader</span><span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">path_raw</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/bronze/cvm/cad_adm_cart&quot;</span><span class="p">),</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># df_[[&quot;CNPJ&quot;, &quot;SOCIOS&quot;]] — sem coluna de data: tudo é texto exato.</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># o ZIP inteiro e os cinco membros ficam em disco: um path_raw de qualquer</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># reader serve os outros (todos baixam o mesmo arquivo).</span>
+</span></code></pre></div>
+<p>Cada <code>read</code> levanta <code>OSError</code> (falha de download), <code>ContractError</code> (CSV viola o contrato) ou
+<code>ValueError</code> (membro ausente no arquivo) — falha cedo, sem devolver dados corrompidos.</p>
 
 
 
