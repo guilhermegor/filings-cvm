@@ -896,7 +896,43 @@ df_ = InvnrRepresPjReader().read()
 
 ---
 
-### `Meta*Reader` (27 readers)
+### `IntermedReader` · `IntermedRespReader` (2 readers)
+
+`filings_cvm.ingestion.intermed`
+
+O cadastro dos **intermediários de mercado** (`INTERMED/CAD`, `cad_intermed.zip`) — **snapshot** de
+URL fixa, sem `date_ref`. Inaugura o *portal root* `intermed/` (5ª fatia da Wave 3 do #41). Página
+completa em [Cadastro de Intermediários](ingestion/intermed.md).
+
+⚠️ **Os dois membros NÃO são um split `pf`/`pj`** — são o registro do intermediário e a tabela de
+responsáveis, ambos chaveados pelo `CNPJ` do intermediário:
+
+- `IntermedReader` — `cad_intermed.csv`, registro do intermediário (28 colunas; `CNPJ` mascarado +
+  código CVM/setor/patrimônio/endereço/contato).
+- `IntermedRespReader` — `cad_intermed_resp.csv`, responsáveis (8 colunas; dado pessoal
+  `RESP`/`EMAIL_RESP`, **sem CPF** — o único `CNPJ` é o do intermediário).
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `cad_intermed.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por intermediário (ou responsável). As colunas `DT_*` viram `date`; o restante fica texto
+exato (`CEP`/`TEL`/`FAX`/`CD_CVM`, `numeric` no META, preservam zeros à esquerda). Levanta `OSError`,
+`ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm import IntermedReader
+
+df_ = IntermedReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "TP_PARTIC", "SIT", "MUN", "UF"]]
+```
+
+---
+
+### `Meta*Reader` (28 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -908,7 +944,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
-· `MetaAgenteAutonReader` · `MetaInvnrRepresReader`
+· `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

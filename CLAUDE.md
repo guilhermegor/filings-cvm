@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **27 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **28 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (27 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (28 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -303,6 +303,19 @@ não publica padrão XML de envio). Sob `INVNR/CAD/`:
   `numeric` no META mas ficam `str` (identificadores, não quantidades — o `CEP` já chega sem o zero à
   esquerda). **Quarta fatia da Wave 3 do #41**
 
+**Intermediários** — portal root `intermed/`; **open-data only** (a CVM não publica padrão XML de
+envio). Sob `INTERMED/CAD/`:
+- Cadastro de Intermediários — ✅ **ingestion** `cad_intermed.zip` (**2 membros**) —
+  `ingestion/intermed/cad/{intermed,intermed_resp}.py` (`IntermedReader`, `IntermedRespReader`, base
+  privada `_base_intermed_reader.py`); contracts `_internal/config/contracts/cad_intermed.py`,
+  pinados aos headers em `tests/fixtures/cad_intermed/*_header.csv`. **Snapshot** de URL fixa, **sem
+  `date_ref`**. ⚠️ **Os 2 membros NÃO são split `pf`/`pj`** — são o registro do intermediário
+  (`cad_intermed.csv`, 28 cols, 4 date cols) e a tabela de responsáveis (`cad_intermed_resp.csv`, 8
+  cols, 2 date cols), **ambos chaveados pelo `CNPJ` do intermediário** (mascarado). O `resp` tem dado
+  pessoal (`RESP`/`EMAIL_RESP`) mas **sem coluna de CPF** → `tuple_cnpj_cols=("CNPJ",)` nos dois.
+  ⚠️ `CEP`/`TEL`/`FAX`/`CD_CVM` são `numeric`/`char` no META mas ficam `str`. **Quinta fatia da Wave
+  3 do #41**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -342,6 +355,7 @@ src/filings_cvm/
         agente_fiduc/      #   AGENTE_FIDUC/ — cad/{agente_fiduc_pf,agente_fiduc_pj} (snapshot ZIP, 2 membros, no date_ref)
         agente_auton/      #   AGENTE_AUTON/ — cad/{agente_auton_pf,agente_auton_pj} (snapshot ZIP, 2 membros, no date_ref)
         invnr/             #   INVNR/ — cad/{invnr_repres_pf,invnr_repres_pj} (snapshot ZIP, 2 membros, no date_ref)
+        intermed/          #   INTERMED/ — cad/{intermed,intermed_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

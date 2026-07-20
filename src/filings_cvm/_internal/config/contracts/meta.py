@@ -85,3 +85,4 @@ META_CAD_AGENTE_FIDUC = _meta_contract("cad_agente_fiduc", "META — Cadastro Ag
 META_CAD_INVNR_REPRES = _meta_contract(
 	"cad_invnr_repres", "META — Cadastro Representante de Investidor Não Residente"
 )
+META_CAD_INTERMED = _meta_contract("cad_intermed", "META — Cadastro Intermediário")
