@@ -122,6 +122,14 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   colunas de data no `pj`) e usa `DDD_TEL`; contracts **gerados do header** e **pinados** a fixtures
   verbatim. **Quarta fatia da Wave 3 do #41**.
 
+- **[Cadastro de Intermediários (INTERMED)](intermed.md)** — 2 readers `IntermedReader` /
+  `IntermedRespReader` sobre o `cad_intermed.zip` (intermediários de mercado + tabela de
+  responsáveis). **Snapshot** de URL fixa, **sem `date_ref`**. ⚠️ **Os dois membros NÃO são
+  `pf`/`pj`** — são o registro (28 cols) e os responsáveis (8 cols), ambos chaveados pelo `CNPJ` do
+  intermediário; o membro de responsáveis tem dado pessoal (`RESP`/`EMAIL_RESP`) mas **sem CPF**.
+  `CEP`/`TEL`/`FAX`/`CD_CVM` ficam `str` apesar de `numeric` no META; contracts **gerados do header**
+  e **pinados** a fixtures verbatim. **Quinta fatia da Wave 3 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
