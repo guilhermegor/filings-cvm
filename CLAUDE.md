@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **29 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **30 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (29 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (30 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -332,6 +332,22 @@ padrão XML de envio). Sob `ADM_CART/CAD/`:
   `pj`+`resp`) é **honrado como publicado** (o check exige ao menos um válido). `CEP`/`TEL` `numeric`
   no META mas `str`. **Sexta fatia da Wave 3 do #41**
 
+**Consultores de Valores Mobiliários** — portal root `consultor_vlmob/`; **open-data only** (a CVM
+não publica padrão XML de envio). Sob `CONSULTOR_VLMOB/CAD/`:
+- Cadastro de Consultores de Valores Mobiliários — ✅ **ingestion** `cad_consultor_vlmob.zip`
+  (**5 membros**) — `ingestion/consultor_vlmob/cad/consultor_vlmob_{pf,pj,diretor,resp,socios}.py`
+  (`ConsultorVlmobPfReader`, `ConsultorVlmobPjReader`, `ConsultorVlmobDiretorReader`,
+  `ConsultorVlmobRespReader`, `ConsultorVlmobSociosReader`, base privada
+  `_base_consultor_vlmob_reader.py`); contracts `_internal/config/contracts/cad_consultor_vlmob.py`,
+  pinados aos headers em `tests/fixtures/cad_consultor_vlmob/*_header.csv`. **Snapshot** de URL fixa,
+  **sem `date_ref`**. Mesma forma do ADM_CART: **3 dos 5 membros sem NENHUMA coluna de data**
+  (`diretor`/`resp`/`socios` → `_DATE_COLS=()`). ⚠️ **Não é cópia do ADM_CART** — `pf` chaveado por
+  `NOME` (não `ADMIN`) com 7ª coluna `SITE_ADMIN` (não `CATEG_REG`); `pj` com **20 cols** (não 24),
+  sem `CATEG_REG`/`SUBCATEG_REG`/`VL_PATRIM_LIQ`/`DT_PATRIM_LIQ` → **só 3 date cols**. `pf` **sem
+  CNPJ nem CPF**; satélites com dado pessoal mas **sem CPF** → `tuple_cnpj_cols=("CNPJ",)` (o do
+  consultor). Todos os CNPJ 100% válidos. `CEP`/`TEL` `numeric` no META mas `str`. **Sétima fatia da
+  Wave 3 do #41**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -373,6 +389,7 @@ src/filings_cvm/
         invnr/             #   INVNR/ — cad/{invnr_repres_pf,invnr_repres_pj} (snapshot ZIP, 2 membros, no date_ref)
         intermed/          #   INTERMED/ — cad/{intermed,intermed_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref)
         adm_cart/          #   ADM_CART/ — cad/{adm_cart_pf,adm_cart_pj,adm_cart_diretor,adm_cart_resp,adm_cart_socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
+        consultor_vlmob/   #   CONSULTOR_VLMOB/ — cad/consultor_vlmob_{pf,pj,diretor,resp,socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
