@@ -87,3 +87,6 @@ META_CAD_INVNR_REPRES = _meta_contract(
 )
 META_CAD_INTERMED = _meta_contract("cad_intermed", "META — Cadastro Intermediário")
 META_CAD_ADM_CART = _meta_contract("cad_adm_cart", "META — Cadastro Administrador de Carteira")
+META_CAD_CONSULTOR_VLMOB = _meta_contract(
+	"cad_consultor_vlmob", "META — Cadastro Consultor de Valores Mobiliários"
+)

@@ -971,7 +971,45 @@ df_ = AdmCartPjReader().read()
 
 ---
 
-### `Meta*Reader` (29 readers)
+### `ConsultorVlmobPfReader` · `ConsultorVlmobPjReader` · `ConsultorVlmobDiretorReader` · `ConsultorVlmobRespReader` · `ConsultorVlmobSociosReader` (5 readers)
+
+`filings_cvm.ingestion.consultor_vlmob`
+
+O cadastro dos **consultores de valores mobiliários** (`CONSULTOR_VLMOB/CAD`,
+`cad_consultor_vlmob.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
+`consultor_vlmob/` (7ª fatia da Wave 3 do #41), na mesma forma de 5 membros do ADM_CART. Página
+completa em [Cadastro de Consultores de Valores Mobiliários](ingestion/consultor_vlmob.md).
+
+- `ConsultorVlmobPfReader` — `cad_consultor_vlmob_pf.csv`, consultores pessoa física (7 colunas;
+  **sem CNPJ/CPF**, identifica pelo `NOME`).
+- `ConsultorVlmobPjReader` — `cad_consultor_vlmob_pj.csv`, firmas (20 colunas; `CNPJ` mascarado +
+  endereço/contato). ⚠️ **3 date cols** — sem `DT_PATRIM_LIQ`, ao contrário do ADM_CART.
+- `ConsultorVlmobDiretorReader` / `ConsultorVlmobRespReader` / `ConsultorVlmobSociosReader` — as
+  tabelas de diretores (3 cols), responsáveis (3) e sócios (2), todas chaveadas pelo `CNPJ` do
+  consultor. ⚠️ **Nenhuma tem coluna de data** (`_DATE_COLS = ()`), e carregam dado pessoal
+  (`DIRETOR`/`RESP`/`SOCIOS`) mas **sem CPF**.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os cinco
+readers baixam o mesmo `cad_consultor_vlmob.zip`, então um `path_raw` de qualquer um serve os outros.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por consultor (ou diretor/responsável/sócio). As colunas `DT_*` viram `date` (nos três
+membros sem data, nada é convertido); o restante fica texto exato (`CEP`/`TEL`, `numeric` no META,
+preservam zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm import ConsultorVlmobPjReader
+
+df_ = ConsultorVlmobPjReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "EMAIL"]]
+```
+
+---
+
+### `Meta*Reader` (30 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -983,7 +1021,8 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
-· `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader`
+· `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
+`MetaConsultorVlmobReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

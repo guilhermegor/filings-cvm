@@ -119,6 +119,13 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 		"AdmCartSociosReader",
 	),
 	"MetaAgenteAutonReader": ("AgenteAutonPfReader", "AgenteAutonPjReader"),
+	"MetaConsultorVlmobReader": (
+		"ConsultorVlmobPfReader",
+		"ConsultorVlmobPjReader",
+		"ConsultorVlmobDiretorReader",
+		"ConsultorVlmobRespReader",
+		"ConsultorVlmobSociosReader",
+	),
 	"MetaAgenteFiducReader": ("AgenteFiducPfReader", "AgenteFiducPjReader"),
 	"MetaAuditorReader": ("AuditorPfReader", "AuditorPjReader"),
 	"MetaBalanceteFieReader": ("BalanceteFieReader",),

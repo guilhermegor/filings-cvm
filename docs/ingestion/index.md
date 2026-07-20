@@ -140,6 +140,15 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   Contracts **gerados do header** e **pinados** a fixtures verbatim. **Sexta fatia da Wave 3 do
   #41**.
 
+- **[Cadastro de Consultores de Valores Mobiliários (CONSULTOR_VLMOB)](consultor_vlmob.md)** —
+  **5 readers** `ConsultorVlmobPfReader` / `ConsultorVlmobPjReader` / `ConsultorVlmobDiretorReader` /
+  `ConsultorVlmobRespReader` / `ConsultorVlmobSociosReader` sobre o `cad_consultor_vlmob.zip`.
+  **Snapshot** de URL fixa, **sem `date_ref`**. Mesma forma do ADM_CART — **3 dos 5 membros sem
+  nenhuma coluna de data**. ⚠️ **Não é cópia**: `pf` chaveado por `NOME` (não `ADMIN`), 7ª coluna
+  `SITE_ADMIN`; `pj` com **20 cols** e **só 3 date cols** (sem `DT_PATRIM_LIQ`). Todos os CNPJ 100%
+  válidos. Contracts **gerados do header** e **pinados** a fixtures verbatim. **Sétima fatia da
+  Wave 3 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
