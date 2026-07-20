@@ -932,7 +932,46 @@ df_ = IntermedReader().read()
 
 ---
 
-### `Meta*Reader` (28 readers)
+### `AdmCartPfReader` · `AdmCartPjReader` · `AdmCartDiretorReader` · `AdmCartRespReader` · `AdmCartSociosReader` (5 readers)
+
+`filings_cvm.ingestion.adm_cart`
+
+O cadastro dos **administradores de carteira** (`ADM_CART/CAD`, `cad_adm_cart.zip`) — **snapshot** de
+URL fixa, sem `date_ref`. Inaugura o *portal root* `adm_cart/` e é o **primeiro root de 5 membros**
+(6ª fatia da Wave 3 do #41). Página completa em
+[Cadastro de Administradores de Carteira](ingestion/adm_cart.md).
+
+- `AdmCartPfReader` — `cad_adm_cart_pf.csv`, administradores pessoa física (7 colunas; **sem
+  CNPJ/CPF**, identifica pelo `ADMIN`).
+- `AdmCartPjReader` — `cad_adm_cart_pj.csv`, firmas (24 colunas; `CNPJ` mascarado + categoria/
+  patrimônio/endereço/contato).
+- `AdmCartDiretorReader` / `AdmCartRespReader` / `AdmCartSociosReader` — as tabelas de diretores (3
+  cols), responsáveis (3) e sócios (2), todas chaveadas pelo `CNPJ` do administrador. ⚠️ **Nenhuma
+  tem coluna de data** (`_DATE_COLS = ()`), e carregam dado pessoal (`DIRETOR`/`RESP`/`SOCIOS`) mas
+  **sem CPF**.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os cinco
+readers baixam o mesmo `cad_adm_cart.zip`, então um `path_raw` de qualquer um serve os outros.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por administrador (ou diretor/responsável/sócio). As colunas `DT_*` viram `date` (nos três
+membros sem data, nada é convertido); o restante fica texto exato (`CEP`/`TEL`, `numeric` no META,
+preservam zeros à esquerda). Um CNPJ malformado da fonte (`00.010.354/1901-72`) é **devolvido como
+publicado**. Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm import AdmCartPjReader
+
+df_ = AdmCartPjReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "CATEG_REG", "SIT", "MUN", "UF"]]
+```
+
+---
+
+### `Meta*Reader` (29 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -944,7 +983,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
-· `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader`
+· `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

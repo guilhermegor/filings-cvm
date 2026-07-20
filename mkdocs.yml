@@ -35,6 +35,7 @@ nav:
       - Cadastro de Agentes Autônomos (AGENTE_AUTON): ingestion/agente_auton.md
       - Cadastro de Repres. de Inv. Não Residentes (INVNR): ingestion/invnr.md
       - Cadastro de Intermediários (INTERMED): ingestion/intermed.md
+      - Cadastro de Administradores de Carteira (ADM_CART): ingestion/adm_cart.md
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
       - Completude do portal (job semanal): ingestion/portal_completeness.md
