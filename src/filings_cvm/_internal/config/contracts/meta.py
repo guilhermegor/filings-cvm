@@ -80,4 +80,5 @@ META_INF_MENSAL_CRA = _meta_contract("inf_mensal_cra", "META — Informe Mensal 
 META_INF_MENSAL_CRI = _meta_contract("inf_mensal_cri", "META — Informe Mensal CRI")
 META_CAD_EMISSOR_CEPAC = _meta_contract("cad_emissor_cepac", "META — Cadastro Emissor CEPAC")
 META_CAD_AUDITOR = _meta_contract("cad_auditor", "META — Cadastro Auditor")
+META_CAD_AGENTE_AUTON = _meta_contract("cad_agente_auton", "META — Cadastro Agente Autônomo")
 META_CAD_AGENTE_FIDUC = _meta_contract("cad_agente_fiduc", "META — Cadastro Agente Fiduciário")

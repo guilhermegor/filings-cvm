@@ -106,6 +106,14 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   colunas de data** em vez de 1, sem `CD_CVM`, e o `pj` acrescenta `PAIS`/`DDD_TEL`/`TEL`; contracts
   **gerados do header** e **pinados** a fixtures verbatim. **Segunda fatia da Wave 3 do #41**.
 
+- **[Cadastro de Agentes Autônomos (AGENTE_AUTON)](agente_auton.md)** — 2 readers
+  `AgenteAutonPfReader` / `AgenteAutonPjReader` sobre o `cad_agente_auton.zip` (agentes autônomos de
+  investimento: pessoa física + firmas). **Snapshot** de URL fixa, **sem `date_ref`**. O `pf` **não
+  tem CPF** (identifica pelo `NOME`, que pode vir em branco); `pj.CNPJ` chega mascarado. ⚠️ **Não é
+  cópia dos irmãos** — acrescenta `MOTIVO_CANCEL`/`DENOM_COMERC`/`EMAIL`/`SITE_ADMIN` e usa `DDD`;
+  contracts **gerados do header** e **pinados** a fixtures verbatim. **Terceira fatia da Wave 3 do
+  #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
