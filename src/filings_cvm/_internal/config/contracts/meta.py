@@ -82,3 +82,6 @@ META_CAD_EMISSOR_CEPAC = _meta_contract("cad_emissor_cepac", "META — Cadastro 
 META_CAD_AUDITOR = _meta_contract("cad_auditor", "META — Cadastro Auditor")
 META_CAD_AGENTE_AUTON = _meta_contract("cad_agente_auton", "META — Cadastro Agente Autônomo")
 META_CAD_AGENTE_FIDUC = _meta_contract("cad_agente_fiduc", "META — Cadastro Agente Fiduciário")
+META_CAD_INVNR_REPRES = _meta_contract(
+	"cad_invnr_repres", "META — Cadastro Representante de Investidor Não Residente"
+)

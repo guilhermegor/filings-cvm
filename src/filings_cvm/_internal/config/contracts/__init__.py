@@ -50,6 +50,10 @@ from filings_cvm._internal.config.contracts.cad_fi_hist import (
 	CAD_FI_HIST_TAXA_PERFM,
 	CAD_FI_HIST_TRIB_LPRAZO,
 )
+from filings_cvm._internal.config.contracts.cad_invnr_repres import (
+	CAD_INVNR_REPRES_PF,
+	CAD_INVNR_REPRES_PJ,
+)
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
@@ -163,6 +167,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_CAD_EMISSOR_CEPAC,
 	META_CAD_FI,
 	META_CAD_FI_HIST,
+	META_CAD_INVNR_REPRES,
 	META_CDA_FI,
 	META_COLUMNS,
 	META_DFIN_CRA,
@@ -223,6 +228,8 @@ __all__ = [
 	"CAD_FI_HIST_TAXA_ADM",
 	"CAD_FI_HIST_TAXA_PERFM",
 	"CAD_FI_HIST_TRIB_LPRAZO",
+	"CAD_INVNR_REPRES_PF",
+	"CAD_INVNR_REPRES_PJ",
 	"CDA_FIF",
 	"ContractError",
 	"DFIN_CRA",
@@ -321,6 +328,7 @@ __all__ = [
 	"META_CAD_EMISSOR_CEPAC",
 	"META_CAD_FI",
 	"META_CAD_FI_HIST",
+	"META_CAD_INVNR_REPRES",
 	"META_CDA_FI",
 	"META_COLUMNS",
 	"META_DFIN_CRA",

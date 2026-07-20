@@ -236,6 +236,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaInfTrimestralFipReader": ("InfTrimestralFipReader",),
 	"MetaInformeDiarioReader": ("InformeDiarioReader",),
+	"MetaInvnrRepresReader": ("InvnrRepresPfReader", "InvnrRepresPjReader"),
 	"MetaLaminaReader": ("LaminaReader", "LaminaCarteiraReader"),
 	"MetaMedidasMesFieReader": ("MedidasMesFieReader",),
 	"MetaRegistroReader": (

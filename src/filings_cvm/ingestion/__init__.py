@@ -143,6 +143,11 @@ from filings_cvm.ingestion.fip import (
 	MetaInfQuadrimestralFipReader,
 	MetaInfTrimestralFipReader,
 )
+from filings_cvm.ingestion.invnr import (
+	InvnrRepresPfReader,
+	InvnrRepresPjReader,
+	MetaInvnrRepresReader,
+)
 from filings_cvm.ingestion.securit import (
 	DfinCraReader,
 	DfinCriReader,
@@ -295,6 +300,8 @@ __all__ = [
 	"InfTrimestralFiiTerrenoReader",
 	"InfTrimestralFipReader",
 	"InformeDiarioReader",
+	"InvnrRepresPfReader",
+	"InvnrRepresPjReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"MedidasMesFieReader",
@@ -321,6 +328,7 @@ __all__ = [
 	"MetaInfTrimestralFiiReader",
 	"MetaInfTrimestralFipReader",
 	"MetaInformeDiarioReader",
+	"MetaInvnrRepresReader",
 	"MetaLaminaReader",
 	"MetaMedidasMesFieReader",
 	"MetaRegistroReader",
