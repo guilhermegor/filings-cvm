@@ -829,7 +829,40 @@ df_ = AgenteFiducPjReader().read()
 
 ---
 
-### `Meta*Reader` (25 readers)
+### `AgenteAutonPfReader` · `AgenteAutonPjReader` (2 readers)
+
+`filings_cvm.ingestion.agente_auton`
+
+O cadastro dos **agentes autônomos de investimento** (`AGENTE_AUTON/CAD`, `cad_agente_auton.zip`) —
+**snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `agente_auton/` (3ª fatia da Wave
+3 do #41). Página completa em [Cadastro de Agentes Autônomos](ingestion/agente_auton.md).
+
+- `AgenteAutonPfReader` — `cad_agente_auton_pf.csv`, agentes pessoa física (6 colunas; **sem
+  CNPJ/CPF**, identifica pelo `NOME`, que pode vir em branco).
+- `AgenteAutonPjReader` — `cad_agente_auton_pj.csv`, firmas (19 colunas; `CNPJ` mascarado +
+  denom. comercial/endereço/telefone/e-mail/site).
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `cad_agente_auton.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por agente. `DT_REG`/`DT_CANCEL`/`DT_INI_SIT` viram `date`; o restante fica texto exato
+(`CEP`/`DDD`/`TEL` preservam zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError`
+(membro ausente).
+
+```python
+from filings_cvm import AgenteAutonPjReader
+
+df_ = AgenteAutonPjReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "EMAIL"]]
+```
+
+---
+
+### `Meta*Reader` (26 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -841,6 +874,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaBalanceteFieReader` · `MetaBalancoFieReader` · `MetaMedidasMesFieReader` · `MetaDfinCraReader` ·
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
+· `MetaAgenteAutonReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

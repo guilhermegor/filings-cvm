@@ -1,7 +1,7 @@
 # **META (metadados da CVM) — leitura**
 
 Leitura (← CVM) dos **META** — a *especificação que a própria CVM publica* para cada dataset do
-[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **25 no total**,
+[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **26 no total**,
 todos sob `.../<DATASET>/META/`.
 
 > **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) · [Proveniência](index.md).
@@ -71,7 +71,7 @@ nunca derivada. Os nomes são irregulares de fato: `meta_inf_mensal_cri.zip`, ma
 
 ---
 
-## Os 25 readers
+## Os 26 readers
 
 Todos devolvem **o mesmo formato**: uma linha por campo declarado.
 
@@ -111,8 +111,9 @@ tabela alguma) — como as seis colunas de proveniência. Os **valores** seguem 
 | `EMISSOR_CEPAC/CAD` | `MetaCadEmissorCepacReader` | `.txt` |
 | `AUDITOR/CAD` | `MetaAuditorReader` | `.zip` (2 membros) |
 | `AGENTE_FIDUC/CAD` | `MetaAgenteFiducReader` | `.zip` (2 membros) |
+| `AGENTE_AUTON/CAD` | `MetaAgenteAutonReader` | `.zip` (2 membros) |
 
-> ℹ️ **`FIE/MEDIDAS`** publica `.csv` **e** `.txt`; usamos o **`.txt`**, o formato que os 25
+> ℹ️ **`FIE/MEDIDAS`** publica `.csv` **e** `.txt`; usamos o **`.txt`**, o formato que os 26
 > compartilham.
 
 ---

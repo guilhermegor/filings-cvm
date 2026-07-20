@@ -111,6 +111,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 # names — see the module docstring (the cad_fi / cad_fi_hist / registro traps). Keyed by class
 # name; both sides resolve against ``ingestion.__all__``.
 _META_MEMBERS: dict[str, tuple[str, ...]] = {
+	"MetaAgenteAutonReader": ("AgenteAutonPfReader", "AgenteAutonPjReader"),
 	"MetaAgenteFiducReader": ("AgenteFiducPfReader", "AgenteFiducPjReader"),
 	"MetaAuditorReader": ("AuditorPfReader", "AuditorPjReader"),
 	"MetaBalanceteFieReader": ("BalanceteFieReader",),
