@@ -18,6 +18,13 @@ from __future__ import annotations
 
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
+from filings_cvm._internal.config.contracts.cad_adm_cart import (
+	CAD_ADM_CART_DIRETOR,
+	CAD_ADM_CART_PF,
+	CAD_ADM_CART_PJ,
+	CAD_ADM_CART_RESP,
+	CAD_ADM_CART_SOCIOS,
+)
 from filings_cvm._internal.config.contracts.cad_agente_auton import (
 	CAD_AGENTE_AUTON_PF,
 	CAD_AGENTE_AUTON_PJ,
@@ -162,6 +169,7 @@ from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_F
 from filings_cvm._internal.config.contracts.meta import (
 	META_BALANCETE_FIE,
 	META_BALANCO_FIE,
+	META_CAD_ADM_CART,
 	META_CAD_AGENTE_AUTON,
 	META_CAD_AGENTE_FIDUC,
 	META_CAD_AUDITOR,
@@ -203,6 +211,11 @@ from filings_cvm._internal.utils.tabular_reader import (
 __all__ = [
 	"BALANCETE_FIE",
 	"BALANCO_FIE",
+	"CAD_ADM_CART_DIRETOR",
+	"CAD_ADM_CART_PF",
+	"CAD_ADM_CART_PJ",
+	"CAD_ADM_CART_RESP",
+	"CAD_ADM_CART_SOCIOS",
 	"CAD_AGENTE_AUTON_PF",
 	"CAD_AGENTE_AUTON_PJ",
 	"CAD_AGENTE_FIDUC_PF",
@@ -326,6 +339,7 @@ __all__ = [
 	"MEDIDAS_MES_FIE",
 	"META_BALANCETE_FIE",
 	"META_BALANCO_FIE",
+	"META_CAD_ADM_CART",
 	"META_CAD_AGENTE_AUTON",
 	"META_CAD_AGENTE_FIDUC",
 	"META_CAD_AUDITOR",

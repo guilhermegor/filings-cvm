@@ -130,6 +130,16 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `CEP`/`TEL`/`FAX`/`CD_CVM` ficam `str` apesar de `numeric` no META; contracts **gerados do header**
   e **pinados** a fixtures verbatim. **Quinta fatia da Wave 3 do #41**.
 
+- **[Cadastro de Administradores de Carteira (ADM_CART)](adm_cart.md)** — **5 readers**
+  `AdmCartPfReader` / `AdmCartPjReader` / `AdmCartDiretorReader` / `AdmCartRespReader` /
+  `AdmCartSociosReader` sobre o `cad_adm_cart.zip`. **Snapshot** de URL fixa, **sem `date_ref`**.
+  ⚠️ **Primeiro root de 5 membros**, e **3 deles não têm nenhuma coluna de data**
+  (`diretor`/`resp`/`socios` → `_DATE_COLS = ()`, tudo texto). O `pf` **não tem CNPJ nem CPF**
+  (chave = `ADMIN`); os satélites têm dado pessoal mas **sem CPF** — o único `CNPJ` é o do
+  administrador. Um CNPJ malformado da fonte (`00.010.354/1901-72`) é **devolvido como publicado**.
+  Contracts **gerados do header** e **pinados** a fixtures verbatim. **Sexta fatia da Wave 3 do
+  #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
