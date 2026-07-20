@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **26 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **27 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (26 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (27 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -290,6 +290,19 @@ publica padrão XML de envio). Sob `AGENTE_AUTON/CAD/`:
   `MOTIVO_CANCEL`/`DENOM_COMERC`/`EMAIL`/`SITE_ADMIN`, usa `DDD` (não `DDD_TEL`). **Terceira fatia da
   Wave 3 do #41**
 
+**Representantes de Investidores Não Residentes** — portal root `invnr/`; **open-data only** (a CVM
+não publica padrão XML de envio). Sob `INVNR/CAD/`:
+- Cadastro de Representantes de INVNR — ✅ **ingestion** `cad_invnr_repres.zip` (**2 membros**: `pf`,
+  `pj`) — `ingestion/invnr/cad/{invnr_repres_pf,invnr_repres_pj}.py` (`InvnrRepresPfReader`,
+  `InvnrRepresPjReader`, base privada `_base_invnr_repres_reader.py`); contracts
+  `_internal/config/contracts/cad_invnr_repres.py`, pinados aos headers em
+  `tests/fixtures/cad_invnr_repres/*_header.csv`. **Snapshot** de URL fixa, **sem `date_ref`**. O
+  `pf` (6 cols) **não tem CPF** (chave = `NOME`); `pj` (23 cols) tem `CNPJ` mascarado. ⚠️ **Não é
+  cópia dos irmãos** — acrescenta `CONTROLE_ACIONARIO`/`DDD_FAX`/`FAX`/`VL_PATRIM_LIQ`/`DT_PATRIM_LIQ`
+  (4 date cols no `pj` contra 3 no `pf`), usa `DDD_TEL` (não `DDD`). ⚠️ `CEP`/`TEL`/`FAX` são
+  `numeric` no META mas ficam `str` (identificadores, não quantidades — o `CEP` já chega sem o zero à
+  esquerda). **Quarta fatia da Wave 3 do #41**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -328,6 +341,7 @@ src/filings_cvm/
         auditor/           #   AUDITOR/ — cad/{auditor_pf,auditor_pj} (snapshot ZIP, 2 membros, no date_ref)
         agente_fiduc/      #   AGENTE_FIDUC/ — cad/{agente_fiduc_pf,agente_fiduc_pj} (snapshot ZIP, 2 membros, no date_ref)
         agente_auton/      #   AGENTE_AUTON/ — cad/{agente_auton_pf,agente_auton_pj} (snapshot ZIP, 2 membros, no date_ref)
+        invnr/             #   INVNR/ — cad/{invnr_repres_pf,invnr_repres_pj} (snapshot ZIP, 2 membros, no date_ref)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

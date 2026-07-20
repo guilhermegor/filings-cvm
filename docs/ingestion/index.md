@@ -114,6 +114,14 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   contracts **gerados do header** e **pinados** a fixtures verbatim. **Terceira fatia da Wave 3 do
   #41**.
 
+- **[Cadastro de Repres. de Inv. Não Residentes (INVNR)](invnr.md)** — 2 readers
+  `InvnrRepresPfReader` / `InvnrRepresPjReader` sobre o `cad_invnr_repres.zip` (representantes de
+  investidores não residentes: pessoa física + firmas). **Snapshot** de URL fixa, **sem `date_ref`**.
+  O `pf` **não tem CPF** (identifica pelo `NOME`); `pj.CNPJ` chega mascarado. ⚠️ **Não é cópia dos
+  irmãos** — acrescenta `CONTROLE_ACIONARIO`/`DDD_FAX`/`FAX`/`VL_PATRIM_LIQ`/`DT_PATRIM_LIQ` (4
+  colunas de data no `pj`) e usa `DDD_TEL`; contracts **gerados do header** e **pinados** a fixtures
+  verbatim. **Quarta fatia da Wave 3 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
