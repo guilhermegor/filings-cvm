@@ -31,6 +31,7 @@ nav:
       - Informe Mensal CRA (Securitização): ingestion/inf_mensal_cra.md
       - Informe Mensal CRI (Securitização): ingestion/inf_mensal_cri.md
       - Cadastro de Auditores (AUDITOR): ingestion/auditor.md
+      - Cadastro de Agentes Fiduciários (AGENTE_FIDUC): ingestion/agente_fiduc.md
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
       - Completude do portal (job semanal): ingestion/portal_completeness.md

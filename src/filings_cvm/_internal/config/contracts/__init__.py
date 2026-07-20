@@ -18,6 +18,10 @@ from __future__ import annotations
 
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
+from filings_cvm._internal.config.contracts.cad_agente_fiduc import (
+	CAD_AGENTE_FIDUC_PF,
+	CAD_AGENTE_FIDUC_PJ,
+)
 from filings_cvm._internal.config.contracts.cad_auditor import CAD_AUDITOR_PF, CAD_AUDITOR_PJ
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
 from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
@@ -149,6 +153,7 @@ from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_F
 from filings_cvm._internal.config.contracts.meta import (
 	META_BALANCETE_FIE,
 	META_BALANCO_FIE,
+	META_CAD_AGENTE_FIDUC,
 	META_CAD_AUDITOR,
 	META_CAD_EMISSOR_CEPAC,
 	META_CAD_FI,
@@ -186,6 +191,8 @@ from filings_cvm._internal.utils.tabular_reader import (
 __all__ = [
 	"BALANCETE_FIE",
 	"BALANCO_FIE",
+	"CAD_AGENTE_FIDUC_PF",
+	"CAD_AGENTE_FIDUC_PJ",
 	"CAD_AUDITOR_PF",
 	"CAD_AUDITOR_PJ",
 	"CAD_EMISSOR_CEPAC",
@@ -301,6 +308,7 @@ __all__ = [
 	"MEDIDAS_MES_FIE",
 	"META_BALANCETE_FIE",
 	"META_BALANCO_FIE",
+	"META_CAD_AGENTE_FIDUC",
 	"META_CAD_AUDITOR",
 	"META_CAD_EMISSOR_CEPAC",
 	"META_CAD_FI",
