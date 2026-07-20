@@ -1260,6 +1260,34 @@
   
   
     <li class="md-nav__item">
+      <a href="intermed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Intermediários (INTERMED)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="meta/" class="md-nav__link">
         
   
@@ -1696,6 +1724,15 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
   irmãos</strong> — acrescenta <code>CONTROLE_ACIONARIO</code>/<code>DDD_FAX</code>/<code>FAX</code>/<code>VL_PATRIM_LIQ</code>/<code>DT_PATRIM_LIQ</code> (4
   colunas de data no <code>pj</code>) e usa <code>DDD_TEL</code>; contracts <strong>gerados do header</strong> e <strong>pinados</strong> a fixtures
   verbatim. <strong>Quarta fatia da Wave 3 do #41</strong>.</p>
+</li>
+<li>
+<p><strong><a href="intermed/">Cadastro de Intermediários (INTERMED)</a></strong> — 2 readers <code>IntermedReader</code> /
+  <code>IntermedRespReader</code> sobre o <code>cad_intermed.zip</code> (intermediários de mercado + tabela de
+  responsáveis). <strong>Snapshot</strong> de URL fixa, <strong>sem <code>date_ref</code></strong>. ⚠️ <strong>Os dois membros NÃO são
+  <code>pf</code>/<code>pj</code></strong> — são o registro (28 cols) e os responsáveis (8 cols), ambos chaveados pelo <code>CNPJ</code> do
+  intermediário; o membro de responsáveis tem dado pessoal (<code>RESP</code>/<code>EMAIL_RESP</code>) mas <strong>sem CPF</strong>.
+  <code>CEP</code>/<code>TEL</code>/<code>FAX</code>/<code>CD_CVM</code> ficam <code>str</code> apesar de <code>numeric</code> no META; contracts <strong>gerados do header</strong>
+  e <strong>pinados</strong> a fixtures verbatim. <strong>Quinta fatia da Wave 3 do #41</strong>.</p>
 </li>
 </ul>
 <p>Cada padrão de leitura ganha a sua própria página, com <strong>Descrição</strong> e <strong>Exemplos</strong>, no mesmo
