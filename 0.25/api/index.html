@@ -1061,6 +1061,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ingestion/agente_fiduc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Agentes Fiduciários (AGENTE_FIDUC)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ingestion/meta/" class="md-nav__link">
         
   
@@ -2077,15 +2105,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#metareader-24-readers" class="md-nav__link">
+  <a href="#agentefiducpfreader-agentefiducpjreader-2-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Meta*Reader (24 readers)
+        AgenteFiducPfReader · AgenteFiducPjReader (2 readers)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Meta*Reader (24 readers)">
+    <nav class="md-nav" aria-label="AgenteFiducPfReader · AgenteFiducPjReader (2 readers)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2101,6 +2129,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metareader-25-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Meta*Reader (25 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta*Reader (25 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__path_rawnone-retry_policynone-cls_loggernone_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_17" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -3173,15 +3240,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#metareader-24-readers" class="md-nav__link">
+  <a href="#agentefiducpfreader-agentefiducpjreader-2-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Meta*Reader (24 readers)
+        AgenteFiducPfReader · AgenteFiducPjReader (2 readers)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Meta*Reader (24 readers)">
+    <nav class="md-nav" aria-label="AgenteFiducPfReader · AgenteFiducPjReader (2 readers)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3197,6 +3264,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metareader-25-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Meta*Reader (25 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta*Reader (25 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__path_rawnone-retry_policynone-cls_loggernone_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_17" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -4478,7 +4584,30 @@ preservam zeros à esquerda). Levanta <code>OSError</code>, <code>ContractError<
 </span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="c1"># df_[[&quot;CD_CVM&quot;, &quot;CNPJ&quot;, &quot;DENOM_SOCIAL&quot;, &quot;SIT&quot;, &quot;UF&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="metareader-24-readers"><code>Meta*Reader</code> (24 readers)<a class="headerlink" href="#metareader-24-readers" title="Permanent link">&para;</a></h3>
+<h3 id="agentefiducpfreader-agentefiducpjreader-2-readers"><code>AgenteFiducPfReader</code> · <code>AgenteFiducPjReader</code> (2 readers)<a class="headerlink" href="#agentefiducpfreader-agentefiducpjreader-2-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.agente_fiduc</code></p>
+<p>O cadastro dos <strong>agentes fiduciários</strong> (<code>AGENTE_FIDUC/CAD</code>, <code>cad_agente_fiduc.zip</code>) — <strong>snapshot</strong> de
+URL fixa, sem <code>date_ref</code>. Inaugura o <em>portal root</em> <code>agente_fiduc/</code> (2ª fatia da Wave 3 do #41).
+Página completa em <a href="../ingestion/agente_fiduc/">Cadastro de Agentes Fiduciários</a>.</p>
+<ul>
+<li><code>AgenteFiducPfReader</code> — <code>cad_agente_fiduc_pf.csv</code>, agentes pessoa física (5 colunas; <strong>sem
+  CNPJ/CPF/<code>CD_CVM</code></strong>, identifica só pelo nome).</li>
+<li><code>AgenteFiducPjReader</code> — <code>cad_agente_fiduc_pj.csv</code>, firmas (15 colunas; <code>CNPJ</code> mascarado + endereço/telefone).</li>
+</ul>
+<h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_1"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_1" title="Permanent link">&para;</a></h4>
+<p><strong>Sem <code>date_ref</code></strong> — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo <code>cad_agente_fiduc.zip</code>, então um <code>path_raw</code> de qualquer um serve o outro.</p>
+<h4 id="readint_timeout_s60-pddataframe_16"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_16" title="Permanent link">&para;</a></h4>
+<p>Uma linha por agente. <code>DT_REG</code>/<code>DT_CANCEL</code>/<code>DT_INI_SIT</code> viram <code>date</code>; o restante fica texto exato
+(<code>CEP</code>/<code>DDD_TEL</code>/<code>TEL</code> preservam zeros à esquerda). Levanta <code>OSError</code>, <code>ContractError</code> ou <code>ValueError</code>
+(membro ausente).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgenteFiducPjReader</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">AgenteFiducPjReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># df_[[&quot;CNPJ&quot;, &quot;DENOM_SOCIAL&quot;, &quot;SIT&quot;, &quot;MUN&quot;, &quot;UF&quot;]]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="metareader-25-readers"><code>Meta*Reader</code> (25 readers)<a class="headerlink" href="#metareader-25-readers" title="Permanent link">&para;</a></h3>
 <p>Os <strong>META</strong> — a spec que a própria CVM publica para cada dataset (<code>.../&lt;DATASET&gt;/META/</code>). Um reader
 por dataset; página completa em <a href="../ingestion/meta/">META (metadados da CVM)</a>.</p>
 <p><code>MetaInformeDiarioReader</code> · <code>MetaCdaReader</code> · <code>MetaLaminaReader</code> · <code>MetaCadastroFiReader</code> ·
@@ -4487,19 +4616,19 @@ por dataset; página completa em <a href="../ingestion/meta/">META (metadados da
 <code>MetaInfTrimestralFipReader</code> · <code>MetaInfQuadrimestralFipReader</code> · <code>MetaInfMensalFiagroReader</code> ·
 <code>MetaBalanceteFieReader</code> · <code>MetaBalancoFieReader</code> · <code>MetaMedidasMesFieReader</code> · <code>MetaDfinCraReader</code> ·
 <code>MetaDfinCriReader</code> · <code>MetaInfMensalOtsReader</code> · <code>MetaInfMensalCraReader</code> ·
-<code>MetaInfMensalCriReader</code> · <code>MetaCadEmissorCepacReader</code> · <code>MetaAuditorReader</code></p>
-<h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_1"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_1" title="Permanent link">&para;</a></h4>
+<code>MetaInfMensalCriReader</code> · <code>MetaCadEmissorCepacReader</code> · <code>MetaAuditorReader</code> · <code>MetaAgenteFiducReader</code></p>
+<h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_2"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_2" title="Permanent link">&para;</a></h4>
 <p><strong>Sem <code>date_ref</code></strong> — o META fica numa URL fixa que a CVM sobrescreve no lugar (o precedente do
 <code>CadastroFiReader</code>), então um <code>path_raw</code> gravado é o <strong>único</strong> registro do que a spec dizia naquele
 dia.</p>
-<h4 id="readint_timeout_s60-pddataframe_16"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_16" title="Permanent link">&para;</a></h4>
+<h4 id="readint_timeout_s60-pddataframe_17"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_17" title="Permanent link">&para;</a></h4>
 <p>Uma linha por campo declarado, colunas <code>section</code>, <code>field</code>, <code>description</code>, <code>domain</code>, <code>data_type</code>,
 <code>size</code>, <code>precision</code>, <code>scale</code> (+ as seis de proveniência). Um META <code>.zip</code> multi-membro volta como
 <strong>um único frame longo</strong>, com o membro em <code>section</code>. Levanta <code>OSError</code> (download).</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaInfMensalCraReader</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
-</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="n">df_meta</span> <span class="o">=</span> <span class="n">MetaInfMensalCraReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaInfMensalCraReader</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="n">df_meta</span> <span class="o">=</span> <span class="n">MetaInfMensalCraReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.</span>
 </span></code></pre></div>
 <blockquote>
 <p>⚠️ <strong>A CVM trunca o nome do campo em 50 caracteres</strong> (o header real vai até 60) e a <strong>ordem do
