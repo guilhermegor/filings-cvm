@@ -43,6 +43,10 @@ from filings_cvm.ingestion.cia_estrang import (
 	CadastroCiaEstrangReader,
 	MetaCadCiaEstrangReader,
 )
+from filings_cvm.ingestion.cia_incent import (
+	CadastroCiaIncentReader,
+	MetaCadCiaIncentReader,
+)
 from filings_cvm.ingestion.consultor_vlmob import (
 	ConsultorVlmobDiretorReader,
 	ConsultorVlmobPfReader,
@@ -231,6 +235,7 @@ __all__ = [
 	"BalancoFieReader",
 	"CadastroAdmFiiReader",
 	"CadastroCiaEstrangReader",
+	"CadastroCiaIncentReader",
 	"CadastroEmissorCepacReader",
 	"CadastroFiHistAdminReader",
 	"CadastroFiHistAuditorReader",
@@ -356,6 +361,7 @@ __all__ = [
 	"MetaBalancoFieReader",
 	"MetaCadAdmFiiReader",
 	"MetaCadCiaEstrangReader",
+	"MetaCadCiaIncentReader",
 	"MetaCadEmissorCepacReader",
 	"MetaCadFiHistReader",
 	"MetaCadastroFiReader",
