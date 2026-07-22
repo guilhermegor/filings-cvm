@@ -149,6 +149,13 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   válidos. Contracts **gerados do header** e **pinados** a fixtures verbatim. **Sétima fatia da
   Wave 3 do #41**.
 
+- **[Cadastro de Administradores de FII (ADM_FII)](adm_fii.md)** — **1 reader**
+  `CadastroAdmFiiReader` sobre o `cad_adm_fii.csv` (**CSV solto**, não ZIP; 18 colunas). **Snapshot**
+  de URL fixa, **sem `date_ref`**. 3 colunas de data (`DT_REG`/`DT_CANCEL`/`DT_INI_SIT`;
+  `MOTIVO_CANCEL` é texto, não data); chaveado por `CNPJ` (mascarado), **sem coluna de CPF**.
+  Molde do [Cadastro FI](cadastro_fi.md) / Emissor CEPAC. **Oitava e última fatia da Wave 3 do #41 —
+  encerra a Wave 3**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

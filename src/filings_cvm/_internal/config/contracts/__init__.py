@@ -25,6 +25,7 @@ from filings_cvm._internal.config.contracts.cad_adm_cart import (
 	CAD_ADM_CART_RESP,
 	CAD_ADM_CART_SOCIOS,
 )
+from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
 from filings_cvm._internal.config.contracts.cad_agente_auton import (
 	CAD_AGENTE_AUTON_PF,
 	CAD_AGENTE_AUTON_PJ,
@@ -177,6 +178,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_BALANCETE_FIE,
 	META_BALANCO_FIE,
 	META_CAD_ADM_CART,
+	META_CAD_ADM_FII,
 	META_CAD_AGENTE_AUTON,
 	META_CAD_AGENTE_FIDUC,
 	META_CAD_AUDITOR,
@@ -224,6 +226,7 @@ __all__ = [
 	"CAD_ADM_CART_PJ",
 	"CAD_ADM_CART_RESP",
 	"CAD_ADM_CART_SOCIOS",
+	"CAD_ADM_FII",
 	"CAD_AGENTE_AUTON_PF",
 	"CAD_AGENTE_AUTON_PJ",
 	"CAD_AGENTE_FIDUC_PF",
@@ -353,6 +356,7 @@ __all__ = [
 	"META_BALANCETE_FIE",
 	"META_BALANCO_FIE",
 	"META_CAD_ADM_CART",
+	"META_CAD_ADM_FII",
 	"META_CAD_AGENTE_AUTON",
 	"META_CAD_AGENTE_FIDUC",
 	"META_CAD_AUDITOR",

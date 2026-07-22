@@ -20,6 +20,10 @@ from filings_cvm.ingestion.adm_cart import (
 	AdmCartSociosReader,
 	MetaAdmCartReader,
 )
+from filings_cvm.ingestion.adm_fii import (
+	CadastroAdmFiiReader,
+	MetaCadAdmFiiReader,
+)
 from filings_cvm.ingestion.agente_auton import (
 	AgenteAutonPfReader,
 	AgenteAutonPjReader,
@@ -221,6 +225,7 @@ __all__ = [
 	"AuditorPjReader",
 	"BalanceteFieReader",
 	"BalancoFieReader",
+	"CadastroAdmFiiReader",
 	"CadastroEmissorCepacReader",
 	"CadastroFiHistAdminReader",
 	"CadastroFiHistAuditorReader",
@@ -344,6 +349,7 @@ __all__ = [
 	"MetaAuditorReader",
 	"MetaBalanceteFieReader",
 	"MetaBalancoFieReader",
+	"MetaCadAdmFiiReader",
 	"MetaCadEmissorCepacReader",
 	"MetaCadFiHistReader",
 	"MetaCadastroFiReader",
