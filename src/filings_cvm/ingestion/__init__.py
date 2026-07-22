@@ -192,6 +192,11 @@ from filings_cvm.ingestion.invnr import (
 	InvnrRepresPjReader,
 	MetaInvnrRepresReader,
 )
+from filings_cvm.ingestion.oferta import (
+	MetaOfertaReader,
+	OfertaDistribuicaoReader,
+	OfertaResolucao160Reader,
+)
 from filings_cvm.ingestion.securit import (
 	DfinCraReader,
 	DfinCriReader,
@@ -403,7 +408,10 @@ __all__ = [
 	"MetaInvnrRepresReader",
 	"MetaLaminaReader",
 	"MetaMedidasMesFieReader",
+	"MetaOfertaReader",
 	"MetaRegistroReader",
+	"OfertaDistribuicaoReader",
+	"OfertaResolucao160Reader",
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",

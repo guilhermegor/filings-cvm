@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **35 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **36 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (35 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (36 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -418,6 +418,25 @@ padrão XML de envio). Sob `CROWDFUNDING/CAD/`:
   (o `.txt` dá **404**) com `section` **assimétricas** (`cad_crowdfunding` + `adm_resp` + `socios`).
   `CEP`/`TEL`/`DDD` `numeric` no META mas `str`. **Quarta fatia da Wave 4 do #41**
 
+**Ofertas de Distribuição de Valores Mobiliários** — portal root `oferta/`; **open-data only** (a CVM
+não publica padrão XML de envio). Sob `OFERTA/DISTRIB/`:
+- Ofertas de Distribuição — ✅ **ingestion** `oferta_distribuicao.zip` (**2 membros por regime**) —
+  `ingestion/oferta/distrib/{oferta_distribuicao,oferta_resolucao_160}.py` (`OfertaDistribuicaoReader`,
+  `OfertaResolucao160Reader`, base privada `_base_oferta_reader.py`); contracts
+  `_internal/config/contracts/oferta_distribuicao.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/oferta_distribuicao/*_header.csv` (76/71 cols = risco de transcrição). **Snapshot**
+  de URL fixa, **sem `date_ref`**. ⚠️ **Os 2 membros NÃO são registro+satélite** — são o registro
+  histórico pré-RCVM 160 (`oferta_distribuicao.csv`, 76 cols, 9 date cols, ~48,9k linhas) e os
+  requerimentos RCVM 160 (`oferta_resolucao_160.csv`, 71 cols, 3 date cols, ~13,9k linhas), de
+  **regimes diferentes** com colunas disjuntas → anti-cópia pinada. Colunas monetárias/contagem
+  (`Valor_*`/`Preco_*`/`Nr_*`/`Num_*`/`Qtd_*`/`Qtde_*`) ficam `str` (texto decimal exato → `Decimal`
+  a jusante). 3 CNPJ cols no histórico (`CNPJ_Emissor`/`CNPJ_Lider`/`CNPJ_Ofertante`), 2 no RCVM 160.
+  ⚠️ **`Data_deliberacao_aprovou_oferta` (RCVM 160) chega em `DD/MM/YYYY`** — a coerção é ISO-only,
+  então fica **`str`** (fora de `_DATE_COLS`; consumidor parseia com `dayfirst=True`), não
+  misparseado dia/mês. ⚠️ **A META é um `.zip` de 2 membros** (o `.txt` dá **404**), mas as `section`
+  voltam **simétricas** (`distribuicao`/`resolucao_160`, `_MEMBER_STEM='oferta'`), diferente do
+  INTERMED/COORD_OFERTA. **Quinta fatia da Wave 4 do #41; fecha a issue #14**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -465,6 +484,7 @@ src/filings_cvm/
         cia_incent/        #   CIA_INCENT/ — cad/cadastro (cad_cia_incent.csv, CSV solto, 47 cols, snapshot, no date_ref; 2 CNPJ cols; NÃO é cópia do cia_estrang)
         coord_oferta/      #   COORD_OFERTA/ — cad/{coord_oferta,coord_oferta_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref; META é .zip)
         crowdfunding/      #   CROWDFUNDING/ — cad/{crowdfunding,crowdfunding_adm_resp,crowdfunding_socios} (snapshot ZIP, 3 membros, no date_ref; 2 satélites sem data; META é .zip)
+        oferta/            #   OFERTA/ — distrib/{oferta_distribuicao,oferta_resolucao_160} (snapshot ZIP, 2 membros por regime, no date_ref; NÃO registro+satélite; META é .zip simétrica) — fecha #14
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
