@@ -1145,7 +1145,43 @@ df_ = CoordOfertaReader().read()
 
 ---
 
-### `Meta*Reader` (34 readers)
+### `CrowdfundingReader` · `CrowdfundingAdmRespReader` · `CrowdfundingSociosReader` (3 readers)
+
+`filings_cvm.ingestion.crowdfunding`
+
+O cadastro das **plataformas de crowdfunding** (`CROWDFUNDING/CAD`, `cad_crowdfunding.zip`) —
+**snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `crowdfunding/` (4ª fatia da
+Wave 4 do #41). Página completa em
+[Cadastro de Plataformas de Crowdfunding](ingestion/crowdfunding.md).
+
+- `CrowdfundingReader` — `cad_crowdfunding.csv`, o registro (17 colunas, 2 date cols). ⚠️ **Mais
+  enxuto que os irmãos**: sem `DT_CANCEL`/`MOTIVO_CANCEL`/`CD_CVM`; usa `WEBSITE` (não `SITE_WEB`)
+  e `DDD` (não `DDD_TEL`).
+- `CrowdfundingAdmRespReader` / `CrowdfundingSociosReader` — os administradores responsáveis e os
+  sócios (2 colunas cada). ⚠️ **Nenhuma coluna de data** (`_DATE_COLS = ()`); carregam dado pessoal
+  (`ADM_RESP`, `SOCIO`) mas **sem CPF**, chaveados pelo `CNPJ` da plataforma.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os três
+readers baixam o mesmo `cad_crowdfunding.zip`, então um `path_raw` de qualquer um serve os outros.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por plataforma (ou administrador/sócio). As colunas `DT_*` viram `date` (nos satélites
+nada é convertido); o restante fica texto exato (`CEP`/`TEL`/`DDD`, `numeric` no META, preservam
+zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm import CrowdfundingReader
+
+df_ = CrowdfundingReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "SIT", "WEBSITE", "MUN", "UF"]]
+```
+
+---
+
+### `Meta*Reader` (35 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1159,7 +1195,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaCadCiaIncentReader` · `MetaCoordOfertaReader`
+`MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
