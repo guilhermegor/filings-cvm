@@ -1400,6 +1400,34 @@
   
   
     <li class="md-nav__item">
+      <a href="cia_incent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Companhias Incentivadas (CIA_INCENT)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="meta/" class="md-nav__link">
         
   
@@ -1882,6 +1910,15 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
   <strong>duas colunas de CNPJ</strong> (<code>CNPJ</code> da companhia + <code>CNPJ_AUDITOR</code>); <code>RESP</code> tem nome de pessoa mas
   <strong>sem coluna de CPF</strong>. Contract <strong>gerado do header</strong> e <strong>pinado</strong> a fixture verbatim (49 cols =
   risco de transcrição). Molde do <a href="adm_fii/">ADM_FII</a>. <strong>Abre a Wave 4 do #41</strong>.</p>
+</li>
+<li>
+<p><strong><a href="cia_incent/">Cadastro de Companhias Incentivadas (CIA_INCENT)</a></strong> — <strong>1 reader</strong>
+  <code>CadastroCiaIncentReader</code> sobre o <code>cad_cia_incent.csv</code> (<strong>CSV solto</strong>, não ZIP; <strong>47 colunas</strong>,
+  ~3.570 linhas). <strong>Snapshot</strong> de URL fixa, <strong>sem <code>date_ref</code></strong>. ⚠️ <strong>Não é cópia do CIA_ESTRANG</strong>
+  (tem <code>ST_CIA_INCENT_REG</code>, não tem <code>PAIS_ORIGEM</code>/<code>CD_PAIS_*</code>, usa <code>MUN</code>/<code>UF</code>). 7 colunas de data
+  (<code>DT_INI_CATEG</code> 100% vazia mas é data por contrato; <code>MOTIVO_CANCEL</code> é texto); <strong>duas colunas de
+  CNPJ</strong> (<code>CNPJ</code> + <code>CNPJ_AUDITOR</code>); <code>RESP</code> sem CPF. Contract <strong>gerado do header</strong> e <strong>pinado</strong> a
+  fixture verbatim. <strong>Segunda fatia da Wave 4 do #41</strong>.</p>
 </li>
 </ul>
 <p>Cada padrão de leitura ganha a sua própria página, com <strong>Descrição</strong> e <strong>Exemplos</strong>, no mesmo
