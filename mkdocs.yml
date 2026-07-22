@@ -37,6 +37,7 @@ nav:
       - Cadastro de Intermediários (INTERMED): ingestion/intermed.md
       - Cadastro de Administradores de Carteira (ADM_CART): ingestion/adm_cart.md
       - Cadastro de Consultores de Valores Mobiliários (CONSULTOR_VLMOB): ingestion/consultor_vlmob.md
+      - Cadastro de Administradores de FII (ADM_FII): ingestion/adm_fii.md
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
       - Completude do portal (job semanal): ingestion/portal_completeness.md

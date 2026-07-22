@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **30 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **31 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (30 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (31 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -348,6 +348,17 @@ não publica padrão XML de envio). Sob `CONSULTOR_VLMOB/CAD/`:
   consultor). Todos os CNPJ 100% válidos. `CEP`/`TEL` `numeric` no META mas `str`. **Sétima fatia da
   Wave 3 do #41**
 
+**Administradores de FII** — portal root `adm_fii/`; **open-data only** (a CVM não publica padrão XML
+de envio). Sob `ADM_FII/CAD/`:
+- Cadastro de Administradores de FII — ✅ **ingestion** `cad_adm_fii.csv` (**CSV solto**, não ZIP,
+  18 cols) — `ingestion/adm_fii/cad/cadastro/cadastro.py` (`CadastroAdmFiiReader`); contract
+  `_internal/config/contracts/cad_adm_fii.py` (verificado contra os bytes reais). **Snapshot** de URL
+  fixa, **sem `date_ref`** (molde do `CadastroFiReader` / `CadastroEmissorCepacReader`). ⚠️ **Único
+  membro da Wave 3 num CSV solto** — 1 reader, sem o multi-membro dos irmãos. 3 colunas de data
+  (`DT_REG`/`DT_CANCEL`/`DT_INI_SIT`; `MOTIVO_CANCEL` é TEXTO, não data); chaveado por `CNPJ`
+  (mascarado), **sem coluna de CPF**. `CEP`/`DDD`/`TEL` `numeric` no META mas `str`; usa `DDD` (não
+  `DDD_TEL`). **Oitava e última fatia da Wave 3 do #41 — ENCERRA A WAVE 3 (8/8)**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -390,6 +401,7 @@ src/filings_cvm/
         intermed/          #   INTERMED/ — cad/{intermed,intermed_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref)
         adm_cart/          #   ADM_CART/ — cad/{adm_cart_pf,adm_cart_pj,adm_cart_diretor,adm_cart_resp,adm_cart_socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
         consultor_vlmob/   #   CONSULTOR_VLMOB/ — cad/consultor_vlmob_{pf,pj,diretor,resp,socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
+        adm_fii/           #   ADM_FII/ — cad/cadastro (cad_adm_fii.csv, CSV solto, 18 cols, snapshot, no date_ref) — encerra a Wave 3 do #41
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

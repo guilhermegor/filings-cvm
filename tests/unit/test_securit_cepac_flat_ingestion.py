@@ -1,11 +1,11 @@
-"""Unit tests for the Wave 2 flat-CSV readers (SECURIT DFIN CRA/CRI + EMISSOR_CEPAC CAD).
+"""Unit tests for the flat-CSV readers (SECURIT DFIN CRA/CRI + EMISSOR_CEPAC & ADM_FII CAD).
 
 ``DfinCraReader`` / ``DfinCriReader`` read a year-partitioned plain CSV index (``date_ref`` selects
-the year; ``Link_Download`` returned as text, not followed). ``CadastroEmissorCepacReader`` reads a
-fixed-URL registry **snapshot** — it takes **no** ``date_ref``. A config table drives the shared
-assertions; a couple of reader-specific tests cover the year selection and the snapshot's absent
-``date_ref``. Mock the single I/O boundary (``download_file``); no network (the autouse
-``conftest.py`` guard also blocks any real socket).
+the year; ``Link_Download`` returned as text, not followed). ``CadastroEmissorCepacReader`` and
+``CadastroAdmFiiReader`` read a fixed-URL registry **snapshot** — they take **no** ``date_ref``. A
+config table drives the shared assertions; a couple of reader-specific tests cover the year
+selection and a snapshot's absent ``date_ref``. Mock the single I/O boundary (``download_file``);
+no network (the autouse ``conftest.py`` guard also blocks any real socket).
 """
 
 from dataclasses import dataclass
@@ -15,12 +15,14 @@ from pathlib import Path
 import pytest
 
 from filings_cvm import (
+	CadastroAdmFiiReader,
 	CadastroEmissorCepacReader,
 	DfinCraReader,
 	DfinCriReader,
 	RetryPolicy,
 )
 from filings_cvm._internal.config.contracts import (
+	CAD_ADM_FII,
 	CAD_EMISSOR_CEPAC,
 	DFIN_CRA,
 	DFIN_CRI,
@@ -76,6 +78,16 @@ CASES: tuple[FlatCase, ...] = (
 		"filings_cvm.ingestion.emissor_cepac.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/EMISSOR_CEPAC/CAD/DADOS/cad_emissor_cepac.csv",
 		"cad_emissor_cepac.csv",
+		"CNPJ",
+		("DT_REG", "DT_CANCEL", "DT_INI_SIT"),
+		False,
+	),
+	FlatCase(
+		CadastroAdmFiiReader,
+		CAD_ADM_FII,
+		"filings_cvm.ingestion.adm_fii.cad.cadastro.cadastro",
+		"https://dados.cvm.gov.br/dados/ADM_FII/CAD/DADOS/cad_adm_fii.csv",
+		"cad_adm_fii.csv",
 		"CNPJ",
 		("DT_REG", "DT_CANCEL", "DT_INI_SIT"),
 		False,

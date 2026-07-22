@@ -1009,7 +1009,40 @@ df_ = ConsultorVlmobPjReader().read()
 
 ---
 
-### `Meta*Reader` (30 readers)
+### `CadastroAdmFiiReader` (1 reader)
+
+`filings_cvm.ingestion.adm_fii`
+
+O cadastro das entidades registradas para **administrar FII** (`ADM_FII/CAD`, `cad_adm_fii.csv`) —
+**snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `adm_fii/` e **encerra a Wave 3
+do #41** (8ª e última fatia). Único membro da Wave 3 num **CSV solto** (não ZIP), no molde do
+`CadastroFiReader` / Emissor CEPAC. Página completa em
+[Cadastro de Administradores de FII](ingestion/adm_fii.md).
+
+- `CadastroAdmFiiReader` — `cad_adm_fii.csv`, uma linha por administrador de FII (18 colunas; `CNPJ`
+  mascarado, **sem coluna de CPF**; `MOTIVO_CANCEL` é texto, não data).
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar; um
+`path_raw` persistido é o único registro do snapshot.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por administrador. As colunas `DT_REG` / `DT_CANCEL` / `DT_INI_SIT` viram `date`; o
+restante fica texto exato (`CEP`/`DDD`/`TEL`, `numeric` no META, preservam zeros à esquerda).
+Levanta `OSError` ou `ContractError`.
+
+```python
+from filings_cvm import CadastroAdmFiiReader
+
+df_ = CadastroAdmFiiReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "DENOM_COMERC", "SIT", "MUN", "UF"]]
+```
+
+---
+
+### `Meta*Reader` (31 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1022,7 +1055,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
-`MetaConsultorVlmobReader`
+`MetaConsultorVlmobReader` · `MetaCadAdmFiiReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

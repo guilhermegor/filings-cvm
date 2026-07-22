@@ -90,3 +90,4 @@ META_CAD_ADM_CART = _meta_contract("cad_adm_cart", "META — Cadastro Administra
 META_CAD_CONSULTOR_VLMOB = _meta_contract(
 	"cad_consultor_vlmob", "META — Cadastro Consultor de Valores Mobiliários"
 )
+META_CAD_ADM_FII = _meta_contract("cad_adm_fii", "META — Cadastro Administrador de FII")
