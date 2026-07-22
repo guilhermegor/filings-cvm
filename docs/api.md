@@ -1218,7 +1218,43 @@ df_ = OfertaDistribuicaoReader().read()
 
 ---
 
-### `Meta*Reader` (36 readers)
+### `CadastroCiaAbertaReader` (1 reader)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O cadastro das **companhias abertas** registradas na CVM (`CIA_ABERTA/CAD`, `cad_cia_aberta.csv`) —
+**snapshot** de URL fixa, sem `date_ref`. **Inaugura o *portal root* `cia_aberta/`** — a última e
+maior raiz da Wave 4 do #41. **CSV solto** de 1 reader, no molde do `CadastroCiaEstrangReader`.
+Página completa em [Cadastro de Companhias Abertas](ingestion/cia_aberta_cad.md).
+
+- `CadastroCiaAbertaReader` — `cad_cia_aberta.csv`, uma linha por companhia aberta (47 colunas,
+  ~2.677 linhas). ⚠️ **Não é cópia do CIA_ESTRANG/CIA_INCENT** (chave `CNPJ_CIA`, não `CNPJ`;
+  acrescenta `TP_MERC`). Duas colunas de CNPJ (`CNPJ_CIA` + `CNPJ_AUDITOR`); `RESP` sem CPF.
+
+> ⚠️ CIA_ABERTA tem **9 datasets** — esta seção cobre só o `CAD`. Os 7 `DOC/` (CGVN, DFP, FCA, FRE,
+> IPE, ITR, VLMO) e o `EVENTOS/RECOMPRA_ACOES` virão como readers próprios.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar; um
+`path_raw` persistido é o único registro do snapshot.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por companhia. As **sete** colunas `DT_*` viram `date`; o restante fica texto exato
+(`CD_CVM`/`CEP`/`TEL`/`DDD_*`, `numeric`/`char` no META, preservam zeros à esquerda). Levanta
+`OSError` ou `ContractError`. O contract é **pinado** ao header verbatim (47 cols).
+
+```python
+from filings_cvm import CadastroCiaAbertaReader
+
+df_ = CadastroCiaAbertaReader().read()
+# df_[["CNPJ_CIA", "DENOM_SOCIAL", "TP_MERC", "SIT", "CNPJ_AUDITOR", "AUDITOR"]]
+```
+
+---
+
+### `Meta*Reader` (37 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).

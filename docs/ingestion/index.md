@@ -200,6 +200,14 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `section` simétricas. Contracts **gerados dos headers** e **pinados**. **Quinta fatia da Wave 4 do
   #41**; fecha a issue #14.
 
+- **[Cadastro de Companhias Abertas (CIA_ABERTA/CAD)](cia_aberta_cad.md)** — **1 reader**
+  `CadastroCiaAbertaReader` sobre o `cad_cia_aberta.csv` (**CSV solto**, não ZIP; **47 cols**,
+  ~2.677 linhas). **Snapshot** de URL fixa, **sem `date_ref`**. ⚠️ **Não é cópia do CIA_ESTRANG/
+  CIA_INCENT** (chave `CNPJ_CIA`, não `CNPJ`; acrescenta `TP_MERC`). 7 date cols (`MOTIVO_CANCEL` é
+  texto); **duas colunas de CNPJ** (`CNPJ_CIA` + `CNPJ_AUDITOR`); `RESP` sem CPF. Contract **gerado
+  do header** e **pinado**. **Abre o portal root `cia_aberta/`** — a última e maior raiz da Wave 4;
+  os 7 datasets `DOC/` + `EVENTOS/` virão como readers próprios.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
