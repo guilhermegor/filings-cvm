@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **33 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **34 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (33 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (34 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -384,6 +384,23 @@ XML de envio). Sob `CIA_INCENT/CAD/`:
   **Duas colunas de CNPJ** (`CNPJ` + `CNPJ_AUDITOR`); `RESP` sem CPF. **Segunda fatia da Wave 4 do
   #41**
 
+**Coordenadores de Oferta** — portal root `coord_oferta/`; **open-data only** (a CVM não publica
+padrão XML de envio). Sob `COORD_OFERTA/CAD/`:
+- Cadastro de Coordenadores de Oferta — ✅ **ingestion** `cad_coord_oferta.zip` (**2 membros**) —
+  `ingestion/coord_oferta/cad/{coord_oferta,coord_oferta_resp}.py` (`CoordOfertaReader`,
+  `CoordOfertaRespReader`, base privada `_base_coord_oferta_reader.py`); contracts
+  `_internal/config/contracts/cad_coord_oferta.py`, pinados aos headers em
+  `tests/fixtures/cad_coord_oferta/*_header.csv`. **Snapshot** de URL fixa, **sem `date_ref`**.
+  ⚠️ **Os 2 membros NÃO são split `pf`/`pj`** (molde do INTERMED) — são o registro
+  (`cad_coord_oferta.csv`, 25 cols, 4 date cols) e a tabela de responsáveis
+  (`cad_coord_oferta_resp.csv`, 6 cols, 2 date cols), **ambos chaveados pelo `CNPJ` do coordenador**
+  (100% válidos). O `resp` tem dado pessoal (`RESP`) mas **sem coluna de CPF** →
+  `tuple_cnpj_cols=("CNPJ",)` nos dois. ⚠️ **A META é um `.zip` de 2 membros** (`.txt` dá **404**) —
+  a URL é constante por dataset, jamais derivada — e as `section` voltam **assimétricas**
+  (`cad_coord_oferta` + `resp`), como no INTERMED. `CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*`
+  `numeric`/`char` no META mas `str`. **Terceira fatia da Wave 4 do #41; primeiro ZIP multi-membro
+  da onda**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -429,6 +446,7 @@ src/filings_cvm/
         adm_fii/           #   ADM_FII/ — cad/cadastro (cad_adm_fii.csv, CSV solto, 18 cols, snapshot, no date_ref) — encerra a Wave 3 do #41
         cia_estrang/       #   CIA_ESTRANG/ — cad/cadastro (cad_cia_estrang.csv, CSV solto, 49 cols, snapshot, no date_ref; 2 CNPJ cols) — abre a Wave 4 do #41
         cia_incent/        #   CIA_INCENT/ — cad/cadastro (cad_cia_incent.csv, CSV solto, 47 cols, snapshot, no date_ref; 2 CNPJ cols; NÃO é cópia do cia_estrang)
+        coord_oferta/      #   COORD_OFERTA/ — cad/{coord_oferta,coord_oferta_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref; META é .zip)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

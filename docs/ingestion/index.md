@@ -171,6 +171,15 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   CNPJ** (`CNPJ` + `CNPJ_AUDITOR`); `RESP` sem CPF. Contract **gerado do header** e **pinado** a
   fixture verbatim. **Segunda fatia da Wave 4 do #41**.
 
+- **[Cadastro de Coordenadores de Oferta (COORD_OFERTA)](coord_oferta.md)** — **2 readers**
+  `CoordOfertaReader` (registro, 25 cols, 4 date cols) / `CoordOfertaRespReader` (responsáveis, 6
+  cols, 2 date cols) sobre o `cad_coord_oferta.zip`. **Snapshot** de URL fixa, **sem `date_ref`**.
+  ⚠️ **Os 2 membros não são split `pf`/`pj`** — são registro + responsáveis, **ambos chaveados pelo
+  `CNPJ`** do coordenador (molde do [INTERMED](intermed.md)); `resp` tem dado pessoal mas **sem
+  CPF**. ⚠️ **A META é um `.zip`**, não `.txt` (404), com `section` assimétricas. Contracts
+  **gerados dos headers** e **pinados**. **Terceira fatia da Wave 4 do #41** e o primeiro ZIP
+  multi-membro dela.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

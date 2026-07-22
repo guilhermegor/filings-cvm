@@ -1110,7 +1110,42 @@ df_ = CadastroCiaIncentReader().read()
 
 ---
 
-### `Meta*Reader` (33 readers)
+### `CoordOfertaReader` · `CoordOfertaRespReader` (2 readers)
+
+`filings_cvm.ingestion.coord_oferta`
+
+O cadastro dos **coordenadores de oferta** (`COORD_OFERTA/CAD`, `cad_coord_oferta.zip`) —
+**snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `coord_oferta/` (3ª fatia da
+Wave 4 do #41) e é o **primeiro ZIP multi-membro da Wave 4**, no molde do INTERMED. Página completa
+em [Cadastro de Coordenadores de Oferta](ingestion/coord_oferta.md).
+
+- `CoordOfertaReader` — `cad_coord_oferta.csv`, o registro (25 colunas, 4 date cols: `DT_REG`,
+  `DT_CANCEL`, `DT_INI_SIT`, `DT_PATRIM_LIQ`).
+- `CoordOfertaRespReader` — `cad_coord_oferta_resp.csv`, os responsáveis (6 colunas, 2 date cols).
+  ⚠️ **Não é um split `pf`/`pj`**: é chaveado pelo **`CNPJ` do coordenador**; tem dado pessoal
+  (`RESP`) mas **sem coluna de CPF**.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `cad_coord_oferta.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por coordenador (ou responsável). As colunas `DT_*` viram `date`; o restante fica texto
+exato (`CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*`, `numeric`/`char` no META, preservam zeros à esquerda).
+Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm import CoordOfertaReader
+
+df_ = CoordOfertaReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "VL_PATRIM_LIQ"]]
+```
+
+---
+
+### `Meta*Reader` (34 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1124,7 +1159,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaCadCiaIncentReader`
+`MetaCadCiaIncentReader` · `MetaCoordOfertaReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
