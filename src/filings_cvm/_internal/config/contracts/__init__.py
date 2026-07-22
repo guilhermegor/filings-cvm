@@ -35,6 +35,7 @@ from filings_cvm._internal.config.contracts.cad_agente_fiduc import (
 	CAD_AGENTE_FIDUC_PJ,
 )
 from filings_cvm._internal.config.contracts.cad_auditor import CAD_AUDITOR_PF, CAD_AUDITOR_PJ
+from filings_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
 from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
 from filings_cvm._internal.config.contracts.cad_consultor_vlmob import (
@@ -193,6 +194,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_CAD_AGENTE_AUTON,
 	META_CAD_AGENTE_FIDUC,
 	META_CAD_AUDITOR,
+	META_CAD_CIA_ABERTA,
 	META_CAD_CIA_ESTRANG,
 	META_CAD_CIA_INCENT,
 	META_CAD_CONSULTOR_VLMOB,
@@ -253,6 +255,7 @@ __all__ = [
 	"CAD_AGENTE_FIDUC_PJ",
 	"CAD_AUDITOR_PF",
 	"CAD_AUDITOR_PJ",
+	"CAD_CIA_ABERTA",
 	"CAD_CIA_ESTRANG",
 	"CAD_CIA_INCENT",
 	"CAD_CONSULTOR_VLMOB_DIRETOR",
@@ -387,6 +390,7 @@ __all__ = [
 	"META_CAD_AGENTE_AUTON",
 	"META_CAD_AGENTE_FIDUC",
 	"META_CAD_AUDITOR",
+	"META_CAD_CIA_ABERTA",
 	"META_CAD_CIA_ESTRANG",
 	"META_CAD_CIA_INCENT",
 	"META_CAD_CONSULTOR_VLMOB",

@@ -220,13 +220,13 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **36 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **37 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (36 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (37 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (15) ou `.zip` multi-membro (22); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
 ⚠️ **Três fatos da fonte, honrados verbatim e nunca "consertados":**
   1. **A CVM trunca o nome do campo em exatamente 50 caracteres** (provado 8/8 no CRA; o header real
@@ -437,6 +437,24 @@ não publica padrão XML de envio). Sob `OFERTA/DISTRIB/`:
   voltam **simétricas** (`distribuicao`/`resolucao_160`, `_MEMBER_STEM='oferta'`), diferente do
   INTERMED/COORD_OFERTA. **Quinta fatia da Wave 4 do #41; fecha a issue #14**
 
+**Companhias Abertas** — portal root `cia_aberta/`; **open-data only** (a CVM não publica padrão XML
+de envio). ⚠️ **É o maior root do portal** — três sub-roots: `CAD` (o cadastro, implementado),
+`DOC/{CGVN,DFP,FCA,FRE,IPE,ITR,VLMO}` (7 datasets de demonstrações, **pendentes**) e `EVENTOS`
+(**pendente**). Cada sub-dataset precisa de grounding próprio; não presumir a forma do vizinho.
+Sob `CIA_ABERTA/CAD/`:
+- Cadastro de Companhias Abertas — ✅ **ingestion** `cad_cia_aberta.csv` (**CSV solto**, não ZIP,
+  **47 cols**, ~2.677 linhas) — `ingestion/cia_aberta/cad/cadastro/cadastro.py`
+  (`CadastroCiaAbertaReader`); contract `_internal/config/contracts/cad_cia_aberta.py`, **gerado do
+  header e pinado** a `tests/fixtures/cad_cia_aberta/cad_cia_aberta_header.csv`. **Snapshot** de URL
+  fixa, **sem `date_ref`** (molde do `CadastroCiaEstrangReader`/`CadastroCiaIncentReader`).
+  ⚠️ **Não é cópia dos irmãos CIA_\*** — a chave é `CNPJ_CIA` (não `CNPJ`) e acrescenta `TP_MERC`
+  (BOLSA / BALCÃO ORGANIZADO / BALCÃO NÃO ORGANIZADO). **7 colunas de data** (`MOTIVO_CANCEL` é
+  TEXTO). **Duas colunas de CNPJ** (`CNPJ_CIA` 2.677 + `CNPJ_AUDITOR` 2.577 preenchidos); `RESP` tem
+  nome de pessoa mas **sem coluna de CPF**. ⚠️ **A META é um `.txt` solto** de seção única
+  (`meta_cad_cia_aberta.txt`, 47 campos) — ao contrário dos `.zip` do COORD_OFERTA/CROWDFUNDING/
+  OFERTA. `CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*` `numeric`/`char` no META mas `str`. **Sexta fatia da
+  Wave 4 do #41; abre o root `cia_aberta/` (1/9 datasets)**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -485,6 +503,7 @@ src/filings_cvm/
         coord_oferta/      #   COORD_OFERTA/ — cad/{coord_oferta,coord_oferta_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref; META é .zip)
         crowdfunding/      #   CROWDFUNDING/ — cad/{crowdfunding,crowdfunding_adm_resp,crowdfunding_socios} (snapshot ZIP, 3 membros, no date_ref; 2 satélites sem data; META é .zip)
         oferta/            #   OFERTA/ — distrib/{oferta_distribuicao,oferta_resolucao_160} (snapshot ZIP, 2 membros por regime, no date_ref; NÃO registro+satélite; META é .zip simétrica) — fecha #14
+        cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto). DOC/{CGVN,DFP,FCA,FRE,IPE,ITR,VLMO} + EVENTOS pendentes
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
