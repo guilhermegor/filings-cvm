@@ -1042,7 +1042,41 @@ df_ = CadastroAdmFiiReader().read()
 
 ---
 
-### `Meta*Reader` (31 readers)
+### `CadastroCiaEstrangReader` (1 reader)
+
+`filings_cvm.ingestion.cia_estrang`
+
+O cadastro das **companhias estrangeiras** registradas na CVM (`CIA_ESTRANG/CAD`,
+`cad_cia_estrang.csv`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
+`cia_estrang/` e **abre a Wave 4 do #41**. **CSV solto** de 1 reader, no molde do
+`CadastroAdmFiiReader`. Página completa em
+[Cadastro de Companhias Estrangeiras](ingestion/cia_estrang.md).
+
+- `CadastroCiaEstrangReader` — `cad_cia_estrang.csv`, uma linha por companhia estrangeira (49
+  colunas; **duas colunas de CNPJ**: `CNPJ` da companhia + `CNPJ_AUDITOR`; `RESP` tem nome de
+  pessoa mas **sem CPF**; `MOTIVO_CANCEL` é texto, não data).
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar; um
+`path_raw` persistido é o único registro do snapshot.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por companhia. As **sete** colunas `DT_*` viram `date`; o restante fica texto exato
+(`CD_CVM`/`CEP`/`TEL`/`DDD_*`, `numeric`/`char` no META, preservam zeros à esquerda). Levanta
+`OSError` ou `ContractError`. O contract é **pinado** ao header verbatim (49 cols).
+
+```python
+from filings_cvm import CadastroCiaEstrangReader
+
+df_ = CadastroCiaEstrangReader().read()
+# df_[["CNPJ", "DENOM_SOCIAL", "PAIS_ORIGEM", "SIT", "CNPJ_AUDITOR", "AUDITOR"]]
+```
+
+---
+
+### `Meta*Reader` (32 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1055,7 +1089,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaDfinCriReader` · `MetaInfMensalOtsReader` · `MetaInfMensalCraReader` ·
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
-`MetaConsultorVlmobReader` · `MetaCadAdmFiiReader`
+`MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
