@@ -97,3 +97,4 @@ META_CAD_COORD_OFERTA = _meta_contract("cad_coord_oferta", "META — Cadastro Co
 META_CAD_CROWDFUNDING = _meta_contract(
 	"cad_crowdfunding", "META — Cadastro Plataforma de Crowdfunding"
 )
+META_OFERTA_DISTRIBUICAO = _meta_contract("oferta_distribuicao", "META — Oferta de Distribuição")

@@ -189,6 +189,17 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   `CD_CVM`; usa `WEBSITE` e `DDD`) — anti-cópia pinada por teste. ⚠️ **A META é um `.zip`** de 3
   membros, com `section` assimétricas. **Quarta fatia da Wave 4 do #41**.
 
+- **[Ofertas de Distribuição (OFERTA/DISTRIB)](oferta_distrib.md)** — **2 readers**
+  `OfertaDistribuicaoReader` (histórico pré-RCVM 160, 76 cols, 9 date cols, ~48,9k linhas) /
+  `OfertaResolucao160Reader` (RCVM 160, 71 cols, 3 date cols, ~13,9k linhas) sobre o
+  `oferta_distribuicao.zip`. **Snapshot** de URL fixa, **sem `date_ref`**. ⚠️ **Não é
+  registro+satélite** — são duas tabelas de **regimes diferentes** com colunas disjuntas
+  (anti-cópia pinada). Colunas monetárias/contagem ficam `str` (texto decimal exato → `Decimal` a
+  jusante); múltiplas colunas de CNPJ por membro. ⚠️ `Data_deliberacao_aprovou_oferta` chega em
+  `DD/MM/YYYY` → fica `str` (a coerção é ISO-only). ⚠️ **A META é um `.zip`** de 2 membros, com
+  `section` simétricas. Contracts **gerados dos headers** e **pinados**. **Quinta fatia da Wave 4 do
+  #41**; fecha a issue #14.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
