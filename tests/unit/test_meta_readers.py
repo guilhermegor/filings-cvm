@@ -1,6 +1,7 @@
 """Unit tests for the META contracts and readers."""
 
 from pathlib import Path
+import re
 import shutil
 import zipfile
 
@@ -119,6 +120,75 @@ def test_every_meta_reader_is_public_and_declares_its_url() -> None:
 		assert "/META/" in cls_reader._META_URL
 		assert cls_reader._CONTRACT.str_source_key.startswith("meta_")
 		assert cls_reader._RETRY_POLICY is not None
+
+
+_PATH_DOC_META = Path(__file__).resolve().parents[2] / "docs" / "ingestion" / "meta.md"
+
+# The three phrasings in which `meta.md` states how many Meta readers there are. Matching an
+# explicit set (rather than any bare number) keeps the gate from tripping on the unrelated
+# "41 campos" / "19 membros" figures the same page carries.
+_RE_DOC_COUNTS = re.compile(r"(\d+) no total|Os (\d+) readers|que os (\d+) compartilham")
+
+
+def _exported_meta_reader_names() -> set[str]:
+	"""Return the Meta readers the package exposes — the only source of truth here."""
+	import filings_cvm
+
+	return {
+		str_name
+		for str_name in filings_cvm.__all__
+		if str_name.startswith("Meta") and str_name.endswith("Reader")
+	}
+
+
+def _meta_reader_names_in_docs_roster() -> tuple[str, ...]:
+	"""Reader names listed in the roster table of ``docs/ingestion/meta.md``.
+
+	Scoped to the section under the ``## Os N readers`` heading: the page carries a second table
+	(the ``meta_cad_fi.txt`` vs ``.zip`` one) whose rows also name readers.
+	"""
+	list_lines = _PATH_DOC_META.read_text(encoding="utf-8").splitlines()
+	int_start = next(
+		i for i, s in enumerate(list_lines) if s.startswith("## Os ") and s.endswith(" readers")
+	)
+
+	list_names: list[str] = []
+	for str_line in list_lines[int_start + 1 :]:
+		if str_line.startswith("## "):
+			break
+		list_cells = [s.strip() for s in str_line.strip().strip("|").split("|")]
+		if len(list_cells) == 3 and list_cells[1].startswith("`Meta"):
+			list_names.append(list_cells[1].strip("`"))
+	return tuple(list_names)
+
+
+def test_docs_meta_roster_lists_every_exported_reader() -> None:
+	"""The published roster is derived from the code, never trusted as prose.
+
+	`docs/ingestion/meta.md` sat at "30 readers" through **seven** consecutive reader PRs while
+	`docs/api.md` correctly said 37 — so nothing ever looked inconsistent, because no gate
+	compared either page to the package. A new `Meta*Reader` whose row is missing now fails here
+	instead of shipping a wrong published page (#155).
+	"""
+	tuple_documented = _meta_reader_names_in_docs_roster()
+
+	assert set(tuple_documented) == _exported_meta_reader_names()
+	assert len(tuple_documented) == len(set(tuple_documented))
+
+
+def test_docs_meta_reader_counts_match_the_real_total() -> None:
+	"""Every "N readers" claim on the page equals the number of readers that exist."""
+	int_total = len(_exported_meta_reader_names())
+	str_flat = " ".join(_PATH_DOC_META.read_text(encoding="utf-8").split())
+
+	list_found = [
+		int(next(s for s in match.groups() if s)) for match in _RE_DOC_COUNTS.finditer(str_flat)
+	]
+
+	# A gate that silently matches nothing is worse than no gate at all. Reworded prose must fail
+	# loudly right here, rather than quietly stop checking anything.
+	assert list_found, "no reader-count claim found in meta.md — did its wording change?"
+	assert set(list_found) == {int_total}
 
 
 def test_meta_source_keys_are_unique_across_every_reader() -> None:
