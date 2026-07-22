@@ -60,6 +60,12 @@ from filings_cvm.ingestion.coord_oferta import (
 	CoordOfertaRespReader,
 	MetaCoordOfertaReader,
 )
+from filings_cvm.ingestion.crowdfunding import (
+	CrowdfundingAdmRespReader,
+	CrowdfundingReader,
+	CrowdfundingSociosReader,
+	MetaCrowdfundingReader,
+)
 from filings_cvm.ingestion.emissor_cepac import (
 	CadastroEmissorCepacReader,
 	MetaCadEmissorCepacReader,
@@ -270,6 +276,9 @@ __all__ = [
 	"ConsultorVlmobSociosReader",
 	"CoordOfertaReader",
 	"CoordOfertaRespReader",
+	"CrowdfundingAdmRespReader",
+	"CrowdfundingReader",
+	"CrowdfundingSociosReader",
 	"DfinCraReader",
 	"DfinCriReader",
 	"DfinFiiReader",
@@ -375,6 +384,7 @@ __all__ = [
 	"MetaCdaReader",
 	"MetaConsultorVlmobReader",
 	"MetaCoordOfertaReader",
+	"MetaCrowdfundingReader",
 	"MetaDfinCraReader",
 	"MetaDfinCriReader",
 	"MetaDfinFiiReader",

@@ -48,6 +48,11 @@ from filings_cvm._internal.config.contracts.cad_coord_oferta import (
 	CAD_COORD_OFERTA,
 	CAD_COORD_OFERTA_RESP,
 )
+from filings_cvm._internal.config.contracts.cad_crowdfunding import (
+	CAD_CROWDFUNDING,
+	CAD_CROWDFUNDING_ADM_RESP,
+	CAD_CROWDFUNDING_SOCIOS,
+)
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
 from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
 from filings_cvm._internal.config.contracts.cad_fi_hist import (
@@ -192,6 +197,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_CAD_CIA_INCENT,
 	META_CAD_CONSULTOR_VLMOB,
 	META_CAD_COORD_OFERTA,
+	META_CAD_CROWDFUNDING,
 	META_CAD_EMISSOR_CEPAC,
 	META_CAD_FI,
 	META_CAD_FI_HIST,
@@ -251,6 +257,9 @@ __all__ = [
 	"CAD_CONSULTOR_VLMOB_SOCIOS",
 	"CAD_COORD_OFERTA",
 	"CAD_COORD_OFERTA_RESP",
+	"CAD_CROWDFUNDING",
+	"CAD_CROWDFUNDING_ADM_RESP",
+	"CAD_CROWDFUNDING_SOCIOS",
 	"CAD_EMISSOR_CEPAC",
 	"CAD_FI",
 	"CAD_FI_HIST_ADMIN",
@@ -377,6 +386,7 @@ __all__ = [
 	"META_CAD_CIA_INCENT",
 	"META_CAD_CONSULTOR_VLMOB",
 	"META_CAD_COORD_OFERTA",
+	"META_CAD_CROWDFUNDING",
 	"META_CAD_EMISSOR_CEPAC",
 	"META_CAD_FI",
 	"META_CAD_FI_HIST",

@@ -180,6 +180,15 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   **gerados dos headers** e **pinados**. **Terceira fatia da Wave 4 do #41** e o primeiro ZIP
   multi-membro dela.
 
+- **[Cadastro de Plataformas de Crowdfunding (CROWDFUNDING)](crowdfunding.md)** — **3 readers**
+  `CrowdfundingReader` (registro, 17 cols, 2 date cols) / `CrowdfundingAdmRespReader` /
+  `CrowdfundingSociosReader` (satélites, 2 cols cada) sobre o `cad_crowdfunding.zip`. **Snapshot**
+  de URL fixa, **sem `date_ref`**. ⚠️ **Os 2 satélites não têm nenhuma coluna de data**
+  (`_DATE_COLS = ()`) e têm dado pessoal mas **sem CPF**; todos chaveados pelo `CNPJ` da
+  plataforma. ⚠️ **O registro é mais enxuto que os irmãos** (sem `DT_CANCEL`/`MOTIVO_CANCEL`/
+  `CD_CVM`; usa `WEBSITE` e `DDD`) — anti-cópia pinada por teste. ⚠️ **A META é um `.zip`** de 3
+  membros, com `section` assimétricas. **Quarta fatia da Wave 4 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

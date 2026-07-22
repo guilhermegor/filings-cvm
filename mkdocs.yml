@@ -41,6 +41,7 @@ nav:
       - Cadastro de Companhias Estrangeiras (CIA_ESTRANG): ingestion/cia_estrang.md
       - Cadastro de Companhias Incentivadas (CIA_INCENT): ingestion/cia_incent.md
       - Cadastro de Coordenadores de Oferta (COORD_OFERTA): ingestion/coord_oferta.md
+      - Cadastro de Plataformas de Crowdfunding (CROWDFUNDING): ingestion/crowdfunding.md
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
       - Completude do portal (job semanal): ingestion/portal_completeness.md

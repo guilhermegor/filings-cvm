@@ -94,3 +94,6 @@ META_CAD_ADM_FII = _meta_contract("cad_adm_fii", "META — Cadastro Administrado
 META_CAD_CIA_ESTRANG = _meta_contract("cad_cia_estrang", "META — Cadastro Companhia Estrangeira")
 META_CAD_CIA_INCENT = _meta_contract("cad_cia_incent", "META — Cadastro Companhia Incentivada")
 META_CAD_COORD_OFERTA = _meta_contract("cad_coord_oferta", "META — Cadastro Coordenador de Oferta")
+META_CAD_CROWDFUNDING = _meta_contract(
+	"cad_crowdfunding", "META — Cadastro Plataforma de Crowdfunding"
+)

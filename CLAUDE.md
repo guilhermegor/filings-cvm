@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **34 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **35 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (34 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (35 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -401,6 +401,23 @@ padrão XML de envio). Sob `COORD_OFERTA/CAD/`:
   `numeric`/`char` no META mas `str`. **Terceira fatia da Wave 4 do #41; primeiro ZIP multi-membro
   da onda**
 
+**Plataformas de Crowdfunding** — portal root `crowdfunding/`; **open-data only** (a CVM não publica
+padrão XML de envio). Sob `CROWDFUNDING/CAD/`:
+- Cadastro de Plataformas de Crowdfunding — ✅ **ingestion** `cad_crowdfunding.zip` (**3 membros**) —
+  `ingestion/crowdfunding/cad/{crowdfunding,crowdfunding_adm_resp,crowdfunding_socios}.py`
+  (`CrowdfundingReader`, `CrowdfundingAdmRespReader`, `CrowdfundingSociosReader`, base privada
+  `_base_crowdfunding_reader.py`); contracts `_internal/config/contracts/cad_crowdfunding.py`,
+  pinados aos headers em `tests/fixtures/cad_crowdfunding/*_header.csv`. **Snapshot** de URL fixa,
+  **sem `date_ref`**. ⚠️ **Não é split `pf`/`pj`** — registro (17 cols, 2 date cols) + 2 satélites
+  (`adm_resp` e `socios`, 2 cols cada), **todos chaveados pelo `CNPJ` da plataforma** (100%
+  válidos). ⚠️ **Os 2 satélites não têm NENHUMA coluna de data** (`_DATE_COLS=()`, forma do
+  ADM_CART); têm dado pessoal (`ADM_RESP`; `SOCIO` mistura PF e PJ) mas **sem coluna de CPF**.
+  ⚠️ **O registro é mais ENXUTO que os irmãos** — **sem** `DT_CANCEL`/`MOTIVO_CANCEL`/`CD_CVM`, e
+  grafa `WEBSITE` (não `SITE_WEB`) e `DDD` (não `DDD_TEL`); copiar o COORD_OFERTA embarcaria colunas
+  erradas com os testes verdes → anti-cópia pinada por teste. ⚠️ **A META é um `.zip` de 3 membros**
+  (o `.txt` dá **404**) com `section` **assimétricas** (`cad_crowdfunding` + `adm_resp` + `socios`).
+  `CEP`/`TEL`/`DDD` `numeric` no META mas `str`. **Quarta fatia da Wave 4 do #41**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -447,6 +464,7 @@ src/filings_cvm/
         cia_estrang/       #   CIA_ESTRANG/ — cad/cadastro (cad_cia_estrang.csv, CSV solto, 49 cols, snapshot, no date_ref; 2 CNPJ cols) — abre a Wave 4 do #41
         cia_incent/        #   CIA_INCENT/ — cad/cadastro (cad_cia_incent.csv, CSV solto, 47 cols, snapshot, no date_ref; 2 CNPJ cols; NÃO é cópia do cia_estrang)
         coord_oferta/      #   COORD_OFERTA/ — cad/{coord_oferta,coord_oferta_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref; META é .zip)
+        crowdfunding/      #   CROWDFUNDING/ — cad/{crowdfunding,crowdfunding_adm_resp,crowdfunding_socios} (snapshot ZIP, 3 membros, no date_ref; 2 satélites sem data; META é .zip)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
