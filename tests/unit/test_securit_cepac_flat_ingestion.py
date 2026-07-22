@@ -17,6 +17,7 @@ import pytest
 from filings_cvm import (
 	CadastroAdmFiiReader,
 	CadastroCiaEstrangReader,
+	CadastroCiaIncentReader,
 	CadastroEmissorCepacReader,
 	DfinCraReader,
 	DfinCriReader,
@@ -25,6 +26,7 @@ from filings_cvm import (
 from filings_cvm._internal.config.contracts import (
 	CAD_ADM_FII,
 	CAD_CIA_ESTRANG,
+	CAD_CIA_INCENT,
 	CAD_EMISSOR_CEPAC,
 	DFIN_CRA,
 	DFIN_CRI,
@@ -95,6 +97,23 @@ CASES: tuple[FlatCase, ...] = (
 		"filings_cvm.ingestion.cia_estrang.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv",
 		"cad_cia_estrang.csv",
+		(
+			"DT_REG",
+			"DT_CONST",
+			"DT_CANCEL",
+			"DT_INI_SIT",
+			"DT_INI_CATEG",
+			"DT_INI_SIT_EMISSOR",
+			"DT_INI_RESP",
+		),
+		False,
+	),
+	FlatCase(
+		CadastroCiaIncentReader,
+		CAD_CIA_INCENT,
+		"filings_cvm.ingestion.cia_incent.cad.cadastro.cadastro",
+		"https://dados.cvm.gov.br/dados/CIA_INCENT/CAD/DADOS/cad_cia_incent.csv",
+		"cad_cia_incent.csv",
 		(
 			"DT_REG",
 			"DT_CONST",
@@ -349,3 +368,14 @@ def test_cia_estrang_contract_matches_the_published_header() -> None:
 	)
 
 	assert CAD_CIA_ESTRANG.tuple_required == tuple(str_line.split(";"))
+
+
+def test_cia_incent_contract_matches_the_published_header() -> None:
+	"""``CAD_CIA_INCENT`` columns equal the verbatim published header, in order."""
+	str_line = (
+		(_PATH_FIXTURES / "cad_cia_incent" / "cad_cia_incent_header.csv")
+		.read_text(encoding="ISO-8859-1")
+		.strip()
+	)
+
+	assert CAD_CIA_INCENT.tuple_required == tuple(str_line.split(";"))

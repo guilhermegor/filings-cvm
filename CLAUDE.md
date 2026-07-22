@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **32 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **33 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (32 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (33 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -372,6 +372,18 @@ padrão XML de envio). Sob `CIA_ESTRANG/CAD/`:
   coluna de CPF**. `CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*`/`CD_PAIS_*` `numeric`/`char` no META mas `str`.
   **ABRE A WAVE 4 do #41** (companhias/ofertas)
 
+**Companhias Incentivadas** — portal root `cia_incent/`; **open-data only** (a CVM não publica padrão
+XML de envio). Sob `CIA_INCENT/CAD/`:
+- Cadastro de Companhias Incentivadas — ✅ **ingestion** `cad_cia_incent.csv` (**CSV solto**, não ZIP,
+  **47 cols**, ~3.570 linhas) — `ingestion/cia_incent/cad/cadastro/cadastro.py`
+  (`CadastroCiaIncentReader`); contract `_internal/config/contracts/cad_cia_incent.py`, **gerado do
+  header e pinado** a `tests/fixtures/cad_cia_incent/cad_cia_incent_header.csv`. **Snapshot** de URL
+  fixa, **sem `date_ref`**. ⚠️ **Não é cópia do CIA_ESTRANG** — acrescenta `ST_CIA_INCENT_REG`, **não
+  tem** `PAIS_ORIGEM`/`CD_PAIS_*`, usa `MUN`/`UF` (não `CIDADE`/`ESTADO`). **7 colunas de data**
+  (`MOTIVO_CANCEL` é TEXTO; ⚠️ `DT_INI_CATEG` chega 100% vazia mas é data por contrato → tudo `NaT`).
+  **Duas colunas de CNPJ** (`CNPJ` + `CNPJ_AUDITOR`); `RESP` sem CPF. **Segunda fatia da Wave 4 do
+  #41**
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -416,6 +428,7 @@ src/filings_cvm/
         consultor_vlmob/   #   CONSULTOR_VLMOB/ — cad/consultor_vlmob_{pf,pj,diretor,resp,socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
         adm_fii/           #   ADM_FII/ — cad/cadastro (cad_adm_fii.csv, CSV solto, 18 cols, snapshot, no date_ref) — encerra a Wave 3 do #41
         cia_estrang/       #   CIA_ESTRANG/ — cad/cadastro (cad_cia_estrang.csv, CSV solto, 49 cols, snapshot, no date_ref; 2 CNPJ cols) — abre a Wave 4 do #41
+        cia_incent/        #   CIA_INCENT/ — cad/cadastro (cad_cia_incent.csv, CSV solto, 47 cols, snapshot, no date_ref; 2 CNPJ cols; NÃO é cópia do cia_estrang)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

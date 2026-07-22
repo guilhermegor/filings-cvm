@@ -163,6 +163,14 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   **sem coluna de CPF**. Contract **gerado do header** e **pinado** a fixture verbatim (49 cols =
   risco de transcrição). Molde do [ADM_FII](adm_fii.md). **Abre a Wave 4 do #41**.
 
+- **[Cadastro de Companhias Incentivadas (CIA_INCENT)](cia_incent.md)** — **1 reader**
+  `CadastroCiaIncentReader` sobre o `cad_cia_incent.csv` (**CSV solto**, não ZIP; **47 colunas**,
+  ~3.570 linhas). **Snapshot** de URL fixa, **sem `date_ref`**. ⚠️ **Não é cópia do CIA_ESTRANG**
+  (tem `ST_CIA_INCENT_REG`, não tem `PAIS_ORIGEM`/`CD_PAIS_*`, usa `MUN`/`UF`). 7 colunas de data
+  (`DT_INI_CATEG` 100% vazia mas é data por contrato; `MOTIVO_CANCEL` é texto); **duas colunas de
+  CNPJ** (`CNPJ` + `CNPJ_AUDITOR`); `RESP` sem CPF. Contract **gerado do header** e **pinado** a
+  fixture verbatim. **Segunda fatia da Wave 4 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 
