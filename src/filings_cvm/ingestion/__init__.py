@@ -55,6 +55,11 @@ from filings_cvm.ingestion.consultor_vlmob import (
 	ConsultorVlmobSociosReader,
 	MetaConsultorVlmobReader,
 )
+from filings_cvm.ingestion.coord_oferta import (
+	CoordOfertaReader,
+	CoordOfertaRespReader,
+	MetaCoordOfertaReader,
+)
 from filings_cvm.ingestion.emissor_cepac import (
 	CadastroEmissorCepacReader,
 	MetaCadEmissorCepacReader,
@@ -263,6 +268,8 @@ __all__ = [
 	"ConsultorVlmobPjReader",
 	"ConsultorVlmobRespReader",
 	"ConsultorVlmobSociosReader",
+	"CoordOfertaReader",
+	"CoordOfertaRespReader",
 	"DfinCraReader",
 	"DfinCriReader",
 	"DfinFiiReader",
@@ -367,6 +374,7 @@ __all__ = [
 	"MetaCadastroFiReader",
 	"MetaCdaReader",
 	"MetaConsultorVlmobReader",
+	"MetaCoordOfertaReader",
 	"MetaDfinCraReader",
 	"MetaDfinCriReader",
 	"MetaDfinFiiReader",

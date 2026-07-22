@@ -113,7 +113,7 @@ def test_every_meta_reader_is_public_and_declares_its_url() -> None:
 		for str_name in filings_cvm.__all__
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	]
-	assert len(list_meta) == 33
+	assert len(list_meta) == 34
 	for cls_reader in list_meta:
 		assert cls_reader._META_URL.startswith("https://dados.cvm.gov.br/dados/")
 		assert "/META/" in cls_reader._META_URL
