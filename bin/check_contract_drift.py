@@ -44,6 +44,7 @@ import urllib.request
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
+from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
 from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
@@ -92,6 +93,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"BalanceteFieReader": BALANCETE_FIE,
 	"BalancoFieReader": BALANCO_FIE,
 	"CadastroAdmFiiReader": CAD_ADM_FII,
+	"CadastroCiaEstrangReader": CAD_CIA_ESTRANG,
 	"CadastroEmissorCepacReader": CAD_EMISSOR_CEPAC,
 	"CadastroFiReader": CAD_FI,
 	"CdaReader": CDA_FIF,
@@ -114,6 +116,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 # name; both sides resolve against ``ingestion.__all__``.
 _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaCadAdmFiiReader": ("CadastroAdmFiiReader",),
+	"MetaCadCiaEstrangReader": ("CadastroCiaEstrangReader",),
 	"MetaAdmCartReader": (
 		"AdmCartPfReader",
 		"AdmCartPjReader",

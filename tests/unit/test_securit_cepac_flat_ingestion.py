@@ -16,6 +16,7 @@ import pytest
 
 from filings_cvm import (
 	CadastroAdmFiiReader,
+	CadastroCiaEstrangReader,
 	CadastroEmissorCepacReader,
 	DfinCraReader,
 	DfinCriReader,
@@ -23,6 +24,7 @@ from filings_cvm import (
 )
 from filings_cvm._internal.config.contracts import (
 	CAD_ADM_FII,
+	CAD_CIA_ESTRANG,
 	CAD_EMISSOR_CEPAC,
 	DFIN_CRA,
 	DFIN_CRI,
@@ -44,7 +46,6 @@ class FlatCase:
 	str_module: str  # dotted module path whose download_file is patched
 	str_url: str  # the exact URL the reader must request
 	str_filename: str  # basename persisted under path_raw
-	str_cnpj_col: str
 	tuple_date_cols: tuple[str, ...]
 	bool_year_partitioned: bool  # True → constructor takes date_ref; False → snapshot, no date_ref
 
@@ -58,7 +59,6 @@ CASES: tuple[FlatCase, ...] = (
 		"filings_cvm.ingestion.securit.doc.dfin_cra.dfin_cra",
 		"https://dados.cvm.gov.br/dados/SECURIT/DOC/DFIN_CRA/DADOS/dfin_cra_2025.csv",
 		"dfin_cra_2025.csv",
-		"CNPJ_Emissora",
 		("Data_Referencia", "Data_Entrega"),
 		True,
 	),
@@ -68,7 +68,6 @@ CASES: tuple[FlatCase, ...] = (
 		"filings_cvm.ingestion.securit.doc.dfin_cri.dfin_cri",
 		"https://dados.cvm.gov.br/dados/SECURIT/DOC/DFIN_CRI/DADOS/dfin_cri_2025.csv",
 		"dfin_cri_2025.csv",
-		"CNPJ_Emissora",
 		("Data_Referencia", "Data_Entrega"),
 		True,
 	),
@@ -78,7 +77,6 @@ CASES: tuple[FlatCase, ...] = (
 		"filings_cvm.ingestion.emissor_cepac.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/EMISSOR_CEPAC/CAD/DADOS/cad_emissor_cepac.csv",
 		"cad_emissor_cepac.csv",
-		"CNPJ",
 		("DT_REG", "DT_CANCEL", "DT_INI_SIT"),
 		False,
 	),
@@ -88,8 +86,24 @@ CASES: tuple[FlatCase, ...] = (
 		"filings_cvm.ingestion.adm_fii.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/ADM_FII/CAD/DADOS/cad_adm_fii.csv",
 		"cad_adm_fii.csv",
-		"CNPJ",
 		("DT_REG", "DT_CANCEL", "DT_INI_SIT"),
+		False,
+	),
+	FlatCase(
+		CadastroCiaEstrangReader,
+		CAD_CIA_ESTRANG,
+		"filings_cvm.ingestion.cia_estrang.cad.cadastro.cadastro",
+		"https://dados.cvm.gov.br/dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv",
+		"cad_cia_estrang.csv",
+		(
+			"DT_REG",
+			"DT_CONST",
+			"DT_CANCEL",
+			"DT_INI_SIT",
+			"DT_INI_CATEG",
+			"DT_INI_SIT_EMISSOR",
+			"DT_INI_RESP",
+		),
 		False,
 	),
 )
@@ -97,8 +111,12 @@ IDS = [case.cls_reader.__name__ for case in CASES]
 
 
 def _value_for(str_col: str, case: FlatCase) -> str:
-	"""Return a plausible source value for one column, by name."""
-	if str_col == case.str_cnpj_col:
+	"""Return a plausible source value for one column, by name.
+
+	CNPJ columns are read from the contract's ``tuple_cnpj_cols`` (a reader may declare more than
+	one, e.g. an issuer plus its auditor), so every declared CNPJ column gets a valid value.
+	"""
+	if str_col in case.cls_contract.tuple_cnpj_cols:
 		return VALID_CNPJ
 	if str_col in case.tuple_date_cols:
 		return "2025-12-31"
@@ -314,3 +332,20 @@ def test_read_rejects_wrong_argument_type(monkeypatch: pytest.MonkeyPatch) -> No
 
 	with pytest.raises(TypeError):
 		CadastroEmissorCepacReader().read(int_timeout_s="nope")
+
+
+# The one non-tautological assertion for the widest flat contract: every other test builds its
+# input from ``tuple_required``, so only this compares the 49-column contract against the verbatim
+# header CVM published. See ``tests/CLAUDE.md`` (the pinned-oracle rule).
+_PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
+
+
+def test_cia_estrang_contract_matches_the_published_header() -> None:
+	"""``CAD_CIA_ESTRANG`` columns equal the verbatim published header, in order."""
+	str_line = (
+		(_PATH_FIXTURES / "cad_cia_estrang" / "cad_cia_estrang_header.csv")
+		.read_text(encoding="ISO-8859-1")
+		.strip()
+	)
+
+	assert CAD_CIA_ESTRANG.tuple_required == tuple(str_line.split(";"))

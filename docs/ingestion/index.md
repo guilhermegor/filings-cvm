@@ -156,6 +156,13 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
   Molde do [Cadastro FI](cadastro_fi.md) / Emissor CEPAC. **Oitava e última fatia da Wave 3 do #41 —
   encerra a Wave 3**.
 
+- **[Cadastro de Companhias Estrangeiras (CIA_ESTRANG)](cia_estrang.md)** — **1 reader**
+  `CadastroCiaEstrangReader` sobre o `cad_cia_estrang.csv` (**CSV solto**, não ZIP; **49 colunas**).
+  **Snapshot** de URL fixa, **sem `date_ref`**. 7 colunas de data (`MOTIVO_CANCEL` é texto);
+  **duas colunas de CNPJ** (`CNPJ` da companhia + `CNPJ_AUDITOR`); `RESP` tem nome de pessoa mas
+  **sem coluna de CPF**. Contract **gerado do header** e **pinado** a fixture verbatim (49 cols =
+  risco de transcrição). Molde do [ADM_FII](adm_fii.md). **Abre a Wave 4 do #41**.
+
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
 formato das páginas de [Envio](../submission/informe_diario.md).
 

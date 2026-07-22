@@ -220,10 +220,10 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **31 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **32 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (31 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (32 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
 **ISO-8859-1 + CRLF**, num `.txt` solto (11) ou `.zip` multi-membro (13); volta como **um frame
@@ -359,6 +359,19 @@ de envio). Sob `ADM_FII/CAD/`:
   (mascarado), **sem coluna de CPF**. `CEP`/`DDD`/`TEL` `numeric` no META mas `str`; usa `DDD` (não
   `DDD_TEL`). **Oitava e última fatia da Wave 3 do #41 — ENCERRA A WAVE 3 (8/8)**
 
+**Companhias Estrangeiras** — portal root `cia_estrang/`; **open-data only** (a CVM não publica
+padrão XML de envio). Sob `CIA_ESTRANG/CAD/`:
+- Cadastro de Companhias Estrangeiras — ✅ **ingestion** `cad_cia_estrang.csv` (**CSV solto**, não
+  ZIP, **49 cols**) — `ingestion/cia_estrang/cad/cadastro/cadastro.py` (`CadastroCiaEstrangReader`);
+  contract `_internal/config/contracts/cad_cia_estrang.py`, **gerado do header e pinado** a
+  `tests/fixtures/cad_cia_estrang/cad_cia_estrang_header.csv` (49 cols = risco de transcrição).
+  **Snapshot** de URL fixa, **sem `date_ref`** (molde do `CadastroAdmFiiReader`). ⚠️ **7 colunas de
+  data** (`DT_REG`/`DT_CONST`/`DT_CANCEL`/`DT_INI_SIT`/`DT_INI_CATEG`/`DT_INI_SIT_EMISSOR`/
+  `DT_INI_RESP`; `MOTIVO_CANCEL` é TEXTO). ⚠️ **Duas colunas de CNPJ** (`CNPJ` da companhia +
+  `CNPJ_AUDITOR`) → `tuple_cnpj_cols=("CNPJ","CNPJ_AUDITOR")`. `RESP` tem nome de pessoa mas **sem
+  coluna de CPF**. `CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*`/`CD_PAIS_*` `numeric`/`char` no META mas `str`.
+  **ABRE A WAVE 4 do #41** (companhias/ofertas)
+
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
@@ -402,6 +415,7 @@ src/filings_cvm/
         adm_cart/          #   ADM_CART/ — cad/{adm_cart_pf,adm_cart_pj,adm_cart_diretor,adm_cart_resp,adm_cart_socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
         consultor_vlmob/   #   CONSULTOR_VLMOB/ — cad/consultor_vlmob_{pf,pj,diretor,resp,socios} (snapshot ZIP, 5 membros, no date_ref; 3 sem coluna de data)
         adm_fii/           #   ADM_FII/ — cad/cadastro (cad_adm_fii.csv, CSV solto, 18 cols, snapshot, no date_ref) — encerra a Wave 3 do #41
+        cia_estrang/       #   CIA_ESTRANG/ — cad/cadastro (cad_cia_estrang.csv, CSV solto, 49 cols, snapshot, no date_ref; 2 CNPJ cols) — abre a Wave 4 do #41
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
