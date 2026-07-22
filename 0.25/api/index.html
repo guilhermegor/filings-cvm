@@ -1397,6 +1397,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ingestion/cia_aberta_cad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Companhias Abertas (CIA_ABERTA/CAD)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ingestion/meta/" class="md-nav__link">
         
   
@@ -2881,15 +2909,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#metareader-36-readers" class="md-nav__link">
+  <a href="#cadastrociaabertareader-1-reader" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Meta*Reader (36 readers)
+        CadastroCiaAbertaReader (1 reader)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Meta*Reader (36 readers)">
+    <nav class="md-nav" aria-label="CadastroCiaAbertaReader (1 reader)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2905,6 +2933,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metareader-37-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Meta*Reader (37 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta*Reader (37 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__path_rawnone-retry_policynone-cls_loggernone_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_29" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -4445,15 +4512,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#metareader-36-readers" class="md-nav__link">
+  <a href="#cadastrociaabertareader-1-reader" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Meta*Reader (36 readers)
+        CadastroCiaAbertaReader (1 reader)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Meta*Reader (36 readers)">
+    <nav class="md-nav" aria-label="CadastroCiaAbertaReader (1 reader)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4469,6 +4536,45 @@
         
           <li class="md-nav__item">
   <a href="#readint_timeout_s60-pddataframe_28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read(int_timeout_s=60) -&gt; pd.DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metareader-37-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Meta*Reader (37 readers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta*Reader (37 readers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#__init__path_rawnone-retry_policynone-cls_loggernone_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__(path_raw=None, retry_policy=None, cls_logger=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readint_timeout_s60-pddataframe_29" class="md-nav__link">
     <span class="md-ellipsis">
       
         read(int_timeout_s=60) -&gt; pd.DataFrame
@@ -6062,7 +6168,35 @@ preservam o decimal exato para um cast a <code>Decimal</code> a jusante. Levanta
 </span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="c1"># df_[[&quot;Numero_Registro_Oferta&quot;, &quot;Tipo_Oferta&quot;, &quot;Nome_Emissor&quot;, &quot;Valor_Total&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="metareader-36-readers"><code>Meta*Reader</code> (36 readers)<a class="headerlink" href="#metareader-36-readers" title="Permanent link">&para;</a></h3>
+<h3 id="cadastrociaabertareader-1-reader"><code>CadastroCiaAbertaReader</code> (1 reader)<a class="headerlink" href="#cadastrociaabertareader-1-reader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.cia_aberta</code></p>
+<p>O cadastro das <strong>companhias abertas</strong> registradas na CVM (<code>CIA_ABERTA/CAD</code>, <code>cad_cia_aberta.csv</code>) —
+<strong>snapshot</strong> de URL fixa, sem <code>date_ref</code>. <strong>Inaugura o <em>portal root</em> <code>cia_aberta/</code></strong> — a última e
+maior raiz da Wave 4 do #41. <strong>CSV solto</strong> de 1 reader, no molde do <code>CadastroCiaEstrangReader</code>.
+Página completa em <a href="../ingestion/cia_aberta_cad/">Cadastro de Companhias Abertas</a>.</p>
+<ul>
+<li><code>CadastroCiaAbertaReader</code> — <code>cad_cia_aberta.csv</code>, uma linha por companhia aberta (47 colunas,
+  ~2.677 linhas). ⚠️ <strong>Não é cópia do CIA_ESTRANG/CIA_INCENT</strong> (chave <code>CNPJ_CIA</code>, não <code>CNPJ</code>;
+  acrescenta <code>TP_MERC</code>). Duas colunas de CNPJ (<code>CNPJ_CIA</code> + <code>CNPJ_AUDITOR</code>); <code>RESP</code> sem CPF.</li>
+</ul>
+<blockquote>
+<p>⚠️ CIA_ABERTA tem <strong>9 datasets</strong> — esta seção cobre só o <code>CAD</code>. Os 7 <code>DOC/</code> (CGVN, DFP, FCA, FRE,
+IPE, ITR, VLMO) e o <code>EVENTOS/RECOMPRA_ACOES</code> virão como readers próprios.</p>
+</blockquote>
+<h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_13"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_13" title="Permanent link">&para;</a></h4>
+<p><strong>Sem <code>date_ref</code></strong> — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar; um
+<code>path_raw</code> persistido é o único registro do snapshot.</p>
+<h4 id="readint_timeout_s60-pddataframe_28"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_28" title="Permanent link">&para;</a></h4>
+<p>Uma linha por companhia. As <strong>sete</strong> colunas <code>DT_*</code> viram <code>date</code>; o restante fica texto exato
+(<code>CD_CVM</code>/<code>CEP</code>/<code>TEL</code>/<code>DDD_*</code>, <code>numeric</code>/<code>char</code> no META, preservam zeros à esquerda). Levanta
+<code>OSError</code> ou <code>ContractError</code>. O contract é <strong>pinado</strong> ao header verbatim (47 cols).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">CadastroCiaAbertaReader</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">CadastroCiaAbertaReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># df_[[&quot;CNPJ_CIA&quot;, &quot;DENOM_SOCIAL&quot;, &quot;TP_MERC&quot;, &quot;SIT&quot;, &quot;CNPJ_AUDITOR&quot;, &quot;AUDITOR&quot;]]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="metareader-37-readers"><code>Meta*Reader</code> (37 readers)<a class="headerlink" href="#metareader-37-readers" title="Permanent link">&para;</a></h3>
 <p>Os <strong>META</strong> — a spec que a própria CVM publica para cada dataset (<code>.../&lt;DATASET&gt;/META/</code>). Um reader
 por dataset; página completa em <a href="../ingestion/meta/">META (metadados da CVM)</a>.</p>
 <p><code>MetaInformeDiarioReader</code> · <code>MetaCdaReader</code> · <code>MetaLaminaReader</code> · <code>MetaCadastroFiReader</code> ·
@@ -6075,18 +6209,18 @@ por dataset; página completa em <a href="../ingestion/meta/">META (metadados da
 · <code>MetaAgenteAutonReader</code> · <code>MetaInvnrRepresReader</code> · <code>MetaIntermedReader</code> · <code>MetaAdmCartReader</code> ·
 <code>MetaConsultorVlmobReader</code> · <code>MetaCadAdmFiiReader</code> · <code>MetaCadCiaEstrangReader</code> ·
 <code>MetaCadCiaIncentReader</code> · <code>MetaCoordOfertaReader</code> · <code>MetaCrowdfundingReader</code> · <code>MetaOfertaReader</code></p>
-<h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_13"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_13" title="Permanent link">&para;</a></h4>
+<h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_14"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_14" title="Permanent link">&para;</a></h4>
 <p><strong>Sem <code>date_ref</code></strong> — o META fica numa URL fixa que a CVM sobrescreve no lugar (o precedente do
 <code>CadastroFiReader</code>), então um <code>path_raw</code> gravado é o <strong>único</strong> registro do que a spec dizia naquele
 dia.</p>
-<h4 id="readint_timeout_s60-pddataframe_28"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_28" title="Permanent link">&para;</a></h4>
+<h4 id="readint_timeout_s60-pddataframe_29"><code>read(int_timeout_s=60) -&gt; pd.DataFrame</code><a class="headerlink" href="#readint_timeout_s60-pddataframe_29" title="Permanent link">&para;</a></h4>
 <p>Uma linha por campo declarado, colunas <code>section</code>, <code>field</code>, <code>description</code>, <code>domain</code>, <code>data_type</code>,
 <code>size</code>, <code>precision</code>, <code>scale</code> (+ as seis de proveniência). Um META <code>.zip</code> multi-membro volta como
 <strong>um único frame longo</strong>, com o membro em <code>section</code>. Levanta <code>OSError</code> (download).</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaInfMensalCraReader</span>
-</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>
-</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="n">df_meta</span> <span class="o">=</span> <span class="n">MetaInfMensalCraReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1"># 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaInfMensalCraReader</span>
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="n">df_meta</span> <span class="o">=</span> <span class="n">MetaInfMensalCraReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="c1"># 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.</span>
 </span></code></pre></div>
 <blockquote>
 <p>⚠️ <strong>A CVM trunca o nome do campo em 50 caracteres</strong> (o header real vai até 60) e a <strong>ordem do
