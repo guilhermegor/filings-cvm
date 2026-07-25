@@ -1548,10 +1548,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-30-readers" class="md-nav__link">
+  <a href="#os-37-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 30 readers
+        Os 37 readers
       
     </span>
   </a>
@@ -1848,10 +1848,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-30-readers" class="md-nav__link">
+  <a href="#os-37-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 30 readers
+        Os 37 readers
       
     </span>
   </a>
@@ -1902,7 +1902,7 @@
 
 <h1 id="meta-metadados-da-cvm-leitura"><strong>META (metadados da CVM) — leitura</strong><a class="headerlink" href="#meta-metadados-da-cvm-leitura" title="Permanent link">&para;</a></h1>
 <p>Leitura (← CVM) dos <strong>META</strong> — a <em>especificação que a própria CVM publica</em> para cada dataset do
-<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>30 no total</strong>,
+<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>37 no total</strong>,
 todos sob <code>.../&lt;DATASET&gt;/META/</code>.</p>
 <blockquote>
 <p><strong>Veja também:</strong> <a href="../../api/">Referência da API</a> · <a href="../../usage/">Uso</a> · <a href="../">Proveniência</a>.</p>
@@ -1992,7 +1992,7 @@ do <strong>hist</strong> para quem pediu <code>cad_fi</code>. Por isso <strong>c
 nunca derivada. Os nomes são irregulares de fato: <code>meta_inf_mensal_cri.zip</code>, mas
 <code>meta_cda_fi_txt.zip</code> / <code>meta_lamina_fi_txt.zip</code> / <code>meta_inf_mensal_fidc_txt.zip</code> (infixo <code>_txt</code>).</p>
 <hr />
-<h2 id="os-30-readers">Os 30 readers<a class="headerlink" href="#os-30-readers" title="Permanent link">&para;</a></h2>
+<h2 id="os-37-readers">Os 37 readers<a class="headerlink" href="#os-37-readers" title="Permanent link">&para;</a></h2>
 <p>Todos devolvem <strong>o mesmo formato</strong>: uma linha por campo declarado.</p>
 <table>
 <thead>
@@ -2177,10 +2177,45 @@ tabela alguma) — como as seis colunas de proveniência. Os <strong>valores</st
 <td><code>MetaConsultorVlmobReader</code></td>
 <td><code>.zip</code> (5 membros)</td>
 </tr>
+<tr>
+<td><code>ADM_FII/CAD</code></td>
+<td><code>MetaCadAdmFiiReader</code></td>
+<td><code>.txt</code></td>
+</tr>
+<tr>
+<td><code>CIA_ESTRANG/CAD</code></td>
+<td><code>MetaCadCiaEstrangReader</code></td>
+<td><code>.txt</code></td>
+</tr>
+<tr>
+<td><code>CIA_INCENT/CAD</code></td>
+<td><code>MetaCadCiaIncentReader</code></td>
+<td><code>.txt</code></td>
+</tr>
+<tr>
+<td><code>COORD_OFERTA/CAD</code></td>
+<td><code>MetaCoordOfertaReader</code></td>
+<td><code>.zip</code> (2 membros)</td>
+</tr>
+<tr>
+<td><code>CROWDFUNDING/CAD</code></td>
+<td><code>MetaCrowdfundingReader</code></td>
+<td><code>.zip</code> (3 membros)</td>
+</tr>
+<tr>
+<td><code>OFERTA/DISTRIB</code></td>
+<td><code>MetaOfertaReader</code></td>
+<td><code>.zip</code> (2 membros)</td>
+</tr>
+<tr>
+<td><code>CIA_ABERTA/CAD</code></td>
+<td><code>MetaCadCiaAbertaReader</code></td>
+<td><code>.txt</code></td>
+</tr>
 </tbody>
 </table>
 <blockquote>
-<p>ℹ️ <strong><code>FIE/MEDIDAS</code></strong> publica <code>.csv</code> <strong>e</strong> <code>.txt</code>; usamos o <strong><code>.txt</code></strong>, o formato que os 30
+<p>ℹ️ <strong><code>FIE/MEDIDAS</code></strong> publica <code>.csv</code> <strong>e</strong> <code>.txt</code>; usamos o <strong><code>.txt</code></strong>, o formato que os 37
 compartilham.</p>
 </blockquote>
 <hr />
