@@ -99,3 +99,4 @@ META_CAD_CROWDFUNDING = _meta_contract(
 )
 META_OFERTA_DISTRIBUICAO = _meta_contract("oferta_distribuicao", "META — Oferta de Distribuição")
 META_CAD_CIA_ABERTA = _meta_contract("cad_cia_aberta", "META — Cadastro Companhia Aberta")
+META_IPE_CIA_ABERTA = _meta_contract("ipe_cia_aberta", "META — IPE Companhia Aberta")

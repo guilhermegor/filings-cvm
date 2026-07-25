@@ -454,6 +454,26 @@ Sob `CIA_ABERTA/CAD/`:
   (`meta_cad_cia_aberta.txt`, 47 campos) — ao contrário dos `.zip` do COORD_OFERTA/CROWDFUNDING/
   OFERTA. `CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*` `numeric`/`char` no META mas `str`. **Sexta fatia da
   Wave 4 do #41; abre o root `cia_aberta/` (1/9 datasets)**
+- IPE (Informações Periódicas e Eventuais) — ✅ **ingestion** `ipe_cia_aberta_AAAA.zip` (**ZIP de 1
+  membro**, 13 cols, ~49,3k linhas em 2025) — `ingestion/cia_aberta/doc/ipe/ipe.py`
+  (`IpeCiaAbertaReader`); contract `_internal/config/contracts/ipe_cia_aberta.py`, **gerado do header
+  e pinado** a `tests/fixtures/ipe_cia_aberta/ipe_cia_aberta_header.csv`. **Particionado por ANO** (o
+  `date_ref` seleciona o ano). ⚠️ **É um ÍNDICE, não o documento** — uma linha por documento
+  entregue, com `Link_Download` (RAD da CVM) devolvido como **texto, não seguido** (molde do
+  `DfinFiiReader`; a extração ZIP vem do `BalanceteFieReader`). 2 date cols (`Data_Referencia`,
+  `Data_Entrega`, ambas ISO e declaradas `date` no META). ⚠️ **`CNPJ_Companhia` carrega o placeholder
+  `00.000.000/0000-00`** para emissores estrangeiros sem CNPJ brasileiro (44 de 49.277 em 2025; zero
+  malformados) — devolvido **como publicado**, e a coluna segue em `tuple_cnpj_cols` porque o check
+  exige **ao menos um** válido (a aresta — uma partição só de placeholders levantaria — é pinada por
+  teste). `Codigo_CVM` (`Numérico`) e `Versao` (`smallint`) no META ficam **`str`** (identificadores).
+  `Tipo`/`Especie`/`Assunto`/`Protocolo_Entrega` chegam **parcialmente preenchidos**. ⚠️ **A META é um
+  `.txt` SOLTO** — entre os 7 datasets do `DOC` a CVM usa **4 grafias distintas** de META
+  (`meta_<ds>_cia_aberta.zip`, `meta_<ds>_cia_aberta_txt.zip`, **`fca_cia_aberta.zip` sem o prefixo
+  `meta_`**, e este `.txt`): a URL é constante por dataset, **jamais derivada**. **Sétima fatia da
+  Wave 4; abre o sub-root `DOC` (2/9 datasets do `cia_aberta/`)**
+- ⬜ **ingestion** os outros 6 `DOC`: CGVN, DFP, FCA, FRE, ITR, VLMO — todos `<ds>_cia_aberta_AAAA.zip`
+  (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
+  próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
 
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
@@ -503,7 +523,9 @@ src/filings_cvm/
         coord_oferta/      #   COORD_OFERTA/ — cad/{coord_oferta,coord_oferta_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref; META é .zip)
         crowdfunding/      #   CROWDFUNDING/ — cad/{crowdfunding,crowdfunding_adm_resp,crowdfunding_socios} (snapshot ZIP, 3 membros, no date_ref; 2 satélites sem data; META é .zip)
         oferta/            #   OFERTA/ — distrib/{oferta_distribuicao,oferta_resolucao_160} (snapshot ZIP, 2 membros por regime, no date_ref; NÃO registro+satélite; META é .zip simétrica) — fecha #14
-        cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto). DOC/{CGVN,DFP,FCA,FRE,IPE,ITR,VLMO} + EVENTOS pendentes
+        cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto)
+                           #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
+                           #     DOC/{CGVN,DFP,FCA,FRE,ITR,VLMO} + EVENTOS pendentes (nº de membros varia: VLMO 2, FCA 10 — grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

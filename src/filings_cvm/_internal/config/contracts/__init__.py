@@ -183,6 +183,7 @@ from filings_cvm._internal.config.contracts.inf_trimestral_fii import (
 )
 from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
+from filings_cvm._internal.config.contracts.ipe_cia_aberta import IPE_CIA_ABERTA
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
 from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
@@ -221,6 +222,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_INF_QUADRIMESTRAL_FIP,
 	META_INF_TRIMESTRAL_FII,
 	META_INF_TRIMESTRAL_FIP,
+	META_IPE_CIA_ABERTA,
 	META_LAMINA_FI,
 	META_MEDIDAS_MES_FIE,
 	META_OFERTA_DISTRIBUICAO,
@@ -380,6 +382,7 @@ __all__ = [
 	"INF_TRIMESTRAL_FII_RESULTADO_CONTABIL_FINANCEIRO",
 	"INF_TRIMESTRAL_FII_TERRENO",
 	"INF_TRIMESTRAL_FIP",
+	"IPE_CIA_ABERTA",
 	"LAMINA_CARTEIRA_FIF",
 	"LAMINA_FIF",
 	"MEDIDAS_MES_FIE",
@@ -417,6 +420,7 @@ __all__ = [
 	"META_INF_QUADRIMESTRAL_FIP",
 	"META_INF_TRIMESTRAL_FII",
 	"META_INF_TRIMESTRAL_FIP",
+	"META_IPE_CIA_ABERTA",
 	"META_LAMINA_FI",
 	"META_MEDIDAS_MES_FIE",
 	"META_OFERTA_DISTRIBUICAO",
