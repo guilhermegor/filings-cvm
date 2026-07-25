@@ -220,14 +220,20 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **37 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **38 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (37 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (38 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (15) ou `.zip` multi-membro (22); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (22); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
+⚠️ **Estes números são MEDIDOS do código** (`38 = 16 .txt + 22 .zip`, e 38 contracts — o 39º nome
+`META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
+`test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
+`docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
+senão ela estagna sem nada ficar vermelho (foi exatamente o que aconteceu: ficou em 37 com 38
+exportados).
 ⚠️ **Três fatos da fonte, honrados verbatim e nunca "consertados":**
   1. **A CVM trunca o nome do campo em exatamente 50 caracteres** (provado 8/8 no CRA; o header real
      vai até 60). Logo o META **não pode ser gate duro de nomes** — reconciliar é do consumidor
