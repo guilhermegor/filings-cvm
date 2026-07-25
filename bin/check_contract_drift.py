@@ -56,6 +56,7 @@ from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
 from filings_cvm._internal.config.contracts.inf_quadrimestral_fip import INF_QUADRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
+from filings_cvm._internal.config.contracts.ipe_cia_aberta import IPE_CIA_ABERTA
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
 from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
@@ -107,6 +108,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"InfQuadrimestralFipReader": INF_QUADRIMESTRAL_FIP,
 	"InfTrimestralFipReader": INF_TRIMESTRAL_FIP,
 	"InformeDiarioReader": INFORME_DIARIO_FIF,
+	"IpeCiaAbertaReader": IPE_CIA_ABERTA,
 	"LaminaCarteiraReader": LAMINA_CARTEIRA_FIF,
 	"LaminaReader": LAMINA_FIF,
 	"MedidasMesFieReader": MEDIDAS_MES_FIE,
@@ -123,6 +125,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaCadCiaEstrangReader": ("CadastroCiaEstrangReader",),
 	"MetaCadCiaAbertaReader": ("CadastroCiaAbertaReader",),
 	"MetaCadCiaIncentReader": ("CadastroCiaIncentReader",),
+	"MetaIpeCiaAbertaReader": ("IpeCiaAbertaReader",),
 	"MetaCoordOfertaReader": ("CoordOfertaReader", "CoordOfertaRespReader"),
 	"MetaCrowdfundingReader": (
 		"CrowdfundingReader",

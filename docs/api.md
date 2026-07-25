@@ -1231,8 +1231,9 @@ Página completa em [Cadastro de Companhias Abertas](ingestion/cia_aberta_cad.md
   ~2.677 linhas). ⚠️ **Não é cópia do CIA_ESTRANG/CIA_INCENT** (chave `CNPJ_CIA`, não `CNPJ`;
   acrescenta `TP_MERC`). Duas colunas de CNPJ (`CNPJ_CIA` + `CNPJ_AUDITOR`); `RESP` sem CPF.
 
-> ⚠️ CIA_ABERTA tem **9 datasets** — esta seção cobre só o `CAD`. Os 7 `DOC/` (CGVN, DFP, FCA, FRE,
-> IPE, ITR, VLMO) e o `EVENTOS/RECOMPRA_ACOES` virão como readers próprios.
+> ⚠️ CIA_ABERTA tem **9 datasets** — esta seção cobre só o `CAD`. Dos 7 `DOC/`, o **IPE** já está
+> implementado (abaixo); CGVN, DFP, FCA, FRE, ITR e VLMO, mais o `EVENTOS/RECOMPRA_ACOES`, virão
+> como readers próprios.
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
@@ -1254,7 +1255,49 @@ df_ = CadastroCiaAbertaReader().read()
 
 ---
 
-### `Meta*Reader` (37 readers)
+### `IpeCiaAbertaReader` (1 reader)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O **índice das Informações Periódicas e Eventuais** das companhias abertas
+(`CIA_ABERTA/DOC/IPE`, `ipe_cia_aberta_AAAA.zip`) — **ZIP de 1 membro, particionado por ano**.
+Primeira fatia do sub-root `DOC`, no molde do `DfinFiiReader` (semântica de índice) com a extração
+ZIP do `BalanceteFieReader`. Página completa em
+[IPE Companhias Abertas](ingestion/ipe_cia_aberta.md).
+
+- `IpeCiaAbertaReader` — `ipe_cia_aberta_AAAA.csv`, **uma linha por documento entregue** (13
+  colunas, ~49,3 mil linhas em 2025). ⚠️ **É um índice, não o documento**: `Link_Download` aponta
+  para o RAD da CVM e é **devolvido como texto, não seguido**.
+
+> ⚠️ `CNPJ_Companhia` carrega o placeholder **`00.000.000/0000-00`** para emissores estrangeiros sem
+> CNPJ brasileiro (44 de 49.277 linhas em 2025; **zero** malformados). É devolvido **como
+> publicado**, nunca consertado.
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano** de referência — só `date_ref.year` seleciona o dump anual.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por documento. `Data_Referencia` e `Data_Entrega` viram `date`; o restante fica texto
+exato (`Codigo_CVM` é `Numérico` no META e `Versao` é `smallint`, mas ambos são identificadores e
+ficam `str`). `Tipo`, `Especie`, `Assunto` e `Protocolo_Entrega` chegam **parcialmente
+preenchidos** — são colunas obrigatórias, não valores obrigatórios. Levanta `OSError`,
+`ContractError` ou `ValueError` (membro ausente). O contract é **pinado** ao header verbatim (13
+cols).
+
+```python
+from datetime import date
+
+from filings_cvm import IpeCiaAbertaReader
+
+df_ = IpeCiaAbertaReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "Categoria", "Data_Entrega", "Versao", "Link_Download"]]
+```
+
+---
+
+### `Meta*Reader` (38 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
