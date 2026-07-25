@@ -26,6 +26,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 import csv
 from dataclasses import dataclass
+from decimal import Decimal
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
@@ -126,6 +128,7 @@ def read_table(
 	str_encoding: str = "utf-8-sig",
 	int_header_row: int = 0,
 	int_csv_quoting: int = csv.QUOTE_MINIMAL,
+	list_decimal_cols: Sequence[str] | None = None,
 ) -> pd.DataFrame:
 	"""Read a file (Excel/CSV/JSON) into a typed, contract-validated DataFrame.
 
@@ -168,6 +171,10 @@ def read_table(
 		``;``-delimited regulatory dumps (e.g. CVM open data), where an upstream submitter's
 		stray ``"`` is literal text, not a field wrapper — the default engine would swallow the
 		delimiter and shift subsequent columns, corrupting the parse. Ignored otherwise.
+	list_decimal_cols : sequence of str, optional
+		Columns coerced to exact :class:`decimal.Decimal` values — the correct declaration for
+		any number whose fractional part carries meaning (money, volumes, rates, quantities).
+		A binary float would destroy the source's exact value irreversibly and silently.
 
 	Returns
 	-------
@@ -191,7 +198,7 @@ def read_table(
 		int_header_row,
 		int_csv_quoting,
 	)
-	return _finalize(df_raw, dict_dtypes, list_date_cols, cls_contract)
+	return _finalize(df_raw, dict_dtypes, list_date_cols, cls_contract, list_decimal_cols)
 
 
 @type_checker
@@ -202,6 +209,7 @@ def read_query(
 	cls_contract: FileContract,
 	list_params: Sequence[Any] | None = None,
 	list_date_cols: Sequence[str] | None = None,
+	list_decimal_cols: Sequence[str] | None = None,
 ) -> pd.DataFrame:
 	"""Run a parameterized SQL query into a typed, contract-validated DataFrame.
 
@@ -225,6 +233,10 @@ def read_query(
 		Bound query parameters passed to :func:`pandas.read_sql_query`.
 	list_date_cols : sequence of str, optional
 		Columns coerced to ``datetime.date``.
+	list_decimal_cols : sequence of str, optional
+		Columns coerced to exact :class:`decimal.Decimal` values. A driver that already returned
+		a binary ``float`` is **rejected**, not laundered — the lossless fix is to select the
+		column as text (or as the database's own ``numeric``), never to convert here.
 
 	Returns
 	-------
@@ -237,7 +249,7 @@ def read_query(
 		When the result violates ``cls_contract``.
 	"""
 	df_raw = pd.read_sql_query(str_sql, cls_connection, params=list_params)
-	return _finalize(df_raw, dict_dtypes, list_date_cols, cls_contract)
+	return _finalize(df_raw, dict_dtypes, list_date_cols, cls_contract, list_decimal_cols)
 
 
 @type_checker
@@ -357,6 +369,7 @@ def _finalize(
 	dict_dtypes: dict[str, str],
 	list_date_cols: Sequence[str] | None,
 	cls_contract: FileContract,
+	list_decimal_cols: Sequence[str] | None = None,
 ) -> pd.DataFrame:
 	"""Enforce the contract then apply declared types (shared, mandatory read tail).
 
@@ -370,6 +383,8 @@ def _finalize(
 		Columns coerced to ``datetime.date``.
 	cls_contract : FileContract
 		The contract validated before typing.
+	list_decimal_cols : sequence of str, optional
+		Columns coerced to exact :class:`decimal.Decimal` values.
 
 	Returns
 	-------
@@ -384,7 +399,12 @@ def _finalize(
 	list_problems = find_contract_problems(df_raw, cls_contract)
 	if list_problems:
 		raise ContractError(list_problems)
-	return apply_dtypes(df_raw, dict_dtypes=dict_dtypes, list_date_cols=list_date_cols)
+	return apply_dtypes(
+		df_raw,
+		dict_dtypes=dict_dtypes,
+		list_date_cols=list_date_cols,
+		list_decimal_cols=list_decimal_cols,
+	)
 
 
 @type_checker
@@ -414,8 +434,8 @@ def _read_raw(
 	list_columns : sequence of str, optional
 		CSV only: when given, read headerless and assign these column names.
 	str_encoding : str, optional
-		CSV text encoding (default ``"utf-8-sig"`` so a leading BOM never corrupts the first
-		cell); pass ``"ISO-8859-1"`` for Latin-1 exports.
+		CSV/JSON text encoding (default ``"utf-8-sig"`` so a leading BOM never corrupts the
+		first cell); pass ``"ISO-8859-1"`` for Latin-1 exports.
 	int_header_row : int, optional
 		Excel header-row index (default ``0``). Ignored for CSV/JSON.
 	int_csv_quoting : int, optional
@@ -454,7 +474,13 @@ def _read_raw(
 			quoting=int_csv_quoting,
 		)
 	if str_suffix == ".json":
-		df_json = pd.read_json(path_file)
+		# Deliberately not pandas' own JSON reader, which infers a type per column — a number
+		# becomes a binary float and a zero-padded code becomes an int *before* any declared
+		# dtype is applied, and the later cast to text then faithfully preserves the damage.
+		# Parsing with parse_float set to Decimal keeps the source's exact digits and scale,
+		# which is what makes this branch as text-first as the CSV one.
+		obj_json = json.loads(path_file.read_text(encoding=str_encoding), parse_float=Decimal)
+		df_json = pd.DataFrame(obj_json)
 		return df_json.astype(str_dtype) if str_dtype is not None else df_json
 	# An empty sheet name means "the first worksheet, whatever it is named" — external files
 	# arrive with locale-dependent default sheet names such as Planilha1 or Sheet1, so read the

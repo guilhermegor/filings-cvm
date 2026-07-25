@@ -557,6 +557,17 @@ of your public `__all__`. The internal imports are package-qualified
   every DataFrame on load via `apply_dtypes` (`_internal.utils.dtypes`, never pandas'
   inference), route reads through `_internal.utils.tabular_reader`, and use
   `_internal.utils.br_identifiers` for CNPJ/CPF (alphanumeric-aware for the 2026 CNPJ).
+- **A number whose fractional part carries meaning is NEVER a binary float.** `float64` cannot
+  represent most decimal fractions (`1984223115.42` is stored as `1984223115.4200000762939453125`),
+  and the loss happens at ingestion, is irreversible, and is **silent** — no contract fails, no
+  single-value test fails, the frame prints correctly, and it surfaces much later as a
+  reconciliation against CVM's own totals that misses by a hair. Declare such a column as exact
+  text (this repo's prevailing convention — `Decimal` downstream) or via `list_decimal_cols`
+  (`apply_dtypes` / `read_table` / `read_query`, exact `Decimal` with the **source's own scale**
+  preserved). `_to_decimal` **refuses** a `float` rather than converting it, because converting
+  launders an already-lossy value into a type that advertises exactness. A genuinely dimensionless
+  statistic opts out per line with `# dtype-ok: <reason>`. Enforced by `bin/check_dtypes.py`
+  (pre-commit + CI).
 - **Every ingested DataFrame is provenance-stamped.** A reader's returned frame carries, beside
   its source columns, the six `FileContract.PROVENANCE_COLUMNS` — `url`, `updated_at` (tz-aware
   UTC collection time), `source_key`, `package_version`, `ingestion_run_id`, `content_hash` —

@@ -6,6 +6,8 @@ declaration must keep missing values missing, on 2.x and 3.x alike. A bare
 fabricating data that then flows into a datalake as if CVM had sent it.
 """
 
+from decimal import Decimal
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -59,3 +61,74 @@ def test_apply_dtypes_raises_when_a_column_has_two_target_types() -> None:
 
 	with pytest.raises(ValueError, match="more than one target type"):
 		apply_dtypes(df_input, {"DT": "str"}, list_date_cols=("DT",))
+
+
+def test_apply_dtypes_decimal_preserves_the_source_value_exactly() -> None:
+	"""A decimal column keeps every digit the source published.
+
+	Asserted with ``==`` against a ``Decimal`` built from the same text, never
+	``pytest.approx``: approximate equality is precisely the blindness this seam exists to
+	remove, so a tolerance-based assertion would pass even on the float path it forbids.
+	"""
+	df_input = pd.DataFrame({"VL_PATRIM_LIQ": ["1984223115.42"]})
+
+	df_typed = apply_dtypes(df_input, list_decimal_cols=("VL_PATRIM_LIQ",))
+
+	value = df_typed["VL_PATRIM_LIQ"].iloc[0]
+	assert isinstance(value, Decimal)
+	assert value == Decimal("1984223115.42")
+	# The binary-float round trip this seam replaces, shown failing on the same value.
+	assert value != Decimal(1984223115.42)
+	assert str(value) == "1984223115.42"
+
+
+def test_apply_dtypes_decimal_preserves_the_sources_own_scale() -> None:
+	"""Trailing zeros are the source's declared precision, not noise to normalise away.
+
+	Quantizing is a silver/gold decision; ingestion has no basis for choosing a scale.
+	"""
+	df_input = pd.DataFrame({"VL": ["1.50", "1.5000", "2"]})
+
+	df_typed = apply_dtypes(df_input, list_decimal_cols=("VL",))
+
+	assert [str(v) for v in df_typed["VL"].tolist()] == ["1.50", "1.5000", "2"]
+
+
+def test_apply_dtypes_decimal_refuses_a_binary_float_instead_of_converting() -> None:
+	"""A float reaching the seam is rejected — converting would launder a lost value.
+
+	``Decimal(1984223115.42)`` succeeds and yields an exact-looking number carrying the
+	float's error, which nothing downstream would ever question. Refusing points the fix at
+	the parse boundary, where the precision was actually lost.
+	"""
+	df_input = pd.DataFrame({"VL": [1984223115.42]})
+
+	with pytest.raises(ValueError, match="Refusing to convert float"):
+		apply_dtypes(df_input, list_decimal_cols=("VL",))
+
+
+def test_apply_dtypes_decimal_treats_nan_as_missing_not_as_a_lossy_float() -> None:
+	"""NaN is pandas' missing marker; it must stay NA rather than trip the float refusal."""
+	df_input = pd.DataFrame({"VL": ["1.50", np.nan, None, ""]})
+
+	df_typed = apply_dtypes(df_input, list_decimal_cols=("VL",))
+
+	assert df_typed["VL"].isna().tolist() == [False, True, True, True]
+
+
+def test_apply_dtypes_decimal_accepts_int_and_passes_decimal_through() -> None:
+	"""The two other lossless inputs a pipeline can deliver are accepted as-is."""
+	df_input = pd.DataFrame({"VL": [7, Decimal("3.140")]})
+
+	df_typed = apply_dtypes(df_input, list_decimal_cols=("VL",))
+
+	assert df_typed["VL"].tolist() == [Decimal(7), Decimal("3.140")]
+	assert str(df_typed["VL"].iloc[1]) == "3.140"
+
+
+def test_apply_dtypes_raises_when_a_column_is_both_decimal_and_typed() -> None:
+	"""The mutual-exclusion rule covers the fourth set too."""
+	df_input = pd.DataFrame({"VL": ["1.50"]})
+
+	with pytest.raises(ValueError, match="more than one target type"):
+		apply_dtypes(df_input, {"VL": "str"}, list_decimal_cols=("VL",))
