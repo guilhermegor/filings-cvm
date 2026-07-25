@@ -13,9 +13,17 @@ from filings_cvm.ingestion.cia_aberta.doc.ipe import (
 	IpeCiaAbertaReader,
 	MetaIpeCiaAbertaReader,
 )
+from filings_cvm.ingestion.cia_aberta.doc.vlmo import (
+	MetaVlmoCiaAbertaReader,
+	VlmoCiaAbertaConReader,
+	VlmoCiaAbertaReader,
+)
 
 
 __all__ = [
 	"IpeCiaAbertaReader",
 	"MetaIpeCiaAbertaReader",
+	"MetaVlmoCiaAbertaReader",
+	"VlmoCiaAbertaConReader",
+	"VlmoCiaAbertaReader",
 ]

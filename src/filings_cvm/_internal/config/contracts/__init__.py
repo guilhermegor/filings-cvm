@@ -227,6 +227,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_MEDIDAS_MES_FIE,
 	META_OFERTA_DISTRIBUICAO,
 	META_REGISTRO_FUNDO_CLASSE,
+	META_VLMO_CIA_ABERTA,
 )
 from filings_cvm._internal.config.contracts.oferta_distribuicao import (
 	OFERTA_DISTRIBUICAO,
@@ -235,6 +236,10 @@ from filings_cvm._internal.config.contracts.oferta_distribuicao import (
 from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
+from filings_cvm._internal.config.contracts.vlmo_cia_aberta import (
+	VLMO_CIA_ABERTA,
+	VLMO_CIA_ABERTA_CON,
+)
 from filings_cvm._internal.utils.tabular_reader import (
 	ContractError,
 	FileContract,
@@ -425,10 +430,13 @@ __all__ = [
 	"META_MEDIDAS_MES_FIE",
 	"META_OFERTA_DISTRIBUICAO",
 	"META_REGISTRO_FUNDO_CLASSE",
+	"META_VLMO_CIA_ABERTA",
 	"OFERTA_DISTRIBUICAO",
 	"OFERTA_RESOLUCAO_160",
 	"REGISTRO_CLASSE",
 	"REGISTRO_FUNDO",
 	"REGISTRO_SUBCLASSE",
+	"VLMO_CIA_ABERTA",
+	"VLMO_CIA_ABERTA_CON",
 	"find_file_problems",
 ]
