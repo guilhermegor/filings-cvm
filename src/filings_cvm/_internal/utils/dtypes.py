@@ -4,12 +4,17 @@ A single place to enforce the project rule *every DataFrame or SQL-to-memory loa
 must declare its column types* — instead of trusting pandas' inference, which silently
 turns a zero-padded code into an int or a mixed column into ``object``. Pass an
 ``astype`` dict for the plain types plus optional lists for ``date`` / ``datetime``
-columns, which need ``to_datetime`` rather than ``astype``.
+columns, which need ``to_datetime`` rather than ``astype``, and ``decimal`` columns, which
+need exact :class:`~decimal.Decimal` conversion.
+
+A number whose fractional part carries meaning is **never** a binary float here: use
+``list_decimal_cols``. ``bin/check_dtypes.py`` enforces that structurally across ``src/``.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -37,18 +42,72 @@ else:
 
 
 @type_checker
+def _to_decimal(value: object) -> object:
+	"""Convert one source value to an exact :class:`~decimal.Decimal`.
+
+	Accepts the two forms a lossless pipeline can deliver — text (``"1984223115.42"``, the
+	usual shape from a text-first CSV read or from JSON parsed with ``parse_float=Decimal``)
+	and ``int`` — plus ``Decimal`` itself, which passes through untouched. Missing values
+	stay missing.
+
+	A binary ``float`` is **rejected rather than converted**. By the time a float exists the
+	source's exact value is already gone, so converting it would launder a lossy value into a
+	type that advertises exactness — the silent failure this seam exists to prevent. The fix
+	belongs upstream at the parse boundary (``json.loads(..., parse_float=Decimal)``, or
+	reading the column as text), never here.
+
+	Parameters
+	----------
+	value : object
+		One cell from a decimal-typed column.
+
+	Returns
+	-------
+	object
+		A :class:`decimal.Decimal`, or :data:`pandas.NA` for a missing value.
+
+	Raises
+	------
+	ValueError
+		If ``value`` is a binary ``float`` — precision was already lost upstream.
+	"""
+	if value is None or value is pd.NA:
+		return pd.NA
+	if isinstance(value, Decimal):
+		return value
+	# NaN is a float, but it means "missing", not "a value we lost precision on" — pandas uses
+	# it as the missing marker in any numeric column. Test it before the float rejection below,
+	# or every blank cell in such a column would raise instead of staying NA.
+	if isinstance(value, float) and value != value:
+		return pd.NA
+	if isinstance(value, float):
+		raise ValueError(
+			f"Refusing to convert float {value!r} to Decimal: the source's exact value is "
+			"already lost. Parse the source losslessly instead — "
+			"json.loads(..., parse_float=Decimal), or read the column as text."
+		)
+	if isinstance(value, int):
+		return Decimal(value)
+	str_value = str(value).strip()
+	if not str_value or str_value.lower() in {"nan", "none", "<na>"}:
+		return pd.NA
+	return Decimal(str_value)
+
+
+@type_checker
 def apply_dtypes(
 	df_input: pd.DataFrame,
 	dict_dtypes: dict[str, str] | None = None,
 	list_date_cols: Sequence[str] | None = None,
 	list_datetime_cols: Sequence[str] | None = None,
+	list_decimal_cols: Sequence[str] | None = None,
 ) -> pd.DataFrame:
 	"""Coerce a DataFrame's columns to declared types, returning a new frame.
 
 	Validation runs first (fail fast): every referenced column must exist, and the
-	three column sets must be disjoint. Then, on a copy: the ``astype`` dict is applied,
-	``list_datetime_cols`` are parsed to full timestamps, and ``list_date_cols`` to pure
-	``date`` objects.
+	four column sets must be disjoint. Then, on a copy: the ``astype`` dict is applied,
+	``list_datetime_cols`` are parsed to full timestamps, ``list_date_cols`` to pure
+	``date`` objects, and ``list_decimal_cols`` to exact :class:`decimal.Decimal` values.
 
 	Parameters
 	----------
@@ -56,14 +115,25 @@ def apply_dtypes(
 		The source frame (left unmodified — work happens on a copy).
 	dict_dtypes : dict of {str: str}, optional
 		Column→dtype mapping passed to :meth:`pandas.DataFrame.astype` (e.g. ``"str"``,
-		``"int64"``, ``"float64"``). A ``"str"`` declaration is applied as pandas'
+		``"int64"``). A ``"str"`` declaration is applied as pandas'
 		nullable ``"string"`` dtype, so a missing value stays missing instead of becoming
 		the literal text ``"nan"`` (which is what a bare ``astype(str)`` yields on
 		pandas < 3). Elements of such a column are still ordinary :class:`str`.
+		**Never declare a binary float dtype for an ingested source column** — use
+		``list_decimal_cols`` (see below); ``bin/check_dtypes.py`` enforces this.
 	list_date_cols : sequence of str, optional
 		Columns coerced to ``datetime.date`` (date only, no time component).
 	list_datetime_cols : sequence of str, optional
 		Columns coerced to ``datetime64`` timestamps.
+	list_decimal_cols : sequence of str, optional
+		Columns coerced to exact :class:`decimal.Decimal` values (``object`` dtype), for any
+		number whose fractional part carries meaning — money, volumes, rates, quantities.
+		A binary float cannot represent most decimal fractions: ``1984223115.42`` is stored
+		as ``1984223115.4200000762939453125``, and that loss is **irreversible and silent**,
+		surfacing later as a reconciliation that misses by a hair. The source's own scale is
+		preserved exactly (``"1.50"`` stays 2dp, ``"1.5000"`` stays 4dp); no precision is
+		*chosen* here, because choosing one is a downstream (warehouse) decision this layer
+		cannot make.
 
 	Returns
 	-------
@@ -75,14 +145,18 @@ def apply_dtypes(
 	KeyError
 		If any referenced column is absent from ``df_input``.
 	ValueError
-		If a column appears in more than one of the three sets, or a date/datetime
-		column cannot be parsed (``to_datetime`` uses ``errors="raise"``).
+		If a column appears in more than one of the four sets, a date/datetime
+		column cannot be parsed (``to_datetime`` uses ``errors="raise"``), or a decimal
+		column already holds a binary ``float`` (see :func:`_to_decimal`).
 	"""
 	dict_dtypes = dict_dtypes or {}
 	list_date_cols = list(list_date_cols or [])
 	list_datetime_cols = list(list_datetime_cols or [])
+	list_decimal_cols = list(list_decimal_cols or [])
 
-	list_referenced = list(dict_dtypes.keys()) + list_date_cols + list_datetime_cols
+	list_referenced = (
+		list(dict_dtypes.keys()) + list_date_cols + list_datetime_cols + list_decimal_cols
+	)
 	set_missing = {str_col for str_col in list_referenced if str_col not in df_input.columns}
 	if set_missing:
 		raise KeyError(f"Columns not found in DataFrame: {sorted(set_missing)}")
@@ -110,5 +184,8 @@ def apply_dtypes(
 
 	for str_col in list_date_cols:
 		df_typed[str_col] = pd.to_datetime(df_typed[str_col], errors="raise").dt.date
+
+	for str_col in list_decimal_cols:
+		df_typed[str_col] = df_typed[str_col].map(_to_decimal)
 
 	return df_typed

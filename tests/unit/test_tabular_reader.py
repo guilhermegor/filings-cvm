@@ -47,3 +47,59 @@ def test_read_table_coerces_declared_types_from_text(tmp_path: Path) -> None:
 	assert df_["code"].iloc[0] == "007"
 	assert str(df_["amount"].dtype) == "Int64"
 	assert df_["amount"].iloc[0] == 42
+
+
+def test_read_table_json_does_not_round_a_number_through_a_binary_float(
+	tmp_path: Path,
+) -> None:
+	"""A JSON number survives the read exactly, digit for digit.
+
+	``pd.read_json`` parses every number into a binary float *before* any dtype is applied,
+	so the later ``astype("str")`` faithfully stringifies the already-corrupted value —
+	``1984223115.42`` comes back as ``"1984223115.4200001"``. Parsing with
+	``parse_float=Decimal`` is what makes the JSON branch as text-first as the CSV one.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the JSON fixture.
+	"""
+	path_json = tmp_path / "source.json"
+	path_json.write_text(
+		'[{"code": "007", "amount": 1984223115.42}]',
+		encoding="utf-8",
+	)
+
+	df_ = read_table(path_json, "", {"code": "str", "amount": "str"}, EXAMPLE_SOURCE)
+
+	assert df_["code"].iloc[0] == "007"
+	assert df_["amount"].iloc[0] == "1984223115.42"
+
+
+def test_read_table_json_yields_decimals_for_declared_decimal_columns(
+	tmp_path: Path,
+) -> None:
+	"""The JSON branch feeds the decimal seam without ever creating a float in between.
+
+	The scale is asserted through ``str``, not through ``==``: ``Decimal`` equality compares
+	numeric value and ignores trailing zeros, so ``Decimal("10.5") == Decimal("10.50")`` is
+	``True`` and an equality-only assertion would pass on the lossy ``pd.read_json`` path
+	this test exists to exclude.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the JSON fixture.
+	"""
+	path_json = tmp_path / "source.json"
+	path_json.write_text('[{"code": "007", "amount": 10.50}]', encoding="utf-8")
+
+	df_ = read_table(
+		path_json,
+		"",
+		{"code": "str"},
+		EXAMPLE_SOURCE,
+		list_decimal_cols=("amount",),
+	)
+
+	assert str(df_["amount"].iloc[0]) == "10.50"

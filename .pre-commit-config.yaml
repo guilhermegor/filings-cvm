@@ -130,6 +130,14 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-dtypes
+        name: no binary float dtype for an ingested value
+        entry: bash bin/poetry_exec.sh run python bin/check_dtypes.py
+        language: system
+        types:
+          - python
+        pass_filenames: false
+
       - id: check-backlog-ledger
         name: every non-trivial (src/ci) branch keeps a work ledger
         entry: bash bin/poetry_exec.sh run python bin/check_backlog_ledger.py

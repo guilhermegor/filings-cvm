@@ -119,6 +119,15 @@ jobs:
         # url/updated_at/source_key/... columns. Explicit CI step (gate parity with pre-commit).
         run: poetry run python bin/check_provenance.py
 
+      - name: Run Binary-Float Dtype Ban
+        if: runner.os == 'Linux'
+        # Mirrors the `check-dtypes` pre-commit hook: no src/ module may declare a binary float
+        # dtype for an ingested column, because that destroys the source's exact value
+        # irreversibly and silently. Use list_decimal_cols (exact Decimal) or text instead; a
+        # genuinely dimensionless value opts out with `# dtype-ok: <reason>`. Explicit CI step
+        # (gate parity with pre-commit) — a hook-only gate is bypassed by `--no-verify`.
+        run: poetry run python bin/check_dtypes.py
+
       - name: Run Work-Ledger Enforcement
         if: runner.os == 'Linux' && github.event_name == 'pull_request'
         # Mirrors the `check-backlog-ledger` pre-commit hook: a branch touching any src/ci path
