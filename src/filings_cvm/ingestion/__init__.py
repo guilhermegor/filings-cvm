@@ -44,6 +44,9 @@ from filings_cvm.ingestion.cia_aberta import (
 	IpeCiaAbertaReader,
 	MetaCadCiaAbertaReader,
 	MetaIpeCiaAbertaReader,
+	MetaVlmoCiaAbertaReader,
+	VlmoCiaAbertaConReader,
+	VlmoCiaAbertaReader,
 )
 from filings_cvm.ingestion.cia_estrang import (
 	CadastroCiaEstrangReader,
@@ -420,9 +423,12 @@ __all__ = [
 	"MetaMedidasMesFieReader",
 	"MetaOfertaReader",
 	"MetaRegistroReader",
+	"MetaVlmoCiaAbertaReader",
 	"OfertaDistribuicaoReader",
 	"OfertaResolucao160Reader",
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",
+	"VlmoCiaAbertaConReader",
+	"VlmoCiaAbertaReader",
 ]

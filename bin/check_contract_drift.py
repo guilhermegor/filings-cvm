@@ -126,6 +126,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaCadCiaAbertaReader": ("CadastroCiaAbertaReader",),
 	"MetaCadCiaIncentReader": ("CadastroCiaIncentReader",),
 	"MetaIpeCiaAbertaReader": ("IpeCiaAbertaReader",),
+	"MetaVlmoCiaAbertaReader": ("VlmoCiaAbertaReader", "VlmoCiaAbertaConReader"),
 	"MetaCoordOfertaReader": ("CoordOfertaReader", "CoordOfertaRespReader"),
 	"MetaCrowdfundingReader": (
 		"CrowdfundingReader",

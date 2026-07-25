@@ -190,11 +190,14 @@ from filings_cvm.ingestion import (
 	MetaMedidasMesFieReader,
 	MetaOfertaReader,
 	MetaRegistroReader,
+	MetaVlmoCiaAbertaReader,
 	OfertaDistribuicaoReader,
 	OfertaResolucao160Reader,
 	RegistroClasseReader,
 	RegistroFundoReader,
 	RegistroSubclasseReader,
+	VlmoCiaAbertaConReader,
+	VlmoCiaAbertaReader,
 )
 from filings_cvm.submission import (
 	InformeDiario,
@@ -391,6 +394,7 @@ __all__ = [
 	"MetaMedidasMesFieReader",
 	"MetaOfertaReader",
 	"MetaRegistroReader",
+	"MetaVlmoCiaAbertaReader",
 	"OfertaDistribuicaoReader",
 	"OfertaResolucao160Reader",
 	"PerfilMensal",
@@ -399,5 +403,7 @@ __all__ = [
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",
 	"RetryPolicy",
+	"VlmoCiaAbertaConReader",
+	"VlmoCiaAbertaReader",
 	"__version__",
 ]

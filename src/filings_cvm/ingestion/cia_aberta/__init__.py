@@ -15,6 +15,9 @@ from filings_cvm.ingestion.cia_aberta.cad import (
 from filings_cvm.ingestion.cia_aberta.doc import (
 	IpeCiaAbertaReader,
 	MetaIpeCiaAbertaReader,
+	MetaVlmoCiaAbertaReader,
+	VlmoCiaAbertaConReader,
+	VlmoCiaAbertaReader,
 )
 
 
@@ -23,4 +26,7 @@ __all__ = [
 	"IpeCiaAbertaReader",
 	"MetaCadCiaAbertaReader",
 	"MetaIpeCiaAbertaReader",
+	"MetaVlmoCiaAbertaReader",
+	"VlmoCiaAbertaConReader",
+	"VlmoCiaAbertaReader",
 ]

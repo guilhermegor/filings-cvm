@@ -1297,7 +1297,52 @@ df_ = IpeCiaAbertaReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `Meta*Reader` (38 readers)
+### `VlmoCiaAberta*Reader` (2 readers)
+
+`filings_cvm.ingestion.cia_aberta`
+
+Os **valores mobiliários negociados e detidos** (`CIA_ABERTA/DOC/VLMO`,
+`vlmo_cia_aberta_AAAA.zip`) — **ZIP de 2 membros, particionado por ano**. Página completa em
+[VLMO Companhias Abertas](ingestion/vlmo_cia_aberta.md).
+
+- `VlmoCiaAbertaReader` — **índice** dos informes entregues (12 cols, ~5,8 mil linhas em 2025);
+  molde do IPE + `Motivo_Reapresentacao`. `Link_Download` **não é seguido**.
+- `VlmoCiaAbertaConReader` — **conteúdo**: movimentações de valores mobiliários (17 cols, ~63 mil
+  linhas).
+
+> ⚠️ **Os 2 membros NÃO são registro+satélite** — são índice e conteúdo, com colunas distintas.
+
+> ⚠️ **Primeiras colunas monetárias do root `cia_aberta/`.** `Preco_Unitario` e `Volume` chegam com
+> **10 casas decimais** e `Quantidade` é inteiro; **todos ficam texto exato**, nunca float — um
+> `float64` transforma `61961072.9999543100` em `61961072.99995431`. Converta para `Decimal` a
+> jusante (`bin/check_dtypes.py` barra o atalho).
+
+> ⚠️ **Sem dado pessoal:** `Empresa` é a *companhia* (`Tipo_Empresa` ∈ Companhia/Controlada/
+> Controladora) e `Tipo_Cargo` é *categoria de cargo* — o indivíduo nunca é nomeado.
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano**. Os dois readers baixam o **mesmo** arquivo, então um
+`path_raw` escrito por um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Índice: `Data_Referencia` + `Data_Entrega` viram `date`. Conteúdo: `Data_Referencia` +
+`Data_Movimentacao` — esta última chega **~58% vazia**, e o branco vira `NaT` (não levanta). Todo o
+resto é texto exato. Contracts **pinados** aos headers verbatim (12 e 17 cols).
+
+```python
+from datetime import date
+
+from filings_cvm import VlmoCiaAbertaConReader
+
+df_ = VlmoCiaAbertaConReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "Tipo_Movimentacao", "Quantidade", "Preco_Unitario", "Volume"]]
+```
+
+---
+
+### `Meta*Reader` (39 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).

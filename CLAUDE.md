@@ -220,13 +220,13 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **38 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **39 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (38 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (39 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (22); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (23); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
 ⚠️ **Estes números são MEDIDOS do código** (`38 = 16 .txt + 22 .zip`, e 38 contracts — o 39º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
@@ -477,7 +477,22 @@ Sob `CIA_ABERTA/CAD/`:
   (`meta_<ds>_cia_aberta.zip`, `meta_<ds>_cia_aberta_txt.zip`, **`fca_cia_aberta.zip` sem o prefixo
   `meta_`**, e este `.txt`): a URL é constante por dataset, **jamais derivada**. **Sétima fatia da
   Wave 4; abre o sub-root `DOC` (2/9 datasets do `cia_aberta/`)**
-- ⬜ **ingestion** os outros 6 `DOC`: CGVN, DFP, FCA, FRE, ITR, VLMO — todos `<ds>_cia_aberta_AAAA.zip`
+- VLMO (Valores Mobiliários negociados e detidos) — ✅ **ingestion** `vlmo_cia_aberta_AAAA.zip`
+  (**ZIP de 2 membros**) — `ingestion/cia_aberta/doc/vlmo/*` (`VlmoCiaAbertaReader` índice 12 cols
+  ~5,8k linhas; `VlmoCiaAbertaConReader` conteúdo 17 cols ~63k linhas; base privada
+  `_base_vlmo_reader.py`); contracts `_internal/config/contracts/vlmo_cia_aberta.py`, **gerados dos
+  headers e pinados** a `tests/fixtures/vlmo_cia_aberta/*_header.csv`. **Particionado por ANO**.
+  ⚠️ **Os 2 membros NÃO são registro+satélite** — são **índice + conteúdo** (colunas disjuntas,
+  anti-cópia pinada). ⚠️ **PRIMEIRAS COLUNAS MONETÁRIAS DO ROOT** — `Preco_Unitario`/`Volume` com
+  **10 casas decimais** e `Quantidade` inteiro (META: `decimal`/`decimal`/`bigint`) ficam **texto
+  exato**, nunca float: um `float64` transforma `61961072.9999543100` em `61961072.99995431`
+  (provado por mutação; o gate `check_dtypes` também barra). ⚠️ **`Data_Movimentacao` chega ~58%
+  VAZIA** — data por contrato, branco vira `NaT`. ⚠️ **SEM dado pessoal** apesar de ser informe de
+  insider: `Empresa` é a *companhia* e `Tipo_Cargo` é *categoria de cargo*; o indivíduo nunca é
+  nomeado. CNPJ 100% válido nos dois (sem o placeholder do IPE). ⚠️ **A META é `.zip` e o `.txt` dá
+  404 — o INVERSO do IPE**; `section` assimétricas (`meta_vlmo_cia_aberta` + `con`, molde INTERMED).
+  **Sétima fatia da Wave 4; `DOC` em 2/7**
+- ⬜ **ingestion** os outros 5 `DOC`: CGVN, DFP, FCA, FRE, ITR — todos `<ds>_cia_aberta_AAAA.zip`
   (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
   próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
 
@@ -531,7 +546,8 @@ src/filings_cvm/
         oferta/            #   OFERTA/ — distrib/{oferta_distribuicao,oferta_resolucao_160} (snapshot ZIP, 2 membros por regime, no date_ref; NÃO registro+satélite; META é .zip simétrica) — fecha #14
         cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto)
                            #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
-                           #     DOC/{CGVN,DFP,FCA,FRE,ITR,VLMO} + EVENTOS pendentes (nº de membros varia: VLMO 2, FCA 10 — grounding próprio por dataset)
+                           #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
+                           #     DOC/{CGVN,DFP,FCA,FRE,ITR} + EVENTOS pendentes (nº de membros varia: FCA 10 — grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
