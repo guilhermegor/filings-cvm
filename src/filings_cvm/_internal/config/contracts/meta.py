@@ -102,3 +102,4 @@ META_CAD_CIA_ABERTA = _meta_contract("cad_cia_aberta", "META — Cadastro Compan
 META_IPE_CIA_ABERTA = _meta_contract("ipe_cia_aberta", "META — IPE Companhia Aberta")
 META_VLMO_CIA_ABERTA = _meta_contract("vlmo_cia_aberta", "META — VLMO Companhia Aberta")
 META_FCA_CIA_ABERTA = _meta_contract("fca_cia_aberta", "META — FCA Companhia Aberta")
+META_CGVN_CIA_ABERTA = _meta_contract("cgvn_cia_aberta", "META — CGVN Companhia Aberta")

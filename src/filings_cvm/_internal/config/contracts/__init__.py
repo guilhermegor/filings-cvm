@@ -83,6 +83,10 @@ from filings_cvm._internal.config.contracts.cad_invnr_repres import (
 	CAD_INVNR_REPRES_PJ,
 )
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
+from filings_cvm._internal.config.contracts.cgvn_cia_aberta import (
+	CGVN_CIA_ABERTA,
+	CGVN_CIA_ABERTA_PRATICAS,
+)
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
@@ -219,6 +223,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_CAD_INTERMED,
 	META_CAD_INVNR_REPRES,
 	META_CDA_FI,
+	META_CGVN_CIA_ABERTA,
 	META_COLUMNS,
 	META_DFIN_CRA,
 	META_DFIN_CRI,
@@ -314,6 +319,8 @@ __all__ = [
 	"CAD_INVNR_REPRES_PF",
 	"CAD_INVNR_REPRES_PJ",
 	"CDA_FIF",
+	"CGVN_CIA_ABERTA",
+	"CGVN_CIA_ABERTA_PRATICAS",
 	"ContractError",
 	"DFIN_CRA",
 	"DFIN_CRI",
@@ -433,6 +440,7 @@ __all__ = [
 	"META_CAD_INTERMED",
 	"META_CAD_INVNR_REPRES",
 	"META_CDA_FI",
+	"META_CGVN_CIA_ABERTA",
 	"META_COLUMNS",
 	"META_DFIN_CRA",
 	"META_DFIN_CRI",

@@ -9,6 +9,11 @@ This slice ships **IPE** (:mod:`filings_cvm.ingestion.cia_aberta.doc.ipe`); the 
 as their own readers. Every reader is re-exported flat from `filings_cvm.ingestion`.
 """
 
+from filings_cvm.ingestion.cia_aberta.doc.cgvn import (
+	CgvnCiaAbertaPraticasReader,
+	CgvnCiaAbertaReader,
+	MetaCgvnCiaAbertaReader,
+)
 from filings_cvm.ingestion.cia_aberta.doc.fca import (
 	FcaCiaAbertaAuditorReader,
 	FcaCiaAbertaCanalDivulgacaoReader,
@@ -34,6 +39,8 @@ from filings_cvm.ingestion.cia_aberta.doc.vlmo import (
 
 
 __all__ = [
+	"CgvnCiaAbertaPraticasReader",
+	"CgvnCiaAbertaReader",
 	"FcaCiaAbertaAuditorReader",
 	"FcaCiaAbertaCanalDivulgacaoReader",
 	"FcaCiaAbertaDepartamentoAcionistasReader",
@@ -45,6 +52,7 @@ __all__ = [
 	"FcaCiaAbertaReader",
 	"FcaCiaAbertaValorMobiliarioReader",
 	"IpeCiaAbertaReader",
+	"MetaCgvnCiaAbertaReader",
 	"MetaFcaCiaAbertaReader",
 	"MetaIpeCiaAbertaReader",
 	"MetaVlmoCiaAbertaReader",

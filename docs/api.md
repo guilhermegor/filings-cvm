@@ -1397,7 +1397,49 @@ df_ = FcaCiaAbertaGeralReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `Meta*Reader` (40 readers)
+### `CgvnCiaAberta*Reader` (2 readers)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O **Informe sobre o Código Brasileiro de Governança Corporativa** (`CIA_ABERTA/DOC/CGVN`,
+`cgvn_cia_aberta_AAAA.zip`) — **ZIP de 2 membros**, particionado por ano: índice + conteúdo (molde
+do VLMO). Página completa em [CGVN Companhias Abertas](ingestion/cgvn_cia_aberta.md).
+
+- `CgvnCiaAbertaReader` — **índice** dos informes (12 cols, 382 linhas em 2025), **4 colunas de
+  data**, `Link_Download` **não seguido**.
+- `CgvnCiaAbertaPraticasReader` — **conteúdo**: uma linha por prática recomendada (11 cols,
+  **19.980** linhas), com `Pratica_Adotada` (`Sim`/`Não`) e a `Explicacao` em texto livre.
+
+> ⚠️ **O índice do CGVN usa CamelCase** (`CNPJ_Companhia`/`Data_Referencia`), **não** o
+> `CNPJ_CIA`/`DT_REFER` do índice do FCA. **O FCA era a exceção do sub-root, não a regra** — pinado
+> por teste que compara os dois contracts.
+
+> ⚠️ **`Codigo_CVM` chega com zero à esquerda (`001023`)** — aqui tipar como texto é
+> **load-bearing**: provado por mutação, um `int64` devolve `1023`. `ID_Item` é hierárquico
+> (`1.1.1`) e também fica texto.
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano**; os 2 readers baixam o **mesmo** arquivo.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Índice: `Data_Referencia`, `Data_Entrega`, `Data_Inicio_Exercicio_Social` e
+`Data_Fim_Exercicio_Social` viram `date`. Conteúdo: só `Data_Referencia`. Todo o resto é texto
+exato. Contracts **pinados** aos headers verbatim (12 e 11 cols).
+
+```python
+from datetime import date
+
+from filings_cvm import CgvnCiaAbertaPraticasReader
+
+df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "ID_Item", "Capitulo", "Pratica_Adotada"]]
+```
+
+---
+
+### `Meta*Reader` (41 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).

@@ -220,13 +220,13 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **40 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **41 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (40 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (41 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (24); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (25); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
 ⚠️ **Estes números são MEDIDOS do código** (`38 = 16 .txt + 22 .zip`, e 38 contracts — o 39º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
@@ -511,7 +511,23 @@ Sob `CIA_ABERTA/CAD/`:
   ⚠️ **A META é `fca_cia_aberta.zip` — SEM o prefixo `meta_`** (as 2 derivações óbvias dão 404,
   enquanto o vizinho `CAD` serve `meta_cad_cia_aberta.txt`): o caso mais forte de "URL jamais
   derivada". **8ª fatia da Wave 4; `DOC` em 3/7**
-- ⬜ **ingestion** os outros 4 `DOC`: CGVN, DFP, FRE, ITR — todos `<ds>_cia_aberta_AAAA.zip`
+- CGVN (Informe sobre o Código Brasileiro de Governança Corporativa) — ✅ **ingestion**
+  `cgvn_cia_aberta_AAAA.zip` (**ZIP de 2 membros**: índice 12 cols/382 linhas + `praticas` 11
+  cols/**19.980** linhas) — `ingestion/cia_aberta/doc/cgvn/*` (`CgvnCiaAbertaReader`,
+  `CgvnCiaAbertaPraticasReader`, base privada `_base_cgvn_reader.py`); contracts
+  `_internal/config/contracts/cgvn_cia_aberta.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/cgvn_cia_aberta/*_header.csv`. **Particionado por ANO**. Molde do VLMO
+  (índice + conteúdo). ⚠️ **O índice do CGVN usa CamelCase** (`CNPJ_Companhia`/`Data_Referencia`) —
+  **o FCA era a EXCEÇÃO do sub-root, não a regra**; generalizar do vizinho escreveria este errado
+  (anti-generalização pinada, comparando os 2 contracts). ⚠️ **`Codigo_CVM` chega `001023`, COM zero
+  à esquerda** — primeiro caso do root em que o texto é **load-bearing** (provado por mutação:
+  `int64` devolve `1023`); `ID_Item` é hierárquico (`1.1.1`). 4 date cols no índice (inclui
+  `Data_Inicio/Fim_Exercicio_Social`), 1 no `praticas`. `Explicacao` até ~6.000 chars, sem `;`
+  embutido (larguras uniformes sob `QUOTE_NONE`, medido). `Link_Download` é **`http://…/ENETCONSULTA/…`**
+  (≠ o `https://…/ENET/…` do IPE/VLMO) e vai **como publicado**, não seguido. ⚠️ **META é
+  `meta_cgvn_cia_aberta.zip`** (a forma padrão); as outras 3 dão 404, **incluindo a sem-prefixo que é
+  a correta do FCA**. **9ª fatia da Wave 4; `DOC` em 4/7**
+- ⬜ **ingestion** os outros 3 `DOC`: DFP, FRE, ITR — todos `<ds>_cia_aberta_AAAA.zip`
   (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
   próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
 
@@ -567,7 +583,8 @@ src/filings_cvm/
                            #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
                            #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
-                           #     DOC/{CGVN,DFP,FRE,ITR} + EVENTOS pendentes (grounding próprio por dataset)
+                           #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
+                           #     DOC/{DFP,FRE,ITR} + EVENTOS pendentes (grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

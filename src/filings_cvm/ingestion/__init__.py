@@ -41,6 +41,8 @@ from filings_cvm.ingestion.auditor import (
 )
 from filings_cvm.ingestion.cia_aberta import (
 	CadastroCiaAbertaReader,
+	CgvnCiaAbertaPraticasReader,
+	CgvnCiaAbertaReader,
 	FcaCiaAbertaAuditorReader,
 	FcaCiaAbertaCanalDivulgacaoReader,
 	FcaCiaAbertaDepartamentoAcionistasReader,
@@ -53,6 +55,7 @@ from filings_cvm.ingestion.cia_aberta import (
 	FcaCiaAbertaValorMobiliarioReader,
 	IpeCiaAbertaReader,
 	MetaCadCiaAbertaReader,
+	MetaCgvnCiaAbertaReader,
 	MetaFcaCiaAbertaReader,
 	MetaIpeCiaAbertaReader,
 	MetaVlmoCiaAbertaReader,
@@ -295,6 +298,8 @@ __all__ = [
 	"CadastroFiHistTribLprazoReader",
 	"CadastroFiReader",
 	"CdaReader",
+	"CgvnCiaAbertaPraticasReader",
+	"CgvnCiaAbertaReader",
 	"ConsultorVlmobDiretorReader",
 	"ConsultorVlmobPfReader",
 	"ConsultorVlmobPjReader",
@@ -420,6 +425,7 @@ __all__ = [
 	"MetaCadFiHistReader",
 	"MetaCadastroFiReader",
 	"MetaCdaReader",
+	"MetaCgvnCiaAbertaReader",
 	"MetaConsultorVlmobReader",
 	"MetaCoordOfertaReader",
 	"MetaCrowdfundingReader",
