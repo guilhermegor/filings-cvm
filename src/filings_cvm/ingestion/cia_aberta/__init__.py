@@ -13,6 +13,8 @@ from filings_cvm.ingestion.cia_aberta.cad import (
 	MetaCadCiaAbertaReader,
 )
 from filings_cvm.ingestion.cia_aberta.doc import (
+	CgvnCiaAbertaPraticasReader,
+	CgvnCiaAbertaReader,
 	FcaCiaAbertaAuditorReader,
 	FcaCiaAbertaCanalDivulgacaoReader,
 	FcaCiaAbertaDepartamentoAcionistasReader,
@@ -24,6 +26,7 @@ from filings_cvm.ingestion.cia_aberta.doc import (
 	FcaCiaAbertaReader,
 	FcaCiaAbertaValorMobiliarioReader,
 	IpeCiaAbertaReader,
+	MetaCgvnCiaAbertaReader,
 	MetaFcaCiaAbertaReader,
 	MetaIpeCiaAbertaReader,
 	MetaVlmoCiaAbertaReader,
@@ -34,6 +37,8 @@ from filings_cvm.ingestion.cia_aberta.doc import (
 
 __all__ = [
 	"CadastroCiaAbertaReader",
+	"CgvnCiaAbertaPraticasReader",
+	"CgvnCiaAbertaReader",
 	"FcaCiaAbertaAuditorReader",
 	"FcaCiaAbertaCanalDivulgacaoReader",
 	"FcaCiaAbertaDepartamentoAcionistasReader",
@@ -46,6 +51,7 @@ __all__ = [
 	"FcaCiaAbertaValorMobiliarioReader",
 	"IpeCiaAbertaReader",
 	"MetaCadCiaAbertaReader",
+	"MetaCgvnCiaAbertaReader",
 	"MetaFcaCiaAbertaReader",
 	"MetaIpeCiaAbertaReader",
 	"MetaVlmoCiaAbertaReader",
