@@ -9,6 +9,19 @@ This slice ships **IPE** (:mod:`filings_cvm.ingestion.cia_aberta.doc.ipe`); the 
 as their own readers. Every reader is re-exported flat from `filings_cvm.ingestion`.
 """
 
+from filings_cvm.ingestion.cia_aberta.doc.fca import (
+	FcaCiaAbertaAuditorReader,
+	FcaCiaAbertaCanalDivulgacaoReader,
+	FcaCiaAbertaDepartamentoAcionistasReader,
+	FcaCiaAbertaDriReader,
+	FcaCiaAbertaEnderecoReader,
+	FcaCiaAbertaEscrituradorReader,
+	FcaCiaAbertaGeralReader,
+	FcaCiaAbertaPaisEstrangeiroNegociacaoReader,
+	FcaCiaAbertaReader,
+	FcaCiaAbertaValorMobiliarioReader,
+	MetaFcaCiaAbertaReader,
+)
 from filings_cvm.ingestion.cia_aberta.doc.ipe import (
 	IpeCiaAbertaReader,
 	MetaIpeCiaAbertaReader,
@@ -21,7 +34,18 @@ from filings_cvm.ingestion.cia_aberta.doc.vlmo import (
 
 
 __all__ = [
+	"FcaCiaAbertaAuditorReader",
+	"FcaCiaAbertaCanalDivulgacaoReader",
+	"FcaCiaAbertaDepartamentoAcionistasReader",
+	"FcaCiaAbertaDriReader",
+	"FcaCiaAbertaEnderecoReader",
+	"FcaCiaAbertaEscrituradorReader",
+	"FcaCiaAbertaGeralReader",
+	"FcaCiaAbertaPaisEstrangeiroNegociacaoReader",
+	"FcaCiaAbertaReader",
+	"FcaCiaAbertaValorMobiliarioReader",
 	"IpeCiaAbertaReader",
+	"MetaFcaCiaAbertaReader",
 	"MetaIpeCiaAbertaReader",
 	"MetaVlmoCiaAbertaReader",
 	"VlmoCiaAbertaConReader",

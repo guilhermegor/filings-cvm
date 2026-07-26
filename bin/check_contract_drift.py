@@ -127,6 +127,18 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaCadCiaIncentReader": ("CadastroCiaIncentReader",),
 	"MetaIpeCiaAbertaReader": ("IpeCiaAbertaReader",),
 	"MetaVlmoCiaAbertaReader": ("VlmoCiaAbertaReader", "VlmoCiaAbertaConReader"),
+	"MetaFcaCiaAbertaReader": (
+		"FcaCiaAbertaAuditorReader",
+		"FcaCiaAbertaCanalDivulgacaoReader",
+		"FcaCiaAbertaDepartamentoAcionistasReader",
+		"FcaCiaAbertaDriReader",
+		"FcaCiaAbertaEnderecoReader",
+		"FcaCiaAbertaEscrituradorReader",
+		"FcaCiaAbertaGeralReader",
+		"FcaCiaAbertaPaisEstrangeiroNegociacaoReader",
+		"FcaCiaAbertaReader",
+		"FcaCiaAbertaValorMobiliarioReader",
+	),
 	"MetaCoordOfertaReader": ("CoordOfertaReader", "CoordOfertaRespReader"),
 	"MetaCrowdfundingReader": (
 		"CrowdfundingReader",
