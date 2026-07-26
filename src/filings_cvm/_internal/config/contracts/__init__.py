@@ -87,6 +87,18 @@ from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
+from filings_cvm._internal.config.contracts.fca_cia_aberta import (
+	FCA_CIA_ABERTA,
+	FCA_CIA_ABERTA_AUDITOR,
+	FCA_CIA_ABERTA_CANAL_DIVULGACAO,
+	FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS,
+	FCA_CIA_ABERTA_DRI,
+	FCA_CIA_ABERTA_ENDERECO,
+	FCA_CIA_ABERTA_ESCRITURADOR,
+	FCA_CIA_ABERTA_GERAL,
+	FCA_CIA_ABERTA_PAIS_ESTRANGEIRO_NEGOCIACAO,
+	FCA_CIA_ABERTA_VALOR_MOBILIARIO,
+)
 from filings_cvm._internal.config.contracts.inf_anual_fii import (
 	INF_ANUAL_FII_ATIVO_ADQUIRIDO,
 	INF_ANUAL_FII_ATIVO_TRANSACAO,
@@ -211,6 +223,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_DFIN_CRA,
 	META_DFIN_CRI,
 	META_DFIN_FII,
+	META_FCA_CIA_ABERTA,
 	META_INF_ANUAL_FII,
 	META_INF_DIARIO_FI,
 	META_INF_MENSAL_CRA,
@@ -306,6 +319,16 @@ __all__ = [
 	"DFIN_CRI",
 	"DFIN_FII",
 	"EXAMPLE_SOURCE",
+	"FCA_CIA_ABERTA",
+	"FCA_CIA_ABERTA_AUDITOR",
+	"FCA_CIA_ABERTA_CANAL_DIVULGACAO",
+	"FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS",
+	"FCA_CIA_ABERTA_DRI",
+	"FCA_CIA_ABERTA_ENDERECO",
+	"FCA_CIA_ABERTA_ESCRITURADOR",
+	"FCA_CIA_ABERTA_GERAL",
+	"FCA_CIA_ABERTA_PAIS_ESTRANGEIRO_NEGOCIACAO",
+	"FCA_CIA_ABERTA_VALOR_MOBILIARIO",
 	"FileContract",
 	"INFORME_DIARIO_FIF",
 	"INF_ANUAL_FII_ATIVO_ADQUIRIDO",
@@ -414,6 +437,7 @@ __all__ = [
 	"META_DFIN_CRA",
 	"META_DFIN_CRI",
 	"META_DFIN_FII",
+	"META_FCA_CIA_ABERTA",
 	"META_INF_ANUAL_FII",
 	"META_INF_DIARIO_FI",
 	"META_INF_MENSAL_CRA",
