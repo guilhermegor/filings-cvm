@@ -250,6 +250,40 @@ def _changed_paths() -> list[str]:
     return [line for line in cls_proc.stdout.splitlines() if line]
 
 
+def is_bot_actor(str_actor: str | None) -> bool:
+    """Say whether a branch's author is a bot, and so exempt from the ledger rule.
+
+    GitHub names bot actors with a ``[bot]`` suffix — ``dependabot[bot]``,
+    ``github-actions[bot]`` — which CI exposes as ``GITHUB_ACTOR``. That suffix is the whole
+    test: it is GitHub's own marker, so no allow-list of bot names has to be maintained (and
+    none can go stale).
+
+    **Why bots are exempt.** A work ledger records a *human's* reasoning — what was done, what
+    is still open, why a shortcut was taken. An automated dependency bump has none to record:
+    the diff is the entire message and the upstream changelog is the justification. Demanding
+    one cannot be satisfied, so every bot PR touching a workflow (risk class ``ci``) would be
+    permanently red, which only teaches people to reach for ``--admin`` — a worse habit than
+    the gate prevents.
+
+    The exemption keys on the **author**, never on the path: a *human* branch touching a
+    workflow still owes a ledger, and only the actor changes the answer.
+
+    Parameters
+    ----------
+    str_actor : str or None
+        The acting user, normally ``GITHUB_ACTOR``. ``None`` or empty (a local run) is **not**
+        a bot — a developer's machine must still satisfy the rule.
+
+    Returns
+    -------
+    bool
+        True when the actor is a GitHub bot.
+    """
+    if not str_actor:
+        return False
+    return str_actor.strip().lower().endswith("[bot]")
+
+
 def _read_text(str_path: str) -> str | None:
     """Read a repo-relative file's text, or ``None`` when it does not exist.
 
@@ -270,6 +304,11 @@ def _read_text(str_path: str) -> str | None:
 
 
 if __name__ == "__main__":
+    # The bot exemption lives here, in the I/O seam, so ``check`` stays pure and unit-testable
+    # without an environment. See ``is_bot_actor`` for why bots are exempt at all.
+    if is_bot_actor(os.environ.get("GITHUB_ACTOR")):
+        print("ℹ️  bot-authored branch — work ledger not required (see is_bot_actor).")
+        sys.exit(0)
     list_found = check(_changed_paths(), _read_text)
     for str_line in list_found:
         print(str_line)
