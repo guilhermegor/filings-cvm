@@ -1439,7 +1439,56 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `Meta*Reader` (41 readers)
+### `FreCiaAberta*Reader` (8 readers — fatia 1 de 4)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O **Formulário de Referência** (`CIA_ABERTA/DOC/FRE`, `fre_cia_aberta_AAAA.zip`) — **o maior dataset
+do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**. Esta é a **1ª: índice +
+estrutura de capital** (8 membros). Página completa em
+[FRE Companhias Abertas](ingestion/fre_cia_aberta.md).
+
+| reader | membro | cols | linhas (2025) |
+|---|---|---|---|
+| `FreCiaAbertaReader` | índice | 9 | 4.931 |
+| `FreCiaAbertaCapitalSocialReader` | `capital_social` | 13 | 2.402 |
+| `FreCiaAbertaCapitalSocialClasseAcaoReader` | `capital_social_classe_acao` | 8 | 292 |
+| `FreCiaAbertaCapitalSocialTituloConversivelReader` | `capital_social_titulo_conversivel` | 8 | 26 |
+| `FreCiaAbertaDistribuicaoCapitalReader` | `distribuicao_capital` | 15 | 700 |
+| `FreCiaAbertaDistribuicaoCapitalClasseAcaoReader` | `distribuicao_capital_classe_acao` | 9 | 170 |
+| `FreCiaAbertaResponsavelReader` | `responsavel` | 7 | 1.413 |
+| `FreCiaAbertaMercadoEstrangeiroReader` | `mercado_estrangeiro` | 17 | 11 |
+
+> ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (maiúsculas abreviadas), os satélites usam
+> `CNPJ_Companhia`/`Data_Referencia`. **O FCA faz igual, o CGVN NÃO** — não há regra entre datasets,
+> só medição. Pinado nas 2 direções, com o CGVN como contra-exemplo.
+
+> ⚠️ **O FRE usa SEIS nomes de coluna de CNPJ** ao longo dos 36 membros — cada contrato declara o
+> seu.
+
+> ⚠️ `Valor_Capital`, `Quantidade_*` e `Percentual_*` ficam **texto exato** (regra do #157).
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano**; **todos** os readers do FRE baixam o **mesmo** arquivo.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Cada reader coage **as suas próprias** colunas de data (1 a 3 nesta fatia); branco vira `NaT`
+(`Data_Ultima_Assembleia` tem linhas vazias). Contracts **pinados** aos 8 headers verbatim.
+
+```python
+from datetime import date
+
+from filings_cvm import FreCiaAbertaCapitalSocialReader
+
+df_ = FreCiaAbertaCapitalSocialReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "Tipo_Capital", "Valor_Capital", "Quantidade_Total_Acoes"]]
+```
+
+---
+
+### `Meta*Reader` (42 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).

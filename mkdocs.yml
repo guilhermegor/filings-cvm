@@ -48,6 +48,7 @@ nav:
       - Companhias Abertas — VLMO: ingestion/vlmo_cia_aberta.md
       - Companhias Abertas — FCA: ingestion/fca_cia_aberta.md
       - Companhias Abertas — CGVN: ingestion/cgvn_cia_aberta.md
+      - Companhias Abertas — FRE: ingestion/fre_cia_aberta.md
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
       - Completude do portal (job semanal): ingestion/portal_completeness.md

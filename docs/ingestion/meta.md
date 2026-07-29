@@ -1,7 +1,7 @@
 # **META (metadados da CVM) — leitura**
 
 Leitura (← CVM) dos **META** — a *especificação que a própria CVM publica* para cada dataset do
-[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **41 no total**,
+[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **42 no total**,
 todos sob `.../<DATASET>/META/`.
 
 > **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) · [Proveniência](index.md).
@@ -71,7 +71,7 @@ nunca derivada. Os nomes são irregulares de fato: `meta_inf_mensal_cri.zip`, ma
 
 ---
 
-## Os 41 readers
+## Os 42 readers
 
 Todos devolvem **o mesmo formato**: uma linha por campo declarado.
 
@@ -127,8 +127,9 @@ tabela alguma) — como as seis colunas de proveniência. Os **valores** seguem 
 | `CIA_ABERTA/DOC/VLMO` | `MetaVlmoCiaAbertaReader` | `.zip` |
 | `CIA_ABERTA/DOC/FCA` | `MetaFcaCiaAbertaReader` | `.zip` ⚠️ **sem o prefixo `meta_`** |
 | `CIA_ABERTA/DOC/CGVN` | `MetaCgvnCiaAbertaReader` | `.zip` |
+| `CIA_ABERTA/DOC/FRE` | `MetaFreCiaAbertaReader` | `.zip` |
 
-> ℹ️ **`FIE/MEDIDAS`** publica `.csv` **e** `.txt`; usamos o **`.txt`**, o formato que os 41
+> ℹ️ **`FIE/MEDIDAS`** publica `.csv` **e** `.txt`; usamos o **`.txt`**, o formato que os 42
 > compartilham.
 
 ---
