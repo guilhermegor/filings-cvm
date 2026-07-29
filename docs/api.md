@@ -1342,7 +1342,153 @@ df_ = VlmoCiaAbertaConReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `Meta*Reader` (39 readers)
+### `FcaCiaAberta*Reader` (10 readers)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O **Formulário Cadastral** (`CIA_ABERTA/DOC/FCA`, `fca_cia_aberta_AAAA.zip`) — **ZIP de 10
+membros**, particionado por ano: o índice + 9 tabelas de detalhe. Página completa em
+[FCA Companhias Abertas](ingestion/fca_cia_aberta.md).
+
+| reader | membro | cols | linhas (2025) |
+|---|---|---|---|
+| `FcaCiaAbertaReader` | índice | 9 | 1.301 |
+| `FcaCiaAbertaAuditorReader` | auditor | 15 | 1.069 |
+| `FcaCiaAbertaCanalDivulgacaoReader` | canal_divulgacao | 7 | 1.350 |
+| `FcaCiaAbertaDepartamentoAcionistasReader` | departamento_acionistas | 23 | **0** |
+| `FcaCiaAbertaDriReader` | dri | 26 | 1.007 |
+| `FcaCiaAbertaEnderecoReader` | endereco | 21 | 1.436 |
+| `FcaCiaAbertaEscrituradorReader` | escriturador | 24 | 552 |
+| `FcaCiaAbertaGeralReader` | geral | 26 | 715 |
+| `FcaCiaAbertaPaisEstrangeiroNegociacaoReader` | pais_estrangeiro_negociacao | 7 | 83 |
+| `FcaCiaAbertaValorMobiliarioReader` | valor_mobiliario | 18 | 995 |
+
+> ⚠️ **O índice NÃO segue a convenção de nomes dos 9 satélites** — usa `CNPJ_CIA` / `DT_REFER` /
+> `DT_RECEB` / `DENOM_CIA` (estilo `cad_cia_aberta.csv`), enquanto todo satélite usa
+> `CNPJ_Companhia` / `Data_Referencia` / `ID_Documento`. Gerar os 10 de um molde só quebra o índice
+> **em silêncio** — pinado por teste.
+
+> ⚠️ **`departamento_acionistas` é header-only** (0 linhas em 2025) → seu contract declara **nenhuma**
+> coluna de CNPJ, porque o check exige um valor **presente** e um artefato legitimamente vazio
+> levantaria `ContractError`. Provado por mutação.
+
+> ⚠️ **DADO PESSOAL (LGPD):** `dri.CPF_Responsavel` (1.003 CPF + 4 CNPJ),
+> `auditor.CPF_Responsavel_Tecnico` e o misto `auditor.CPF_CNPJ_Auditor`. Devolvidos como texto
+> exato, **nunca** declarados como coluna de CNPJ. Fixtures **header-only**.
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano**. Os 10 readers baixam o **mesmo** arquivo, então um `path_raw`
+escrito por um serve os outros.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Cada reader coage **as suas próprias** colunas de data (de 1 a **9**, em `geral`); branco vira
+`NaT`. Todo o resto é texto exato. Contracts **pinados** aos 10 headers verbatim.
+
+```python
+from datetime import date
+
+from filings_cvm import FcaCiaAbertaGeralReader
+
+df_ = FcaCiaAbertaGeralReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "Setor_Atividade", "Data_Constituicao", "Situacao_Emissor"]]
+```
+
+---
+
+### `CgvnCiaAberta*Reader` (2 readers)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O **Informe sobre o Código Brasileiro de Governança Corporativa** (`CIA_ABERTA/DOC/CGVN`,
+`cgvn_cia_aberta_AAAA.zip`) — **ZIP de 2 membros**, particionado por ano: índice + conteúdo (molde
+do VLMO). Página completa em [CGVN Companhias Abertas](ingestion/cgvn_cia_aberta.md).
+
+- `CgvnCiaAbertaReader` — **índice** dos informes (12 cols, 382 linhas em 2025), **4 colunas de
+  data**, `Link_Download` **não seguido**.
+- `CgvnCiaAbertaPraticasReader` — **conteúdo**: uma linha por prática recomendada (11 cols,
+  **19.980** linhas), com `Pratica_Adotada` (`Sim`/`Não`) e a `Explicacao` em texto livre.
+
+> ⚠️ **O índice do CGVN usa CamelCase** (`CNPJ_Companhia`/`Data_Referencia`), **não** o
+> `CNPJ_CIA`/`DT_REFER` do índice do FCA. **O FCA era a exceção do sub-root, não a regra** — pinado
+> por teste que compara os dois contracts.
+
+> ⚠️ **`Codigo_CVM` chega com zero à esquerda (`001023`)** — aqui tipar como texto é
+> **load-bearing**: provado por mutação, um `int64` devolve `1023`. `ID_Item` é hierárquico
+> (`1.1.1`) e também fica texto.
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano**; os 2 readers baixam o **mesmo** arquivo.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Índice: `Data_Referencia`, `Data_Entrega`, `Data_Inicio_Exercicio_Social` e
+`Data_Fim_Exercicio_Social` viram `date`. Conteúdo: só `Data_Referencia`. Todo o resto é texto
+exato. Contracts **pinados** aos headers verbatim (12 e 11 cols).
+
+```python
+from datetime import date
+
+from filings_cvm import CgvnCiaAbertaPraticasReader
+
+df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "ID_Item", "Capitulo", "Pratica_Adotada"]]
+```
+
+---
+
+### `FreCiaAberta*Reader` (8 readers — fatia 1 de 4)
+
+`filings_cvm.ingestion.cia_aberta`
+
+O **Formulário de Referência** (`CIA_ABERTA/DOC/FRE`, `fre_cia_aberta_AAAA.zip`) — **o maior dataset
+do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**. Esta é a **1ª: índice +
+estrutura de capital** (8 membros). Página completa em
+[FRE Companhias Abertas](ingestion/fre_cia_aberta.md).
+
+| reader | membro | cols | linhas (2025) |
+|---|---|---|---|
+| `FreCiaAbertaReader` | índice | 9 | 4.931 |
+| `FreCiaAbertaCapitalSocialReader` | `capital_social` | 13 | 2.402 |
+| `FreCiaAbertaCapitalSocialClasseAcaoReader` | `capital_social_classe_acao` | 8 | 292 |
+| `FreCiaAbertaCapitalSocialTituloConversivelReader` | `capital_social_titulo_conversivel` | 8 | 26 |
+| `FreCiaAbertaDistribuicaoCapitalReader` | `distribuicao_capital` | 15 | 700 |
+| `FreCiaAbertaDistribuicaoCapitalClasseAcaoReader` | `distribuicao_capital_classe_acao` | 9 | 170 |
+| `FreCiaAbertaResponsavelReader` | `responsavel` | 7 | 1.413 |
+| `FreCiaAbertaMercadoEstrangeiroReader` | `mercado_estrangeiro` | 17 | 11 |
+
+> ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (maiúsculas abreviadas), os satélites usam
+> `CNPJ_Companhia`/`Data_Referencia`. **O FCA faz igual, o CGVN NÃO** — não há regra entre datasets,
+> só medição. Pinado nas 2 direções, com o CGVN como contra-exemplo.
+
+> ⚠️ **O FRE usa SEIS nomes de coluna de CNPJ** ao longo dos 36 membros — cada contrato declara o
+> seu.
+
+> ⚠️ `Valor_Capital`, `Quantidade_*` e `Percentual_*` ficam **texto exato** (regra do #157).
+
+#### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+`date_ref` é qualquer dia do **ano**; **todos** os readers do FRE baixam o **mesmo** arquivo.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Cada reader coage **as suas próprias** colunas de data (1 a 3 nesta fatia); branco vira `NaT`
+(`Data_Ultima_Assembleia` tem linhas vazias). Contracts **pinados** aos 8 headers verbatim.
+
+```python
+from datetime import date
+
+from filings_cvm import FreCiaAbertaCapitalSocialReader
+
+df_ = FreCiaAbertaCapitalSocialReader(date_ref=date(2025, 6, 15)).read()
+# df_[["CNPJ_Companhia", "Tipo_Capital", "Valor_Capital", "Quantidade_Total_Acoes"]]
+```
+
+---
+
+### `Meta*Reader` (42 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).

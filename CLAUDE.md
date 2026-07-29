@@ -220,13 +220,13 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **39 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **42 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (39 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (42 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (23); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (26); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
 ⚠️ **Estes números são MEDIDOS do código** (`38 = 16 .txt + 22 .zip`, e 38 contracts — o 39º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
@@ -492,7 +492,58 @@ Sob `CIA_ABERTA/CAD/`:
   nomeado. CNPJ 100% válido nos dois (sem o placeholder do IPE). ⚠️ **A META é `.zip` e o `.txt` dá
   404 — o INVERSO do IPE**; `section` assimétricas (`meta_vlmo_cia_aberta` + `con`, molde INTERMED).
   **Sétima fatia da Wave 4; `DOC` em 2/7**
-- ⬜ **ingestion** os outros 5 `DOC`: CGVN, DFP, FCA, FRE, ITR — todos `<ds>_cia_aberta_AAAA.zip`
+- FCA (Formulário Cadastral) — ✅ **ingestion** `fca_cia_aberta_AAAA.zip` (**ZIP de 10 membros**:
+  índice 9 cols + auditor 15 + canal_divulgacao 7 + departamento_acionistas 23 + dri 26 + endereco 21
+  + escriturador 24 + geral 26 + pais_estrangeiro_negociacao 7 + valor_mobiliario 18) —
+  `ingestion/cia_aberta/doc/fca/*` (10 `FcaCiaAberta*Reader`, base privada `_base_fca_reader.py`);
+  contracts `_internal/config/contracts/fca_cia_aberta.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/fca_cia_aberta/*_header.csv`. **Particionado por ANO**.
+  ⚠️ **O ÍNDICE NÃO SEGUE A CONVENÇÃO DE NOMES DOS PRÓPRIOS SATÉLITES** — usa `CNPJ_CIA`/`DT_REFER`/
+  `DT_RECEB`/`DENOM_CIA`/`ID_DOC` (estilo `cad_cia_aberta.csv`) contra `CNPJ_Companhia`/
+  `Data_Referencia`/`ID_Documento` nos 9; gerar de um molde só quebra o índice **em silêncio**
+  (anti-cópia pinada nas 2 direções). ⚠️ **`departamento_acionistas` é HEADER-ONLY (0 linhas)** →
+  `tuple_cnpj_cols=()`, senão um artefato legitimamente vazio levanta `ContractError` (provado por
+  mutação; classe de falha do CRI). ⚠️ **PRIMEIROS CPF DO ROOT (LGPD):** `dri.CPF_Responsavel`
+  (1.003 CPF + 4 CNPJ), `auditor.CPF_Responsavel_Tecnico`, e `auditor.CPF_CNPJ_Auditor` (misto por
+  definição — todo CNPJ em 2025, mas um ano com CPF quebraria um check) → **fora de
+  `tuple_cnpj_cols`**, fixtures **header-only**. `escriturador` é o único com **2** CNPJ cols de
+  fato. De 1 a **9** date cols por membro (`geral`), todas ISO-ou-branco → branco vira `NaT`.
+  ⚠️ **A META é `fca_cia_aberta.zip` — SEM o prefixo `meta_`** (as 2 derivações óbvias dão 404,
+  enquanto o vizinho `CAD` serve `meta_cad_cia_aberta.txt`): o caso mais forte de "URL jamais
+  derivada". **8ª fatia da Wave 4; `DOC` em 3/7**
+- CGVN (Informe sobre o Código Brasileiro de Governança Corporativa) — ✅ **ingestion**
+  `cgvn_cia_aberta_AAAA.zip` (**ZIP de 2 membros**: índice 12 cols/382 linhas + `praticas` 11
+  cols/**19.980** linhas) — `ingestion/cia_aberta/doc/cgvn/*` (`CgvnCiaAbertaReader`,
+  `CgvnCiaAbertaPraticasReader`, base privada `_base_cgvn_reader.py`); contracts
+  `_internal/config/contracts/cgvn_cia_aberta.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/cgvn_cia_aberta/*_header.csv`. **Particionado por ANO**. Molde do VLMO
+  (índice + conteúdo). ⚠️ **O índice do CGVN usa CamelCase** (`CNPJ_Companhia`/`Data_Referencia`) —
+  **o FCA era a EXCEÇÃO do sub-root, não a regra**; generalizar do vizinho escreveria este errado
+  (anti-generalização pinada, comparando os 2 contracts). ⚠️ **`Codigo_CVM` chega `001023`, COM zero
+  à esquerda** — primeiro caso do root em que o texto é **load-bearing** (provado por mutação:
+  `int64` devolve `1023`); `ID_Item` é hierárquico (`1.1.1`). 4 date cols no índice (inclui
+  `Data_Inicio/Fim_Exercicio_Social`), 1 no `praticas`. `Explicacao` até ~6.000 chars, sem `;`
+  embutido (larguras uniformes sob `QUOTE_NONE`, medido). `Link_Download` é **`http://…/ENETCONSULTA/…`**
+  (≠ o `https://…/ENET/…` do IPE/VLMO) e vai **como publicado**, não seguido. ⚠️ **META é
+  `meta_cgvn_cia_aberta.zip`** (a forma padrão); as outras 3 dão 404, **incluindo a sem-prefixo que é
+  a correta do FCA**. **9ª fatia da Wave 4; `DOC` em 4/7**
+- FRE (Formulário de Referência) — 🟡 **ingestion PARCIAL (fatia 1 de 4)** `fre_cia_aberta_AAAA.zip`
+  — ⚠️ **o MAIOR dataset do portal: 36 membros, ~131 mil linhas**, entregue em **4 PRs temáticos**
+  (1: índice+capital ✅ · 2: administração/pessoas, **todos os com CPF** ⬜ · 3: diversidade
+  (agregados) ⬜ · 4: remuneração/val. mobiliários/transações ⬜). `ingestion/cia_aberta/doc/fre/*`
+  (base privada `_base_fre_reader.py`); contracts `_internal/config/contracts/fre_cia_aberta.py`,
+  **gerados dos headers e pinados**. **Particionado por ANO**. ⚠️ **O índice usa
+  `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (como o FCA), os satélites usam
+  `CNPJ_Companhia`/`Data_Referencia` — **o CGVN NÃO faz isso**: não há regra entre datasets, só
+  medição (pinado nas 2 direções, com o CGVN como contra-exemplo). ⚠️ **SEIS nomes de coluna de CNPJ**
+  ao longo dos 36 membros (`CNPJ`, `CNPJ_Auditor`, `CNPJ_CIA`, `CNPJ_Companhia`, `CNPJ_Emissor`,
+  `CNPJ_Emissor_Pessoa_Relacionada`) → cada contrato declara o seu. ⚠️ **Os membros
+  `*_declaracao_raca`/`*_declaracao_genero`/`*_PCD`/`*_faixa_etaria` NÃO são dado pessoal sensível —
+  são CONTAGENS AGREGADAS** (`Quantidade_Preto`, `Quantidade_Feminino`); o PII real são **6 membros
+  com CPF** (fatia 2). `Valor_*`/`Quantidade_*`/`Percentual_*` ficam texto exato. ⚠️ **META =
+  `meta_fre_cia_aberta.zip`** (padrão), **50 membros para 36 de dados** e prefixo interno **misto**.
+  **10ª fatia da Wave 4; `DOC` em 5/7 (FRE parcial)**
+- ⬜ **ingestion** os outros 2 `DOC`: DFP, ITR — ambos `<ds>_cia_aberta_AAAA.zip`
   (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
   próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
 
@@ -547,7 +598,10 @@ src/filings_cvm/
         cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto)
                            #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
-                           #     DOC/{CGVN,DFP,FCA,FRE,ITR} + EVENTOS pendentes (nº de membros varia: FCA 10 — grounding próprio por dataset)
+                           #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
+                           #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
+                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; entregue em 4 fatias temáticas — fatia 1 (índice+capital, 8) FEITA; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col; membros de diversidade são AGREGADOS, não PII)
+                           #     DOC/{DFP,ITR} + EVENTOS pendentes (grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
