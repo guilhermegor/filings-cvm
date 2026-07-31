@@ -254,9 +254,15 @@ def is_bot_actor(str_actor: str | None) -> bool:
     """Say whether a branch's author is a bot, and so exempt from the ledger rule.
 
     GitHub names bot actors with a ``[bot]`` suffix — ``dependabot[bot]``,
-    ``github-actions[bot]`` — which CI exposes as ``GITHUB_ACTOR``. That suffix is the whole
-    test: it is GitHub's own marker, so no allow-list of bot names has to be maintained (and
-    none can go stale).
+    ``github-actions[bot]``. That suffix is the whole test: it is GitHub's own marker, so no
+    allow-list of bot names has to be maintained (and none can go stale).
+
+    ⚠️ **Feed this the PR's author, not ``GITHUB_ACTOR``.** ``GITHUB_ACTOR`` names whoever
+    *triggered the run*, so the moment a human touches a bot's PR — ``gh pr update-branch``, a
+    manual re-run, a maintainer's fixup — it becomes that human and the exemption evaporates,
+    which is exactly when it is needed. Measured on PR #167: the original dependabot push ran as
+    ``dependabot[bot]``, every later run as ``guilhermegor``, while the PR's author stayed
+    ``dependabot[bot]`` throughout. :func:`_ledger_author` resolves the right value.
 
     **Why bots are exempt.** A work ledger records a *human's* reasoning — what was done, what
     is still open, why a shortcut was taken. An automated dependency bump has none to record:
@@ -284,6 +290,25 @@ def is_bot_actor(str_actor: str | None) -> bool:
     return str_actor.strip().lower().endswith("[bot]")
 
 
+def _ledger_author() -> str | None:
+    """Resolve whose branch this is: the PR's author, falling back to the run's actor.
+
+    ``LEDGER_PR_AUTHOR`` is supplied by CI from ``github.event.pull_request.user.login`` — the
+    PR's **author**, which never changes no matter who re-runs or updates the branch. It is the
+    value the bot exemption actually needs.
+
+    ``GITHUB_ACTOR`` is the fallback for contexts with no pull-request payload (a ``push`` to
+    ``main``, a local run). There the actor *is* the right answer, and it is a human, so the gate
+    applies — which is the safe direction to fall back in.
+
+    Returns
+    -------
+    str or None
+        The PR author when CI provides one, else the triggering actor, else ``None``.
+    """
+    return os.environ.get("LEDGER_PR_AUTHOR") or os.environ.get("GITHUB_ACTOR")
+
+
 def _read_text(str_path: str) -> str | None:
     """Read a repo-relative file's text, or ``None`` when it does not exist.
 
@@ -305,8 +330,9 @@ def _read_text(str_path: str) -> str | None:
 
 if __name__ == "__main__":
     # The bot exemption lives here, in the I/O seam, so ``check`` stays pure and unit-testable
-    # without an environment. See ``is_bot_actor`` for why bots are exempt at all.
-    if is_bot_actor(os.environ.get("GITHUB_ACTOR")):
+    # without an environment. See ``is_bot_actor`` for why bots are exempt, and ``_ledger_author``
+    # for why the PR's author — not the run's actor — is the value that decides it.
+    if is_bot_actor(_ledger_author()):
         print("ℹ️  bot-authored branch — work ledger not required (see is_bot_actor).")
         sys.exit(0)
     list_found = check(_changed_paths(), _read_text)
