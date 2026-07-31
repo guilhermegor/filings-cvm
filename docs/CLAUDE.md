@@ -27,6 +27,16 @@ exclude_docs: |
   generalizable lessons: the ledger is *this branch's* state. **Keep it on completion —
   never delete:** when every box is `[x]`, tick the last one, add a short "Completed —
   kept as a record" note, and leave the file as the permanent record of what was done.
+- ⚠️ **Bot-authored branches are exempt** (`bin/check_backlog_ledger.py`, `is_bot_actor`): when
+  `GITHUB_ACTOR` ends in `[bot]` the gate is a no-op. A ledger records a *human's* reasoning —
+  what was done, what is open, why a shortcut was taken — and an automated dependency bump has
+  none to record: the diff is the whole message. Without the exemption every Dependabot PR
+  touching `.github/workflows/**` (risk class `ci`) is **permanently red and unmergeable**, which
+  only teaches people to reach for `--admin` — a worse habit than the gate prevents. This was
+  measured, not theorised: PR #167 sat blocked for days (#174).
+  **The exemption keys on the author, never on the path** — a *human* branch touching a workflow
+  still owes a ledger, and a unit test asserts both directions so the exemption cannot quietly
+  become a hole for everyone.
 - Any new non-published folder must be added to `exclude_docs` in the same commit.
 
 ## Published pages
