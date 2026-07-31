@@ -160,3 +160,84 @@ def test_a_human_workflow_change_with_a_ledger_passes() -> None:
 	list_paths = [".github/workflows/tests.yaml", "docs/backlog/topic_20260729_101500.md"]
 
 	assert clg.check(list_paths, lambda _: "- [ ] do the thing\n") == []
+
+
+@pytest.mark.parametrize(
+	("str_pr_author", "str_actor", "str_expected"),
+	[
+		("dependabot[bot]", "guilhermegor", "dependabot[bot]"),
+		("guilhermegor", "github-actions[bot]", "guilhermegor"),
+		(None, "guilhermegor", "guilhermegor"),
+		("", "dependabot[bot]", "dependabot[bot]"),
+		(None, None, None),
+	],
+)
+def test_ledger_author_prefers_the_pr_author_over_the_run_actor(
+	monkeypatch: pytest.MonkeyPatch,
+	str_pr_author: str | None,
+	str_actor: str | None,
+	str_expected: str | None,
+) -> None:
+	"""``LEDGER_PR_AUTHOR`` outranks ``GITHUB_ACTOR``; the actor is only the fallback.
+
+	The PR's author wins whenever CI supplies one. With no pull-request payload — a push to
+	``main``, a local run — there is no author to read, so the actor is used and the gate applies.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to set the environment.
+	str_pr_author : str or None
+		Value of ``LEDGER_PR_AUTHOR`` (``None`` = unset).
+	str_actor : str or None
+		Value of ``GITHUB_ACTOR`` (``None`` = unset).
+	str_expected : str or None
+		The author the gate should resolve.
+	"""
+	for str_name, str_value in (
+		("LEDGER_PR_AUTHOR", str_pr_author),
+		("GITHUB_ACTOR", str_actor),
+	):
+		if str_value is None:
+			monkeypatch.delenv(str_name, raising=False)
+		else:
+			monkeypatch.setenv(str_name, str_value)
+
+	assert clg._ledger_author() == str_expected
+
+
+def test_a_human_rerun_of_a_bot_pr_stays_exempt(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""⚠️ The regression this fix exists for — PR #167, measured, not hypothetical.
+
+	Updating or re-running a bot's PR makes ``GITHUB_ACTOR`` a human. Keying the exemption on the
+	actor therefore cancelled it exactly when it was needed, leaving the PR red forever. The PR's
+	author never changes, so it is the value that decides.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to set the environment.
+	"""
+	monkeypatch.setenv("LEDGER_PR_AUTHOR", "dependabot[bot]")
+	monkeypatch.setenv("GITHUB_ACTOR", "guilhermegor")
+
+	assert clg.is_bot_actor(clg._ledger_author()) is True
+
+
+def test_a_bot_triggered_rerun_of_a_human_pr_is_not_exempt(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""The inverse must not leak: a human's PR re-run by CI still owes its ledger.
+
+	Without this, keying on the actor in the *other* direction would hand every human PR an
+	exemption as soon as an automation re-ran it.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to set the environment.
+	"""
+	monkeypatch.setenv("LEDGER_PR_AUTHOR", "guilhermegor")
+	monkeypatch.setenv("GITHUB_ACTOR", "github-actions[bot]")
+
+	assert clg.is_bot_actor(clg._ledger_author()) is False

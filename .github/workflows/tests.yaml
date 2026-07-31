@@ -136,6 +136,9 @@ jobs:
         # fetch-depth:0 merge checkout. Explicit CI step (gate parity with pre-commit).
         env:
           LEDGER_BASE_REF: ${{ github.event.pull_request.base.sha }}
+          # The PR's AUTHOR, which never changes — unlike GITHUB_ACTOR, which becomes whoever
+          # re-ran or updated the branch and so would silently cancel the bot exemption.
+          LEDGER_PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: poetry run python bin/check_backlog_ledger.py
 
       - name: Run Ruff Linting
