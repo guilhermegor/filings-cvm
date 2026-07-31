@@ -27,8 +27,11 @@ exclude_docs: |
   generalizable lessons: the ledger is *this branch's* state. **Keep it on completion —
   never delete:** when every box is `[x]`, tick the last one, add a short "Completed —
   kept as a record" note, and leave the file as the permanent record of what was done.
-- ⚠️ **Bot-authored branches are exempt** (`bin/check_backlog_ledger.py`, `is_bot_actor`): when
-  `GITHUB_ACTOR` ends in `[bot]` the gate is a no-op. A ledger records a *human's* reasoning —
+- ⚠️ **Bot-authored branches are exempt** (`bin/check_backlog_ledger.py`, `is_bot_actor`): when the
+  **PR's author** ends in `[bot]` the gate is a no-op. The author arrives as `LEDGER_PR_AUTHOR`
+  (`github.event.pull_request.user.login`), **not** `GITHUB_ACTOR` — that one names whoever
+  *triggered the run*, so a human re-running or updating a bot's PR would cancel the exemption
+  exactly when it is needed (measured on #167; fixed in #176). A ledger records a *human's* reasoning —
   what was done, what is open, why a shortcut was taken — and an automated dependency bump has
   none to record: the diff is the whole message. Without the exemption every Dependabot PR
   touching `.github/workflows/**` (risk class `ci`) is **permanently red and unmergeable**, which
