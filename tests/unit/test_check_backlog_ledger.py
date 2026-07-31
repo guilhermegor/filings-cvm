@@ -113,3 +113,50 @@ def test_check_skips_content_when_ledger_is_absent() -> None:
 	"""A valid-named ledger the diff deletes (reader returns None) passes — no content to judge."""
 	list_paths = ["src/x.py", "docs/backlog/topic_20260717_091038.md"]
 	assert clg.check(list_paths, lambda _p: None) == []
+
+
+@pytest.mark.parametrize(
+	("str_actor", "bool_is_bot"),
+	[
+		("dependabot[bot]", True),
+		("github-actions[bot]", True),
+		("Dependabot[Bot]", True),  # GitHub's casing is not guaranteed
+		("  dependabot[bot]  ", True),  # tolerate stray whitespace from the env
+		("guilhermegor", False),
+		("robotics-dev", False),  # "bot" as a substring is not the marker
+		("someone[bot]x", False),  # the suffix must terminate the name
+		("", False),
+		(None, False),  # a local run has no GITHUB_ACTOR — humans stay bound
+	],
+)
+def test_is_bot_actor(str_actor: str | None, bool_is_bot: bool) -> None:
+	"""Only GitHub's own ``[bot]`` suffix marks an actor as exempt.
+
+	Parameters
+	----------
+	str_actor : str or None
+		The candidate actor name.
+	bool_is_bot : bool
+		Whether it should count as a bot.
+	"""
+	assert clg.is_bot_actor(str_actor) is bool_is_bot
+
+
+def test_the_rule_itself_still_binds_a_workflow_change() -> None:
+	"""⚠️ Negative control: the exemption must not have disabled the gate.
+
+	``check`` is pure and knows nothing about actors, so a workflow-touching diff with no ledger
+	still reports a violation. Without this assertion the bot exemption could silently neuter the
+	rule for everyone and every test would stay green.
+	"""
+	list_found = clg.check([".github/workflows/tests.yaml"], lambda _: None)
+
+	assert list_found
+	assert "work ledger" in list_found[0]
+
+
+def test_a_human_workflow_change_with_a_ledger_passes() -> None:
+	"""The ordinary human path is unaffected: workflow + valid ledger = clean."""
+	list_paths = [".github/workflows/tests.yaml", "docs/backlog/topic_20260729_101500.md"]
+
+	assert clg.check(list_paths, lambda _: "- [ ] do the thing\n") == []
