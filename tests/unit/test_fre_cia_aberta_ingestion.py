@@ -1,10 +1,10 @@
-"""Unit tests for the CIA_ABERTA/DOC/FRE readers — slices 1 and 2 of 4.
+"""Unit tests for the CIA_ABERTA/DOC/FRE readers — slices 1–3 of 4.
 
 `fre_cia_aberta_AAAA.zip` is the portal's largest dataset (36 members, ~131k rows), shipped in four
-themed slices. This file covers the first fifteen members — index + capital, and
-administração/pessoas — and grows as the later slices land.
+themed slices. This file covers the first twenty-six members — index + capital,
+administração/pessoas, and diversidade — and grows as the last slice lands.
 
-Four things carry the weight here:
+Six things carry the weight here:
 
 1. the **index uses a different naming convention from its own satellites** (`CNPJ_CIA` /
    `DT_REFER` vs `CNPJ_Companhia` / `Data_Referencia`), matching FCA but **not** CGVN — there is no
@@ -16,10 +16,15 @@ Four things carry the weight here:
    because the real values are mixed CPF/CNPJ — including one whose name says neither
    (`Documento_Pessoa_Relacionada`);
 4. `membro_comite` and `administrador_membro_conselho_fiscal` have the **same column count (21)**
-   and different columns, so a copied contract would ship wrong with the suite green.
+   and different columns, so a copied contract would ship wrong with the suite green;
+5. the diversidade slice adds **five more same-width pairs** — `*_local_*` vs `*_posicao_*` differ
+   only in their grouping column — so the same hazard occurs six times in this one dataset;
+6. those diversidade members are **aggregate counts, not personal data**, despite names that read
+   as individual-level protected attributes. That claim is asserted from the columns, because
+   asserting it from the member name is the mistake that was already made here once.
 
 Every test except one builds its input from each contract's `tuple_required`, so it is a tautology.
-The exception is :func:`test_contracts_match_the_published_headers`, which compares all fifteen
+The exception is :func:`test_contracts_match_the_published_headers`, which compares all twenty-six
 contracts against the **verbatim header bytes CVM publishes**.
 
 Mock the single I/O boundary (``download_file``); no network.
@@ -37,13 +42,24 @@ import pytest
 from filings_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	FRE_CIA_ABERTA,
+	FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_GENERO,
+	FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_RACA,
 	FRE_CIA_ABERTA_ADMINISTRADOR_MEMBRO_CONSELHO_FISCAL,
+	FRE_CIA_ABERTA_ADMINISTRADOR_PCD,
 	FRE_CIA_ABERTA_AUDITOR,
 	FRE_CIA_ABERTA_CAPITAL_SOCIAL,
 	FRE_CIA_ABERTA_CAPITAL_SOCIAL_CLASSE_ACAO,
 	FRE_CIA_ABERTA_CAPITAL_SOCIAL_TITULO_CONVERSIVEL,
 	FRE_CIA_ABERTA_DISTRIBUICAO_CAPITAL,
 	FRE_CIA_ABERTA_DISTRIBUICAO_CAPITAL_CLASSE_ACAO,
+	FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_GENERO,
+	FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_RACA,
+	FRE_CIA_ABERTA_EMPREGADO_LOCAL_FAIXA_ETARIA,
+	FRE_CIA_ABERTA_EMPREGADO_PCD,
+	FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_GENERO,
+	FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_RACA,
+	FRE_CIA_ABERTA_EMPREGADO_POSICAO_FAIXA_ETARIA,
+	FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL,
 	FRE_CIA_ABERTA_MEMBRO_COMITE,
 	FRE_CIA_ABERTA_MERCADO_ESTRANGEIRO,
 	FRE_CIA_ABERTA_POSICAO_ACIONARIA,
@@ -57,13 +73,24 @@ from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
 from filings_cvm.ingestion.cia_aberta import (
 	CgvnCiaAbertaReader,
+	FreCiaAbertaAdministradorDeclaracaoGeneroReader,
+	FreCiaAbertaAdministradorDeclaracaoRacaReader,
 	FreCiaAbertaAdministradorMembroConselhoFiscalReader,
+	FreCiaAbertaAdministradorPcdReader,
 	FreCiaAbertaAuditorReader,
 	FreCiaAbertaCapitalSocialClasseAcaoReader,
 	FreCiaAbertaCapitalSocialReader,
 	FreCiaAbertaCapitalSocialTituloConversivelReader,
 	FreCiaAbertaDistribuicaoCapitalClasseAcaoReader,
 	FreCiaAbertaDistribuicaoCapitalReader,
+	FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader,
+	FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader,
+	FreCiaAbertaEmpregadoLocalFaixaEtariaReader,
+	FreCiaAbertaEmpregadoPcdReader,
+	FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader,
+	FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader,
+	FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader,
+	FreCiaAbertaEmpregadoPosicaoLocalReader,
 	FreCiaAbertaMembroComiteReader,
 	FreCiaAbertaMercadoEstrangeiroReader,
 	FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
@@ -162,6 +189,63 @@ CASES: tuple[FreCase, ...] = (
 		FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
 		FRE_CIA_ABERTA_POSICAO_ACIONARIA_CLASSE_ACAO,
 		"fre_cia_aberta_posicao_acionaria_classe_acao",
+	),
+	# Slice 3 of 4 — the diversidade members, which hold aggregate counts per company
+	# and never individual-level data.
+	FreCase(
+		FreCiaAbertaAdministradorPcdReader,
+		FRE_CIA_ABERTA_ADMINISTRADOR_PCD,
+		"fre_cia_aberta_administrador_PCD",
+	),
+	FreCase(
+		FreCiaAbertaAdministradorDeclaracaoGeneroReader,
+		FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_GENERO,
+		"fre_cia_aberta_administrador_declaracao_genero",
+	),
+	FreCase(
+		FreCiaAbertaAdministradorDeclaracaoRacaReader,
+		FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_RACA,
+		"fre_cia_aberta_administrador_declaracao_raca",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoPcdReader,
+		FRE_CIA_ABERTA_EMPREGADO_PCD,
+		"fre_cia_aberta_empregado_PCD",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader,
+		FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_GENERO,
+		"fre_cia_aberta_empregado_local_declaracao_genero",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader,
+		FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_RACA,
+		"fre_cia_aberta_empregado_local_declaracao_raca",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoLocalFaixaEtariaReader,
+		FRE_CIA_ABERTA_EMPREGADO_LOCAL_FAIXA_ETARIA,
+		"fre_cia_aberta_empregado_local_faixa_etaria",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader,
+		FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_GENERO,
+		"fre_cia_aberta_empregado_posicao_declaracao_genero",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader,
+		FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_RACA,
+		"fre_cia_aberta_empregado_posicao_declaracao_raca",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader,
+		FRE_CIA_ABERTA_EMPREGADO_POSICAO_FAIXA_ETARIA,
+		"fre_cia_aberta_empregado_posicao_faixa_etaria",
+	),
+	FreCase(
+		FreCiaAbertaEmpregadoPosicaoLocalReader,
+		FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL,
+		"fre_cia_aberta_empregado_posicao_local",
 	),
 )
 IDS = [case.cls_reader.__name__ for case in CASES]
@@ -275,6 +359,17 @@ def test_contracts_match_the_published_headers() -> None:
 		17,
 		29,
 		9,
+		10,
+		12,
+		14,
+		10,
+		11,
+		13,
+		9,
+		11,
+		13,
+		9,
+		12,
 	]
 
 
@@ -600,3 +695,110 @@ def test_meta_url_is_the_standard_prefixed_zip() -> None:
 		"https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/META/meta_fre_cia_aberta.zip"
 	)
 	assert MetaFreCiaAbertaReader._CONTRACT.str_source_key == "meta_fre_cia_aberta"
+
+
+# Pairs of diversidade members with the SAME column count and DIFFERENT columns, measured on the
+# 2025 artifact. Each pair is a place where a copied contract would pass every test except the
+# one comparing it to the pinned header.
+COLLIDING_PAIRS = (
+	(FRE_CIA_ABERTA_EMPREGADO_LOCAL_FAIXA_ETARIA, FRE_CIA_ABERTA_EMPREGADO_POSICAO_FAIXA_ETARIA),
+	(FRE_CIA_ABERTA_ADMINISTRADOR_PCD, FRE_CIA_ABERTA_EMPREGADO_PCD),
+	(
+		FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_GENERO,
+		FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_GENERO,
+	),
+	(FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_GENERO, FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL),
+	(
+		FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_RACA,
+		FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_RACA,
+	),
+)
+
+
+@pytest.mark.parametrize(("cls_left", "cls_right"), COLLIDING_PAIRS)
+def test_same_width_diversidade_members_are_not_the_same_columns(
+	cls_left: FileContract, cls_right: FileContract
+) -> None:
+	"""Five pairs share a column count; none shares a column list.
+
+	The diversidade members differ by one grouping column (`Local` vs `Posicao` vs
+	`Orgao_Administracao`) and by which buckets they carry, so a copied contract lines up on width
+	and fails only against the pinned header. Asserting the width match *and* the column mismatch
+	states why each pair is a hazard rather than just restating one contract.
+
+	Parameters
+	----------
+	cls_left : FileContract
+		The first contract of the colliding pair.
+	cls_right : FileContract
+		The second contract of the colliding pair.
+	"""
+	assert len(cls_left.tuple_required) == len(cls_right.tuple_required)
+	assert cls_left.tuple_required != cls_right.tuple_required
+
+
+def test_every_diversidade_contract_has_a_distinct_column_list() -> None:
+	"""No two of the eleven diversidade members share a column list — none is a copy of another."""
+	list_contracts = [case.cls_contract for case in CASES[15:]]
+
+	assert len(list_contracts) == 11
+	assert len({c.tuple_required for c in list_contracts}) == 11
+
+
+def test_diversidade_members_carry_counts_and_no_personal_identifier() -> None:
+	"""The diversidade members are aggregates: `Quantidade_*` totals, no CPF, one company CNPJ.
+
+	This is the correction that measurement forced. Member names like `*_declaracao_raca` /
+	`*_declaracao_genero` / `*_PCD` read as individual-level protected attributes, and were once
+	classified that way from the name alone. The columns say otherwise — they are counts per
+	company and grouping, and no individual appears in any of them.
+	"""
+	for case in CASES[15:]:
+		tuple_cols = case.cls_contract.tuple_required
+		assert any(c.startswith("Quantidade_") for c in tuple_cols), case.str_stem
+		assert not [c for c in tuple_cols if "CPF" in c.upper()], case.str_stem
+		assert not [c for c in tuple_cols if c.startswith("Nome_") and c != "Nome_Companhia"], (
+			case.str_stem
+		)
+		# Only the filing company's CNPJ is declared — the counts are not identifiers.
+		assert case.cls_contract.tuple_cnpj_cols == ("CNPJ_Companhia",), case.str_stem
+
+
+def test_diversidade_counts_come_back_as_exact_text(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""`Quantidade_*` is a count and stays source text, never a binary float.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	_patch(monkeypatch, _all_members())
+
+	df_ = FreCiaAbertaAdministradorDeclaracaoRacaReader(date_ref=DATE_REF).read()
+
+	assert df_["Quantidade_Preto"].iloc[0] == QUANTIDADE
+	assert isinstance(df_["Quantidade_Preto"].iloc[0], str)
+
+
+def test_administrador_pcd_accepts_blank_counts(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""A blank `Quantidade_*` is an absent declaration, not a zero — it stays empty, never 0.
+
+	Roughly a fifth of `administrador_PCD`'s 2025 rows leave the counts blank. Coercing those to
+	`0` would invent a declaration the company never made, and the difference is invisible once
+	summed.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	list_cols = list(FRE_CIA_ABERTA_ADMINISTRADOR_PCD.tuple_required)
+	list_blank = ["" if c.startswith("Quantidade_") else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [_row(FRE_CIA_ABERTA_ADMINISTRADOR_PCD), list_blank])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_administrador_PCD_2025.csv": str_csv}))
+
+	df_ = FreCiaAbertaAdministradorPcdReader(date_ref=DATE_REF).read()
+
+	assert len(df_) == 2
+	assert df_["Quantidade_PCD"].iloc[0] == QUANTIDADE
+	assert pd.isna(df_["Quantidade_PCD"].iloc[1])

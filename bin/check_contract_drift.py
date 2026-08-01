@@ -125,10 +125,21 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaCadCiaEstrangReader": ("CadastroCiaEstrangReader",),
 	"MetaCadCiaAbertaReader": ("CadastroCiaAbertaReader",),
 	"MetaCadCiaIncentReader": ("CadastroCiaIncentReader",),
-	# FRE ships in four themed slices. Slices 1 and 2 are in, covering 15 of its 36 members;
-	# the remaining two slices append their readers to this same tuple.
+	# FRE ships in four themed slices. Slices 1-3 are in, covering 26 of its 36 members;
+	# the remaining slice appends its readers to this same tuple.
 	"MetaFreCiaAbertaReader": (
 		"FreCiaAbertaAdministradorMembroConselhoFiscalReader",
+		"FreCiaAbertaAdministradorDeclaracaoGeneroReader",
+		"FreCiaAbertaAdministradorDeclaracaoRacaReader",
+		"FreCiaAbertaAdministradorPcdReader",
+		"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader",
+		"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader",
+		"FreCiaAbertaEmpregadoLocalFaixaEtariaReader",
+		"FreCiaAbertaEmpregadoPcdReader",
+		"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader",
+		"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader",
+		"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader",
+		"FreCiaAbertaEmpregadoPosicaoLocalReader",
 		"FreCiaAbertaAuditorReader",
 		"FreCiaAbertaCapitalSocialClasseAcaoReader",
 		"FreCiaAbertaCapitalSocialReader",

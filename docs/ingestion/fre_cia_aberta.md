@@ -18,9 +18,11 @@ implementado em **4 PRs temáticos**, cada um revisável e releasável sozinho:
 | fatia | tema | membros | estado |
 |---|---|---|---|
 | **1** | **índice + estrutura de capital** | **8** | ✅ |
-| **2** | **administração / pessoas (todos os membros com CPF)** | **7** | ✅ **esta** |
-| 3 | diversidade (contagens agregadas) | 11 | ⬜ |
+| **2** | **administração / pessoas (todos os membros com CPF)** | **7** | ✅ |
+| **3** | **diversidade (contagens agregadas)** | **11** | ✅ **esta** |
 | 4 | remuneração + valores mobiliários + transações | 10 | ⬜ |
+
+Com esta fatia o FRE fica em **26 dos 36 membros**.
 
 ---
 
@@ -48,6 +50,24 @@ implementado em **4 PRs temáticos**, cada um revisável e releasável sozinho:
 | `FreCiaAbertaRelacaoSubordinacaoReader` | `relacao_subordinacao` | 17 | 9.102 | `Data_Referencia`, `Data_Inicio_Exercicio_Social`, `Data_Fim_Exercicio_Social` |
 | `FreCiaAbertaPosicaoAcionariaReader` | `posicao_acionaria` | 29 | 31.508 | `Data_Referencia`, `Data_Composicao_Capital_Social`, `Data_Ultima_Alteracao` |
 | `FreCiaAbertaPosicaoAcionariaClasseAcaoReader` | `posicao_acionaria_classe_acao` | 9 | 2.092 | `Data_Referencia` |
+
+## Os 11 membros da fatia 3 — diversidade
+
+Todos com **uma** coluna de data (`Data_Referencia`, 100% ISO) e **uma** de CNPJ (`CNPJ_Companhia`).
+
+| reader | membro | cols | linhas (2025) | agrupa por |
+|---|---|---|---|---|
+| `FreCiaAbertaAdministradorPcdReader` | `administrador_PCD` | 10 | 3.495 | `Orgao_Administracao` |
+| `FreCiaAbertaAdministradorDeclaracaoGeneroReader` | `administrador_declaracao_genero` | 12 | 3.470 | `Orgao_Administracao` |
+| `FreCiaAbertaAdministradorDeclaracaoRacaReader` | `administrador_declaracao_raca` | 14 | 3.470 | `Orgao_Administracao` |
+| `FreCiaAbertaEmpregadoPcdReader` | `empregado_PCD` | 10 | 1.082 | `Codigo_Posicao` + `Posicao` |
+| `FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader` | `empregado_local_declaracao_genero` | 11 | 3.118 | `Local` |
+| `FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader` | `empregado_local_declaracao_raca` | 13 | 3.117 | `Local` |
+| `FreCiaAbertaEmpregadoLocalFaixaEtariaReader` | `empregado_local_faixa_etaria` | 9 | 3.117 | `Local` |
+| `FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader` | `empregado_posicao_declaracao_genero` | 11 | 1.038 | `Posicao` |
+| `FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader` | `empregado_posicao_declaracao_raca` | 13 | 1.038 | `Posicao` |
+| `FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader` | `empregado_posicao_faixa_etaria` | 9 | 1.040 | `Posicao` |
+| `FreCiaAbertaEmpregadoPosicaoLocalReader` | `empregado_posicao_local` | 12 | 1.036 | `Posicao` × região |
 
 **Particionado por ano** — o `date_ref` seleciona o **ano**, e **todos** os readers do FRE baixam o
 **mesmo** arquivo (um `path_raw` escrito por um serve os outros).
@@ -127,9 +147,34 @@ das duas colunas irmãs. A grafia é preservada **verbatim**: "corrigir" faria a
 encontrada no arquivo real.
 
 ⚠️ Os membros de **diversidade** (`*_declaracao_raca`, `*_declaracao_genero`, `*_PCD`,
-`*_faixa_etaria`, na fatia 3) **não** são dado pessoal sensível — são **contagens agregadas** por
+`*_faixa_etaria`, fatia 3) **não** são dado pessoal sensível — são **contagens agregadas** por
 companhia (`Quantidade_Preto`, `Quantidade_Feminino`). O nome do membro sugere o contrário; medir as
-colunas desmentiu.
+colunas desmentiu. **Nenhum deles tem CPF, nome de pessoa, ou qualquer identificador além do CNPJ da
+companhia** — pinado por teste sobre as colunas, não sobre o nome.
+
+---
+
+## ⚠️ Cinco pares de mesma largura na fatia 3 — o risco de copiar o irmão
+
+Os membros de diversidade diferem entre si por **uma coluna de agrupamento** e pelos baldes que
+carregam. Cinco pares têm **exatamente a mesma contagem de colunas** e listas diferentes:
+
+| cols | par |
+|---|---|
+| 9 | `empregado_local_faixa_etaria` × `empregado_posicao_faixa_etaria` |
+| 10 | `administrador_PCD` × `empregado_PCD` |
+| 11 | `empregado_local_declaracao_genero` × `empregado_posicao_declaracao_genero` |
+| 12 | `administrador_declaracao_genero` × `empregado_posicao_local` |
+| 13 | `empregado_local_declaracao_raca` × `empregado_posicao_declaracao_raca` |
+
+Um contract copiado do irmão **bate na largura** e só falha contra o header pinado — por isso cada
+um é **gerado do seu próprio header**, e os 5 pares são pinados por teste. ⚠️ `administrador_PCD` e
+`empregado_PCD` têm 10 colunas cada e compartilham **só seis**: o primeiro agrupa por
+`Orgao_Administracao` e tem `Nao_Aplicavel`; o segundo agrupa por `Codigo_Posicao` + `Posicao` e não
+tem.
+
+⚠️ Em `administrador_PCD` as colunas `Quantidade_*` chegam **parcialmente vazias** (~1/5 das linhas
+em 2025). **Vazio não é zero** — é declaração ausente, e volta vazio.
 
 ---
 

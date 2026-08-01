@@ -527,10 +527,15 @@ Sob `CIA_ABERTA/CAD/`:
   (≠ o `https://…/ENET/…` do IPE/VLMO) e vai **como publicado**, não seguido. ⚠️ **META é
   `meta_cgvn_cia_aberta.zip`** (a forma padrão); as outras 3 dão 404, **incluindo a sem-prefixo que é
   a correta do FCA**. **9ª fatia da Wave 4; `DOC` em 4/7**
-- FRE (Formulário de Referência) — 🟡 **ingestion PARCIAL (fatias 1 e 2 de 4 — 15 dos 36 membros)**
+- FRE (Formulário de Referência) — 🟡 **ingestion PARCIAL (fatias 1–3 de 4 — 26 dos 36 membros)**
   `fre_cia_aberta_AAAA.zip` — ⚠️ **o MAIOR dataset do portal: 36 membros, ~131 mil linhas**, entregue
   em **4 PRs temáticos** (1: índice+capital ✅ · 2: administração/pessoas, **todos os com CPF** ✅ ·
-  3: diversidade (agregados) ⬜ · 4: remuneração/val. mobiliários/transações ⬜).
+  3: diversidade (agregados) ✅ · 4: remuneração/val. mobiliários/transações ⬜).
+  ⚠️ **Os 11 membros de diversidade têm 5 PARES de mesma largura e listas diferentes**
+  (9/10/11/12/13 cols) — diferem por **uma** coluna de agrupamento (`Local` × `Posicao` ×
+  `Orgao_Administracao`) e pelos baldes; copiar o irmão bate na largura e só falha no header pinado.
+  `administrador_PCD` e `empregado_PCD` têm 10 cols cada e compartilham **só 6**. Em
+  `administrador_PCD` as `Quantidade_*` chegam ~1/5 **vazias** — vazio **não** é zero.
   `ingestion/cia_aberta/doc/fre/*` (base privada `_base_fre_reader.py`); contracts
   `_internal/config/contracts/fre_cia_aberta.py`, **gerados dos headers e pinados**. **Particionado
   por ANO**. ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (como o FCA), os satélites usam
@@ -619,7 +624,7 @@ src/filings_cvm/
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
                            #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
-                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; entregue em 4 fatias temáticas — fatias 1 (índice+capital, 8) e 2 (administração/pessoas, 7, TODOS os com CPF) FEITAS = 15/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada guarda CNPJ+CPF e fica de fora; membros de diversidade são AGREGADOS, não PII)
+                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; entregue em 4 fatias temáticas — fatias 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF) e 3 (diversidade, 11, AGREGADOS) FEITAS = 26/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada guarda CNPJ+CPF e fica de fora; membros de diversidade são AGREGADOS, não PII)
                            #     DOC/{DFP,ITR} + EVENTOS pendentes (grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
@@ -648,9 +653,16 @@ neither section:
 | a submission writer | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
-**So a new reader is registered in exactly TWO `__init__` files** — its dataset package and its
-portal root — never four. It must **not** be added to `filings_cvm/__init__.py` or
-`ingestion/__init__.py`; `tests/unit/test_public_surface.py` fails in both directions if it is.
+**So a new reader is registered along its own package chain up to its portal root — and stops
+there.** For a flat root that is two `__init__` files (dataset + root); for a nested one it is
+every level in between — `cia_aberta` has an extra `doc/` layer, so its readers need **three**
+(`doc/fre/` → `doc/` → `cia_aberta/`). Count the packages on the path rather than assuming two.
+It must **not** be added to `filings_cvm/__init__.py` or `ingestion/__init__.py`;
+`tests/unit/test_public_surface.py` fails in both directions if it is.
+
+⚠️ **And register the contract in `_internal/config/contracts/__init__.py` too** — a reader
+importing its contract from the module directly works fine while the contract is missing from that
+`__all__`, so nothing fails. Check the **exported count**, not the suite.
 The flat namespace was removed because at 216 readers it was an undivided wall of names that every
 new reader widened, while the CVM portal already supplies the grouping.
 

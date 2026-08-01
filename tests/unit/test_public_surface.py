@@ -121,12 +121,14 @@ def test_ingestion_exports_exactly_the_portal_roots() -> None:
 def test_every_reader_is_reachable_from_exactly_one_root() -> None:
 	"""Nothing was lost or duplicated when the flat namespace went away.
 
-	This is the precondition the refactor rests on: 216 readers were reachable flat, and the same
-	216 must be reachable through the roots — no orphan, no name owned by two roots.
+	The precondition #91 rested on: every reader reachable through the roots, no orphan and no
+	name owned by two roots. The exact count is pinned deliberately — it is the assertion that
+	catches a reader silently dropping out of its root's ``__all__``, so **update it in the same
+	commit as a new reader**, exactly like the derived doc counts.
 	"""
 	dict_readers = iter_public_readers()
 
-	assert len(dict_readers) == 216
+	assert len(dict_readers) == 227
 	assert all(issubclass(cls, IngestionReader) for cls in dict_readers.values())
 	# iter_public_readers raises on a duplicate name, so reaching here proves single ownership.
 	int_summed = sum(len(module.__all__) for module in iter_root_packages().values())
