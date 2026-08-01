@@ -527,22 +527,36 @@ Sob `CIA_ABERTA/CAD/`:
   (≠ o `https://…/ENET/…` do IPE/VLMO) e vai **como publicado**, não seguido. ⚠️ **META é
   `meta_cgvn_cia_aberta.zip`** (a forma padrão); as outras 3 dão 404, **incluindo a sem-prefixo que é
   a correta do FCA**. **9ª fatia da Wave 4; `DOC` em 4/7**
-- FRE (Formulário de Referência) — 🟡 **ingestion PARCIAL (fatia 1 de 4)** `fre_cia_aberta_AAAA.zip`
-  — ⚠️ **o MAIOR dataset do portal: 36 membros, ~131 mil linhas**, entregue em **4 PRs temáticos**
-  (1: índice+capital ✅ · 2: administração/pessoas, **todos os com CPF** ⬜ · 3: diversidade
-  (agregados) ⬜ · 4: remuneração/val. mobiliários/transações ⬜). `ingestion/cia_aberta/doc/fre/*`
-  (base privada `_base_fre_reader.py`); contracts `_internal/config/contracts/fre_cia_aberta.py`,
-  **gerados dos headers e pinados**. **Particionado por ANO**. ⚠️ **O índice usa
-  `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (como o FCA), os satélites usam
+- FRE (Formulário de Referência) — 🟡 **ingestion PARCIAL (fatias 1 e 2 de 4 — 15 dos 36 membros)**
+  `fre_cia_aberta_AAAA.zip` — ⚠️ **o MAIOR dataset do portal: 36 membros, ~131 mil linhas**, entregue
+  em **4 PRs temáticos** (1: índice+capital ✅ · 2: administração/pessoas, **todos os com CPF** ✅ ·
+  3: diversidade (agregados) ⬜ · 4: remuneração/val. mobiliários/transações ⬜).
+  `ingestion/cia_aberta/doc/fre/*` (base privada `_base_fre_reader.py`); contracts
+  `_internal/config/contracts/fre_cia_aberta.py`, **gerados dos headers e pinados**. **Particionado
+  por ANO**. ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (como o FCA), os satélites usam
   `CNPJ_Companhia`/`Data_Referencia` — **o CGVN NÃO faz isso**: não há regra entre datasets, só
   medição (pinado nas 2 direções, com o CGVN como contra-exemplo). ⚠️ **SEIS nomes de coluna de CNPJ**
   ao longo dos 36 membros (`CNPJ`, `CNPJ_Auditor`, `CNPJ_CIA`, `CNPJ_Companhia`, `CNPJ_Emissor`,
-  `CNPJ_Emissor_Pessoa_Relacionada`) → cada contrato declara o seu. ⚠️ **Os membros
-  `*_declaracao_raca`/`*_declaracao_genero`/`*_PCD`/`*_faixa_etaria` NÃO são dado pessoal sensível —
-  são CONTAGENS AGREGADAS** (`Quantidade_Preto`, `Quantidade_Feminino`); o PII real são **6 membros
-  com CPF** (fatia 2). `Valor_*`/`Quantidade_*`/`Percentual_*` ficam texto exato. ⚠️ **META =
+  `CNPJ_Emissor_Pessoa_Relacionada`) → cada contrato declara o seu; `auditor` declara **2** e
+  `relacao_familiar` **3**. ⚠️⚠️ **COLUNA DE CNPJ É A QUE SÓ GUARDA CNPJ — O NOME NÃO É O TESTE:**
+  ficam **fora** de `tuple_cnpj_cols` toda coluna `CPF*`, as 3 `CPF_CNPJ_*` de `posicao_acionaria`
+  (mistas por definição) e **`relacao_subordinacao.Documento_Pessoa_Relacionada`**, que **não diz nem
+  CPF nem CNPJ e guarda os dois** (8.462 CNPJ × 34 CPF em 2025, tipados pela irmã
+  `Tipo_Pessoa_Relacionada`) — uma coluna mista declarada passa no ano todo-CNPJ e quebra no primeiro
+  CPF. ⚠️ **Máscara não é uniforme nem dentro de um membro:** em `auditor`, `CNPJ_Companhia` vem
+  pontuado e `CNPJ_Auditor`, na mesma linha, vem em dígitos crus. ⚠️ `membro_comite` e
+  `administrador_membro_conselho_fiscal` têm **21 colunas cada e colunas diferentes** → copiar o irmão
+  passaria em tudo menos no header pinado (anti-cópia pinada nas 2 direções). ⚠️ **2 colunas de data
+  chegam 100% VAZIAS** em 2025 (`auditor.Data_Fim_Contratacao`,
+  `posicao_acionaria.Data_Composicao_Capital_Social`) e **seguem data por contrato** — e um teste de
+  vazio **NÃO** prova isso: branco vira NA sob `dtype="str"` também, então a asserção é sobre o
+  **dtype** (`datetime64` × `string`). ⚠️ `CPF_CNPJ_Representante_legal` com `legal` **minúsculo**,
+  preservado verbatim. ⚠️ **Os membros `*_declaracao_raca`/`*_declaracao_genero`/`*_PCD`/
+  `*_faixa_etaria` NÃO são dado pessoal sensível — são CONTAGENS AGREGADAS** (`Quantidade_Preto`,
+  `Quantidade_Feminino`); o PII real são os **6 membros com CPF** da fatia 2, com fixtures
+  **header-only**. `Valor_*`/`Quantidade_*`/`Numero_*`/`Percentual_*` ficam texto exato. ⚠️ **META =
   `meta_fre_cia_aberta.zip`** (padrão), **50 membros para 36 de dados** e prefixo interno **misto**.
-  **10ª fatia da Wave 4; `DOC` em 5/7 (FRE parcial)**
+  **10ª–11ª fatias da Wave 4; `DOC` em 5/7 (FRE parcial)**
 - ⬜ **ingestion** os outros 2 `DOC`: DFP, ITR — ambos `<ds>_cia_aberta_AAAA.zip`
   (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
   próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
@@ -600,7 +614,7 @@ src/filings_cvm/
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
                            #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
-                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; entregue em 4 fatias temáticas — fatia 1 (índice+capital, 8) FEITA; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col; membros de diversidade são AGREGADOS, não PII)
+                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; entregue em 4 fatias temáticas — fatias 1 (índice+capital, 8) e 2 (administração/pessoas, 7, TODOS os com CPF) FEITAS = 15/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada guarda CNPJ+CPF e fica de fora; membros de diversidade são AGREGADOS, não PII)
                            #     DOC/{DFP,ITR} + EVENTOS pendentes (grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
