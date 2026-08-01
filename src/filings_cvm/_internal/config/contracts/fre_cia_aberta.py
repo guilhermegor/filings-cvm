@@ -1,9 +1,10 @@
-"""Data contracts for the CVM open-data *FRE CIA_ABERTA* CSVs (ingestion) — group 1 of 4.
+"""Data contracts for the CVM open-data *FRE CIA_ABERTA* CSVs (ingestion) — groups 1 and 2 of 4.
 
 `fre_cia_aberta_AAAA.zip` (dataset `CIA_ABERTA/DOC/FRE`, *Formulário de Referência*) is the largest
 dataset in this portal: **36 members, ~131k rows**. It is implemented in four themed slices; this
-module holds the first — the **index** plus the **capital-structure** tables. The remaining groups
-(administração/pessoas, diversidade, remuneração) append their contracts here.
+module holds the first two — the **index** plus the **capital-structure** tables, and the
+**administração/pessoas** tables (every CPF-bearing member of the dataset). The remaining groups
+(diversidade, remuneração) append their contracts here.
 
 Every column list is **generated from the real 2025 headers**, not transcribed, and pinned to
 `tests/fixtures/fre_cia_aberta/` verbatim.
@@ -16,6 +17,19 @@ infer across `DOC` datasets, only per-dataset measurement.
 ⚠️ **FRE uses six different CNPJ column names across its 36 members** (`CNPJ`, `CNPJ_Auditor`,
 `CNPJ_CIA`, `CNPJ_Companhia`, `CNPJ_Emissor`, `CNPJ_Emissor_Pessoa_Relacionada`), so each member
 declares its own rather than inheriting a shared assumption.
+
+⚠️ **A CNPJ column is one that holds only CNPJ — the name is not the test.** Three measured cases
+in this dataset make the point, and each was resolved by counting the real values, not by reading
+the header:
+
+- `auditor.CNPJ_Auditor` holds **bare 14-digit** values (`49928567000111`) while
+  `auditor.CNPJ_Companhia` in the *same row* is masked (`00.000.000/0001-91`). Both are declared —
+  the validator normalises punctuation — but the mask style is **not** uniform within a member.
+- `relacao_subordinacao.Documento_Pessoa_Relacionada` carries **CNPJ and CPF together** (8.462
+  CNPJ + 34 CPF in 2025, matching its own `Tipo_Pessoa_Relacionada` PJ/PF flag) despite having
+  neither word in its name, so it is **excluded**.
+- `posicao_acionaria`'s three `CPF_CNPJ_*` columns are mixed by definition and are **excluded**;
+  so is every `CPF*` column, which additionally carries personal data.
 
 Monetary and count columns (`Valor_Capital`, `Quantidade_*`, `Percentual_*`) stay **exact source
 text** — never a binary float; see `bin/check_dtypes.py`.
@@ -174,6 +188,199 @@ FRE_CIA_ABERTA_MERCADO_ESTRANGEIRO = FileContract(
 		"Descricao_Proporcao_Certificado",
 		"Descricao_Banco_Depositario",
 		"Descricao_Instituicao_Custodiante",
+	),
+	("CNPJ_Companhia",),
+)
+
+# --- Group 2 of 4: administração/pessoas — every CPF-bearing member of the dataset. ---
+# No `CPF*` column is declared as a CNPJ column: they hold personal data, and several are mixed
+# CPF/CNPJ by design, so a year whose values happened to be all-CNPJ would silently set the
+# expectation that the next year breaks.
+
+FRE_CIA_ABERTA_AUDITOR = FileContract(
+	"FRE CIA_ABERTA — auditores independentes",
+	"fre_cia_aberta_auditor",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"ID_Auditor",
+		"Auditor",
+		"CPF_Auditor",
+		"CNPJ_Auditor",
+		"Codigo_CVM_Auditor",
+		"Tipo_Origem_Auditor",
+		"Data_Inicio_Contratacao",
+		"Data_Fim_Contratacao",
+		"Data_Inicio_Prestacao_Servico",
+		"Servico_Contratado",
+		"Remuneracao_Auditor",
+		"Justificativa_Substituicao",
+		"Razao_Apresentada",
+	),
+	("CNPJ_Companhia", "CNPJ_Auditor"),
+)
+
+FRE_CIA_ABERTA_ADMINISTRADOR_MEMBRO_CONSELHO_FISCAL = FileContract(
+	"FRE CIA_ABERTA — administradores e membros do conselho fiscal",
+	"fre_cia_aberta_administrador_membro_conselho_fiscal",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Orgao_Administracao",
+		"Nome",
+		"CPF",
+		"Profissao",
+		"Cargo_Eletivo_Ocupado",
+		"Complemento_Cargo_Eletivo_Ocupado",
+		"Data_Eleicao",
+		"Data_Posse",
+		"Data_Inicio_Primeiro_Mandato",
+		"Prazo_Mandato",
+		"Eleito_Controlador",
+		"Outro_Cargo_Funcao",
+		"Experiencia_Profissional",
+		"Data_Nascimento",
+		"Numero_Mandatos_Consecutivos",
+		"Percentual_Participacao_Reunioes",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_MEMBRO_COMITE = FileContract(
+	"FRE CIA_ABERTA — membros de comitês",
+	"fre_cia_aberta_membro_comite",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Nome",
+		"CPF",
+		"Profissao",
+		"Tipo_Comite",
+		"Descricao_Outros_Comites",
+		"Cargo_Ocupado",
+		"Descricao_Outro_Cargo_Ocupado",
+		"Data_Eleicao",
+		"Data_Posse",
+		"Data_Inicio_Primeiro_Mandato",
+		"Prazo_Mandato",
+		"Outro_Cargo_Funcao",
+		"Experiencia_Profissional",
+		"Data_Nascimento",
+		"Numero_Mandatos_Consecutivos",
+		"Percentual_Participacao_Reunioes",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_RELACAO_FAMILIAR = FileContract(
+	"FRE CIA_ABERTA — relações familiares",
+	"fre_cia_aberta_relacao_familiar",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Nome_Administrador",
+		"CPF_Administrador",
+		"Nome_Emissor",
+		"CNPJ_Emissor",
+		"Cargo_Administrador",
+		"Nome_Pessoa_Relacionada",
+		"CPF_Pessoa_Relacionada",
+		"Nome_Emissor_Pessoa_Relacionada",
+		"CNPJ_Emissor_Pessoa_Relacionada",
+		"Cargo_Pessoa_Relacionada",
+		"Tipo_Parentesco",
+		"Observacao",
+	),
+	("CNPJ_Companhia", "CNPJ_Emissor", "CNPJ_Emissor_Pessoa_Relacionada"),
+)
+
+FRE_CIA_ABERTA_RELACAO_SUBORDINACAO = FileContract(
+	"FRE CIA_ABERTA — relações de subordinação",
+	"fre_cia_aberta_relacao_subordinacao",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Data_Inicio_Exercicio_Social",
+		"Data_Fim_Exercicio_Social",
+		"Nome_Administrador",
+		"CPF_Administrador",
+		"Cargo_Administrador",
+		"Nome_Pessoa_Relacionada",
+		"Tipo_Pessoa_Relacionada",
+		"Documento_Pessoa_Relacionada",
+		"Cargo_Pessoa_Relacionada",
+		"Categoria_Pessoa_Relacionada",
+		"Tipo_Relacao",
+		"Observacao",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_POSICAO_ACIONARIA = FileContract(
+	"FRE CIA_ABERTA — posição acionária",
+	"fre_cia_aberta_posicao_acionaria",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"ID_Acionista",
+		"Acionista",
+		"Tipo_Pessoa_Acionista",
+		"CPF_CNPJ_Acionista",
+		"ID_Acionista_Relacionado",
+		"Acionista_Relacionado",
+		"Tipo_Pessoa_Acionista_Relacionado",
+		"CPF_CNPJ_Acionista_Relacionado",
+		"Quantidade_Acao_Ordinaria_Circulacao",
+		"Percentual_Acao_Ordinaria_Circulacao",
+		"Quantidade_Acao_Preferencial_Circulacao",
+		"Percentual_Acao_Preferencial_Circulacao",
+		"Quantidade_Total_Acoes_Circulacao",
+		"Percentual_Total_Acoes_Circulacao",
+		"Nacionalidade",
+		"Sigla_UF",
+		"Residente_Exterior",
+		"Representante_Legal",
+		"Tipo_Pessoa_Representante_Legal",
+		"CPF_CNPJ_Representante_legal",
+		"Data_Composicao_Capital_Social",
+		"Data_Ultima_Alteracao",
+		"Acionista_Controlador",
+		"Participante_Acordo_Acionistas",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_POSICAO_ACIONARIA_CLASSE_ACAO = FileContract(
+	"FRE CIA_ABERTA — posição acionária por classe de ação",
+	"fre_cia_aberta_posicao_acionaria_classe_acao",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"ID_Acionista",
+		"Tipo_Classe_Acao_Preferencial",
+		"Quantidade_Acoes",
+		"Percentual_Acoes",
 	),
 	("CNPJ_Companhia",),
 )

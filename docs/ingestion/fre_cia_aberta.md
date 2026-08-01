@@ -17,14 +17,14 @@ implementado em **4 PRs temáticos**, cada um revisável e releasável sozinho:
 
 | fatia | tema | membros | estado |
 |---|---|---|---|
-| **1** | **índice + estrutura de capital** | **8** | ✅ **esta** |
-| 2 | administração / pessoas (**todos os membros com CPF**) | 7 | ⬜ |
+| **1** | **índice + estrutura de capital** | **8** | ✅ |
+| **2** | **administração / pessoas (todos os membros com CPF)** | **7** | ✅ **esta** |
 | 3 | diversidade (contagens agregadas) | 11 | ⬜ |
 | 4 | remuneração + valores mobiliários + transações | 10 | ⬜ |
 
 ---
 
-## Os 8 membros desta fatia
+## Os 8 membros da fatia 1 — índice + capital
 
 | reader | membro | cols | linhas (2025) | colunas de data |
 |---|---|---|---|---|
@@ -36,6 +36,18 @@ implementado em **4 PRs temáticos**, cada um revisável e releasável sozinho:
 | `FreCiaAbertaDistribuicaoCapitalClasseAcaoReader` | `distribuicao_capital_classe_acao` | 9 | 170 | `Data_Referencia` |
 | `FreCiaAbertaResponsavelReader` | `responsavel` | 7 | 1.413 | `Data_Referencia` |
 | `FreCiaAbertaMercadoEstrangeiroReader` | `mercado_estrangeiro` | 17 | 11 | `Data_Referencia`, `Data_Emissao`, `Data_Inicio_Listagem` |
+
+## Os 7 membros da fatia 2 — administração / pessoas
+
+| reader | membro | cols | linhas (2025) | colunas de data |
+|---|---|---|---|---|
+| `FreCiaAbertaAuditorReader` | `auditor` | 18 | 1.097 | `Data_Referencia`, `Data_Inicio_Contratacao`, `Data_Fim_Contratacao`, `Data_Inicio_Prestacao_Servico` |
+| `FreCiaAbertaAdministradorMembroConselhoFiscalReader` | `administrador_membro_conselho_fiscal` | 21 | 8.988 | `Data_Referencia`, `Data_Eleicao`, `Data_Posse`, `Data_Inicio_Primeiro_Mandato`, `Data_Nascimento` |
+| `FreCiaAbertaMembroComiteReader` | `membro_comite` | 21 | 4.538 | as mesmas 5 do anterior |
+| `FreCiaAbertaRelacaoFamiliarReader` | `relacao_familiar` | 17 | 1.698 | `Data_Referencia` |
+| `FreCiaAbertaRelacaoSubordinacaoReader` | `relacao_subordinacao` | 17 | 9.102 | `Data_Referencia`, `Data_Inicio_Exercicio_Social`, `Data_Fim_Exercicio_Social` |
+| `FreCiaAbertaPosicaoAcionariaReader` | `posicao_acionaria` | 29 | 31.508 | `Data_Referencia`, `Data_Composicao_Capital_Social`, `Data_Ultima_Alteracao` |
+| `FreCiaAbertaPosicaoAcionariaClasseAcaoReader` | `posicao_acionaria_classe_acao` | 9 | 2.092 | `Data_Referencia` |
 
 **Particionado por ano** — o `date_ref` seleciona o **ano**, e **todos** os readers do FRE baixam o
 **mesmo** arquivo (um `path_raw` escrito por um serve os outros).
@@ -60,20 +72,64 @@ declara o seu; nada é herdado.
 
 ---
 
+## ⚠️ Coluna de CNPJ é a que **só** guarda CNPJ — o nome não é o teste
+
+Quase todo membro declara só o `CNPJ_Companhia`, mas **dois declaram mais**, e **três colunas que
+parecem identificador ficam de fora**. Cada caso foi decidido contando os valores reais de 2025:
+
+| membro | declara | fica de fora | por quê |
+|---|---|---|---|
+| `auditor` | `CNPJ_Companhia`, `CNPJ_Auditor` | `CPF_Auditor` | CPF é dado pessoal |
+| `relacao_familiar` | `CNPJ_Companhia`, `CNPJ_Emissor`, `CNPJ_Emissor_Pessoa_Relacionada` | 2 colunas de CPF | idem |
+| `relacao_subordinacao` | `CNPJ_Companhia` | **`Documento_Pessoa_Relacionada`** | guarda **CNPJ e CPF** (8.462 × 34) |
+| `posicao_acionaria` | `CNPJ_Companhia` | as 3 `CPF_CNPJ_*` | mistas por definição |
+
+`Documento_Pessoa_Relacionada` é o caso que uma regra pelo nome erra: **não diz nem CPF nem CNPJ, e
+guarda os dois** (tipados pela coluna irmã `Tipo_Pessoa_Relacionada`, `PJ`/`PF`). Uma coluna mista
+declarada passaria no ano em que os valores fossem todos CNPJ e quebraria no primeiro CPF.
+
+⚠️ **O estilo de máscara não é uniforme nem dentro de um membro:** em `auditor`, `CNPJ_Companhia`
+vem pontuado (`00.000.000/0001-91`) e `CNPJ_Auditor`, na mesma linha, vem em dígitos crus
+(`49928567000111`). Os dois são declarados — o validador normaliza a pontuação — e voltam **como
+publicados**.
+
+---
+
 ## Tipagem
 
-Todas as colunas de data chegam **100% ISO** (só `Data_Ultima_Assembleia` tem algumas em branco, que
-viram **`NaT`**). Todo o restante é **texto exato da fonte**, incluindo:
+Todas as colunas de data chegam **100% ISO**; branco vira **`NaT`**. Duas chegam **inteiramente
+vazias** em 2025 — `auditor.Data_Fim_Contratacao` (contrato em aberto não tem fim) e
+`posicao_acionaria.Data_Composicao_Capital_Social` — e **seguem sendo data por contrato**: um ano
+vazio não rebaixa a coluna para texto.
 
-- `Valor_Capital` (monetário),
-- `Quantidade_*` (contagens de ações e de acionistas),
-- `Percentual_*` (percentuais de circulação).
+Todo o restante é **texto exato da fonte**, incluindo `Valor_Capital` (monetário), `Quantidade_*` e
+`Numero_*` (contagens) e `Percentual_*`.
 
 Nunca um float binário: um `float64` perde a escala publicada de forma irreversível e silenciosa, e
 `bin/check_dtypes.py` barra o atalho. Converta para `Decimal` a jusante se precisar de aritmética.
 
-`responsavel.Nome_Responsavel` é nome de pessoa, mas **este membro não tem CPF** — os membros com
-CPF do FRE ficam todos na **fatia 2**.
+---
+
+## ⚠️ Dado pessoal (LGPD) — a fatia 2 concentra todo o CPF do FRE
+
+Seis dos sete membros desta fatia carregam CPF, e vários carregam nome, profissão e **data de
+nascimento** de pessoa física. Tudo volta **como publicado**, sem mascarar e sem reformatar, mas:
+
+- **nenhuma coluna de CPF entra em `tuple_cnpj_cols`** — CPF não é identificador de empresa;
+- as **fixtures de teste são só cabeçalho**, sem uma linha de dado, para que nenhum CPF real entre
+  no repositório.
+
+`posicao_acionaria_classe_acao` é o **único membro da fatia sem dado pessoal** — identifica o
+acionista só pelo `ID_Acionista`.
+
+⚠️ `posicao_acionaria` grafa `CPF_CNPJ_Representante_legal` com **`legal` minúsculo**, ao contrário
+das duas colunas irmãs. A grafia é preservada **verbatim**: "corrigir" faria a coluna não ser
+encontrada no arquivo real.
+
+⚠️ Os membros de **diversidade** (`*_declaracao_raca`, `*_declaracao_genero`, `*_PCD`,
+`*_faixa_etaria`, na fatia 3) **não** são dado pessoal sensível — são **contagens agregadas** por
+companhia (`Quantidade_Preto`, `Quantidade_Feminino`). O nome do membro sugere o contrário; medir as
+colunas desmentiu.
 
 ---
 
@@ -83,7 +139,11 @@ CPF do FRE ficam todos na **fatia 2**.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm import FreCiaAbertaCapitalSocialReader, FreCiaAbertaReader
+from filings_cvm import (
+    FreCiaAbertaCapitalSocialReader,
+    FreCiaAbertaPosicaoAcionariaReader,
+    FreCiaAbertaReader,
+)
 
 # O índice dos formulários entregues no ano:
 df_indice = FreCiaAbertaReader(date_ref=date(2025, 6, 15)).read()
@@ -93,6 +153,9 @@ df_capital = FreCiaAbertaCapitalSocialReader(
     date_ref=date(2025, 6, 15),
     path_raw=Path("/data/bronze/cvm/fre"),
 ).read()
+
+# A base acionária — o maior membro da fatia 2 (31.508 linhas em 2025):
+df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).read()
 
 # Aritmética a jusante — Decimal, nunca float:
 from decimal import Decimal

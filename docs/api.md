@@ -1439,13 +1439,14 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `FreCiaAberta*Reader` (8 readers — fatia 1 de 4)
+### `FreCiaAberta*Reader` (15 readers — fatias 1 e 2 de 4)
 
 `filings_cvm.ingestion.cia_aberta`
 
 O **Formulário de Referência** (`CIA_ABERTA/DOC/FRE`, `fre_cia_aberta_AAAA.zip`) — **o maior dataset
-do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**. Esta é a **1ª: índice +
-estrutura de capital** (8 membros). Página completa em
+do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**. Estão implementadas a
+**1ª: índice + estrutura de capital** (8 membros) e a **2ª: administração/pessoas** (7 membros, todos
+os do dataset que carregam CPF). Página completa em
 [FRE Companhias Abertas](ingestion/fre_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
@@ -1458,15 +1459,31 @@ estrutura de capital** (8 membros). Página completa em
 | `FreCiaAbertaDistribuicaoCapitalClasseAcaoReader` | `distribuicao_capital_classe_acao` | 9 | 170 |
 | `FreCiaAbertaResponsavelReader` | `responsavel` | 7 | 1.413 |
 | `FreCiaAbertaMercadoEstrangeiroReader` | `mercado_estrangeiro` | 17 | 11 |
+| `FreCiaAbertaAuditorReader` | `auditor` | 18 | 1.097 |
+| `FreCiaAbertaAdministradorMembroConselhoFiscalReader` | `administrador_membro_conselho_fiscal` | 21 | 8.988 |
+| `FreCiaAbertaMembroComiteReader` | `membro_comite` | 21 | 4.538 |
+| `FreCiaAbertaRelacaoFamiliarReader` | `relacao_familiar` | 17 | 1.698 |
+| `FreCiaAbertaRelacaoSubordinacaoReader` | `relacao_subordinacao` | 17 | 9.102 |
+| `FreCiaAbertaPosicaoAcionariaReader` | `posicao_acionaria` | 29 | 31.508 |
+| `FreCiaAbertaPosicaoAcionariaClasseAcaoReader` | `posicao_acionaria_classe_acao` | 9 | 2.092 |
 
 > ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (maiúsculas abreviadas), os satélites usam
 > `CNPJ_Companhia`/`Data_Referencia`. **O FCA faz igual, o CGVN NÃO** — não há regra entre datasets,
 > só medição. Pinado nas 2 direções, com o CGVN como contra-exemplo.
 
 > ⚠️ **O FRE usa SEIS nomes de coluna de CNPJ** ao longo dos 36 membros — cada contrato declara o
-> seu.
+> seu. `auditor` declara **2** e `relacao_familiar` **3**.
 
-> ⚠️ `Valor_Capital`, `Quantidade_*` e `Percentual_*` ficam **texto exato** (regra do #157).
+> ⚠️ **Coluna de CNPJ é a que só guarda CNPJ; o nome não decide.** Nenhuma coluna de CPF entra em
+> `tuple_cnpj_cols`, e ficam de fora também as 3 `CPF_CNPJ_*` de `posicao_acionaria` e
+> **`relacao_subordinacao.Documento_Pessoa_Relacionada`** — que não diz nem CPF nem CNPJ e guarda os
+> dois.
+
+> ⚠️ **A fatia 2 concentra todo o CPF do FRE** (6 dos 7 membros). Volta como publicado; as fixtures
+> de teste são **só cabeçalho**.
+
+> ⚠️ `Valor_Capital`, `Quantidade_*`, `Numero_*` e `Percentual_*` ficam **texto exato** (regra do
+> #157).
 
 #### `__init__(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
 
@@ -1474,16 +1491,21 @@ estrutura de capital** (8 membros). Página completa em
 
 #### `read(int_timeout_s=60) -> pd.DataFrame`
 
-Cada reader coage **as suas próprias** colunas de data (1 a 3 nesta fatia); branco vira `NaT`
-(`Data_Ultima_Assembleia` tem linhas vazias). Contracts **pinados** aos 8 headers verbatim.
+Cada reader coage **as suas próprias** colunas de data (1 a 5 nestas fatias); branco vira `NaT`.
+Duas colunas chegam **inteiramente vazias** em 2025 (`auditor.Data_Fim_Contratacao`,
+`posicao_acionaria.Data_Composicao_Capital_Social`) e seguem **data por contrato**. Contracts
+**pinados** aos 15 headers verbatim.
 
 ```python
 from datetime import date
 
-from filings_cvm import FreCiaAbertaCapitalSocialReader
+from filings_cvm import FreCiaAbertaCapitalSocialReader, FreCiaAbertaPosicaoAcionariaReader
 
 df_ = FreCiaAbertaCapitalSocialReader(date_ref=date(2025, 6, 15)).read()
 # df_[["CNPJ_Companhia", "Tipo_Capital", "Valor_Capital", "Quantidade_Total_Acoes"]]
+
+df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).read()
+# df_acionistas[["CNPJ_Companhia", "Acionista", "Percentual_Total_Acoes_Circulacao"]]
 ```
 
 ---

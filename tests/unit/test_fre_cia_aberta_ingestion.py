@@ -1,18 +1,25 @@
-"""Unit tests for the CIA_ABERTA/DOC/FRE readers — slice 1 of 4 (index + capital).
+"""Unit tests for the CIA_ABERTA/DOC/FRE readers — slices 1 and 2 of 4.
 
 `fre_cia_aberta_AAAA.zip` is the portal's largest dataset (36 members, ~131k rows), shipped in four
-themed slices. This file covers the first eight members and grows as the later slices land.
+themed slices. This file covers the first fifteen members — index + capital, and
+administração/pessoas — and grows as the later slices land.
 
-Two things carry the weight here:
+Four things carry the weight here:
 
 1. the **index uses a different naming convention from its own satellites** (`CNPJ_CIA` /
    `DT_REFER` vs `CNPJ_Companhia` / `Data_Referencia`), matching FCA but **not** CGVN — there is no
    cross-dataset rule, so the divergence is asserted in both directions;
 2. money and count columns (`Valor_Capital`, `Quantidade_*`, `Percentual_*`) stay **exact source
-   text**, never binary floats.
+   text**, never binary floats;
+3. **which columns are CNPJ columns is measured, not read off the header name.** Two members
+   declare more than one, and three columns that *look* like identifiers are deliberately excluded
+   because the real values are mixed CPF/CNPJ — including one whose name says neither
+   (`Documento_Pessoa_Relacionada`);
+4. `membro_comite` and `administrador_membro_conselho_fiscal` have the **same column count (21)**
+   and different columns, so a copied contract would ship wrong with the suite green.
 
 Every test except one builds its input from each contract's `tuple_required`, so it is a tautology.
-The exception is :func:`test_contracts_match_the_published_headers`, which compares all eight
+The exception is :func:`test_contracts_match_the_published_headers`, which compares all fifteen
 contracts against the **verbatim header bytes CVM publishes**.
 
 Mock the single I/O boundary (``download_file``); no network.
@@ -29,25 +36,39 @@ import pytest
 
 from filings_cvm import (
 	CgvnCiaAbertaReader,
+	FreCiaAbertaAdministradorMembroConselhoFiscalReader,
+	FreCiaAbertaAuditorReader,
 	FreCiaAbertaCapitalSocialClasseAcaoReader,
 	FreCiaAbertaCapitalSocialReader,
 	FreCiaAbertaCapitalSocialTituloConversivelReader,
 	FreCiaAbertaDistribuicaoCapitalClasseAcaoReader,
 	FreCiaAbertaDistribuicaoCapitalReader,
+	FreCiaAbertaMembroComiteReader,
 	FreCiaAbertaMercadoEstrangeiroReader,
+	FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
+	FreCiaAbertaPosicaoAcionariaReader,
 	FreCiaAbertaReader,
+	FreCiaAbertaRelacaoFamiliarReader,
+	FreCiaAbertaRelacaoSubordinacaoReader,
 	FreCiaAbertaResponsavelReader,
 	MetaFreCiaAbertaReader,
 )
 from filings_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	FRE_CIA_ABERTA,
+	FRE_CIA_ABERTA_ADMINISTRADOR_MEMBRO_CONSELHO_FISCAL,
+	FRE_CIA_ABERTA_AUDITOR,
 	FRE_CIA_ABERTA_CAPITAL_SOCIAL,
 	FRE_CIA_ABERTA_CAPITAL_SOCIAL_CLASSE_ACAO,
 	FRE_CIA_ABERTA_CAPITAL_SOCIAL_TITULO_CONVERSIVEL,
 	FRE_CIA_ABERTA_DISTRIBUICAO_CAPITAL,
 	FRE_CIA_ABERTA_DISTRIBUICAO_CAPITAL_CLASSE_ACAO,
+	FRE_CIA_ABERTA_MEMBRO_COMITE,
 	FRE_CIA_ABERTA_MERCADO_ESTRANGEIRO,
+	FRE_CIA_ABERTA_POSICAO_ACIONARIA,
+	FRE_CIA_ABERTA_POSICAO_ACIONARIA_CLASSE_ACAO,
+	FRE_CIA_ABERTA_RELACAO_FAMILIAR,
+	FRE_CIA_ABERTA_RELACAO_SUBORDINACAO,
 	FRE_CIA_ABERTA_RESPONSAVEL,
 	FileContract,
 )
@@ -110,8 +131,68 @@ CASES: tuple[FreCase, ...] = (
 		FRE_CIA_ABERTA_MERCADO_ESTRANGEIRO,
 		"fre_cia_aberta_mercado_estrangeiro",
 	),
+	# Slice 2 of 4 — administração/pessoas, holding every CPF-bearing member.
+	FreCase(FreCiaAbertaAuditorReader, FRE_CIA_ABERTA_AUDITOR, "fre_cia_aberta_auditor"),
+	FreCase(
+		FreCiaAbertaAdministradorMembroConselhoFiscalReader,
+		FRE_CIA_ABERTA_ADMINISTRADOR_MEMBRO_CONSELHO_FISCAL,
+		"fre_cia_aberta_administrador_membro_conselho_fiscal",
+	),
+	FreCase(
+		FreCiaAbertaMembroComiteReader,
+		FRE_CIA_ABERTA_MEMBRO_COMITE,
+		"fre_cia_aberta_membro_comite",
+	),
+	FreCase(
+		FreCiaAbertaRelacaoFamiliarReader,
+		FRE_CIA_ABERTA_RELACAO_FAMILIAR,
+		"fre_cia_aberta_relacao_familiar",
+	),
+	FreCase(
+		FreCiaAbertaRelacaoSubordinacaoReader,
+		FRE_CIA_ABERTA_RELACAO_SUBORDINACAO,
+		"fre_cia_aberta_relacao_subordinacao",
+	),
+	FreCase(
+		FreCiaAbertaPosicaoAcionariaReader,
+		FRE_CIA_ABERTA_POSICAO_ACIONARIA,
+		"fre_cia_aberta_posicao_acionaria",
+	),
+	FreCase(
+		FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
+		FRE_CIA_ABERTA_POSICAO_ACIONARIA_CLASSE_ACAO,
+		"fre_cia_aberta_posicao_acionaria_classe_acao",
+	),
 )
 IDS = [case.cls_reader.__name__ for case in CASES]
+
+# The CNPJ columns each member declares, **as measured against the 2025 artifact** — not derived
+# from the header names. Members absent from this map declare the filing company's column alone.
+DICT_CNPJ_COLS: dict[str, tuple[str, ...]] = {
+	"fre_cia_aberta": ("CNPJ_CIA",),
+	"fre_cia_aberta_auditor": ("CNPJ_Companhia", "CNPJ_Auditor"),
+	"fre_cia_aberta_relacao_familiar": (
+		"CNPJ_Companhia",
+		"CNPJ_Emissor",
+		"CNPJ_Emissor_Pessoa_Relacionada",
+	),
+}
+
+# Columns holding a document that is CPF, or CPF *and* CNPJ, so none may be declared a CNPJ column.
+DICT_NON_CNPJ_DOCS: dict[str, tuple[str, ...]] = {
+	"fre_cia_aberta_auditor": ("CPF_Auditor",),
+	"fre_cia_aberta_administrador_membro_conselho_fiscal": ("CPF",),
+	"fre_cia_aberta_membro_comite": ("CPF",),
+	"fre_cia_aberta_relacao_familiar": ("CPF_Administrador", "CPF_Pessoa_Relacionada"),
+	# It holds both kinds of document — thousands of CNPJ against a few dozen CPF in 2025 —
+	# even though its name says neither one of them.
+	"fre_cia_aberta_relacao_subordinacao": ("CPF_Administrador", "Documento_Pessoa_Relacionada"),
+	"fre_cia_aberta_posicao_acionaria": (
+		"CPF_CNPJ_Acionista",
+		"CPF_CNPJ_Acionista_Relacionado",
+		"CPF_CNPJ_Representante_legal",
+	),
+}
 
 
 def _value_for(str_col: str) -> str:
@@ -172,13 +253,29 @@ def _patch(monkeypatch: pytest.MonkeyPatch, bytes_payload: bytes) -> list[str]:
 
 
 def test_contracts_match_the_published_headers() -> None:
-	"""All eight contracts equal the verbatim headers CVM publishes — the oracle."""
+	"""All fifteen contracts equal the verbatim headers CVM publishes — the oracle."""
 	for case in CASES:
 		str_line = (PATH_FIXTURES / f"{case.str_stem}_header.csv").read_text(encoding="iso-8859-1")
 		assert case.cls_contract.tuple_required == tuple(str_line.strip().split(";")), (
 			case.str_stem
 		)
-	assert [len(c.cls_contract.tuple_required) for c in CASES] == [9, 13, 8, 8, 15, 9, 7, 17]
+	assert [len(c.cls_contract.tuple_required) for c in CASES] == [
+		9,
+		13,
+		8,
+		8,
+		15,
+		9,
+		7,
+		17,
+		18,
+		21,
+		21,
+		17,
+		17,
+		29,
+		9,
+	]
 
 
 def test_the_index_uses_a_different_convention_from_its_satellites() -> None:
@@ -203,14 +300,80 @@ def test_the_index_uses_a_different_convention_from_its_satellites() -> None:
 	assert FreCiaAbertaReader._DATE_COLS == ("DT_REFER", "DT_RECEB")
 
 
-def test_each_member_declares_its_own_cnpj_column() -> None:
-	"""The index declares ``CNPJ_CIA``; every satellite declares ``CNPJ_Companhia``.
+def test_each_member_declares_its_own_cnpj_columns() -> None:
+	"""Each member declares the CNPJ columns it actually has — one, two or three.
 
-	FRE uses six different CNPJ column names across its 36 members, so nothing is inherited.
+	FRE uses six different CNPJ column names across its 36 members, so nothing is inherited. The
+	index declares ``CNPJ_CIA``; most satellites declare ``CNPJ_Companhia`` alone; ``auditor`` adds
+	the auditor's own and ``relacao_familiar`` adds both sides' issuers. A blanket
+	``== ("CNPJ_Companhia",)`` over every satellite — which held while only slice 1 existed — is
+	exactly the assertion this replaces.
 	"""
-	assert FRE_CIA_ABERTA.tuple_cnpj_cols == ("CNPJ_CIA",)
-	for case in CASES[1:]:
-		assert case.cls_contract.tuple_cnpj_cols == ("CNPJ_Companhia",), case.str_stem
+	for case in CASES:
+		tuple_expected = DICT_CNPJ_COLS.get(case.str_stem, ("CNPJ_Companhia",))
+		assert case.cls_contract.tuple_cnpj_cols == tuple_expected, case.str_stem
+	# The declared counts genuinely differ across members, so no uniform rule holds.
+	assert {len(c.cls_contract.tuple_cnpj_cols) for c in CASES} == {1, 2, 3}
+
+
+def test_no_cpf_or_mixed_document_column_is_declared_a_cnpj_column() -> None:
+	"""Personal and mixed-document columns stay out of ``tuple_cnpj_cols``.
+
+	Two reasons, both load-bearing. A CPF is personal data and is not a company identifier, so
+	asserting CNPJ validity over it is wrong in kind. And a *mixed* column would pass the check in
+	a year whose values happened to be all-CNPJ, then fail the year one CPF appears — the contract
+	would encode an accident of one artifact.
+
+	``Documento_Pessoa_Relacionada`` is the case that a name-based rule gets wrong: it says neither
+	CPF nor CNPJ and holds both.
+	"""
+	for case in CASES:
+		tuple_docs = DICT_NON_CNPJ_DOCS.get(case.str_stem, ())
+		for str_col in tuple_docs:
+			assert str_col in case.cls_contract.tuple_required, f"{case.str_stem}.{str_col}"
+			assert str_col not in case.cls_contract.tuple_cnpj_cols, f"{case.str_stem}.{str_col}"
+	# No column named for CPF is ever declared, in any member — including future slices' shapes.
+	for case in CASES:
+		assert not [c for c in case.cls_contract.tuple_cnpj_cols if "CPF" in c.upper()], (
+			case.str_stem
+		)
+
+
+def test_membro_comite_is_not_a_copy_of_the_administrador_member() -> None:
+	"""Same column count (21), different columns — a copied contract would pass every other test.
+
+	Both members describe people with a mandate, and both have exactly 21 columns, so the two
+	are easy to conflate. They diverge in four columns each, and this asserts the divergence
+	in **both** directions rather than only restating one contract.
+	"""
+	tuple_admin = FRE_CIA_ABERTA_ADMINISTRADOR_MEMBRO_CONSELHO_FISCAL.tuple_required
+	tuple_comite = FRE_CIA_ABERTA_MEMBRO_COMITE.tuple_required
+
+	assert len(tuple_admin) == len(tuple_comite) == 21
+	assert tuple_admin != tuple_comite
+	assert {
+		"Orgao_Administracao",
+		"Cargo_Eletivo_Ocupado",
+		"Complemento_Cargo_Eletivo_Ocupado",
+		"Eleito_Controlador",
+	} <= set(tuple_admin) - set(tuple_comite)
+	assert {
+		"Tipo_Comite",
+		"Descricao_Outros_Comites",
+		"Cargo_Ocupado",
+		"Descricao_Outro_Cargo_Ocupado",
+	} <= set(tuple_comite) - set(tuple_admin)
+
+
+def test_posicao_acionaria_keeps_the_lowercase_legal_spelling() -> None:
+	"""CVM spells one column ``CPF_CNPJ_Representante_legal``; it is preserved verbatim.
+
+	Its two siblings are ``CPF_CNPJ_Acionista`` and ``CPF_CNPJ_Acionista_Relacionado``, so the
+	lowercase tail reads like a typo worth tidying. Normalising it would silently stop the column
+	from being found in the real file.
+	"""
+	assert "CPF_CNPJ_Representante_legal" in FRE_CIA_ABERTA_POSICAO_ACIONARIA.tuple_required
+	assert "CPF_CNPJ_Representante_Legal" not in FRE_CIA_ABERTA_POSICAO_ACIONARIA.tuple_required
 
 
 def test_read_keeps_money_and_counts_as_exact_text(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -260,7 +423,7 @@ def test_read_returns_all_contract_columns(case: FreCase, monkeypatch: pytest.Mo
 def test_read_coerces_every_declared_date_column(
 	case: FreCase, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-	"""Each reader coerces its own date columns — they differ per member (1 to 3 here).
+	"""Each reader coerces its own date columns — they differ per member (1 to 5 here).
 
 	Parameters
 	----------
@@ -296,6 +459,60 @@ def test_read_accepts_a_blank_data_ultima_assembleia(monkeypatch: pytest.MonkeyP
 	assert len(df_) == 2
 	assert df_["Data_Ultima_Assembleia"].iloc[0] == date(2025, 8, 25)
 	assert pd.isna(df_["Data_Ultima_Assembleia"].iloc[1])
+
+
+def test_read_accepts_an_entirely_blank_date_column(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""A date column that is blank in **every** row still types as a date, all ``NaT``.
+
+	Two real cases in 2025: ``auditor.Data_Fim_Contratacao`` (an open engagement has no end
+	date) and ``posicao_acionaria.Data_Composicao_Capital_Social``. Neither is dropped from
+	``_DATE_COLS`` on the strength of one empty year — the column is a date by contract, and a
+	later year that populates it must not suddenly come back as text.
+
+	⚠️ Asserted on the **dtype**, because emptiness does not discriminate: pandas turns a blank
+	field into a missing value under ``dtype="str"`` too, so ``isna().all()`` is ``True``
+	whether or not the column is declared a date. Dropping it from ``_DATE_COLS`` yields
+	``string``/``<NA>`` instead of ``datetime64``/``NaT`` — only the dtype tells them apart.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	list_cols = list(FRE_CIA_ABERTA_AUDITOR.tuple_required)
+	list_blank = ["" if c == "Data_Fim_Contratacao" else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [list_blank, list_blank])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_auditor_2025.csv": str_csv}))
+
+	df_ = FreCiaAbertaAuditorReader(date_ref=DATE_REF).read()
+
+	assert len(df_) == 2
+	assert "Data_Fim_Contratacao" in FreCiaAbertaAuditorReader._DATE_COLS
+	assert pd.api.types.is_datetime64_any_dtype(df_["Data_Fim_Contratacao"])
+	assert df_["Data_Fim_Contratacao"].isna().all()
+	assert df_["Data_Inicio_Contratacao"].iloc[0] == date(2025, 8, 25)
+	# The same shape in posicao_acionaria, which is likewise blank throughout 2025.
+	assert "Data_Composicao_Capital_Social" in FreCiaAbertaPosicaoAcionariaReader._DATE_COLS
+
+
+def test_read_keeps_personal_documents_as_exact_text(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""CPF and mixed-document columns come back as published text, never reformatted.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	str_cpf = "596.116.268-00"
+	list_cols = list(FRE_CIA_ABERTA_RELACAO_SUBORDINACAO.tuple_required)
+	list_row = [str_cpf if c == "CPF_Administrador" else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [list_row])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_relacao_subordinacao_2025.csv": str_csv}))
+
+	df_ = FreCiaAbertaRelacaoSubordinacaoReader(date_ref=DATE_REF).read()
+
+	assert df_["CPF_Administrador"].iloc[0] == str_cpf
+	assert isinstance(df_["CPF_Administrador"].iloc[0], str)
 
 
 @pytest.mark.parametrize("case", CASES, ids=IDS)
