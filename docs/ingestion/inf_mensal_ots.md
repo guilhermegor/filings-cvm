@@ -68,7 +68,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalOtsGeralReader
+from filings_cvm.ingestion.securit import InfMensalOtsGeralReader
 
 df_ = InfMensalOtsGeralReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
 # uma linha por certificado por mês de referência.
@@ -79,7 +79,7 @@ df_ = InfMensalOtsGeralReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 202
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfMensalOtsClasseReader
+from filings_cvm.ingestion.securit import InfMensalOtsClasseReader
 
 InfMensalOtsClasseReader(
     date_ref=date(2025, 6, 1),

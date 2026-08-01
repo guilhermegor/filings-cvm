@@ -13,8 +13,8 @@ import pandas as pd
 import pytest
 
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.introspection import iter_public_readers
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-import filings_cvm.ingestion as ingestion
 from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
 
 
@@ -26,10 +26,10 @@ _SPEC.loader.exec_module(ccd)
 
 
 def _reader_classes() -> list[type]:
-	"""Every public reader discovered from the ingestion API."""
+	"""Every public reader, discovered through the portal-root packages."""
 	return [
 		cls
-		for cls in (getattr(ingestion, name) for name in ingestion.__all__)
+		for cls in iter_public_readers().values()
 		if inspect.isclass(cls) and issubclass(cls, IngestionReader)
 	]
 
@@ -371,8 +371,9 @@ def test_every_registry_name_resolves_to_a_reader() -> None:
 	list_names = list(ccd._META_MEMBERS) + [
 		name for names in ccd._META_MEMBERS.values() for name in names
 	]
+	dict_readers = iter_public_readers()
 	for str_name in list_names:
-		cls = getattr(ingestion, str_name, None)
+		cls = dict_readers.get(str_name)
 		assert inspect.isclass(cls) and issubclass(cls, IngestionReader), str_name
 
 

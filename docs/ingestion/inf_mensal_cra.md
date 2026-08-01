@@ -92,7 +92,7 @@ precisão da fonte para um `Decimal` a jusante.
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalCraGeralReader, InfMensalCraCedenteDevedorReader
+from filings_cvm.ingestion.securit import InfMensalCraCedenteDevedorReader, InfMensalCraGeralReader
 
 # O ano inteiro de 2025 (todos os meses), seção geral.
 df_geral = InfMensalCraGeralReader(date_ref=date(2025, 6, 1)).read()

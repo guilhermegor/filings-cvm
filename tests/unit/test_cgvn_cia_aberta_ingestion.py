@@ -26,12 +26,6 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm import (
-	CgvnCiaAbertaPraticasReader,
-	CgvnCiaAbertaReader,
-	FcaCiaAbertaReader,
-	MetaCgvnCiaAbertaReader,
-)
 from filings_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	CGVN_CIA_ABERTA_PRATICAS,
@@ -40,6 +34,12 @@ from filings_cvm._internal.config.contracts import (
 )
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.cia_aberta import (
+	CgvnCiaAbertaPraticasReader,
+	CgvnCiaAbertaReader,
+	FcaCiaAbertaReader,
+	MetaCgvnCiaAbertaReader,
+)
 
 
 VALID_CNPJ = "11.222.333/0001-81"

@@ -82,7 +82,7 @@ por instância que a sobrescreve. Veja
 
 ```python
 from datetime import date
-from filings_cvm import InfTrimestralFipReader
+from filings_cvm.ingestion.fip import InfTrimestralFipReader
 
 df_ = InfTrimestralFipReader(date_ref=date(2023, 5, 15)).read()   # o ANO de 2023
 # df_[["CNPJ_FUNDO", "DT_COMPTC", "VL_PATRIM_LIQ", "VL_CAP_INTEGR"]]
@@ -92,7 +92,7 @@ df_ = InfTrimestralFipReader(date_ref=date(2023, 5, 15)).read()   # o ANO de 202
 
 ```python
 from datetime import date
-from filings_cvm import InfQuadrimestralFipReader
+from filings_cvm.ingestion.fip import InfQuadrimestralFipReader
 
 df_ = InfQuadrimestralFipReader(date_ref=date(2024, 8, 15)).read()   # o ANO de 2024
 # df_[["CNPJ_FUNDO_CLASSE", "TP_FUNDO_CLASSE", "DT_COMPTC", "VL_PATRIM_LIQ"]]
@@ -103,7 +103,7 @@ df_ = InfQuadrimestralFipReader(date_ref=date(2024, 8, 15)).read()   # o ANO de 
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfQuadrimestralFipReader
+from filings_cvm.ingestion.fip import InfQuadrimestralFipReader
 
 InfQuadrimestralFipReader(
     date_ref=date(2024, 8, 15),

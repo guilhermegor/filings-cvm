@@ -56,7 +56,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Firmas de agente autônomo (pessoa jurídica)
 
 ```python
-from filings_cvm import AgenteAutonPjReader
+from filings_cvm.ingestion.agente_auton import AgenteAutonPjReader
 
 df_ = AgenteAutonPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "EMAIL"]]
@@ -66,7 +66,7 @@ df_ = AgenteAutonPjReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import AgenteAutonPfReader
+from filings_cvm.ingestion.agente_auton import AgenteAutonPfReader
 
 df_ = AgenteAutonPfReader(
     path_raw=Path("/data/bronze/cvm/cad_agente_auton"),

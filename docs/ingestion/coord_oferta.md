@@ -67,7 +67,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Coordenadores de oferta
 
 ```python
-from filings_cvm import CoordOfertaReader
+from filings_cvm.ingestion.coord_oferta import CoordOfertaReader
 
 df_ = CoordOfertaReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "VL_PATRIM_LIQ"]]
@@ -77,7 +77,7 @@ df_ = CoordOfertaReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import CoordOfertaRespReader
+from filings_cvm.ingestion.coord_oferta import CoordOfertaRespReader
 
 df_ = CoordOfertaRespReader(
     path_raw=Path("/data/bronze/cvm/cad_coord_oferta"),

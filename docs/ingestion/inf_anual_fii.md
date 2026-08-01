@@ -69,7 +69,7 @@ Como todo leitor da biblioteca, os 12 seguem o padrão de **`_RETRY_POLICY` por 
 
 ```python
 from datetime import date
-from filings_cvm import InfAnualFiiDistribuicaoCotistasReader
+from filings_cvm.ingestion.fii import InfAnualFiiDistribuicaoCotistasReader
 
 df_ = InfAnualFiiDistribuicaoCotistasReader(date_ref=date(2025, 6, 15)).read()
 # faixas: Numero_Cotistas_Faixa_Ate_5, …, Percentual_Detido_PJ_Faixa_Acima_50
@@ -79,7 +79,7 @@ df_ = InfAnualFiiDistribuicaoCotistasReader(date_ref=date(2025, 6, 15)).read()
 
 ```python
 from datetime import date
-from filings_cvm import InfAnualFiiProcessoReader
+from filings_cvm.ingestion.fii import InfAnualFiiProcessoReader
 
 df_ = InfAnualFiiProcessoReader(date_ref=date(2025, 6, 15)).read()
 # uma linha por processo: Juizo, Instancia, Data_Instauracao, Valor_Causa, Chance_Perda…
@@ -90,7 +90,7 @@ df_ = InfAnualFiiProcessoReader(date_ref=date(2025, 6, 15)).read()
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfAnualFiiGeralReader
+from filings_cvm.ingestion.fii import InfAnualFiiGeralReader
 
 InfAnualFiiGeralReader(
     date_ref=date(2025, 6, 15),

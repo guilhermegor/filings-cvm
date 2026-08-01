@@ -19,7 +19,7 @@ este **não**. Para um único mês, filtre o `DataFrame` devolvido por `Data_Ref
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFiiComplementoReader
+from filings_cvm.ingestion.fii import InfMensalFiiComplementoReader
 
 df_ = InfMensalFiiComplementoReader(date_ref=date(2025, 6, 15)).read()   # baixa o ANO de 2025
 junho = df_[df_["Data_Referencia"] == date(2025, 6, 1)]                  # filtre o mês aqui
@@ -77,7 +77,7 @@ declara a sua paciência (padrão: 5 tentativas, *backoff* exponencial limitado)
 ```python
 from decimal import Decimal
 from datetime import date
-from filings_cvm import InfMensalFiiComplementoReader
+from filings_cvm.ingestion.fii import InfMensalFiiComplementoReader
 
 df_ = InfMensalFiiComplementoReader(date_ref=date(2025, 6, 15)).read()
 df_ = df_[df_["Data_Referencia"] == date(2025, 6, 1)]
@@ -88,7 +88,7 @@ df_["PL"] = df_["Patrimonio_Liquido"].dropna().map(Decimal)   # texto exato → 
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFiiAtivoPassivoReader
+from filings_cvm.ingestion.fii import InfMensalFiiAtivoPassivoReader
 
 df_ = InfMensalFiiAtivoPassivoReader(date_ref=date(2025, 6, 15)).read()
 # Imoveis_Renda_Acabados, CRI, LCI, Total_Investido, Total_Passivo, …
@@ -99,7 +99,7 @@ df_ = InfMensalFiiAtivoPassivoReader(date_ref=date(2025, 6, 15)).read()
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfMensalFiiGeralReader
+from filings_cvm.ingestion.fii import InfMensalFiiGeralReader
 
 # Um download; o ZIP e os 3 CSVs ficam em disco para os outros readers.
 InfMensalFiiGeralReader(

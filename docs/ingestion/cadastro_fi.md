@@ -60,7 +60,7 @@ O mapa de tipos é **derivado do contrato**, não redigitado, de modo que os doi
 ### Ler o cadastro
 
 ```python
-from filings_cvm.ingestion import CadastroFiReader
+from filings_cvm.ingestion.fi import CadastroFiReader
 
 df_ = CadastroFiReader().read()   # sem date_ref: é um retrato do estado atual
 print(df_.shape)                  # (46809, 41)

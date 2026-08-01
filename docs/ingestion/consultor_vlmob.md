@@ -67,7 +67,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Firmas consultoras (pessoa jurídica)
 
 ```python
-from filings_cvm import ConsultorVlmobPjReader
+from filings_cvm.ingestion.consultor_vlmob import ConsultorVlmobPjReader
 
 df_ = ConsultorVlmobPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "EMAIL"]]
@@ -77,7 +77,7 @@ df_ = ConsultorVlmobPjReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import ConsultorVlmobSociosReader
+from filings_cvm.ingestion.consultor_vlmob import ConsultorVlmobSociosReader
 
 df_ = ConsultorVlmobSociosReader(
     path_raw=Path("/data/bronze/cvm/cad_consultor_vlmob"),

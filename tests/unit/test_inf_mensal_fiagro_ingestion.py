@@ -14,13 +14,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm import (
-	InfMensalFiagroReader,
-	InfMensalFiagroSubclasseReader,
-	RetryPolicy,
-)
+from filings_cvm import RetryPolicy
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.fiagro import InfMensalFiagroReader, InfMensalFiagroSubclasseReader
 from filings_cvm.ingestion.fiagro.doc.inf_mensal._base_inf_mensal_fiagro_reader import (
 	_DEFAULT_RETRY_POLICY,
 )

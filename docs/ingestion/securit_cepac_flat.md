@@ -54,7 +54,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 
 ```python
 from datetime import date
-from filings_cvm import DfinCraReader
+from filings_cvm.ingestion.securit import DfinCraReader
 
 df_ = DfinCraReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
 # uma linha por documento; Link_Download devolvido como texto (não seguido).
@@ -64,7 +64,7 @@ df_ = DfinCraReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
 
 ```python
 from pathlib import Path
-from filings_cvm import CadastroEmissorCepacReader
+from filings_cvm.ingestion.emissor_cepac import CadastroEmissorCepacReader
 
 df_ = CadastroEmissorCepacReader(
     path_raw=Path("/data/bronze/cvm/cad_emissor_cepac"),

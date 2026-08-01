@@ -76,7 +76,7 @@ conhecida: uma partição hipotética composta **só** de emissores estrangeiros
 from datetime import date
 from pathlib import Path
 
-from filings_cvm import IpeCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import IpeCiaAbertaReader
 
 # O ano do date_ref seleciona o dump anual.
 df = IpeCiaAbertaReader(date_ref=date(2025, 6, 15)).read()

@@ -72,7 +72,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Ofertas históricas (pré-RCVM 160)
 
 ```python
-from filings_cvm import OfertaDistribuicaoReader
+from filings_cvm.ingestion.oferta import OfertaDistribuicaoReader
 
 df_ = OfertaDistribuicaoReader().read()
 # df_[["Numero_Registro_Oferta", "Tipo_Oferta", "Nome_Emissor", "Valor_Total"]]
@@ -82,7 +82,7 @@ df_ = OfertaDistribuicaoReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import OfertaResolucao160Reader
+from filings_cvm.ingestion.oferta import OfertaResolucao160Reader
 
 df_ = OfertaResolucao160Reader(
     path_raw=Path("/data/bronze/cvm/oferta_distribuicao"),

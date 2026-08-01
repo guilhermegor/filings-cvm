@@ -52,7 +52,7 @@ O reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu padrã
 ### Administradores de FII
 
 ```python
-from filings_cvm import CadastroAdmFiiReader
+from filings_cvm.ingestion.adm_fii import CadastroAdmFiiReader
 
 df_ = CadastroAdmFiiReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "DENOM_COMERC", "SIT", "MUN", "UF"]]
@@ -62,7 +62,7 @@ df_ = CadastroAdmFiiReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import CadastroAdmFiiReader
+from filings_cvm.ingestion.adm_fii import CadastroAdmFiiReader
 
 df_ = CadastroAdmFiiReader(
     path_raw=Path("/data/bronze/cvm/cad_adm_fii"),

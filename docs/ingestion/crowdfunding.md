@@ -74,7 +74,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Plataformas registradas
 
 ```python
-from filings_cvm import CrowdfundingReader
+from filings_cvm.ingestion.crowdfunding import CrowdfundingReader
 
 df_ = CrowdfundingReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "WEBSITE", "MUN", "UF"]]
@@ -84,7 +84,7 @@ df_ = CrowdfundingReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import CrowdfundingSociosReader
+from filings_cvm.ingestion.crowdfunding import CrowdfundingSociosReader
 
 df_ = CrowdfundingSociosReader(
     path_raw=Path("/data/bronze/cvm/cad_crowdfunding"),

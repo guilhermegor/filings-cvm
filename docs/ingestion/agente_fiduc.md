@@ -58,7 +58,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Firmas de agente fiduciário (pessoa jurídica)
 
 ```python
-from filings_cvm import AgenteFiducPjReader
+from filings_cvm.ingestion.agente_fiduc import AgenteFiducPjReader
 
 df_ = AgenteFiducPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF"]]
@@ -68,7 +68,7 @@ df_ = AgenteFiducPjReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import AgenteFiducPfReader
+from filings_cvm.ingestion.agente_fiduc import AgenteFiducPfReader
 
 df_ = AgenteFiducPfReader(
     path_raw=Path("/data/bronze/cvm/cad_agente_fiduc"),

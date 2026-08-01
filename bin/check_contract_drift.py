@@ -64,9 +64,9 @@ from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLAS
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.introspection import iter_public_readers
 from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-import filings_cvm.ingestion as ingestion
 from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
 
 
@@ -91,7 +91,7 @@ _META_NAME_MAX_LEN = 50
 # Contracts of the readers that hold their contract inline instead of a ``_CONTRACT`` classvar
 # (the single-member flat/registro/snapshot readers). Declared here so the drift job can reach
 # every reader's contract; the multi-member readers expose ``_CONTRACT`` and are read from the
-# class directly. Keyed by class name, resolved against ``ingestion.__all__``.
+# class directly. Keyed by class name, resolved through the portal-root packages.
 _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"BalanceteFieReader": BALANCETE_FIE,
 	"BalancoFieReader": BALANCO_FIE,
@@ -119,14 +119,14 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 
 # Which readers each META dataset describes. Explicit because the mapping is not derivable from
 # names — see the module docstring (the cad_fi / cad_fi_hist / registro traps). Keyed by class
-# name; both sides resolve against ``ingestion.__all__``.
+# name; both sides resolve through the portal-root packages.
 _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaCadAdmFiiReader": ("CadastroAdmFiiReader",),
 	"MetaCadCiaEstrangReader": ("CadastroCiaEstrangReader",),
 	"MetaCadCiaAbertaReader": ("CadastroCiaAbertaReader",),
 	"MetaCadCiaIncentReader": ("CadastroCiaIncentReader",),
-	# FRE ships in four themed slices; slices 1 and 2 are in (15 of the 36 members). The
-	# remaining two slices append here.
+	# FRE ships in four themed slices. Slices 1 and 2 are in, covering 15 of its 36 members;
+	# the remaining two slices append their readers to this same tuple.
 	"MetaFreCiaAbertaReader": (
 		"FreCiaAbertaAdministradorMembroConselhoFiscalReader",
 		"FreCiaAbertaAuditorReader",
@@ -475,14 +475,14 @@ def contract_of(cls_reader: type[IngestionReader]) -> FileContract:
 
 def _resolve(str_name: str) -> type[IngestionReader]:
 	"""Resolve a reader class name against the public ingestion API."""
-	return getattr(ingestion, str_name)
+	return iter_public_readers()[str_name]
 
 
 def real_readers() -> tuple[type[IngestionReader], ...]:
-	"""Every public non-META reader, discovered from ``ingestion.__all__``."""
+	"""Every public non-META reader, discovered through the portal-root packages."""
 	return tuple(
 		cls
-		for cls in (getattr(ingestion, str_name) for str_name in ingestion.__all__)
+		for cls in iter_public_readers().values()
 		if inspect.isclass(cls)
 		and issubclass(cls, IngestionReader)
 		and not issubclass(cls, BaseMetaReader)

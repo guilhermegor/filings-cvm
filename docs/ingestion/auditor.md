@@ -55,7 +55,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Firmas de auditoria (pessoa jurídica)
 
 ```python
-from filings_cvm import AuditorPjReader
+from filings_cvm.ingestion.auditor import AuditorPjReader
 
 df_ = AuditorPjReader().read()
 # df_[["CD_CVM", "CNPJ", "DENOM_SOCIAL", "SIT", "UF"]]
@@ -65,7 +65,7 @@ df_ = AuditorPjReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import AuditorPfReader
+from filings_cvm.ingestion.auditor import AuditorPfReader
 
 df_ = AuditorPfReader(
     path_raw=Path("/data/bronze/cvm/cad_auditor"),

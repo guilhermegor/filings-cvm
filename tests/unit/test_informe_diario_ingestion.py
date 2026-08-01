@@ -13,7 +13,7 @@ import pytest
 
 from filings_cvm._internal.utils.retry import RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion import InformeDiarioReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
 
 
 # A CNPJ whose check digits are valid under the repo's ASCII-48 mod-11 routine.

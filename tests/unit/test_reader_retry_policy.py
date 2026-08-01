@@ -5,10 +5,14 @@ retry/backoff schedule used when the caller passes no ``retry_policy`` — so th
 co-located with the dataset and tunable per reader, while a per-instance ``retry_policy=`` still
 overrides it.
 
-This module is deliberately **cross-cutting and introspective**: it discovers the readers from the
-public API (``filings_cvm.ingestion.__all__``) rather than listing them, so a newly added reader
-that forgets ``_RETRY_POLICY`` fails here automatically. That structural guarantee is the point —
-it is what makes the pattern a *standard* instead of a convention nine files happen to follow.
+This module is deliberately **cross-cutting and introspective**: it discovers the readers through
+the **portal-root packages** (the public surface since #91) rather than listing them, so a newly
+added reader that forgets ``_RETRY_POLICY`` fails here automatically. That structural guarantee is
+the point — it is what makes the pattern a *standard* instead of a convention nine files follow.
+
+⚠️ The discovery walks the roots, **never a flat top-level ``__all__``** — that namespace no longer
+carries readers, and a walk over it would parametrise to **zero cases while staying green**. The
+count assertion below exists for exactly that: it is the difference between a gate and a placebo.
 
 No network and no download mocking: the assertions are about constructor state, not ``read()``.
 """
@@ -19,21 +23,26 @@ import pytest
 
 from filings_cvm import RetryPolicy
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-import filings_cvm.ingestion as ingestion
+from filings_cvm._internal.utils.introspection import iter_public_readers, iter_root_packages
 
 
 # Every public reader of the library, discovered — never hand-listed (see the module docstring).
+_DISCOVERED = iter_public_readers()
 ALL_READERS: tuple[type[IngestionReader], ...] = tuple(
 	cls
-	for cls in (getattr(ingestion, str_name) for str_name in ingestion.__all__)
+	for cls in _DISCOVERED.values()
 	if inspect.isclass(cls) and issubclass(cls, IngestionReader)
 )
 
 
-def test_every_public_name_in_all_resolves_to_a_reader() -> None:
-	"""``ingestion.__all__`` exports only readers, so the discovery cannot silently shrink."""
-	assert len(ALL_READERS) == len(ingestion.__all__)
+def test_every_public_name_in_a_root_resolves_to_a_reader() -> None:
+	"""Each root exports only readers, so the discovery cannot silently shrink."""
+	assert len(ALL_READERS) == len(_DISCOVERED)
 	assert ALL_READERS, "no readers discovered — the introspection is broken, not the readers"
+	# A root that stopped exporting, or a root list that emptied, must fail loudly rather than
+	# quietly parametrising this whole module to nothing.
+	assert len(iter_root_packages()) == 22
+	assert len(ALL_READERS) > 200
 
 
 @pytest.mark.parametrize("cls", ALL_READERS, ids=lambda c: c.__name__)

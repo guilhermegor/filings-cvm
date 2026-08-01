@@ -78,7 +78,7 @@ Chegam **parcialmente preenchidos** (colunas obrigatórias, valores não): `Moti
 from datetime import date
 from pathlib import Path
 
-from filings_cvm import VlmoCiaAbertaConReader, VlmoCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import VlmoCiaAbertaConReader, VlmoCiaAbertaReader
 
 # O índice dos documentos entregues no ano:
 df_indice = VlmoCiaAbertaReader(date_ref=date(2025, 6, 15)).read()

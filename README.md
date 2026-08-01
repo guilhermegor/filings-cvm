@@ -103,7 +103,7 @@ E a leitura (← CVM) devolve um `DataFrame` tipado e validado por contrato:
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import InformeDiarioReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
 
 df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()   # dump mensal inf_diario_fi
 ```

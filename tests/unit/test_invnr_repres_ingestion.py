@@ -19,7 +19,7 @@ import pytest
 from filings_cvm._internal.config.contracts import CAD_INVNR_REPRES_PF, CAD_INVNR_REPRES_PJ
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion import InvnrRepresPfReader, InvnrRepresPjReader
+from filings_cvm.ingestion.invnr import InvnrRepresPfReader, InvnrRepresPjReader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; the pj contract's CNPJ check accepts it.

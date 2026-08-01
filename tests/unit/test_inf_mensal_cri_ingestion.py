@@ -19,7 +19,8 @@ import zipfile
 
 import pytest
 
-from filings_cvm import (
+from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm.ingestion.securit import (
 	InfMensalCriAtivoPassivoReader,
 	InfMensalCriCarteiraModificacaoReader,
 	InfMensalCriCarteiraReader,
@@ -32,7 +33,6 @@ from filings_cvm import (
 	InfMensalCriGeralReader,
 	InfMensalCriResponsavelReader,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm.ingestion.securit.doc.inf_mensal_cri._base_inf_mensal_cri_reader import (
 	_DEFAULT_RETRY_POLICY,
 )

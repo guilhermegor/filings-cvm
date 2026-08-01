@@ -35,7 +35,7 @@ declarados** aplicados — nunca a inferência do pandas.
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import InformeDiarioReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
 
 # Qualquer dia do mês seleciona o dump; o padrão é hoje. Prefira um mês passado
 # para dados completos — o mês corrente pode ainda não estar publicado.
@@ -73,7 +73,7 @@ df_ = InformeDiarioReader(
 ### Ajustar o timeout
 
 ```python
-from filings_cvm.ingestion import InformeDiarioReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
 
 reader = InformeDiarioReader(date_ref=date(2025, 1, 15))
 df_ = reader.read(int_timeout_s=60)   # timeout de download maior

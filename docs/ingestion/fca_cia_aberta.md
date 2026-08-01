@@ -93,7 +93,7 @@ parcialmente vazia. Todo o restante é **texto exato da fonte**.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm import FcaCiaAbertaGeralReader, FcaCiaAbertaValorMobiliarioReader
+from filings_cvm.ingestion.cia_aberta import FcaCiaAbertaGeralReader, FcaCiaAbertaValorMobiliarioReader
 
 # Dados gerais de registro (9 colunas de data):
 df_geral = FcaCiaAbertaGeralReader(date_ref=date(2025, 6, 15)).read()
