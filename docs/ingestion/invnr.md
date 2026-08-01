@@ -59,7 +59,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Firmas representantes (pessoa jurídica)
 
 ```python
-from filings_cvm import InvnrRepresPjReader
+from filings_cvm.ingestion.invnr import InvnrRepresPjReader
 
 df_ = InvnrRepresPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "VL_PATRIM_LIQ"]]
@@ -69,7 +69,7 @@ df_ = InvnrRepresPjReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import InvnrRepresPfReader
+from filings_cvm.ingestion.invnr import InvnrRepresPfReader
 
 df_ = InvnrRepresPfReader(
     path_raw=Path("/data/bronze/cvm/cad_invnr_repres"),

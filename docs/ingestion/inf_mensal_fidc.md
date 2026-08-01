@@ -66,7 +66,8 @@ A resolução é em duas camadas:
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFidcTabIReader, RetryPolicy
+from filings_cvm import RetryPolicy
+from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
 
 # 1. Padrão — o reader usa a política do seu próprio módulo (5 tentativas). Nada a passar:
 df_ = InfMensalFidcTabIReader(date_ref=date(2025, 6, 1)).read()
@@ -88,7 +89,8 @@ uma tabela específica, basta uma política diferente — por instância:
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFidcTabX4Reader, RetryPolicy
+from filings_cvm import RetryPolicy
+from filings_cvm.ingestion.fidc import InfMensalFidcTabX4Reader
 
 # Mais tentativas e teto de espera maior só para esta tabela, nesta execução:
 cls_retry_policy = RetryPolicy(int_max_attempts=10, float_base_wait_s=2.0, float_max_wait_s=30.0)
@@ -108,7 +110,7 @@ explícito.
 ```python
 from decimal import Decimal
 from datetime import date
-from filings_cvm import InfMensalFidcTabIVReader
+from filings_cvm.ingestion.fidc import InfMensalFidcTabIVReader
 
 pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1)).read()
 pl["PL"] = pl["TAB_IV_A_VL_PL"].dropna().map(Decimal)   # texto exato → Decimal
@@ -118,7 +120,7 @@ pl["PL"] = pl["TAB_IV_A_VL_PL"].dropna().map(Decimal)   # texto exato → Decima
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFidcTabX1Reader
+from filings_cvm.ingestion.fidc import InfMensalFidcTabX1Reader
 
 cotistas = InfMensalFidcTabX1Reader(date_ref=date(2025, 6, 1)).read()
 # muitas linhas por fundo — uma por TAB_X_CLASSE_SERIE / ID_SUBCLASSE.
@@ -129,7 +131,7 @@ cotistas = InfMensalFidcTabX1Reader(date_ref=date(2025, 6, 1)).read()
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfMensalFidcTabIReader
+from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
 
 # Um download; o ZIP e os 17 CSVs ficam em disco para os outros readers.
 InfMensalFidcTabIReader(

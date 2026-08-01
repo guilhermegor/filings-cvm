@@ -52,7 +52,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ```python
 from decimal import Decimal
 from datetime import date
-from filings_cvm import BalanceteFieReader
+from filings_cvm.ingestion.fie import BalanceteFieReader
 
 df_ = BalanceteFieReader(date_ref=date(2026, 6, 1)).read()   # o MÊS 2026-06
 df_["SALDO"] = df_["VL_SALDO_BALCTE"].dropna().map(Decimal)   # texto exato → Decimal
@@ -63,7 +63,7 @@ df_["SALDO"] = df_["VL_SALDO_BALCTE"].dropna().map(Decimal)   # texto exato → 
 
 ```python
 from datetime import date
-from filings_cvm import BalancoFieReader
+from filings_cvm.ingestion.fie import BalancoFieReader
 
 df_ = BalancoFieReader(date_ref=date(2020, 6, 1)).read()   # o ANO de 2020
 # uma linha por fundo × data × conta.
@@ -74,7 +74,7 @@ df_ = BalancoFieReader(date_ref=date(2020, 6, 1)).read()   # o ANO de 2020
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import MedidasMesFieReader
+from filings_cvm.ingestion.fie import MedidasMesFieReader
 
 df_ = MedidasMesFieReader(
     date_ref=date(2026, 6, 1),

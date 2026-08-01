@@ -34,25 +34,6 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm import (
-	CgvnCiaAbertaReader,
-	FreCiaAbertaAdministradorMembroConselhoFiscalReader,
-	FreCiaAbertaAuditorReader,
-	FreCiaAbertaCapitalSocialClasseAcaoReader,
-	FreCiaAbertaCapitalSocialReader,
-	FreCiaAbertaCapitalSocialTituloConversivelReader,
-	FreCiaAbertaDistribuicaoCapitalClasseAcaoReader,
-	FreCiaAbertaDistribuicaoCapitalReader,
-	FreCiaAbertaMembroComiteReader,
-	FreCiaAbertaMercadoEstrangeiroReader,
-	FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
-	FreCiaAbertaPosicaoAcionariaReader,
-	FreCiaAbertaReader,
-	FreCiaAbertaRelacaoFamiliarReader,
-	FreCiaAbertaRelacaoSubordinacaoReader,
-	FreCiaAbertaResponsavelReader,
-	MetaFreCiaAbertaReader,
-)
 from filings_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	FRE_CIA_ABERTA,
@@ -74,6 +55,25 @@ from filings_cvm._internal.config.contracts import (
 )
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.cia_aberta import (
+	CgvnCiaAbertaReader,
+	FreCiaAbertaAdministradorMembroConselhoFiscalReader,
+	FreCiaAbertaAuditorReader,
+	FreCiaAbertaCapitalSocialClasseAcaoReader,
+	FreCiaAbertaCapitalSocialReader,
+	FreCiaAbertaCapitalSocialTituloConversivelReader,
+	FreCiaAbertaDistribuicaoCapitalClasseAcaoReader,
+	FreCiaAbertaDistribuicaoCapitalReader,
+	FreCiaAbertaMembroComiteReader,
+	FreCiaAbertaMercadoEstrangeiroReader,
+	FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
+	FreCiaAbertaPosicaoAcionariaReader,
+	FreCiaAbertaReader,
+	FreCiaAbertaRelacaoFamiliarReader,
+	FreCiaAbertaRelacaoSubordinacaoReader,
+	FreCiaAbertaResponsavelReader,
+	MetaFreCiaAbertaReader,
+)
 
 
 VALID_CNPJ = "11.222.333/0001-81"

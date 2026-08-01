@@ -59,7 +59,7 @@ O reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu padrã
 ### Companhias incentivadas
 
 ```python
-from filings_cvm import CadastroCiaIncentReader
+from filings_cvm.ingestion.cia_incent import CadastroCiaIncentReader
 
 df_ = CadastroCiaIncentReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "CNPJ_AUDITOR", "AUDITOR"]]
@@ -69,7 +69,7 @@ df_ = CadastroCiaIncentReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import CadastroCiaIncentReader
+from filings_cvm.ingestion.cia_incent import CadastroCiaIncentReader
 
 df_ = CadastroCiaIncentReader(
     path_raw=Path("/data/bronze/cvm/cad_cia_incent"),

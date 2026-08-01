@@ -74,7 +74,7 @@ Como todo leitor da biblioteca, os 16 seguem o padrão de **`_RETRY_POLICY` por 
 
 ```python
 from datetime import date
-from filings_cvm import InfTrimestralFiiResultadoContabilFinanceiroReader
+from filings_cvm.ingestion.fii import InfTrimestralFiiResultadoContabilFinanceiroReader
 
 df_ = InfTrimestralFiiResultadoContabilFinanceiroReader(date_ref=date(2025, 6, 15)).read()
 df_ = df_[df_["Data_Referencia"] == date(2025, 3, 31)]   # o 1º trimestre
@@ -84,7 +84,7 @@ df_ = df_[df_["Data_Referencia"] == date(2025, 3, 31)]   # o 1º trimestre
 
 ```python
 from datetime import date
-from filings_cvm import InfTrimestralFiiImovelRendaAcabadoInquilinoReader
+from filings_cvm.ingestion.fii import InfTrimestralFiiImovelRendaAcabadoInquilinoReader
 
 df_ = InfTrimestralFiiImovelRendaAcabadoInquilinoReader(date_ref=date(2025, 6, 15)).read()
 # muitas linhas por fundo — um inquilino por linha.
@@ -95,7 +95,7 @@ df_ = InfTrimestralFiiImovelRendaAcabadoInquilinoReader(date_ref=date(2025, 6, 1
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfTrimestralFiiGeralReader
+from filings_cvm.ingestion.fii import InfTrimestralFiiGeralReader
 
 InfTrimestralFiiGeralReader(
     date_ref=date(2025, 6, 15),

@@ -7,6 +7,29 @@ volta para modelos tipados — a contraparte do [Envio](../submission/perfil_men
 
 ---
 
+## Como importar um leitor — pelo **portal root**
+
+Os leitores são agrupados pelo **root do portal de dados abertos**
+(`dados.cvm.gov.br/dados/<ROOT>/…`), e **cada root é a superfície pública** dos seus leitores:
+
+```python
+from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader
+from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
+```
+
+São **22 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `auditor`, `cia_aberta`,
+`cia_estrang`, `cia_incent`, `consultor_vlmob`, `coord_oferta`, `crowdfunding`, `emissor_cepac`,
+`fi`, `fiagro`, `fidc`, `fie`, `fii`, `fip`, `intermed`, `invnr`, `oferta`, `securit`.
+
+> ⚠️ **Mudança incompatível na 0.26.0.** `from filings_cvm import <Leitor>` e
+> `from filings_cvm.ingestion import <Leitor>` **deixaram de funcionar** — os 216 leitores não são
+> mais reexportados num namespace plano. Importe do root que é dono do leitor (a página de cada
+> dataset mostra o import correto). O agrupamento é o **do próprio portal da CVM**; um namespace
+> único de 216 nomes não tinha divisão nenhuma e crescia a cada leitor novo.
+
+---
+
 ## Padrões implementados
 
 - **[Informe Diário FIF](informe_diario.md)** — `InformeDiarioReader`: lê o dump mensal de
@@ -253,7 +276,8 @@ A resolução é em duas camadas:
    *backoff* exponencial limitado (~2, 4, 8, 10 s).
 
 ```python
-from filings_cvm import CdaReader, RetryPolicy
+from filings_cvm import RetryPolicy
+from filings_cvm.ingestion.fi import CdaReader
 
 # 1. Padrão — o leitor usa a política do seu próprio módulo. Nada a passar:
 df_ = CdaReader().read()

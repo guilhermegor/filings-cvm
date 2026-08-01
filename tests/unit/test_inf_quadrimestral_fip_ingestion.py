@@ -13,9 +13,10 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm import InfQuadrimestralFipReader, RetryPolicy
+from filings_cvm import RetryPolicy
 from filings_cvm._internal.config.contracts import INF_QUADRIMESTRAL_FIP
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.fip import InfQuadrimestralFipReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"

@@ -16,7 +16,7 @@ import pytest
 
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion import (
+from filings_cvm.ingestion.fi import (
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
 	CadastroFiHistClasseReader,

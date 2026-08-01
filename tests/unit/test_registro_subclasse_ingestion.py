@@ -16,7 +16,7 @@ from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLAS
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
 from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion import RegistroSubclasseReader
+from filings_cvm.ingestion.fi import RegistroSubclasseReader
 
 
 VALID_CNPJ = "11222333000181"

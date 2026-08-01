@@ -23,9 +23,9 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm import IpeCiaAbertaReader, MetaIpeCiaAbertaReader
 from filings_cvm._internal.config.contracts import IPE_CIA_ABERTA
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.cia_aberta import IpeCiaAbertaReader, MetaIpeCiaAbertaReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"

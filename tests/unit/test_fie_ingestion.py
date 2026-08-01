@@ -16,12 +16,7 @@ import zipfile
 
 import pytest
 
-from filings_cvm import (
-	BalanceteFieReader,
-	BalancoFieReader,
-	MedidasMesFieReader,
-	RetryPolicy,
-)
+from filings_cvm import RetryPolicy
 from filings_cvm._internal.config.contracts import (
 	BALANCETE_FIE,
 	BALANCO_FIE,
@@ -30,6 +25,7 @@ from filings_cvm._internal.config.contracts import (
 )
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.fie import BalanceteFieReader, BalancoFieReader, MedidasMesFieReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"

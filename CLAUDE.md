@@ -576,14 +576,19 @@ Sob `CIA_ABERTA/CAD/`:
 
 ```
 src/filings_cvm/
-    __init__.py            # the public API surface (control it with __all__)
+    __init__.py            # ONLY the cross-cutting names: RetryPolicy + __version__ (#91).
+                           #   NOT readers, NOT writers — each section owns its own names.
     submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
+                           #   `from filings_cvm.submission import InformeDiario`
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
-                           #   nested by CVM portal path (dados/<ROOT>/…); __init__ FLAT public API
-        _base_meta_reader.py   # PRIVATE base for the 26 Meta*Reader (shared across every root)
+                           #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
+                           #   22 ROOT PACKAGES, never the readers
+        _base_meta_reader.py   # PRIVATE base for the 42 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
-                           #   directory per dataset. Public API stays flat via re-exports.
+                           #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:
+                           #   `from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader`
+                           #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
@@ -632,6 +637,27 @@ tests/
 resolve after `pip install`), but the leading underscore marks it off-limits — keep it out
 of your public `__all__`. The internal imports are package-qualified
 (`from <project_name>._internal.utils.dtypes import …`).
+
+**⚠️ The import surface is grouped, not flat (#91).** Each section owns its own names, and the
+top-level `filings_cvm.__all__` holds **only** `RetryPolicy` and `__version__` — what belongs to
+neither section:
+
+| what | import from |
+|---|---|
+| an ingestion reader | `filings_cvm.ingestion.<portal_root>` (22 roots) |
+| a submission writer | `filings_cvm.submission` |
+| `RetryPolicy` | `filings_cvm` |
+
+**So a new reader is registered in exactly TWO `__init__` files** — its dataset package and its
+portal root — never four. It must **not** be added to `filings_cvm/__init__.py` or
+`ingestion/__init__.py`; `tests/unit/test_public_surface.py` fails in both directions if it is.
+The flat namespace was removed because at 216 readers it was an undivided wall of names that every
+new reader widened, while the CVM portal already supplies the grouping.
+
+⚠️ **"Every public reader" is now `_internal/utils/introspection.py`**, which walks the roots —
+not a flat `__all__`. Any new gate that sweeps all readers must use it: a walk over the top-level
+`__all__` finds **zero** readers and stays **green**, which is how a parametrised gate becomes a
+placebo.
 
 ## Architecture
 

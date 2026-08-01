@@ -19,7 +19,7 @@ import pytest
 
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
 from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion import LaminaReader
+from filings_cvm.ingestion.fi import LaminaReader
 
 
 # CNPJs whose check digits are valid under the repo's ASCII-48 mod-11 routine. CVM ships

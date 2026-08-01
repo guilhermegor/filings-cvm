@@ -1,8 +1,26 @@
 # **Referência da API**
 
-Interface pública da biblioteca. Os serializadores e modelos abaixo são importáveis de
-`filings_cvm.submission`, e os leitores de `filings_cvm.ingestion`; os nomes principais também
-são reexportados no topo de `filings_cvm`.
+Interface pública da biblioteca. **Cada seção é dona dos seus próprios nomes** — nada de leitor ou
+serializador é reexportado no topo de `filings_cvm`:
+
+| o que | importe de |
+|---|---|
+| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **22 roots** do portal |
+| um **serializador** (submission) | `filings_cvm.submission` |
+| `RetryPolicy` | `filings_cvm` |
+
+```python
+from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader
+from filings_cvm.submission import InformeDiario
+from filings_cvm import RetryPolicy
+```
+
+> ⚠️ **Mudança incompatível na 0.26.0.** Antes, os 216 leitores eram reexportados num namespace
+> **plano** em `filings_cvm` e em `filings_cvm.ingestion`, e
+> `from filings_cvm import <Leitor>` funcionava. Agora levanta `ImportError`. Troque pelo
+> **portal root** que é dono do leitor — o mesmo agrupamento que a
+> [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
+> seção abaixo nomeia o root de cada leitor.
 
 > **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
@@ -92,7 +110,7 @@ Levanta `OSError` (falha de download), `ContractError` (CSV viola o contrato) ou
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import InformeDiarioReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
 
 df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 ```
@@ -135,7 +153,7 @@ por fundo/data).
 from datetime import date
 from decimal import Decimal
 
-from filings_cvm.ingestion import CdaReader
+from filings_cvm.ingestion.fi import CdaReader
 
 df_ = CdaReader(date_ref=date(2025, 4, 15)).read()
 df_["PCT_PL"] = df_["VL_MERC_POS_FINAL"].map(Decimal) / df_["VL_PATRIM_LIQ"].map(Decimal)
@@ -176,7 +194,7 @@ não contém o membro `lamina_fi_carteira_*`).
 from datetime import date
 from decimal import Decimal
 
-from filings_cvm.ingestion import LaminaCarteiraReader
+from filings_cvm.ingestion.fi import LaminaCarteiraReader
 
 df_ = LaminaCarteiraReader(date_ref=date(2025, 4, 15)).read()
 df_["PCT"] = df_["PR_PL_ATIVO"].map(Decimal)
@@ -215,7 +233,7 @@ não contém o membro `lamina_fi_AAAAMM.csv`).
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import LaminaReader
+from filings_cvm.ingestion.fi import LaminaReader
 
 df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
 print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
@@ -251,7 +269,7 @@ linhas — filtre antes de tratar como fundos vivos.
 Levanta `OSError` (falha de download) ou `ContractError` (CSV viola o contrato).
 
 ```python
-from filings_cvm.ingestion import CadastroFiReader
+from filings_cvm.ingestion.fi import CadastroFiReader
 
 df_ = CadastroFiReader().read()
 ativos = df_[df_["SIT"] == "EM FUNCIONAMENTO NORMAL"]
@@ -292,7 +310,7 @@ multiplicaria linhas; junte nas chaves substitutas você mesmo. As colunas `Data
 ausente).
 
 ```python
-from filings_cvm.ingestion import RegistroFundoReader, RegistroClasseReader
+from filings_cvm.ingestion.fi import RegistroClasseReader, RegistroFundoReader
 
 fundos = RegistroFundoReader().read()
 classes = RegistroClasseReader().read()
@@ -324,7 +342,7 @@ Devolve o log daquele atributo — muitas linhas por fundo (uma por período de 
 `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm.ingestion import CadastroFiHistSitReader
+from filings_cvm.ingestion.fi import CadastroFiHistSitReader
 
 sit = CadastroFiHistSitReader().read()
 janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]   # DT_INI_SIT / DT_FIM_SIT
@@ -359,7 +377,8 @@ exato (monetários/quantidades/percentuais/contagens **nunca `float`**). As sub-
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFidcTabIVReader, RetryPolicy
+from filings_cvm import RetryPolicy
+from filings_cvm.ingestion.fidc import InfMensalFidcTabIVReader
 
 pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1)).read()          # padrão do módulo
 cls_retry_policy = RetryPolicy(int_max_attempts=10, float_max_wait_s=30.0)
@@ -395,7 +414,7 @@ viram `datetime.date` (vazios → `NaT`); as demais são texto exato. Levanta `O
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFiiComplementoReader
+from filings_cvm.ingestion.fii import InfMensalFiiComplementoReader
 
 df_ = InfMensalFiiComplementoReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 junho = df_[df_["Data_Referencia"] == date(2025, 6, 1)]
@@ -430,7 +449,7 @@ Levanta `OSError` ou `ContractError`.
 
 ```python
 from datetime import date
-from filings_cvm import DfinFiiReader
+from filings_cvm.ingestion.fii import DfinFiiReader
 
 df_ = DfinFiiReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 # df_[["CNPJ_Fundo_Classe", "Data_Referencia", "Versao", "Link_Download"]]
@@ -465,7 +484,7 @@ viram `datetime.date` (vazios → `NaT`); as demais são texto exato. Levanta `O
 
 ```python
 from datetime import date
-from filings_cvm import InfTrimestralFiiImovelReader
+from filings_cvm.ingestion.fii import InfTrimestralFiiImovelReader
 
 df_ = InfTrimestralFiiImovelReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 primeiro_tri = df_[df_["Data_Referencia"] == date(2025, 3, 31)]
@@ -502,7 +521,7 @@ ausente).
 
 ```python
 from datetime import date
-from filings_cvm import InfAnualFiiProcessoReader
+from filings_cvm.ingestion.fii import InfAnualFiiProcessoReader
 
 df_ = InfAnualFiiProcessoReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 # uma linha por processo: Juizo, Instancia, Data_Instauracao, Valor_Causa, Chance_Perda…
@@ -537,7 +556,7 @@ Levanta `OSError` ou `ContractError`.
 
 ```python
 from datetime import date
-from filings_cvm import InfQuadrimestralFipReader
+from filings_cvm.ingestion.fip import InfQuadrimestralFipReader
 
 df_ = InfQuadrimestralFipReader(date_ref=date(2024, 8, 15)).read()   # o ANO de 2024
 # df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "VL_PATRIM_LIQ", "VL_CAP_INTEGR"]]
@@ -572,7 +591,7 @@ ficam texto exato. Levanta `OSError`, `ContractError` ou `ValueError`.
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFiagroReader
+from filings_cvm.ingestion.fiagro import InfMensalFiagroReader
 
 df_ = InfMensalFiagroReader(date_ref=date(2025, 6, 1)).read()   # o MÊS 2025-06
 # df_[["CNPJ_Classe", "Data_Referencia", "Patrimonio_Liquido", "Valor_Patrimonial_Cotas"]]
@@ -609,7 +628,7 @@ exato. Levanta `OSError`, `ContractError` ou (nos balanços) `ValueError` se o m
 
 ```python
 from datetime import date
-from filings_cvm import BalanceteFieReader
+from filings_cvm.ingestion.fie import BalanceteFieReader
 
 df_ = BalanceteFieReader(date_ref=date(2026, 6, 1)).read()   # o MÊS 2026-06
 # df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "CD_CONTA_BALCTE", "VL_SALDO_BALCTE"]]
@@ -645,7 +664,8 @@ Só as colunas de data viram `date`; o restante fica texto exato. Levanta `OSErr
 
 ```python
 from datetime import date
-from filings_cvm import DfinCraReader, CadastroEmissorCepacReader
+from filings_cvm.ingestion.emissor_cepac import CadastroEmissorCepacReader
+from filings_cvm.ingestion.securit import DfinCraReader
 
 df_ = DfinCraReader(date_ref=date(2025, 6, 1)).read()   # índice de DF dos CRA de 2025
 cad = CadastroEmissorCepacReader().read()               # snapshot dos emissores de CEPAC
@@ -679,7 +699,7 @@ Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalOtsClasseReader
+from filings_cvm.ingestion.securit import InfMensalOtsClasseReader
 
 df_ = InfMensalOtsClasseReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
 # muitas linhas por certificado — uma por classe/série.
@@ -717,7 +737,7 @@ Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalCraDireitosCreditoriosReader
+from filings_cvm.ingestion.securit import InfMensalCraDireitosCreditoriosReader
 
 df_ = InfMensalCraDireitosCreditoriosReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
 # 56 colunas — inclui os baldes agro (produção, comercialização, beneficiamento, industrialização).
@@ -759,7 +779,7 @@ Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalCriCreditosReader
+from filings_cvm.ingestion.securit import InfMensalCriCreditosReader
 
 df_ = InfMensalCriCreditosReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 2025
 # 51 colunas — a carteira de recebíveis imobiliários (incorporação, aluguéis, aquisição, …).
@@ -789,7 +809,7 @@ Uma linha por auditor. `DT_INI_SIT` vira `date`; o restante fica texto exato (`C
 preservam zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import AuditorPjReader
+from filings_cvm.ingestion.auditor import AuditorPjReader
 
 df_ = AuditorPjReader().read()
 # df_[["CD_CVM", "CNPJ", "DENOM_SOCIAL", "SIT", "UF"]]
@@ -821,7 +841,7 @@ Uma linha por agente. `DT_REG`/`DT_CANCEL`/`DT_INI_SIT` viram `date`; o restante
 (membro ausente).
 
 ```python
-from filings_cvm import AgenteFiducPjReader
+from filings_cvm.ingestion.agente_fiduc import AgenteFiducPjReader
 
 df_ = AgenteFiducPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF"]]
@@ -854,7 +874,7 @@ Uma linha por agente. `DT_REG`/`DT_CANCEL`/`DT_INI_SIT` viram `date`; o restante
 (membro ausente).
 
 ```python
-from filings_cvm import AgenteAutonPjReader
+from filings_cvm.ingestion.agente_auton import AgenteAutonPjReader
 
 df_ = AgenteAutonPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "EMAIL"]]
@@ -888,7 +908,7 @@ Uma linha por representante. `DT_REG`/`DT_CANCEL`/`DT_INI_SIT` (e `DT_PATRIM_LIQ
 esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import InvnrRepresPjReader
+from filings_cvm.ingestion.invnr import InvnrRepresPjReader
 
 df_ = InvnrRepresPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "VL_PATRIM_LIQ"]]
@@ -924,7 +944,7 @@ exato (`CEP`/`TEL`/`FAX`/`CD_CVM`, `numeric` no META, preservam zeros à esquerd
 `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import IntermedReader
+from filings_cvm.ingestion.intermed import IntermedReader
 
 df_ = IntermedReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "TP_PARTIC", "SIT", "MUN", "UF"]]
@@ -963,7 +983,7 @@ preservam zeros à esquerda). Um CNPJ malformado da fonte (`00.010.354/1901-72`)
 publicado**. Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import AdmCartPjReader
+from filings_cvm.ingestion.adm_cart import AdmCartPjReader
 
 df_ = AdmCartPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "CATEG_REG", "SIT", "MUN", "UF"]]
@@ -1001,7 +1021,7 @@ membros sem data, nada é convertido); o restante fica texto exato (`CEP`/`TEL`,
 preservam zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import ConsultorVlmobPjReader
+from filings_cvm.ingestion.consultor_vlmob import ConsultorVlmobPjReader
 
 df_ = ConsultorVlmobPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "EMAIL"]]
@@ -1034,7 +1054,7 @@ restante fica texto exato (`CEP`/`DDD`/`TEL`, `numeric` no META, preservam zeros
 Levanta `OSError` ou `ContractError`.
 
 ```python
-from filings_cvm import CadastroAdmFiiReader
+from filings_cvm.ingestion.adm_fii import CadastroAdmFiiReader
 
 df_ = CadastroAdmFiiReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "DENOM_COMERC", "SIT", "MUN", "UF"]]
@@ -1068,7 +1088,7 @@ Uma linha por companhia. As **sete** colunas `DT_*` viram `date`; o restante fic
 `OSError` ou `ContractError`. O contract é **pinado** ao header verbatim (49 cols).
 
 ```python
-from filings_cvm import CadastroCiaEstrangReader
+from filings_cvm.ingestion.cia_estrang import CadastroCiaEstrangReader
 
 df_ = CadastroCiaEstrangReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "PAIS_ORIGEM", "SIT", "CNPJ_AUDITOR", "AUDITOR"]]
@@ -1102,7 +1122,7 @@ Uma linha por companhia. As **sete** colunas `DT_*` viram `date` (`DT_INI_CATEG`
 ao header verbatim (47 cols).
 
 ```python
-from filings_cvm import CadastroCiaIncentReader
+from filings_cvm.ingestion.cia_incent import CadastroCiaIncentReader
 
 df_ = CadastroCiaIncentReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "CNPJ_AUDITOR", "AUDITOR"]]
@@ -1137,7 +1157,7 @@ exato (`CD_CVM`/`CEP`/`TEL`/`FAX`/`DDD_*`, `numeric`/`char` no META, preservam z
 Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import CoordOfertaReader
+from filings_cvm.ingestion.coord_oferta import CoordOfertaReader
 
 df_ = CoordOfertaReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "MUN", "UF", "VL_PATRIM_LIQ"]]
@@ -1173,7 +1193,7 @@ nada é convertido); o restante fica texto exato (`CEP`/`TEL`/`DDD`, `numeric` n
 zeros à esquerda). Levanta `OSError`, `ContractError` ou `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import CrowdfundingReader
+from filings_cvm.ingestion.crowdfunding import CrowdfundingReader
 
 df_ = CrowdfundingReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "SIT", "WEBSITE", "MUN", "UF"]]
@@ -1210,7 +1230,7 @@ preservam o decimal exato para um cast a `Decimal` a jusante. Levanta `OSError`,
 `ValueError` (membro ausente).
 
 ```python
-from filings_cvm import OfertaDistribuicaoReader
+from filings_cvm.ingestion.oferta import OfertaDistribuicaoReader
 
 df_ = OfertaDistribuicaoReader().read()
 # df_[["Numero_Registro_Oferta", "Tipo_Oferta", "Nome_Emissor", "Valor_Total"]]
@@ -1247,7 +1267,7 @@ Uma linha por companhia. As **sete** colunas `DT_*` viram `date`; o restante fic
 `OSError` ou `ContractError`. O contract é **pinado** ao header verbatim (47 cols).
 
 ```python
-from filings_cvm import CadastroCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import CadastroCiaAbertaReader
 
 df_ = CadastroCiaAbertaReader().read()
 # df_[["CNPJ_CIA", "DENOM_SOCIAL", "TP_MERC", "SIT", "CNPJ_AUDITOR", "AUDITOR"]]
@@ -1289,7 +1309,7 @@ cols).
 ```python
 from datetime import date
 
-from filings_cvm import IpeCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import IpeCiaAbertaReader
 
 df_ = IpeCiaAbertaReader(date_ref=date(2025, 6, 15)).read()
 # df_[["CNPJ_Companhia", "Categoria", "Data_Entrega", "Versao", "Link_Download"]]
@@ -1334,7 +1354,7 @@ resto é texto exato. Contracts **pinados** aos headers verbatim (12 e 17 cols).
 ```python
 from datetime import date
 
-from filings_cvm import VlmoCiaAbertaConReader
+from filings_cvm.ingestion.cia_aberta import VlmoCiaAbertaConReader
 
 df_ = VlmoCiaAbertaConReader(date_ref=date(2025, 6, 15)).read()
 # df_[["CNPJ_Companhia", "Tipo_Movimentacao", "Quantidade", "Preco_Unitario", "Volume"]]
@@ -1389,7 +1409,7 @@ Cada reader coage **as suas próprias** colunas de data (de 1 a **9**, em `geral
 ```python
 from datetime import date
 
-from filings_cvm import FcaCiaAbertaGeralReader
+from filings_cvm.ingestion.cia_aberta import FcaCiaAbertaGeralReader
 
 df_ = FcaCiaAbertaGeralReader(date_ref=date(2025, 6, 15)).read()
 # df_[["CNPJ_Companhia", "Setor_Atividade", "Data_Constituicao", "Situacao_Emissor"]]
@@ -1431,7 +1451,7 @@ exato. Contracts **pinados** aos headers verbatim (12 e 11 cols).
 ```python
 from datetime import date
 
-from filings_cvm import CgvnCiaAbertaPraticasReader
+from filings_cvm.ingestion.cia_aberta import CgvnCiaAbertaPraticasReader
 
 df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 # df_[["CNPJ_Companhia", "ID_Item", "Capitulo", "Pratica_Adotada"]]
@@ -1499,7 +1519,7 @@ Duas colunas chegam **inteiramente vazias** em 2025 (`auditor.Data_Fim_Contratac
 ```python
 from datetime import date
 
-from filings_cvm import FreCiaAbertaCapitalSocialReader, FreCiaAbertaPosicaoAcionariaReader
+from filings_cvm.ingestion.cia_aberta import FreCiaAbertaCapitalSocialReader, FreCiaAbertaPosicaoAcionariaReader
 
 df_ = FreCiaAbertaCapitalSocialReader(date_ref=date(2025, 6, 15)).read()
 # df_[["CNPJ_Companhia", "Tipo_Capital", "Valor_Capital", "Quantidade_Total_Acoes"]]
@@ -1539,7 +1559,7 @@ Uma linha por campo declarado, colunas `section`, `field`, `description`, `domai
 **um único frame longo**, com o membro em `section`. Levanta `OSError` (download).
 
 ```python
-from filings_cvm import MetaInfMensalCraReader
+from filings_cvm.ingestion.securit import MetaInfMensalCraReader
 
 df_meta = MetaInfMensalCraReader().read()
 # 8 seções; os nomes de campo vêm VERBATIM — inclusive truncados em 50 caracteres.

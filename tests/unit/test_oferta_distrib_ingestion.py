@@ -19,7 +19,7 @@ import pytest
 from filings_cvm._internal.config.contracts import OFERTA_DISTRIBUICAO, OFERTA_RESOLUCAO_160
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion import OfertaDistribuicaoReader, OfertaResolucao160Reader
+from filings_cvm.ingestion.oferta import OfertaDistribuicaoReader, OfertaResolucao160Reader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; every contract's CNPJ check accepts it.

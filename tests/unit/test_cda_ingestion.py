@@ -19,7 +19,7 @@ import pytest
 
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion import CdaReader
+from filings_cvm.ingestion.fi import CdaReader
 
 
 class _SpyLogger(LogEmitter):

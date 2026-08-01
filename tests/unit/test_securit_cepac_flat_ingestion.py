@@ -14,16 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm import (
-	CadastroAdmFiiReader,
-	CadastroCiaAbertaReader,
-	CadastroCiaEstrangReader,
-	CadastroCiaIncentReader,
-	CadastroEmissorCepacReader,
-	DfinCraReader,
-	DfinCriReader,
-	RetryPolicy,
-)
+from filings_cvm import RetryPolicy
 from filings_cvm._internal.config.contracts import (
 	CAD_ADM_FII,
 	CAD_CIA_ABERTA,
@@ -36,6 +27,12 @@ from filings_cvm._internal.config.contracts import (
 )
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.adm_fii import CadastroAdmFiiReader
+from filings_cvm.ingestion.cia_aberta import CadastroCiaAbertaReader
+from filings_cvm.ingestion.cia_estrang import CadastroCiaEstrangReader
+from filings_cvm.ingestion.cia_incent import CadastroCiaIncentReader
+from filings_cvm.ingestion.emissor_cepac import CadastroEmissorCepacReader
+from filings_cvm.ingestion.securit import DfinCraReader, DfinCriReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"

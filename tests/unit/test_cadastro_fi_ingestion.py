@@ -16,7 +16,7 @@ import pytest
 from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
 from filings_cvm._internal.utils.retry import LogEmitter
 from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion import CadastroFiReader
+from filings_cvm.ingestion.fi import CadastroFiReader
 
 
 # CNPJs whose check digits are valid under the repo's ASCII-48 mod-11 routine. CVM ships

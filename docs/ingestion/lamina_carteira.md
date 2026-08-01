@@ -51,7 +51,7 @@ alavancados perfeitamente válidos.
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import LaminaCarteiraReader
+from filings_cvm.ingestion.fi import LaminaCarteiraReader
 
 # Qualquer dia do mês seleciona o dump; o padrão é hoje. Prefira um mês passado
 # para dados completos — o mês corrente pode ainda não estar publicado.

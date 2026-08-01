@@ -22,7 +22,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm import (
+from filings_cvm import RetryPolicy
+from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.tabular_reader import ContractError
+from filings_cvm.ingestion.securit import (
 	InfMensalOtsAtivoPassivoReader,
 	InfMensalOtsCedenteDevedorReader,
 	InfMensalOtsClasseReader,
@@ -31,10 +34,7 @@ from filings_cvm import (
 	InfMensalOtsDireitosCreditoriosReader,
 	InfMensalOtsFluxoCaixaReader,
 	InfMensalOtsGeralReader,
-	RetryPolicy,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
 from filings_cvm.ingestion.securit.doc.inf_mensal_ots._base_inf_mensal_ots_reader import (
 	_DEFAULT_RETRY_POLICY,
 )

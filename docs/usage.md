@@ -130,7 +130,7 @@ mensal de *open-data* do Informe Diário de fundos (`inf_diario_fi_AAAAMM`):
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import InformeDiarioReader
+from filings_cvm.ingestion.fi import InformeDiarioReader
 
 # Qualquer dia do mês de referência seleciona o dump mensal; o padrão é hoje.
 df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()

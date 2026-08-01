@@ -147,7 +147,7 @@ a versão anterior é irrecuperável no dia em que a CVM mudar o contrato.
 
 ```python
 from pathlib import Path
-from filings_cvm import MetaInfMensalCraReader
+from filings_cvm.ingestion.securit import MetaInfMensalCraReader
 
 # A spec declarada dos 8 membros do INF_MENSAL_CRA.
 df_meta = MetaInfMensalCraReader().read()

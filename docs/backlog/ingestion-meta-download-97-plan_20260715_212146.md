@@ -1205,7 +1205,7 @@ Cover: o que é o META, a tabela dos 22 datasets → classe, o `path_raw`, a **t
 regra "o header real é a fonte da ordem e dos nomes longos", e um exemplo:
 
 ```python
-from filings_cvm import MetaInfMensalCraReader
+from filings_cvm.ingestion.securit import MetaInfMensalCraReader
 
 df_meta = MetaInfMensalCraReader().read()
 ```

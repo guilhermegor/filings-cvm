@@ -72,7 +72,7 @@ reader não normaliza nem segue o link.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm import CgvnCiaAbertaPraticasReader, CgvnCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import CgvnCiaAbertaPraticasReader, CgvnCiaAbertaReader
 
 # O índice dos informes entregues no ano:
 df_indice = CgvnCiaAbertaReader(date_ref=date(2025, 6, 15)).read()

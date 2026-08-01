@@ -54,7 +54,7 @@ fundo × data × ativo — e torna a *diversificação* diretamente calculável.
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import CdaReader
+from filings_cvm.ingestion.fi import CdaReader
 
 # Qualquer dia do mês seleciona o dump; o padrão é hoje. Prefira um mês passado
 # para dados completos — o mês corrente pode ainda não estar publicado.

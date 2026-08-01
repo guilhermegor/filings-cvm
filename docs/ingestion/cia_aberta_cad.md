@@ -57,7 +57,7 @@ O reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu padrã
 ### Companhias abertas
 
 ```python
-from filings_cvm import CadastroCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import CadastroCiaAbertaReader
 
 df_ = CadastroCiaAbertaReader().read()
 # df_[["CNPJ_CIA", "DENOM_SOCIAL", "TP_MERC", "SIT", "CNPJ_AUDITOR", "AUDITOR"]]
@@ -67,7 +67,7 @@ df_ = CadastroCiaAbertaReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import CadastroCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta import CadastroCiaAbertaReader
 
 df_ = CadastroCiaAbertaReader(
     path_raw=Path("/data/bronze/cvm/cad_cia_aberta"),

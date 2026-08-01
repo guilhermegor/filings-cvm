@@ -19,7 +19,7 @@ import pytest
 from filings_cvm._internal.config.contracts import CAD_INTERMED, CAD_INTERMED_RESP
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion import IntermedReader, IntermedRespReader
+from filings_cvm.ingestion.intermed import IntermedReader, IntermedRespReader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; both contracts' CNPJ check accepts it.

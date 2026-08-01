@@ -57,7 +57,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ```python
 from decimal import Decimal
 from datetime import date
-from filings_cvm import InfMensalFiagroReader
+from filings_cvm.ingestion.fiagro import InfMensalFiagroReader
 
 df_ = InfMensalFiagroReader(date_ref=date(2025, 6, 1)).read()
 df_["PL"] = df_["Patrimonio_Liquido"].dropna().map(Decimal)   # texto exato → Decimal
@@ -67,7 +67,7 @@ df_["PL"] = df_["Patrimonio_Liquido"].dropna().map(Decimal)   # texto exato → 
 
 ```python
 from datetime import date
-from filings_cvm import InfMensalFiagroSubclasseReader
+from filings_cvm.ingestion.fiagro import InfMensalFiagroSubclasseReader
 
 df_ = InfMensalFiagroSubclasseReader(date_ref=date(2025, 6, 1)).read()
 # muitas linhas por classe — uma por Nome_Subclasse.
@@ -78,7 +78,7 @@ df_ = InfMensalFiagroSubclasseReader(date_ref=date(2025, 6, 1)).read()
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import InfMensalFiagroReader
+from filings_cvm.ingestion.fiagro import InfMensalFiagroReader
 
 # Um download; o ZIP e os dois CSVs ficam em disco para o outro reader.
 InfMensalFiagroReader(

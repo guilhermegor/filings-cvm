@@ -59,7 +59,7 @@ Toda coluna é texto (`str`) exceto as `DT_*`, convertidas para `date` puro (vaz
 ### Reconstruir quando um fundo esteve em funcionamento
 
 ```python
-from filings_cvm.ingestion import CadastroFiHistSitReader
+from filings_cvm.ingestion.fi import CadastroFiHistSitReader
 
 sit = CadastroFiHistSitReader().read()
 # uma linha por (fundo, período de situação); use DT_INI_SIT / DT_FIM_SIT.
@@ -70,7 +70,7 @@ janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 
 ```python
 from decimal import Decimal
-from filings_cvm.ingestion import CadastroFiHistTaxaAdmReader
+from filings_cvm.ingestion.fi import CadastroFiHistTaxaAdmReader
 
 taxa = CadastroFiHistTaxaAdmReader().read()
 taxa["TAXA"] = taxa["TAXA_ADM"].dropna().map(Decimal)   # texto exato → Decimal

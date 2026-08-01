@@ -8,6 +8,7 @@ import zipfile
 import pytest
 
 from filings_cvm._internal.config.contracts.meta import META_CAD_FI, META_COLUMNS, META_DFIN_CRA
+from filings_cvm._internal.utils.introspection import iter_public_readers
 from filings_cvm._internal.utils.tabular_reader import FileContract
 from filings_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
 from filings_cvm.ingestion.securit.doc.inf_mensal_cra.meta import MetaInfMensalCraReader
@@ -107,11 +108,9 @@ def test_every_meta_reader_is_public_and_declares_its_url() -> None:
 	Mirrors `test_reader_retry_policy.py` — the convention is enforced structurally, so it cannot
 	rot the way a documented rule does.
 	"""
-	import filings_cvm
-
 	list_meta = [
-		getattr(filings_cvm, str_name)
-		for str_name in filings_cvm.__all__
+		cls_reader
+		for str_name, cls_reader in iter_public_readers().items()
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	]
 	assert len(list_meta) == 42
@@ -132,11 +131,9 @@ _RE_DOC_COUNTS = re.compile(r"(\d+) no total|Os (\d+) readers|que os (\d+) compa
 
 def _exported_meta_reader_names() -> set[str]:
 	"""Return the Meta readers the package exposes — the only source of truth here."""
-	import filings_cvm
-
 	return {
 		str_name
-		for str_name in filings_cvm.__all__
+		for str_name in iter_public_readers()
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	}
 
@@ -193,11 +190,9 @@ def test_docs_meta_reader_counts_match_the_real_total() -> None:
 
 def test_meta_source_keys_are_unique_across_every_reader() -> None:
 	"""Two datasets sharing a source_key would be indistinguishable in the bronze table."""
-	import filings_cvm
-
 	list_keys = [
-		getattr(filings_cvm, str_name)._CONTRACT.str_source_key
-		for str_name in filings_cvm.__all__
+		cls_reader._CONTRACT.str_source_key
+		for str_name, cls_reader in iter_public_readers().items()
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	]
 	assert len(list_keys) == len(set(list_keys))

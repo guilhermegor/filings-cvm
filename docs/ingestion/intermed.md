@@ -57,7 +57,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Registro dos intermediários
 
 ```python
-from filings_cvm import IntermedReader
+from filings_cvm.ingestion.intermed import IntermedReader
 
 df_ = IntermedReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "TP_PARTIC", "SIT", "MUN", "UF"]]
@@ -67,7 +67,7 @@ df_ = IntermedReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm import IntermedRespReader
+from filings_cvm.ingestion.intermed import IntermedRespReader
 
 df_ = IntermedRespReader(
     path_raw=Path("/data/bronze/cvm/cad_intermed"),

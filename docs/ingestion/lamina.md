@@ -51,7 +51,7 @@ O mapa de tipos é **derivado do contrato**, não redigitado, de modo que os doi
 ```python
 from datetime import date
 
-from filings_cvm.ingestion import LaminaReader
+from filings_cvm.ingestion.fi import LaminaReader
 
 df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
 

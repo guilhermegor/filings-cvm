@@ -36,7 +36,7 @@ mistura de grãos que o [CDA](cda.md) documenta. Faça o `join` você mesmo, nas
 no grão que precisar:
 
 ```python
-from filings_cvm.ingestion import RegistroFundoReader, RegistroClasseReader
+from filings_cvm.ingestion.fi import RegistroClasseReader, RegistroFundoReader
 
 fundos = RegistroFundoReader().read()
 classes = RegistroClasseReader().read()
@@ -68,7 +68,7 @@ dois não podem divergir.
 ### Listar os fundos em funcionamento
 
 ```python
-from filings_cvm.ingestion import RegistroFundoReader
+from filings_cvm.ingestion.fi import RegistroFundoReader
 
 fundos = RegistroFundoReader().read()
 ativos = fundos[fundos["Situacao"] == "Em Funcionamento Normal"]

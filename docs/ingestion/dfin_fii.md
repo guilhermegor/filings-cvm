@@ -65,7 +65,7 @@ declara a sua paciência (padrão: 5 tentativas, *backoff* exponencial limitado)
 
 ```python
 from datetime import date
-from filings_cvm import DfinFiiReader
+from filings_cvm.ingestion.fii import DfinFiiReader
 
 df_ = DfinFiiReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 fundo = df_[df_["CNPJ_Fundo_Classe"] == "00.332.266/0001-31"]
@@ -87,7 +87,7 @@ mais_recente = (
 ```python
 from datetime import date
 from pathlib import Path
-from filings_cvm import DfinFiiReader
+from filings_cvm.ingestion.fii import DfinFiiReader
 
 DfinFiiReader(
     date_ref=date(2025, 6, 15),
