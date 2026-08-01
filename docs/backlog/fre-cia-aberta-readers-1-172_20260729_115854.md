@@ -69,9 +69,19 @@ e **os 6 membros com CPF ficam concentrados na fatia 2**, num diff que dá para 
 
 ## Aberto / próximo
 
-- [ ] PR (`Closes #172`) → aprovação → merge → **release PATCH**.
-- [ ] **Fatia 2 do FRE** (7 membros, **todos os com CPF**): `auditor`, `administrador_membro_conselho_fiscal`,
+- [x] PR (`Closes #172`) → aprovação → merge → **release PATCH** — PR #173 mergeado, **0.25.26**
+  publicado.
+- [x] **Fatia 2 do FRE** (7 membros, **todos os com CPF**): `auditor`, `administrador_membro_conselho_fiscal`,
   `membro_comite`, `relacao_familiar`, `relacao_subordinacao`, `posicao_acionaria` (**3** cols
   `CPF_CNPJ_*` mistas, 31.508 linhas), `posicao_acionaria_classe_acao`. **Fixtures header-only
-  obrigatórias**; CPF **fora** de `tuple_cnpj_cols`.
+  obrigatórias**; CPF **fora** de `tuple_cnpj_cols`. → **#179 / PR #180, 0.25.27**; ledger próprio em
+  `fre-cia-aberta-readers-2-179_20260801_143000.md`.
+  ⚠️ **Uma previsão desta fatia saiu errada e a medição corrigiu:** o plano supunha que só as colunas
+  `CPF*` ficariam de fora de `tuple_cnpj_cols`. Medido: `auditor` tem **2** cols de CNPJ,
+  `relacao_familiar` tem **3**, e `relacao_subordinacao.Documento_Pessoa_Relacionada` guarda CNPJ
+  **e** CPF sem dizer nenhum dos dois no nome. **Coluna de CNPJ é a que só guarda CNPJ.**
 - [ ] Depois fatias 3 e 4, então **DFP** (12,12 MiB) e **ITR** (30,14) e `EVENTOS/RECOMPRA_ACOES`.
+  ⚠️ **#91 (slim top-level `__all__`) vem ANTES das fatias 3–4** — decisão do user (2026-08-01).
+
+**Completed — mantido como registro.** A única linha aberta acima é o roteiro seguinte, não trabalho
+desta fatia.

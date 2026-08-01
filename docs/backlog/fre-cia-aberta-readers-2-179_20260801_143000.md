@@ -48,13 +48,27 @@ sobreviveu ao 9º.
 
 ## Aberto / próximo
 
+- [x] PR #180 (`Closes #179`) → CI 8/8 verde → merge `--squash --delete-branch` → cascade nativa
+      completa (issue CLOSED, branch remota deletada, card Done).
+- [ ] **#91** (slim top-level `__all__`) — acordado com o user para **depois deste PR**, antes das
+      fatias 3–4, para não colidir. O `__all__` plano já está em **216 readers** (a issue foi escrita
+      com 94). ⚠️ **É breaking pela decisão registrada na issue** (`from filings_cvm import XReader`
+      para de funcionar → **0.26.0**, MINOR em 0.x); a própria issue pede para **reconfirmar no
+      início do PR** a versão dura vs a branda (manter importável mas fora do `__all__`,
+      não-breaking, PATCH).
 - [ ] **Fatia 3 de 4** — diversidade, 11 membros (contagens **agregadas**, não PII).
 - [ ] **Fatia 4 de 4** — remuneração + valores mobiliários + transações, 10 membros.
 - [ ] Estender `_META_MEMBERS` do drift conforme as fatias 3–4 entrarem.
-- [ ] **#91** (slim top-level `__all__`) — acordado com o user para **depois deste PR**, antes das
-      fatias 3–4, para não colidir. O `__all__` plano já está em **216 readers** (a issue foi escrita
-      com 94).
 
 ## Release
 
-`src/` muda → releasa. PATCH sobre 0.25.26 → **0.25.27** (feat, pré-1.0).
+- [x] `src/` muda → releasou. PATCH sobre 0.25.26 → **0.25.27** (feat, pré-1.0).
+      **Zero jobs não-success**, incluindo `Create GitHub Release` (o step que só existe no workflow
+      de produção e nunca é ensaiado) e `deploy_docs`/mike. Tag `v0.25.27` sozinha, `isDraft=false`,
+      wheel+sdist. **Fix do #102 provado 21ª vez** (`files:` conferido ANTES de despachar).
+      Test PyPI install-verify na attempt-1, PyPI na attempt-2 (CDN lag, padrão esperado).
+      O install-verify provou **comportamento** do wheel, não só símbolos: as 2/3 cols de CNPJ, as
+      exclusões de CPF/documento misto, a grafia minúscula e `membro_comite != administrador`.
+
+**Completed — mantido como registro.** As linhas abertas acima são o roteiro seguinte (#91 e as
+fatias 3–4), não trabalho desta fatia.
