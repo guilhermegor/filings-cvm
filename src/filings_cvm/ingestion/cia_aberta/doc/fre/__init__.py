@@ -10,8 +10,17 @@ data is returned exactly as published and never validated as a company identifie
 module's docstring for what its columns actually contain.
 """
 
+from filings_cvm.ingestion.cia_aberta.doc.fre.administrador_declaracao_genero import (
+	FreCiaAbertaAdministradorDeclaracaoGeneroReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.administrador_declaracao_raca import (
+	FreCiaAbertaAdministradorDeclaracaoRacaReader,
+)
 from filings_cvm.ingestion.cia_aberta.doc.fre.administrador_membro_conselho_fiscal import (
 	FreCiaAbertaAdministradorMembroConselhoFiscalReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.administrador_pcd import (
+	FreCiaAbertaAdministradorPcdReader,
 )
 from filings_cvm.ingestion.cia_aberta.doc.fre.auditor import FreCiaAbertaAuditorReader
 from filings_cvm.ingestion.cia_aberta.doc.fre.capital_social import FreCiaAbertaCapitalSocialReader
@@ -26,6 +35,30 @@ from filings_cvm.ingestion.cia_aberta.doc.fre.distribuicao_capital import (
 )
 from filings_cvm.ingestion.cia_aberta.doc.fre.distribuicao_capital_classe_acao import (
 	FreCiaAbertaDistribuicaoCapitalClasseAcaoReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_local_declaracao_genero import (
+	FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_local_declaracao_raca import (
+	FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_local_faixa_etaria import (
+	FreCiaAbertaEmpregadoLocalFaixaEtariaReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_pcd import (
+	FreCiaAbertaEmpregadoPcdReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_posicao_declaracao_genero import (
+	FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_posicao_declaracao_raca import (
+	FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_posicao_faixa_etaria import (
+	FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.empregado_posicao_local import (
+	FreCiaAbertaEmpregadoPosicaoLocalReader,
 )
 from filings_cvm.ingestion.cia_aberta.doc.fre.fre import FreCiaAbertaReader
 from filings_cvm.ingestion.cia_aberta.doc.fre.membro_comite import FreCiaAbertaMembroComiteReader
@@ -49,13 +82,24 @@ from filings_cvm.ingestion.cia_aberta.doc.fre.responsavel import FreCiaAbertaRes
 
 
 __all__ = [
+	"FreCiaAbertaAdministradorDeclaracaoGeneroReader",
+	"FreCiaAbertaAdministradorDeclaracaoRacaReader",
 	"FreCiaAbertaAdministradorMembroConselhoFiscalReader",
+	"FreCiaAbertaAdministradorPcdReader",
 	"FreCiaAbertaAuditorReader",
 	"FreCiaAbertaCapitalSocialClasseAcaoReader",
 	"FreCiaAbertaCapitalSocialReader",
 	"FreCiaAbertaCapitalSocialTituloConversivelReader",
 	"FreCiaAbertaDistribuicaoCapitalClasseAcaoReader",
 	"FreCiaAbertaDistribuicaoCapitalReader",
+	"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader",
+	"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader",
+	"FreCiaAbertaEmpregadoLocalFaixaEtariaReader",
+	"FreCiaAbertaEmpregadoPcdReader",
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader",
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader",
+	"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader",
+	"FreCiaAbertaEmpregadoPosicaoLocalReader",
 	"FreCiaAbertaMembroComiteReader",
 	"FreCiaAbertaMercadoEstrangeiroReader",
 	"FreCiaAbertaPosicaoAcionariaClasseAcaoReader",

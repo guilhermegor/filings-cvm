@@ -1,10 +1,23 @@
-"""Data contracts for the CVM open-data *FRE CIA_ABERTA* CSVs (ingestion) — groups 1 and 2 of 4.
+"""Data contracts for the CVM open-data *FRE CIA_ABERTA* CSVs (ingestion) — groups 1–3 of 4.
 
 `fre_cia_aberta_AAAA.zip` (dataset `CIA_ABERTA/DOC/FRE`, *Formulário de Referência*) is the largest
 dataset in this portal: **36 members, ~131k rows**. It is implemented in four themed slices; this
-module holds the first two — the **index** plus the **capital-structure** tables, and the
-**administração/pessoas** tables (every CPF-bearing member of the dataset). The remaining groups
-(diversidade, remuneração) append their contracts here.
+module holds the first three — the **index** plus the **capital-structure** tables, the
+**administração/pessoas** tables (every CPF-bearing member of the dataset), and the
+**diversidade** tables. The remaining group (remuneração) appends its contracts here.
+
+⚠️ **The diversidade members are AGGREGATE COUNTS, not sensitive personal data.** Names like
+`administrador_declaracao_raca` / `*_declaracao_genero` / `*_PCD` / `*_faixa_etaria` read as
+individual-level protected attributes; the columns are `Quantidade_Preto`, `Quantidade_Feminino`,
+`Quantidade_PCD` — **totals per company and organ/position**, with no identifiable individual. This
+was misclassified once from the member *name* alone; reading the columns disproved it. The real
+personal data of FRE sits in the administração/pessoas members above.
+
+⚠️ **Eleven diversidade members, five colliding column counts, and no two headers alike.**
+`empregado_local_*` and `empregado_posicao_*` differ only in their grouping column (`Local` vs
+`Posicao`), and `administrador_PCD` and `empregado_PCD` both have 10 columns while sharing only
+six. Every contract is generated from **its own** header; copying a sibling would ship a wrong
+column list that only the pinned fixture can catch.
 
 Every column list is **generated from the real 2025 headers**, not transcribed, and pinned to
 `tests/fixtures/fre_cia_aberta/` verbatim.
@@ -381,6 +394,217 @@ FRE_CIA_ABERTA_POSICAO_ACIONARIA_CLASSE_ACAO = FileContract(
 		"Tipo_Classe_Acao_Preferencial",
 		"Quantidade_Acoes",
 		"Percentual_Acoes",
+	),
+	("CNPJ_Companhia",),
+)
+FRE_CIA_ABERTA_ADMINISTRADOR_PCD = FileContract(
+	"FRE CIA_ABERTA — administradores PCD",
+	"fre_cia_aberta_administrador_PCD",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Orgao_Administracao",
+		"Quantidade_PCD",
+		"Quantidade_Nao_PCD",
+		"Quantidade_Sem_Resposta",
+		"Nao_Aplicavel",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_GENERO = FileContract(
+	"FRE CIA_ABERTA — gênero declarado (administradores)",
+	"fre_cia_aberta_administrador_declaracao_genero",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Orgao_Administracao",
+		"Quantidade_Feminino",
+		"Quantidade_Masculino",
+		"Quantidade_Nao_Binario",
+		"Quantidade_Outros",
+		"Quantidade_Sem_Resposta",
+		"Nao_Aplicavel",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_RACA = FileContract(
+	"FRE CIA_ABERTA — raça declarada (administradores)",
+	"fre_cia_aberta_administrador_declaracao_raca",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Orgao_Administracao",
+		"Quantidade_Amarelo",
+		"Quantidade_Branco",
+		"Quantidade_Preto",
+		"Quantidade_Pardo",
+		"Quantidade_Indigena",
+		"Quantidade_Outros",
+		"Quantidade_Sem_Resposta",
+		"Nao_Aplicavel",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_PCD = FileContract(
+	"FRE CIA_ABERTA — empregados PCD",
+	"fre_cia_aberta_empregado_PCD",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Codigo_Posicao",
+		"Posicao",
+		"Quantidade_PCD",
+		"Quantidade_Nao_PCD",
+		"Quantidade_Sem_Resposta",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_GENERO = FileContract(
+	"FRE CIA_ABERTA — gênero declarado (empregados por local)",
+	"fre_cia_aberta_empregado_local_declaracao_genero",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Local",
+		"Quantidade_Feminino",
+		"Quantidade_Masculino",
+		"Quantidade_Nao_Binario",
+		"Quantidade_Outros",
+		"Quantidade_Sem_Resposta",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_LOCAL_DECLARACAO_RACA = FileContract(
+	"FRE CIA_ABERTA — raça declarada (empregados por local)",
+	"fre_cia_aberta_empregado_local_declaracao_raca",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Local",
+		"Quantidade_Amarelo",
+		"Quantidade_Branco",
+		"Quantidade_Preto",
+		"Quantidade_Pardo",
+		"Quantidade_Indigena",
+		"Quantidade_Outros",
+		"Quantidade_Sem_Resposta",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_LOCAL_FAIXA_ETARIA = FileContract(
+	"FRE CIA_ABERTA — faixa etária (empregados por local)",
+	"fre_cia_aberta_empregado_local_faixa_etaria",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Local",
+		"Quantidade_Ate30Anos",
+		"Quantidade_30a50Anos",
+		"Quantidade_Acima50Anos",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_GENERO = FileContract(
+	"FRE CIA_ABERTA — gênero declarado (empregados por posição)",
+	"fre_cia_aberta_empregado_posicao_declaracao_genero",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Posicao",
+		"Quantidade_Feminino",
+		"Quantidade_Masculino",
+		"Quantidade_Nao_Binario",
+		"Quantidade_Outros",
+		"Quantidade_Sem_Resposta",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_POSICAO_DECLARACAO_RACA = FileContract(
+	"FRE CIA_ABERTA — raça declarada (empregados por posição)",
+	"fre_cia_aberta_empregado_posicao_declaracao_raca",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Posicao",
+		"Quantidade_Amarelo",
+		"Quantidade_Branco",
+		"Quantidade_Preto",
+		"Quantidade_Pardo",
+		"Quantidade_Indigena",
+		"Quantidade_Outros",
+		"Quantidade_Sem_Resposta",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_POSICAO_FAIXA_ETARIA = FileContract(
+	"FRE CIA_ABERTA — faixa etária (empregados por posição)",
+	"fre_cia_aberta_empregado_posicao_faixa_etaria",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Posicao",
+		"Quantidade_Ate30Anos",
+		"Quantidade_30a50Anos",
+		"Quantidade_Acima50Anos",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL = FileContract(
+	"FRE CIA_ABERTA — empregados por posição e local",
+	"fre_cia_aberta_empregado_posicao_local",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Posicao",
+		"Quantidade_Norte",
+		"Quantidade_Nordeste",
+		"Quantidade_Centro_Oeste",
+		"Quantidade_Sudeste",
+		"Quantidade_Sul",
+		"Quantidade_Exterior",
 	),
 	("CNPJ_Companhia",),
 )

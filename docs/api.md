@@ -1459,14 +1459,15 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `FreCiaAberta*Reader` (15 readers — fatias 1 e 2 de 4)
+### `FreCiaAberta*Reader` (26 readers — fatias 1, 2 e 3 de 4)
 
 `filings_cvm.ingestion.cia_aberta`
 
 O **Formulário de Referência** (`CIA_ABERTA/DOC/FRE`, `fre_cia_aberta_AAAA.zip`) — **o maior dataset
 do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**. Estão implementadas a
-**1ª: índice + estrutura de capital** (8 membros) e a **2ª: administração/pessoas** (7 membros, todos
-os do dataset que carregam CPF). Página completa em
+**1ª: índice + estrutura de capital** (8 membros), a **2ª: administração/pessoas** (7 membros, todos
+os do dataset que carregam CPF) e a **3ª: diversidade** (11 membros de contagens agregadas). Página
+completa em
 [FRE Companhias Abertas](ingestion/fre_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
@@ -1486,6 +1487,17 @@ os do dataset que carregam CPF). Página completa em
 | `FreCiaAbertaRelacaoSubordinacaoReader` | `relacao_subordinacao` | 17 | 9.102 |
 | `FreCiaAbertaPosicaoAcionariaReader` | `posicao_acionaria` | 29 | 31.508 |
 | `FreCiaAbertaPosicaoAcionariaClasseAcaoReader` | `posicao_acionaria_classe_acao` | 9 | 2.092 |
+| `FreCiaAbertaAdministradorPcdReader` | `administrador_PCD` | 10 | 3.495 |
+| `FreCiaAbertaAdministradorDeclaracaoGeneroReader` | `administrador_declaracao_genero` | 12 | 3.470 |
+| `FreCiaAbertaAdministradorDeclaracaoRacaReader` | `administrador_declaracao_raca` | 14 | 3.470 |
+| `FreCiaAbertaEmpregadoPcdReader` | `empregado_PCD` | 10 | 1.082 |
+| `FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader` | `empregado_local_declaracao_genero` | 11 | 3.118 |
+| `FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader` | `empregado_local_declaracao_raca` | 13 | 3.117 |
+| `FreCiaAbertaEmpregadoLocalFaixaEtariaReader` | `empregado_local_faixa_etaria` | 9 | 3.117 |
+| `FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader` | `empregado_posicao_declaracao_genero` | 11 | 1.038 |
+| `FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader` | `empregado_posicao_declaracao_raca` | 13 | 1.038 |
+| `FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader` | `empregado_posicao_faixa_etaria` | 9 | 1.040 |
+| `FreCiaAbertaEmpregadoPosicaoLocalReader` | `empregado_posicao_local` | 12 | 1.036 |
 
 > ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (maiúsculas abreviadas), os satélites usam
 > `CNPJ_Companhia`/`Data_Referencia`. **O FCA faz igual, o CGVN NÃO** — não há regra entre datasets,
@@ -1501,6 +1513,11 @@ os do dataset que carregam CPF). Página completa em
 
 > ⚠️ **A fatia 2 concentra todo o CPF do FRE** (6 dos 7 membros). Volta como publicado; as fixtures
 > de teste são **só cabeçalho**.
+
+> ⚠️ **Os 11 membros de diversidade da fatia 3 NÃO são dado pessoal** — são **contagens agregadas**
+> (`Quantidade_Preto`, `Quantidade_Feminino`) por companhia e órgão/posição, sem indivíduo algum.
+> Cuidado ao estendê-los: **5 pares têm a mesma contagem de colunas e listas diferentes**, então um
+> contract copiado do irmão passa em tudo menos no header pinado.
 
 > ⚠️ `Valor_Capital`, `Quantidade_*`, `Numero_*` e `Percentual_*` ficam **texto exato** (regra do
 > #157).
