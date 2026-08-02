@@ -1505,6 +1505,45 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
+### `DfpCiaAberta*Reader` (19 readers)
+
+`filings_cvm.ingestion.cia_aberta`
+
+As **Demonstrações Financeiras Padronizadas** (`CIA_ABERTA/DOC/DFP`, `dfp_cia_aberta_AAAA.zip`) —
+**19 membros, ~1,17 milhão de linhas**: o índice, oito demonstrações em versão `_con`
+(consolidada) e `_ind` (individual) cada, a composição do capital e o parecer. Página completa em
+[DFP Companhias Abertas](ingestion/dfp_cia_aberta.md).
+
+| reader | membro | cols | linhas (2025) |
+|---|---|---|---|
+| `DfpCiaAbertaReader` | índice | 9 | 750 |
+| `DfpCiaAbertaBpaConReader` · `…BpaIndReader` | `BPA_con` · `BPA_ind` | 14 | 59.262 · 88.897 |
+| `DfpCiaAbertaBppConReader` · `…BppIndReader` | `BPP_con` · `BPP_ind` | 14 | 101.380 · 150.064 |
+| `DfpCiaAbertaDfcMdConReader` · `…DfcMdIndReader` | `DFC_MD_con` · `DFC_MD_ind` | 15 | 504 · 758 |
+| `DfpCiaAbertaDfcMiConReader` · `…DfcMiIndReader` | `DFC_MI_con` · `DFC_MI_ind` | 15 | 48.500 · 65.449 |
+| `DfpCiaAbertaDmplConReader` · `…DmplIndReader` | `DMPL_con` · `DMPL_ind` | 16 | 225.735 · 246.495 |
+| `DfpCiaAbertaDraConReader` · `…DraIndReader` | `DRA_con` · `DRA_ind` | 15 | 6.520 · 6.702 |
+| `DfpCiaAbertaDreConReader` · `…DreIndReader` | `DRE_con` · `DRE_ind` | 15 | 30.786 · 43.367 |
+| `DfpCiaAbertaDvaConReader` · `…DvaIndReader` | `DVA_con` · `DVA_ind` | 15 | 38.554 · 56.070 |
+| `DfpCiaAbertaComposicaoCapitalReader` | `composicao_capital` | 10 | 665 |
+| `DfpCiaAbertaParecerReader` | `parecer` | 8 | 3.715 |
+
+> ⚠️⚠️ **INVERTE a armadilha dos anteriores.** Os 16 membros de demonstração colapsam em **3**
+> listas de colunas — aqui membros de mesma largura são **genuinamente idênticos** (14 = balanço,
+> sem `DT_INI_EXERC`; 15 = fluxo; 16 = DMPL, que soma `COLUNA_DF`). Medido contra as fixtures, não
+> presumido.
+
+> ⚠️⚠️ **O buraco que isso abre:** com 10 membros de lista idêntica, um reader apontado ao membro
+> errado (swap `con`↔`ind`) devolve frame **válido** e nada fica vermelho. Provado por mutação e
+> fechado por um teste de **identidade do membro**.
+
+> ⚠️⚠️ **`VL_CONTA` tem 10 casas decimais e sua ESCALA está em outra coluna** (`ESCALA_MOEDA` =
+> `MIL`/`UNIDADE`). Somar sem ler a escala erra por **1000×**. Os readers **não** reescalam.
+
+> ⚠️ `CD_CVM` vem `001023` (zero à esquerda) · `ORDEM_EXERC` duplica cada conta (corrente +
+> comparativo), **sem chave única** · todos os 19 usam `CNPJ_CIA`/`DT_REFER`, **diferente** do
+> FCA/FRE · META é `meta_dfp_cia_aberta_txt.zip` (infixo `_txt`).
+
 ### `FreCiaAberta*Reader` (36 readers — dataset completo)
 
 `filings_cvm.ingestion.cia_aberta`
@@ -1612,7 +1651,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (43 readers)
+### `Meta*Reader` (44 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).

@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **43 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **44 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (43 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (44 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (26); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (27); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`43 = 17 .txt + 26 .zip`, e 43 contracts — o 44º nome
+⚠️ **Estes números são MEDIDOS do código** (`44 = 17 .txt + 27 .zip`, e 44 contracts — o 45º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
 `docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
@@ -595,9 +595,30 @@ Sob `CIA_ABERTA/CAD/`:
   **header-only**. `Valor_*`/`Quantidade_*`/`Numero_*`/`Percentual_*` ficam texto exato. ⚠️ **META =
   `meta_fre_cia_aberta.zip`** (padrão), **50 membros para 36 de dados** e prefixo interno **misto**.
   **10ª–12ª fatias da Wave 4; `DOC` em 5/7 (FRE COMPLETO)**
-- ⬜ **ingestion** os outros 2 `DOC`: DFP, ITR — ambos `<ds>_cia_aberta_AAAA.zip`
-  (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
-  próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
+- DFP (Demonstrações Financeiras Padronizadas) — ✅ **ingestion COMPLETA (19/19 membros)**
+  `dfp_cia_aberta_AAAA.zip` (12,73 MB, **~1,17 MILHÃO de linhas**: índice + 8 demonstrações em
+  `_con`/`_ind` + composição do capital + parecer) — `ingestion/cia_aberta/doc/dfp/*`
+  (`DfpCiaAberta*Reader`, base privada `_base_dfp_reader.py`); contracts
+  `_internal/config/contracts/dfp_cia_aberta.py`, **gerados dos headers e pinados**.
+  **Particionado por ANO**.
+  ⚠️⚠️ **INVERTE A ARMADILHA DE TODOS OS ANTERIORES:** em CRA/CRI/FCA/FRE membros de mesma largura
+  tinham colunas DIFERENTES; aqui os 16 membros de demonstração colapsam em **3 listas** e são
+  **genuinamente idênticos** (14 = balanço, só `DT_FIM_EXERC`; 15 = fluxo, soma `DT_INI_EXERC`;
+  16 = DMPL, soma `COLUNA_DF`). 19 membros → **6** listas distintas. **Medido contra as fixtures** —
+  presumir "iguais" e presumir "diferentes" é o mesmo erro.
+  ⚠️⚠️ **O BURACO QUE ISSO ABRE:** com 10 membros de lista idêntica, um reader apontado ao membro
+  ERRADO (swap `con`↔`ind`) devolve frame **válido**, tipos certos, contrato passa — **nada fica
+  vermelho**. Provado por mutação (`DRE_con` lendo `DRE_ind` passava na suíte INTEIRA) e fechado por
+  um teste de **identidade do membro** (cada membro sintético se identifica numa coluna).
+  ⚠️⚠️ **`VL_CONTA` tem 10 casas decimais E SUA ESCALA ESTÁ EM OUTRA COLUNA** (`ESCALA_MOEDA` =
+  `MIL`/`UNIDADE`): somar sem ler a escala erra por **1000×**. Texto exato; os readers **não**
+  reescalam. ⚠️ `CD_CVM` vem `001023` (zero à esquerda) · `ORDEM_EXERC` (`ÚLTIMO`/`PENÚLTIMO`)
+  duplica cada conta, **sem chave única** · **todos os 19 usam `CNPJ_CIA`/`DT_REFER`**, diferente do
+  FCA/FRE cujos satélites trocam de convenção · META = `meta_dfp_cia_aberta_txt.zip` (**infixo
+  `_txt`**; as outras 3 dão 404, inclusive a sem-prefixo que é a correta do FCA)
+- ⬜ **ingestion** o último `DOC`: ITR — `itr_cia_aberta_AAAA.zip` (ZIP anual, 30,14 MiB), com
+  **contagem de membros própria a medir** (medido até aqui: IPE 1, VLMO 2, FCA 10, CGVN 2, FRE 36,
+  DFP 19) · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
 
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
@@ -659,7 +680,8 @@ src/filings_cvm/
                            #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
                            #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; COMPLETO em 4 fatias temáticas — 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF), 3 (diversidade, 11, AGREGADOS), 4 (remuneração/val. mob./transações, 10) = 36/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada e Documento_Parte_Relacionada guardam CNPJ+CPF e ficam de fora; membros de diversidade são AGREGADOS, não PII; participacao_sociedade tem 2 CNPJ cols com 792 placeholders 00000000000000)
-                           #     DOC/{DFP,ITR} + EVENTOS pendentes (grounding próprio por dataset)
+                           #     doc/dfp/ — DFP (dfp_cia_aberta_AAAA.zip, 19 membros/~1,17M linhas, anual; INVERTE a armadilha: 16 membros colapsam em 3 listas IDÊNTICAS, e por isso um swap con/ind era invisível — fechado por teste de identidade do membro; VL_CONTA com 10 casas E escala em ESCALA_MOEDA; todos usam CNPJ_CIA; META com infixo _txt)
+                           #     DOC/ITR + EVENTOS pendentes (grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
