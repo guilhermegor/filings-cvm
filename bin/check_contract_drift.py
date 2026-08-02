@@ -53,6 +53,7 @@ from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
+from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.inf_quadrimestral_fip import INF_QUADRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
@@ -105,6 +106,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"DfinCraReader": DFIN_CRA,
 	"DfinCriReader": DFIN_CRI,
 	"DfinFiiReader": DFIN_FII,
+	"EventualFiReader": EVENTUAL_FI,
 	"InfQuadrimestralFipReader": INF_QUADRIMESTRAL_FIP,
 	"InfTrimestralFipReader": INF_TRIMESTRAL_FIP,
 	"InformeDiarioReader": INFORME_DIARIO_FIF,
@@ -233,6 +235,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
+	"MetaEventualFiReader": ("EventualFiReader",),
 	"MetaInfAnualFiiReader": (
 		"InfAnualFiiAtivoAdquiridoReader",
 		"InfAnualFiiAtivoTransacaoReader",

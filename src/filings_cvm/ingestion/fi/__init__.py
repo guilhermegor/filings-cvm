@@ -39,10 +39,12 @@ from filings_cvm.ingestion.fi.cad.registro import (
 )
 from filings_cvm.ingestion.fi.doc import (
 	CdaReader,
+	EventualFiReader,
 	InformeDiarioReader,
 	LaminaCarteiraReader,
 	LaminaReader,
 	MetaCdaReader,
+	MetaEventualFiReader,
 	MetaInformeDiarioReader,
 	MetaLaminaReader,
 )
@@ -70,12 +72,14 @@ __all__ = [
 	"CadastroFiHistTribLprazoReader",
 	"CadastroFiReader",
 	"CdaReader",
+	"EventualFiReader",
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"MetaCadFiHistReader",
 	"MetaCadastroFiReader",
 	"MetaCdaReader",
+	"MetaEventualFiReader",
 	"MetaInformeDiarioReader",
 	"MetaLaminaReader",
 	"MetaRegistroReader",

@@ -90,6 +90,7 @@ from filings_cvm._internal.config.contracts.cgvn_cia_aberta import (
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
+from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
 from filings_cvm._internal.config.contracts.fca_cia_aberta import (
 	FCA_CIA_ABERTA,
@@ -266,6 +267,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_DFIN_CRA,
 	META_DFIN_CRI,
 	META_DFIN_FII,
+	META_EVENTUAL_FI,
 	META_FCA_CIA_ABERTA,
 	META_FRE_CIA_ABERTA,
 	META_INF_ANUAL_FII,
@@ -364,6 +366,7 @@ __all__ = [
 	"DFIN_CRA",
 	"DFIN_CRI",
 	"DFIN_FII",
+	"EVENTUAL_FI",
 	"EXAMPLE_SOURCE",
 	"FCA_CIA_ABERTA",
 	"FCA_CIA_ABERTA_AUDITOR",
@@ -496,14 +499,6 @@ __all__ = [
 	"LAMINA_CARTEIRA_FIF",
 	"LAMINA_FIF",
 	"MEDIDAS_MES_FIE",
-	"OFERTA_DISTRIBUICAO",
-	"OFERTA_RESOLUCAO_160",
-	"REGISTRO_CLASSE",
-	"REGISTRO_FUNDO",
-	"REGISTRO_SUBCLASSE",
-	"VLMO_CIA_ABERTA",
-	"VLMO_CIA_ABERTA_CON",
-	"find_file_problems",
 	"META_BALANCETE_FIE",
 	"META_BALANCO_FIE",
 	"META_CAD_ADM_CART",
@@ -528,6 +523,7 @@ __all__ = [
 	"META_DFIN_CRA",
 	"META_DFIN_CRI",
 	"META_DFIN_FII",
+	"META_EVENTUAL_FI",
 	"META_FCA_CIA_ABERTA",
 	"META_FRE_CIA_ABERTA",
 	"META_INF_ANUAL_FII",
@@ -547,4 +543,12 @@ __all__ = [
 	"META_OFERTA_DISTRIBUICAO",
 	"META_REGISTRO_FUNDO_CLASSE",
 	"META_VLMO_CIA_ABERTA",
+	"OFERTA_DISTRIBUICAO",
+	"OFERTA_RESOLUCAO_160",
+	"REGISTRO_CLASSE",
+	"REGISTRO_FUNDO",
+	"REGISTRO_SUBCLASSE",
+	"VLMO_CIA_ABERTA",
+	"VLMO_CIA_ABERTA_CON",
+	"find_file_problems",
 ]
