@@ -15,9 +15,9 @@ personal data of FRE sits in the administração/pessoas members above.
 
 ⚠️ **Eleven diversidade members, five colliding column counts, and no two headers alike.**
 `empregado_local_*` and `empregado_posicao_*` differ only in their grouping column (`Local` vs
-`Posicao`), and `administrador_PCD` and `empregado_PCD` both have 10 columns while sharing only
-six. Every contract is generated from **its own** header; copying a sibling would ship a wrong
-column list that only the pinned fixture can catch.
+`Posicao`), and `administrador_PCD` and `empregado_PCD` both have 10 columns and share **8** of
+them, differing in exactly two each. Every contract is generated from **its own** header; copying
+a sibling would ship a wrong column list that only the pinned fixture can catch.
 
 Every column list is **generated from the real 2025 headers**, not transcribed, and pinned to
 `tests/fixtures/fre_cia_aberta/` verbatim.

@@ -802,3 +802,23 @@ def test_administrador_pcd_accepts_blank_counts(monkeypatch: pytest.MonkeyPatch)
 	assert len(df_) == 2
 	assert df_["Quantidade_PCD"].iloc[0] == QUANTIDADE
 	assert pd.isna(df_["Quantidade_PCD"].iloc[1])
+
+
+def test_the_pcd_pair_overlap_is_exactly_as_documented() -> None:
+	"""The PCD pair shares 8 of 10 columns, differing in exactly two each.
+
+	The overlap is stated in three docstrings and two docs pages as the reason the anti-copy test
+	exists — so it is a claim, and an unverified claim in prose is how a wrong number survives. It
+	was wrong once: "only six" shipped in a wheel docstring and was caught by an install-verify,
+	not by this suite, because nothing asserted the intersection.
+
+	The true figure makes the hazard **worse**, which is the point: the two members are more alike
+	than the prose said.
+	"""
+	set_admin = set(FRE_CIA_ABERTA_ADMINISTRADOR_PCD.tuple_required)
+	set_empregado = set(FRE_CIA_ABERTA_EMPREGADO_PCD.tuple_required)
+
+	assert len(set_admin) == len(set_empregado) == 10
+	assert len(set_admin & set_empregado) == 8
+	assert set_admin - set_empregado == {"Orgao_Administracao", "Nao_Aplicavel"}
+	assert set_empregado - set_admin == {"Codigo_Posicao", "Posicao"}
