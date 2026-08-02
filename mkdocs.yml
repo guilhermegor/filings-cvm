@@ -15,6 +15,7 @@ nav:
       - CDA FIF: ingestion/cda.md
       - Lâmina carteira FIF: ingestion/lamina_carteira.md
       - Lâmina FIF: ingestion/lamina.md
+      - Eventual FI: ingestion/eventual_fi.md
       - Cadastro de Fundos (CAD/FI): ingestion/cadastro_fi.md
       - Registro RCVM 175: ingestion/registro.md
       - CAD/FI histórico: ingestion/cad_fi_hist.md

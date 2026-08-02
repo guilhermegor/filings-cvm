@@ -220,20 +220,22 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **42 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **43 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (42 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (43 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (16) ou `.zip` multi-membro (26); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (26); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`38 = 16 .txt + 22 .zip`, e 38 contracts — o 39º nome
+⚠️ **Estes números são MEDIDOS do código** (`43 = 17 .txt + 26 .zip`, e 43 contracts — o 44º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
 `docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
-senão ela estagna sem nada ficar vermelho (foi exatamente o que aconteceu: ficou em 37 com 38
-exportados).
+senão ela estagna sem nada ficar vermelho (já aconteceu duas vezes: ficou em 37 com 38 exportados,
+e o parêntese dos números medidos ficou em `38 = 16 + 22` enquanto o texto acima já dizia 42).
+**Ao corrigir, RE-MEDIR do código, nunca incrementar** — foi re-medindo que se viu que os dois
+números do mesmo parágrafo discordavam.
 ⚠️ **Três fatos da fonte, honrados verbatim e nunca "consertados":**
   1. **A CVM trunca o nome do campo em exatamente 50 caracteres** (provado 8/8 no CRA; o header real
      vai até 60). Logo o META **não pode ser gate duro de nomes** — reconciliar é do consumidor
@@ -256,6 +258,24 @@ exportados).
   (`LaminaReader`); contract `_internal/config/contracts/lamina_fif.py` ·
   ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP) ·
   ⬜ **submission** V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
+
+**Documentos Eventuais (FI/DOC/EVENTUAL)** — **open-data only** (a CVM não publica padrão XML de
+envio; é o registro do que foi entregue, não um informe):
+- Documentos Eventuais — ✅ **ingestion** `eventual_fi_AAAA.csv` (**CSV solto**, não ZIP, 11 cols,
+  **186.453 linhas / 50,91 MB em 2025**, série ao menos 2020–2026) —
+  `ingestion/fi/doc/eventual/eventual.py` (`EventualFiReader`); contract
+  `_internal/config/contracts/eventual_fi.py`, **gerado do header e pinado** a
+  `tests/fixtures/eventual_fi/eventual_fi_header.csv`. **Particionado por ANO**. ⚠️ **É um ÍNDICE,
+  não o documento** — `LINK_ARQ` (portal *fundosweb*, host distinto do RAD usado pelo IPE/CGVN)
+  volta como **texto, não seguido**. Nomenclatura **pós-RCVM 175** (`TP_FUNDO_CLASSE`/
+  `CNPJ_FUNDO_CLASSE` + `ID_SUBCLASSE`). ⚠️⚠️ **NÃO é cópia do `DfinFiiReader`** — os dois são
+  índices anuais de documentos em CSV solto e **7 colunas significam a mesma coisa com nomes TODOS
+  diferentes** (`TP_FUNDO_CLASSE`×`Tipo_Fundo_Classe`, `DT_COMPTC`×`Data_Referencia`,
+  `LINK_ARQ`×`Link_Download`, …): **paralelismo semântico não é regra de nomenclatura**, anti-cópia
+  pinada nas 2 direções. ⚠️ `ID_DOC` é `int` na META e fica **`str`** (identificador; um numérico
+  apaga zero à esquerda em silêncio). ⚠️ **4 colunas parcialmente vazias** (`ID_SUBCLASSE` 96,8%,
+  `RESULTADO_AUDITORIA` 83,5%, `ID_DOC` 75,6%, `NM_ARQ` 24,4%) — dependem do tipo de documento;
+  vazio volta vazio. ⚠️ META é **`.txt` solto** (as outras 3 grafias dão 404)
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
 - ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
@@ -608,7 +628,8 @@ src/filings_cvm/
                            #   `from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader`
                            #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
-            doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira)
+            doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira),
+                           #       eventual/ (índice de documentos eventuais, CSV solto anual)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)

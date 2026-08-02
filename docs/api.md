@@ -239,6 +239,52 @@ df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
 print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 ```
 
+### `EventualFiReader`
+
+`filings_cvm.ingestion.fi.EventualFiReader`
+
+Lê `eventual_fi_AAAA.csv` (`FI/DOC/EVENTUAL`) — o **índice dos documentos eventuais** entregues por
+fundos e classes. **CSV solto** (não ZIP), **particionado por ano**; 11 colunas, 186.453 linhas em
+2025. Página completa em [EVENTUAL FI](ingestion/eventual_fi.md).
+
+> ⚠️ **É um índice, não o documento.** `LINK_ARQ` aponta para o arquivo no portal *fundosweb* da
+> CVM e volta **como texto, não seguido**.
+
+> ⚠️ **Não é cópia do `DfinFiiReader`.** Os dois são índices anuais de documentos em CSV solto, e
+> **7 colunas significam a mesma coisa com nomes todos diferentes** (`TP_FUNDO_CLASSE` ×
+> `Tipo_Fundo_Classe`, `DT_COMPTC` × `Data_Referencia`, `LINK_ARQ` × `Link_Download`, …).
+> Paralelismo semântico **não** é regra de nomenclatura; anti-cópia pinada por teste.
+
+> ⚠️ **`ID_DOC` é `int` na META e fica `str`** — identificador não é quantidade, e um tipo numérico
+> apaga zero à esquerda em silêncio.
+
+#### `EventualFiReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência (só o ano é lido). Padrão: hoje. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o `.csv` bruto. Padrão `None`: diretório temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por documento entregue no ano. `DT_COMPTC` e `DT_RECEB` viram `datetime.date`; todo o
+resto é texto exato. Quatro colunas chegam **parcialmente vazias** (`ID_SUBCLASSE`,
+`RESULTADO_AUDITORIA`, `ID_DOC`, `NM_ARQ`) porque dependem do tipo de documento — vazio volta
+vazio, sem placeholder. **Nenhuma chave única é afirmada.**
+
+Levanta `OSError` (falha de download) ou `ContractError` (CSV viola o contrato).
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion.fi import EventualFiReader
+
+df_ = EventualFiReader(date_ref=date(2025, 6, 15)).read()
+print(df_[["CNPJ_FUNDO_CLASSE", "TP_DOC", "DT_COMPTC", "LINK_ARQ"]].head())
+```
+
 ### `CadastroFiReader`
 
 `filings_cvm.ingestion.CadastroFiReader`
@@ -1566,7 +1612,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (42 readers)
+### `Meta*Reader` (43 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
