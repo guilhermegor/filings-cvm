@@ -1,10 +1,10 @@
-"""Unit tests for the CIA_ABERTA/DOC/FRE readers — slices 1–3 of 4.
+"""Unit tests for the CIA_ABERTA/DOC/FRE readers — all four slices, all 36 members.
 
 `fre_cia_aberta_AAAA.zip` is the portal's largest dataset (36 members, ~131k rows), shipped in four
-themed slices. This file covers the first twenty-six members — index + capital,
-administração/pessoas, and diversidade — and grows as the last slice lands.
+themed slices — index + capital, administração/pessoas, diversidade, and remuneração / valores
+mobiliários / transações. This file covers every one of them.
 
-Six things carry the weight here:
+Eight things carry the weight here:
 
 1. the **index uses a different naming convention from its own satellites** (`CNPJ_CIA` /
    `DT_REFER` vs `CNPJ_Companhia` / `Data_Referencia`), matching FCA but **not** CGVN — there is no
@@ -21,10 +21,16 @@ Six things carry the weight here:
    only in their grouping column — so the same hazard occurs six times in this one dataset;
 6. those diversidade members are **aggregate counts, not personal data**, despite names that read
    as individual-level protected attributes. That claim is asserted from the columns, because
-   asserting it from the member name is the mistake that was already made here once.
+   asserting it from the member name is the mistake that was already made here once;
+7. the remuneração slice adds **four more same-width pairs**, three of which also share their
+   first ten columns — the tightest collision in the dataset;
+8. **an empty column is a property of the year, not of the schema.** Two `participacao_sociedade`
+   date columns are empty throughout 2025 and stay dates, and
+   `transacao_parte_relacionada.Documento_Parte_Relacionada` is empty throughout 2025 and stays
+   **out** of `tuple_cnpj_cols`, because it is a CPF-or-CNPJ column by design.
 
 Every test except one builds its input from each contract's `tuple_required`, so it is a tautology.
-The exception is :func:`test_contracts_match_the_published_headers`, which compares all twenty-six
+The exception is :func:`test_contracts_match_the_published_headers`, which compares all thirty-six
 contracts against the **verbatim header bytes CVM publishes**.
 
 Mock the single I/O boundary (``download_file``); no network.
@@ -42,6 +48,7 @@ import pytest
 from filings_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	FRE_CIA_ABERTA,
+	FRE_CIA_ABERTA_ACAO_ENTREGUE,
 	FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_GENERO,
 	FRE_CIA_ABERTA_ADMINISTRADOR_DECLARACAO_RACA,
 	FRE_CIA_ABERTA_ADMINISTRADOR_MEMBRO_CONSELHO_FISCAL,
@@ -62,17 +69,27 @@ from filings_cvm._internal.config.contracts import (
 	FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL,
 	FRE_CIA_ABERTA_MEMBRO_COMITE,
 	FRE_CIA_ABERTA_MERCADO_ESTRANGEIRO,
+	FRE_CIA_ABERTA_OUTRO_VALOR_MOBILIARIO,
+	FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE,
 	FRE_CIA_ABERTA_POSICAO_ACIONARIA,
 	FRE_CIA_ABERTA_POSICAO_ACIONARIA_CLASSE_ACAO,
 	FRE_CIA_ABERTA_RELACAO_FAMILIAR,
 	FRE_CIA_ABERTA_RELACAO_SUBORDINACAO,
+	FRE_CIA_ABERTA_REMUNERACAO_ACAO,
+	FRE_CIA_ABERTA_REMUNERACAO_MAXIMA_MINIMA_MEDIA,
+	FRE_CIA_ABERTA_REMUNERACAO_TOTAL_ORGAO,
+	FRE_CIA_ABERTA_REMUNERACAO_VARIAVEL,
 	FRE_CIA_ABERTA_RESPONSAVEL,
+	FRE_CIA_ABERTA_TITULAR_VALOR_MOBILIARIO,
+	FRE_CIA_ABERTA_TITULO_EXTERIOR,
+	FRE_CIA_ABERTA_TRANSACAO_PARTE_RELACIONADA,
 	FileContract,
 )
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
 from filings_cvm._internal.utils.tabular_reader import ContractError
 from filings_cvm.ingestion.cia_aberta import (
 	CgvnCiaAbertaReader,
+	FreCiaAbertaAcaoEntregueReader,
 	FreCiaAbertaAdministradorDeclaracaoGeneroReader,
 	FreCiaAbertaAdministradorDeclaracaoRacaReader,
 	FreCiaAbertaAdministradorMembroConselhoFiscalReader,
@@ -93,12 +110,21 @@ from filings_cvm.ingestion.cia_aberta import (
 	FreCiaAbertaEmpregadoPosicaoLocalReader,
 	FreCiaAbertaMembroComiteReader,
 	FreCiaAbertaMercadoEstrangeiroReader,
+	FreCiaAbertaOutroValorMobiliarioReader,
+	FreCiaAbertaParticipacaoSociedadeReader,
 	FreCiaAbertaPosicaoAcionariaClasseAcaoReader,
 	FreCiaAbertaPosicaoAcionariaReader,
 	FreCiaAbertaReader,
 	FreCiaAbertaRelacaoFamiliarReader,
 	FreCiaAbertaRelacaoSubordinacaoReader,
+	FreCiaAbertaRemuneracaoAcaoReader,
+	FreCiaAbertaRemuneracaoMaximaMinimaMediaReader,
+	FreCiaAbertaRemuneracaoTotalOrgaoReader,
+	FreCiaAbertaRemuneracaoVariavelReader,
 	FreCiaAbertaResponsavelReader,
+	FreCiaAbertaTitularValorMobiliarioReader,
+	FreCiaAbertaTituloExteriorReader,
+	FreCiaAbertaTransacaoParteRelacionadaReader,
 	MetaFreCiaAbertaReader,
 )
 
@@ -247,6 +273,57 @@ CASES: tuple[FreCase, ...] = (
 		FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL,
 		"fre_cia_aberta_empregado_posicao_local",
 	),
+	# Slice 4 of 4 — remuneração, valores mobiliários and transações, closing the dataset at 36.
+	FreCase(
+		FreCiaAbertaAcaoEntregueReader,
+		FRE_CIA_ABERTA_ACAO_ENTREGUE,
+		"fre_cia_aberta_acao_entregue",
+	),
+	FreCase(
+		FreCiaAbertaRemuneracaoAcaoReader,
+		FRE_CIA_ABERTA_REMUNERACAO_ACAO,
+		"fre_cia_aberta_remuneracao_acao",
+	),
+	FreCase(
+		FreCiaAbertaRemuneracaoMaximaMinimaMediaReader,
+		FRE_CIA_ABERTA_REMUNERACAO_MAXIMA_MINIMA_MEDIA,
+		"fre_cia_aberta_remuneracao_maxima_minima_media",
+	),
+	FreCase(
+		FreCiaAbertaRemuneracaoTotalOrgaoReader,
+		FRE_CIA_ABERTA_REMUNERACAO_TOTAL_ORGAO,
+		"fre_cia_aberta_remuneracao_total_orgao",
+	),
+	FreCase(
+		FreCiaAbertaRemuneracaoVariavelReader,
+		FRE_CIA_ABERTA_REMUNERACAO_VARIAVEL,
+		"fre_cia_aberta_remuneracao_variavel",
+	),
+	FreCase(
+		FreCiaAbertaOutroValorMobiliarioReader,
+		FRE_CIA_ABERTA_OUTRO_VALOR_MOBILIARIO,
+		"fre_cia_aberta_outro_valor_mobiliario",
+	),
+	FreCase(
+		FreCiaAbertaTitularValorMobiliarioReader,
+		FRE_CIA_ABERTA_TITULAR_VALOR_MOBILIARIO,
+		"fre_cia_aberta_titular_valor_mobiliario",
+	),
+	FreCase(
+		FreCiaAbertaTituloExteriorReader,
+		FRE_CIA_ABERTA_TITULO_EXTERIOR,
+		"fre_cia_aberta_titulo_exterior",
+	),
+	FreCase(
+		FreCiaAbertaParticipacaoSociedadeReader,
+		FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE,
+		"fre_cia_aberta_participacao_sociedade",
+	),
+	FreCase(
+		FreCiaAbertaTransacaoParteRelacionadaReader,
+		FRE_CIA_ABERTA_TRANSACAO_PARTE_RELACIONADA,
+		"fre_cia_aberta_transacao_parte_relacionada",
+	),
 )
 IDS = [case.cls_reader.__name__ for case in CASES]
 
@@ -260,6 +337,8 @@ DICT_CNPJ_COLS: dict[str, tuple[str, ...]] = {
 		"CNPJ_Emissor",
 		"CNPJ_Emissor_Pessoa_Relacionada",
 	),
+	# The invested company's own CNPJ, beside the filer's.
+	"fre_cia_aberta_participacao_sociedade": ("CNPJ_Companhia", "CNPJ"),
 }
 
 # Columns holding a document that is CPF, or CPF *and* CNPJ, so none may be declared a CNPJ column.
@@ -276,6 +355,10 @@ DICT_NON_CNPJ_DOCS: dict[str, tuple[str, ...]] = {
 		"CPF_CNPJ_Acionista_Relacionado",
 		"CPF_CNPJ_Representante_legal",
 	),
+	# Empty throughout 2025 and still excluded, because its sibling ``Tipo_Pessoa`` is a PF/PJ
+	# flag — the column holds a CPF or a CNPJ by design, so declaring it would pass every empty
+	# year and fail the first populated one.
+	"fre_cia_aberta_transacao_parte_relacionada": ("Documento_Parte_Relacionada",),
 }
 
 
@@ -337,7 +420,7 @@ def _patch(monkeypatch: pytest.MonkeyPatch, bytes_payload: bytes) -> list[str]:
 
 
 def test_contracts_match_the_published_headers() -> None:
-	"""All fifteen contracts equal the verbatim headers CVM publishes — the oracle."""
+	"""All thirty-six contracts equal the verbatim headers CVM publishes — the oracle."""
 	for case in CASES:
 		str_line = (PATH_FIXTURES / f"{case.str_stem}_header.csv").read_text(encoding="iso-8859-1")
 		assert case.cls_contract.tuple_required == tuple(str_line.strip().split(";")), (
@@ -370,6 +453,16 @@ def test_contracts_match_the_published_headers() -> None:
 		13,
 		9,
 		12,
+		14,
+		14,
+		14,
+		27,
+		18,
+		24,
+		9,
+		21,
+		21,
+		22,
 	]
 
 
@@ -739,7 +832,7 @@ def test_same_width_diversidade_members_are_not_the_same_columns(
 
 def test_every_diversidade_contract_has_a_distinct_column_list() -> None:
 	"""No two of the eleven diversidade members share a column list — none is a copy of another."""
-	list_contracts = [case.cls_contract for case in CASES[15:]]
+	list_contracts = [case.cls_contract for case in CASES[15:26]]
 
 	assert len(list_contracts) == 11
 	assert len({c.tuple_required for c in list_contracts}) == 11
@@ -753,7 +846,7 @@ def test_diversidade_members_carry_counts_and_no_personal_identifier() -> None:
 	classified that way from the name alone. The columns say otherwise — they are counts per
 	company and grouping, and no individual appears in any of them.
 	"""
-	for case in CASES[15:]:
+	for case in CASES[15:26]:
 		tuple_cols = case.cls_contract.tuple_required
 		assert any(c.startswith("Quantidade_") for c in tuple_cols), case.str_stem
 		assert not [c for c in tuple_cols if "CPF" in c.upper()], case.str_stem
@@ -822,3 +915,198 @@ def test_the_pcd_pair_overlap_is_exactly_as_documented() -> None:
 	assert len(set_admin & set_empregado) == 8
 	assert set_admin - set_empregado == {"Orgao_Administracao", "Nao_Aplicavel"}
 	assert set_empregado - set_admin == {"Codigo_Posicao", "Posicao"}
+
+
+# Pairs of remuneração-slice members with the SAME column count and DIFFERENT columns. The first
+# three collide at 14 and share their first ten columns, which is the tightest collision in the
+# dataset; the last pair collides at 21 with near-disjoint lists.
+COLLIDING_PAIRS_SLICE_4 = (
+	(FRE_CIA_ABERTA_ACAO_ENTREGUE, FRE_CIA_ABERTA_REMUNERACAO_ACAO),
+	(FRE_CIA_ABERTA_ACAO_ENTREGUE, FRE_CIA_ABERTA_REMUNERACAO_MAXIMA_MINIMA_MEDIA),
+	(FRE_CIA_ABERTA_REMUNERACAO_ACAO, FRE_CIA_ABERTA_REMUNERACAO_MAXIMA_MINIMA_MEDIA),
+	(FRE_CIA_ABERTA_TITULO_EXTERIOR, FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE),
+)
+
+
+@pytest.mark.parametrize(("cls_left", "cls_right"), COLLIDING_PAIRS_SLICE_4)
+def test_same_width_remuneracao_members_are_not_the_same_columns(
+	cls_left: FileContract, cls_right: FileContract
+) -> None:
+	"""Four more same-width pairs, none of them a copy of the other.
+
+	`acao_entregue`, `remuneracao_acao` and `remuneracao_maxima_minima_media` all have 14 columns
+	**and share the first ten**, so a contract copied between them lines up on width, on prefix,
+	and on every generated-input test — only the pinned header disagrees.
+
+	Parameters
+	----------
+	cls_left : FileContract
+		The first contract of the colliding pair.
+	cls_right : FileContract
+		The second contract of the colliding pair.
+	"""
+	assert len(cls_left.tuple_required) == len(cls_right.tuple_required)
+	assert cls_left.tuple_required != cls_right.tuple_required
+
+
+def test_the_three_fourteen_column_members_share_exactly_their_first_ten() -> None:
+	"""The shared prefix is stated as a hazard in prose, so it is asserted rather than believed.
+
+	Sharing ten of fourteen columns is what makes these three the easiest members in the dataset to
+	conflate. A number asserted only in a docstring has already shipped wrong in this dataset once.
+	"""
+	tuple_acao = FRE_CIA_ABERTA_ACAO_ENTREGUE.tuple_required
+	tuple_remun = FRE_CIA_ABERTA_REMUNERACAO_ACAO.tuple_required
+	tuple_max = FRE_CIA_ABERTA_REMUNERACAO_MAXIMA_MINIMA_MEDIA.tuple_required
+
+	assert len(tuple_acao) == len(tuple_remun) == len(tuple_max) == 14
+	assert tuple_acao[:10] == tuple_remun[:10]
+	assert tuple_acao[:8] == tuple_max[:8]
+	# The divergence is real and in the tail, not a reordering of the same names.
+	assert len({tuple_acao, tuple_remun, tuple_max}) == 3
+	assert set(tuple_acao[10:]).isdisjoint(tuple_remun[10:])
+
+
+def test_participacao_sociedade_declares_the_invested_company_cnpj() -> None:
+	"""The only member of this slice with two CNPJ columns — the filer's and the investee's."""
+	assert FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE.tuple_cnpj_cols == ("CNPJ_Companhia", "CNPJ")
+	assert "CNPJ" in FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE.tuple_required
+
+
+def test_read_honours_the_foreign_subsidiary_cnpj_placeholder(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""`00000000000000` is returned as published, and does not fail the CNPJ check.
+
+	792 of the 6.511 `CNPJ` values in 2025 are that literal placeholder — what CVM publishes for a
+	subsidiary abroad with no Brazilian CNPJ. The contract requires *at least one* valid value in
+	the column, so a mixed artifact passes and the placeholders survive untouched. Rewriting them
+	to `NA` would erase the distinction between "no Brazilian CNPJ" and "not reported".
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	str_placeholder = "00000000000000"
+	list_cols = list(FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE.tuple_required)
+	list_foreign = [str_placeholder if c == "CNPJ" else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [_row(FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE), list_foreign])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_participacao_sociedade_2025.csv": str_csv}))
+
+	df_ = FreCiaAbertaParticipacaoSociedadeReader(date_ref=DATE_REF).read()
+
+	assert len(df_) == 2
+	assert df_["CNPJ"].iloc[1] == str_placeholder
+	assert isinstance(df_["CNPJ"].iloc[1], str)
+
+
+def test_read_rejects_a_participacao_sociedade_of_placeholders_only(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""The tolerance is "at least one valid", not "anything goes" — an all-placeholder file fails.
+
+	This pins the edge the previous test relies on. Without it, "the placeholder is accepted" could
+	equally describe a contract that had stopped checking the column at all.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	list_cols = list(FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE.tuple_required)
+	list_foreign = ["00000000000000" if c == "CNPJ" else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [list_foreign, list_foreign])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_participacao_sociedade_2025.csv": str_csv}))
+
+	with pytest.raises(ContractError):
+		FreCiaAbertaParticipacaoSociedadeReader(date_ref=DATE_REF).read()
+
+
+def test_participacao_sociedade_empty_date_columns_are_still_dates(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""`Data_Valor_Mercado` and `Data_Valor_Contabil` are empty all through 2025 and still dates.
+
+	The dataset's META types both `date`, and twelve of this member's columns arrive empty in 2025
+	— emptiness is a property of the year, not of the schema. Asserted on the **dtype**, because a
+	blank field becomes a missing value under `dtype="str"` too, so `isna().all()` holds either
+	way; only `datetime64` vs `string` distinguishes a declared date from text.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	tuple_empty = ("Data_Valor_Mercado", "Data_Valor_Contabil")
+	list_cols = list(FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE.tuple_required)
+	list_row = ["" if c in tuple_empty else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [list_row, list_row])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_participacao_sociedade_2025.csv": str_csv}))
+
+	df_ = FreCiaAbertaParticipacaoSociedadeReader(date_ref=DATE_REF).read()
+
+	for str_col in tuple_empty:
+		assert str_col in FreCiaAbertaParticipacaoSociedadeReader._DATE_COLS
+		assert pd.api.types.is_datetime64_any_dtype(df_[str_col]), str_col
+		assert df_[str_col].isna().all(), str_col
+
+
+def test_duracao_transacao_is_free_text_and_never_coerced(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""879 of its 11.238 values look like `DD/MM/YYYY`, and it is still not a date column.
+
+	The META types it `varchar`, and the majority of its values are prose ("indeterminado", "5
+	anos"). Coercing the minority that parse would silently produce a column that is `NaT` wherever
+	the company wrote a sentence, and — being day-first — would misread the ones that do parse.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	str_br_date = "31/12/2025"
+	list_cols = list(FRE_CIA_ABERTA_TRANSACAO_PARTE_RELACIONADA.tuple_required)
+	list_row = [str_br_date if c == "Duracao_Transacao" else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [list_row])
+	_patch(
+		monkeypatch, _all_members({"fre_cia_aberta_transacao_parte_relacionada_2025.csv": str_csv})
+	)
+
+	df_ = FreCiaAbertaTransacaoParteRelacionadaReader(date_ref=DATE_REF).read()
+
+	assert "Duracao_Transacao" not in FreCiaAbertaTransacaoParteRelacionadaReader._DATE_COLS
+	assert df_["Duracao_Transacao"].iloc[0] == str_br_date
+	assert isinstance(df_["Duracao_Transacao"].iloc[0], str)
+	assert df_["Data_Transacao"].iloc[0] == date(2025, 8, 25)
+
+
+def test_remuneracao_amounts_come_back_as_exact_text(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The slice's monetary columns stay source text — this is its densest concentration of money.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	str_salario = "3141592653.58"
+	list_cols = list(FRE_CIA_ABERTA_REMUNERACAO_TOTAL_ORGAO.tuple_required)
+	list_row = [str_salario if c == "Salario" else _value_for(c) for c in list_cols]
+	str_csv = _csv_text(list_cols, [list_row])
+	_patch(monkeypatch, _all_members({"fre_cia_aberta_remuneracao_total_orgao_2025.csv": str_csv}))
+
+	df_ = FreCiaAbertaRemuneracaoTotalOrgaoReader(date_ref=DATE_REF).read()
+
+	assert df_["Salario"].iloc[0] == str_salario
+	assert isinstance(df_["Salario"].iloc[0], str)
+
+
+def test_the_fre_dataset_is_complete_at_thirty_six_members() -> None:
+	"""All 36 members are in, each with its own contract and none sharing a column list.
+
+	The four slices were written months apart, so the closing assertion is that nothing was lost or
+	duplicated between them — 36 distinct stems, 36 distinct column lists.
+	"""
+	assert len(CASES) == 36
+	assert len({case.str_stem for case in CASES}) == 36
+	assert len({case.cls_contract.tuple_required for case in CASES}) == 36
+	assert len({case.cls_contract.str_source_key for case in CASES}) == 36

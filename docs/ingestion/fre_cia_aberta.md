@@ -12,17 +12,17 @@ publicado no
 
 ## ⚠️ O maior dataset do portal — entregue em 4 fatias
 
-O FRE tem **36 membros e ~131 mil linhas** (o FCA, o segundo maior, tem 10 membros). Está sendo
+O FRE tem **36 membros e ~131 mil linhas** (o FCA, o segundo maior, tem 10 membros). Foi
 implementado em **4 PRs temáticos**, cada um revisável e releasável sozinho:
 
 | fatia | tema | membros | estado |
 |---|---|---|---|
 | **1** | **índice + estrutura de capital** | **8** | ✅ |
 | **2** | **administração / pessoas (todos os membros com CPF)** | **7** | ✅ |
-| **3** | **diversidade (contagens agregadas)** | **11** | ✅ **esta** |
-| 4 | remuneração + valores mobiliários + transações | 10 | ⬜ |
+| **3** | **diversidade (contagens agregadas)** | **11** | ✅ |
+| **4** | **remuneração + valores mobiliários + transações** | **10** | ✅ **esta** |
 
-Com esta fatia o FRE fica em **26 dos 36 membros**.
+Com esta fatia o dataset está **completo: 36 de 36 membros**.
 
 ---
 
@@ -69,6 +69,42 @@ Todos com **uma** coluna de data (`Data_Referencia`, 100% ISO) e **uma** de CNPJ
 | `FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader` | `empregado_posicao_faixa_etaria` | 9 | 1.040 | `Posicao` |
 | `FreCiaAbertaEmpregadoPosicaoLocalReader` | `empregado_posicao_local` | 12 | 1.036 | `Posicao` × região |
 
+## Os 10 membros da fatia 4 — remuneração, valores mobiliários e transações
+
+| reader | membro | cols | linhas (2025) | colunas de data |
+|---|---|---|---|---|
+| `FreCiaAbertaAcaoEntregueReader` | `acao_entregue` | 14 | 1.304 | `Data_Referencia` + as 2 do exercício social |
+| `FreCiaAbertaRemuneracaoAcaoReader` | `remuneracao_acao` | 14 | 1.565 | idem |
+| `FreCiaAbertaRemuneracaoMaximaMinimaMediaReader` | `remuneracao_maxima_minima_media` | 14 | 3.307 | idem |
+| `FreCiaAbertaRemuneracaoTotalOrgaoReader` | `remuneracao_total_orgao` | 27 | 6.320 | idem |
+| `FreCiaAbertaRemuneracaoVariavelReader` | `remuneracao_variavel` | 18 | 3.851 | idem |
+| `FreCiaAbertaOutroValorMobiliarioReader` | `outro_valor_mobiliario` | 24 | 2.735 | `Data_Referencia`, `Data_Emissao`, `Data_Vencimento` |
+| `FreCiaAbertaTitularValorMobiliarioReader` | `titular_valor_mobiliario` | 9 | 163 | `Data_Referencia` |
+| `FreCiaAbertaTituloExteriorReader` | `titulo_exterior` | 21 | 122 | `Data_Referencia`, `Data_Emissao`, `Data_Vencimento` |
+| `FreCiaAbertaParticipacaoSociedadeReader` | `participacao_sociedade` | 21 | 6.511 | `Data_Referencia`, `Data_Valor_Mercado`, `Data_Valor_Contabil` |
+| `FreCiaAbertaTransacaoParteRelacionadaReader` | `transacao_parte_relacionada` | 22 | 11.238 | `Data_Referencia`, `Data_Transacao` |
+
+⚠️ **`participacao_sociedade` é o único membro da fatia com DUAS colunas de CNPJ** —
+`CNPJ_Companhia` (quem entrega) e `CNPJ` (a investida). **792 dos 6.511 valores de `CNPJ` em 2025
+são o placeholder literal `00000000000000`**, que é o que a CVM publica para **subsidiária no
+exterior sem CNPJ brasileiro** (`AMERICANAS LUX`, `St. Marys Cement Inc.`): nenhum malformado,
+nenhum branco. Voltam **como publicados**, e a coluna segue declarada porque o contrato exige **ao
+menos um** válido — a aresta (um arquivo só de placeholders **levanta**) é pinada por teste.
+
+⚠️ **`transacao_parte_relacionada.Documento_Parte_Relacionada` fica FORA de `tuple_cnpj_cols`
+apesar de chegar 100% vazia em 2025.** A irmã `Tipo_Pessoa` tem domínio **`PF/PJ`** na META: a
+coluna guarda **CPF ou CNPJ** conforme a linha, como o `Documento_Pessoa_Relacionada` da fatia 2.
+Declará-la passaria em todo ano vazio e quebraria no primeiro com dado.
+
+⚠️ **Coluna vazia é propriedade do ANO, não do schema.** Doze colunas de `participacao_sociedade` e
+três de `outro_valor_mobiliario` chegam 100% vazias em 2025 — entre elas `Data_Valor_Mercado` e
+`Data_Valor_Contabil`, que a META tipa **`date`** e portanto **seguem colunas de data** (tudo
+`NaT`). A asserção é sobre o **dtype**, nunca sobre `isna().all()`: branco vira NA sob `str`
+também.
+
+⚠️ **`Duracao_Transacao` é texto livre, não data**, embora 879 das 11.238 linhas pareçam
+`DD/MM/YYYY` — a META a tipa `varchar` e a maioria dos valores é prosa ("indeterminado").
+
 **Particionado por ano** — o `date_ref` seleciona o **ano**, e **todos** os readers do FRE baixam o
 **mesmo** arquivo (um `path_raw` escrito por um serve os outros).
 
@@ -94,7 +130,7 @@ declara o seu; nada é herdado.
 
 ## ⚠️ Coluna de CNPJ é a que **só** guarda CNPJ — o nome não é o teste
 
-Quase todo membro declara só o `CNPJ_Companhia`, mas **dois declaram mais**, e **três colunas que
+Quase todo membro declara só o `CNPJ_Companhia`, mas **três declaram mais**, e **quatro colunas que
 parecem identificador ficam de fora**. Cada caso foi decidido contando os valores reais de 2025:
 
 | membro | declara | fica de fora | por quê |
@@ -103,6 +139,8 @@ parecem identificador ficam de fora**. Cada caso foi decidido contando os valore
 | `relacao_familiar` | `CNPJ_Companhia`, `CNPJ_Emissor`, `CNPJ_Emissor_Pessoa_Relacionada` | 2 colunas de CPF | idem |
 | `relacao_subordinacao` | `CNPJ_Companhia` | **`Documento_Pessoa_Relacionada`** | guarda **CNPJ e CPF** (8.462 × 34) |
 | `posicao_acionaria` | `CNPJ_Companhia` | as 3 `CPF_CNPJ_*` | mistas por definição |
+| `participacao_sociedade` | `CNPJ_Companhia`, **`CNPJ`** | — | o CNPJ da investida, 5.719 válidos + 792 placeholders |
+| `transacao_parte_relacionada` | `CNPJ_Companhia` | **`Documento_Parte_Relacionada`** | CPF **ou** CNPJ (`Tipo_Pessoa` é PF/PJ), mesmo 100% vazia em 2025 |
 
 `Documento_Pessoa_Relacionada` é o caso que uma regra pelo nome erra: **não diz nem CPF nem CNPJ, e
 guarda os dois** (tipados pela coluna irmã `Tipo_Pessoa_Relacionada`, `PJ`/`PF`). Uma coluna mista
@@ -117,13 +155,15 @@ publicados**.
 
 ## Tipagem
 
-Todas as colunas de data chegam **100% ISO**; branco vira **`NaT`**. Duas chegam **inteiramente
-vazias** em 2025 — `auditor.Data_Fim_Contratacao` (contrato em aberto não tem fim) e
-`posicao_acionaria.Data_Composicao_Capital_Social` — e **seguem sendo data por contrato**: um ano
-vazio não rebaixa a coluna para texto.
+Todas as colunas de data chegam **100% ISO**; branco vira **`NaT`**. **Quatro** chegam
+**inteiramente vazias** em 2025 — `auditor.Data_Fim_Contratacao` (contrato em aberto não tem fim),
+`posicao_acionaria.Data_Composicao_Capital_Social` e as duas de `participacao_sociedade`
+(`Data_Valor_Mercado`, `Data_Valor_Contabil`) — e **seguem sendo data por contrato**: um ano vazio
+não rebaixa a coluna para texto.
 
 Todo o restante é **texto exato da fonte**, incluindo `Valor_Capital` (monetário), `Quantidade_*` e
-`Numero_*` (contagens) e `Percentual_*`.
+`Numero_*` (contagens), `Percentual_*` e — na fatia 4, a mais monetária do dataset — `Salario`,
+`Bonus_*`, `Montante_*`, `Preco_*` e `Saldo_*`.
 
 Nunca um float binário: um `float64` perde a escala publicada de forma irreversível e silenciosa, e
 `bin/check_dtypes.py` barra o atalho. Converta para `Decimal` a jusante se precisar de aritmética.
@@ -176,6 +216,18 @@ tem.
 ⚠️ Em `administrador_PCD` as colunas `Quantidade_*` chegam **parcialmente vazias** (~1/5 das linhas
 em 2025). **Vazio não é zero** — é declaração ausente, e volta vazio.
 
+## ⚠️ Mais quatro pares de mesma largura na fatia 4 — e três deles com prefixo idêntico
+
+| cols | par | o que compartilham |
+|---|---|---|
+| 14 | `acao_entregue` × `remuneracao_acao` | **as 10 primeiras colunas** |
+| 14 | `acao_entregue` × `remuneracao_maxima_minima_media` | as 8 primeiras |
+| 14 | `remuneracao_acao` × `remuneracao_maxima_minima_media` | as 8 primeiras |
+| 21 | `titulo_exterior` × `participacao_sociedade` | quase nada — só a largura |
+
+O trio de 14 colunas é a **colisão mais apertada do dataset**: compartilha largura, prefixo e todo
+teste de entrada gerada — só o header pinado discorda. **Nove pares no total** entre as fatias 3 e 4.
+
 ---
 
 ## Uso
@@ -184,10 +236,11 @@ em 2025). **Vazio não é zero** — é declaração ausente, e volta vazio.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm import (
+from filings_cvm.ingestion.cia_aberta import (
     FreCiaAbertaCapitalSocialReader,
     FreCiaAbertaPosicaoAcionariaReader,
     FreCiaAbertaReader,
+    FreCiaAbertaRemuneracaoTotalOrgaoReader,
 )
 
 # O índice dos formulários entregues no ano:
@@ -201,6 +254,9 @@ df_capital = FreCiaAbertaCapitalSocialReader(
 
 # A base acionária — o maior membro da fatia 2 (31.508 linhas em 2025):
 df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).read()
+
+# A remuneração por órgão — o membro mais largo da fatia 4 (27 colunas):
+df_remuneracao = FreCiaAbertaRemuneracaoTotalOrgaoReader(date_ref=date(2025, 6, 15)).read()
 
 # Aritmética a jusante — Decimal, nunca float:
 from decimal import Decimal

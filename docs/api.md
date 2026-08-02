@@ -1459,15 +1459,15 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
-### `FreCiaAberta*Reader` (26 readers — fatias 1, 2 e 3 de 4)
+### `FreCiaAberta*Reader` (36 readers — dataset completo)
 
 `filings_cvm.ingestion.cia_aberta`
 
 O **Formulário de Referência** (`CIA_ABERTA/DOC/FRE`, `fre_cia_aberta_AAAA.zip`) — **o maior dataset
-do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**. Estão implementadas a
-**1ª: índice + estrutura de capital** (8 membros), a **2ª: administração/pessoas** (7 membros, todos
-os do dataset que carregam CPF) e a **3ª: diversidade** (11 membros de contagens agregadas). Página
-completa em
+do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**, todas implementadas:
+**1ª: índice + estrutura de capital** (8 membros), **2ª: administração/pessoas** (7 membros, todos
+os do dataset que carregam CPF), **3ª: diversidade** (11 membros de contagens agregadas) e
+**4ª: remuneração + valores mobiliários + transações** (10 membros). Página completa em
 [FRE Companhias Abertas](ingestion/fre_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
@@ -1498,18 +1498,37 @@ completa em
 | `FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader` | `empregado_posicao_declaracao_raca` | 13 | 1.038 |
 | `FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader` | `empregado_posicao_faixa_etaria` | 9 | 1.040 |
 | `FreCiaAbertaEmpregadoPosicaoLocalReader` | `empregado_posicao_local` | 12 | 1.036 |
+| `FreCiaAbertaAcaoEntregueReader` | `acao_entregue` | 14 | 1.304 |
+| `FreCiaAbertaRemuneracaoAcaoReader` | `remuneracao_acao` | 14 | 1.565 |
+| `FreCiaAbertaRemuneracaoMaximaMinimaMediaReader` | `remuneracao_maxima_minima_media` | 14 | 3.307 |
+| `FreCiaAbertaRemuneracaoTotalOrgaoReader` | `remuneracao_total_orgao` | 27 | 6.320 |
+| `FreCiaAbertaRemuneracaoVariavelReader` | `remuneracao_variavel` | 18 | 3.851 |
+| `FreCiaAbertaOutroValorMobiliarioReader` | `outro_valor_mobiliario` | 24 | 2.735 |
+| `FreCiaAbertaTitularValorMobiliarioReader` | `titular_valor_mobiliario` | 9 | 163 |
+| `FreCiaAbertaTituloExteriorReader` | `titulo_exterior` | 21 | 122 |
+| `FreCiaAbertaParticipacaoSociedadeReader` | `participacao_sociedade` | 21 | 6.511 |
+| `FreCiaAbertaTransacaoParteRelacionadaReader` | `transacao_parte_relacionada` | 22 | 11.238 |
 
 > ⚠️ **O índice usa `CNPJ_CIA`/`DT_REFER`/`DT_RECEB`** (maiúsculas abreviadas), os satélites usam
 > `CNPJ_Companhia`/`Data_Referencia`. **O FCA faz igual, o CGVN NÃO** — não há regra entre datasets,
 > só medição. Pinado nas 2 direções, com o CGVN como contra-exemplo.
 
 > ⚠️ **O FRE usa SEIS nomes de coluna de CNPJ** ao longo dos 36 membros — cada contrato declara o
-> seu. `auditor` declara **2** e `relacao_familiar` **3**.
+> seu. `auditor` declara **2**, `participacao_sociedade` **2** e `relacao_familiar` **3**.
 
 > ⚠️ **Coluna de CNPJ é a que só guarda CNPJ; o nome não decide.** Nenhuma coluna de CPF entra em
-> `tuple_cnpj_cols`, e ficam de fora também as 3 `CPF_CNPJ_*` de `posicao_acionaria` e
+> `tuple_cnpj_cols`, e ficam de fora também as 3 `CPF_CNPJ_*` de `posicao_acionaria`,
 > **`relacao_subordinacao.Documento_Pessoa_Relacionada`** — que não diz nem CPF nem CNPJ e guarda os
-> dois.
+> dois — e **`transacao_parte_relacionada.Documento_Parte_Relacionada`**, que é CPF-ou-CNPJ por
+> definição (`Tipo_Pessoa` é PF/PJ) **mesmo chegando 100% vazia em 2025**.
+
+> ⚠️ **`participacao_sociedade.CNPJ` traz 792 placeholders `00000000000000`** (subsidiária no
+> exterior sem CNPJ brasileiro) entre 5.719 válidos. Voltam como publicados; a coluna segue
+> declarada porque o contrato exige **ao menos um** válido.
+
+> ⚠️ **Coluna vazia é propriedade do ANO, não do schema.** Doze colunas de `participacao_sociedade`
+> chegam 100% vazias em 2025, incluindo `Data_Valor_Mercado`/`Data_Valor_Contabil`, que a META tipa
+> `date` e portanto **seguem colunas de data** (tudo `NaT`).
 
 > ⚠️ **A fatia 2 concentra todo o CPF do FRE** (6 dos 7 membros). Volta como publicado; as fixtures
 > de teste são **só cabeçalho**.
