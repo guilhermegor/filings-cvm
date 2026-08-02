@@ -1643,6 +1643,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#os-10-membros-da-fatia-4-remuneracao-valores-mobiliarios-e-transacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Os 10 membros da fatia 4 — remuneração, valores mobiliários e transações
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#o-indice-nao-segue-a-convencao-dos-proprios-satelites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1691,6 +1702,17 @@
     <span class="md-ellipsis">
       
         ⚠️ Cinco pares de mesma largura na fatia 3 — o risco de copiar o irmão
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mais-quatro-pares-de-mesma-largura-na-fatia-4-e-tres-deles-com-prefixo-identico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Mais quatro pares de mesma largura na fatia 4 — e três deles com prefixo idêntico
       
     </span>
   </a>
@@ -1998,6 +2020,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#os-10-membros-da-fatia-4-remuneracao-valores-mobiliarios-e-transacoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Os 10 membros da fatia 4 — remuneração, valores mobiliários e transações
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#o-indice-nao-segue-a-convencao-dos-proprios-satelites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2046,6 +2079,17 @@
     <span class="md-ellipsis">
       
         ⚠️ Cinco pares de mesma largura na fatia 3 — o risco de copiar o irmão
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mais-quatro-pares-de-mesma-largura-na-fatia-4-e-tres-deles-com-prefixo-identico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Mais quatro pares de mesma largura na fatia 4 — e três deles com prefixo idêntico
       
     </span>
   </a>
@@ -2105,7 +2149,7 @@ o <a href="../ipe_cia_aberta/">IPE</a>, o <a href="../vlmo_cia_aberta/">VLMO</a>
 </blockquote>
 <hr />
 <h2 id="o-maior-dataset-do-portal-entregue-em-4-fatias">⚠️ O maior dataset do portal — entregue em 4 fatias<a class="headerlink" href="#o-maior-dataset-do-portal-entregue-em-4-fatias" title="Permanent link">&para;</a></h2>
-<p>O FRE tem <strong>36 membros e ~131 mil linhas</strong> (o FCA, o segundo maior, tem 10 membros). Está sendo
+<p>O FRE tem <strong>36 membros e ~131 mil linhas</strong> (o FCA, o segundo maior, tem 10 membros). Foi
 implementado em <strong>4 PRs temáticos</strong>, cada um revisável e releasável sozinho:</p>
 <table>
 <thead>
@@ -2133,17 +2177,17 @@ implementado em <strong>4 PRs temáticos</strong>, cada um revisável e releasá
 <td><strong>3</strong></td>
 <td><strong>diversidade (contagens agregadas)</strong></td>
 <td><strong>11</strong></td>
-<td>✅ <strong>esta</strong></td>
+<td>✅</td>
 </tr>
 <tr>
-<td>4</td>
-<td>remuneração + valores mobiliários + transações</td>
-<td>10</td>
-<td>⬜</td>
+<td><strong>4</strong></td>
+<td><strong>remuneração + valores mobiliários + transações</strong></td>
+<td><strong>10</strong></td>
+<td>✅ <strong>esta</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Com esta fatia o FRE fica em <strong>26 dos 36 membros</strong>.</p>
+<p>Com esta fatia o dataset está <strong>completo: 36 de 36 membros</strong>.</p>
 <hr />
 <h2 id="os-8-membros-da-fatia-1-indice-capital">Os 8 membros da fatia 1 — índice + capital<a class="headerlink" href="#os-8-membros-da-fatia-1-indice-capital" title="Permanent link">&para;</a></h2>
 <table>
@@ -2370,6 +2414,107 @@ implementado em <strong>4 PRs temáticos</strong>, cada um revisável e releasá
 </tr>
 </tbody>
 </table>
+<h2 id="os-10-membros-da-fatia-4-remuneracao-valores-mobiliarios-e-transacoes">Os 10 membros da fatia 4 — remuneração, valores mobiliários e transações<a class="headerlink" href="#os-10-membros-da-fatia-4-remuneracao-valores-mobiliarios-e-transacoes" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>reader</th>
+<th>membro</th>
+<th>cols</th>
+<th>linhas (2025)</th>
+<th>colunas de data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FreCiaAbertaAcaoEntregueReader</code></td>
+<td><code>acao_entregue</code></td>
+<td>14</td>
+<td>1.304</td>
+<td><code>Data_Referencia</code> + as 2 do exercício social</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoAcaoReader</code></td>
+<td><code>remuneracao_acao</code></td>
+<td>14</td>
+<td>1.565</td>
+<td>idem</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoMaximaMinimaMediaReader</code></td>
+<td><code>remuneracao_maxima_minima_media</code></td>
+<td>14</td>
+<td>3.307</td>
+<td>idem</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoTotalOrgaoReader</code></td>
+<td><code>remuneracao_total_orgao</code></td>
+<td>27</td>
+<td>6.320</td>
+<td>idem</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoVariavelReader</code></td>
+<td><code>remuneracao_variavel</code></td>
+<td>18</td>
+<td>3.851</td>
+<td>idem</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaOutroValorMobiliarioReader</code></td>
+<td><code>outro_valor_mobiliario</code></td>
+<td>24</td>
+<td>2.735</td>
+<td><code>Data_Referencia</code>, <code>Data_Emissao</code>, <code>Data_Vencimento</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaTitularValorMobiliarioReader</code></td>
+<td><code>titular_valor_mobiliario</code></td>
+<td>9</td>
+<td>163</td>
+<td><code>Data_Referencia</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaTituloExteriorReader</code></td>
+<td><code>titulo_exterior</code></td>
+<td>21</td>
+<td>122</td>
+<td><code>Data_Referencia</code>, <code>Data_Emissao</code>, <code>Data_Vencimento</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaParticipacaoSociedadeReader</code></td>
+<td><code>participacao_sociedade</code></td>
+<td>21</td>
+<td>6.511</td>
+<td><code>Data_Referencia</code>, <code>Data_Valor_Mercado</code>, <code>Data_Valor_Contabil</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaTransacaoParteRelacionadaReader</code></td>
+<td><code>transacao_parte_relacionada</code></td>
+<td>22</td>
+<td>11.238</td>
+<td><code>Data_Referencia</code>, <code>Data_Transacao</code></td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong><code>participacao_sociedade</code> é o único membro da fatia com DUAS colunas de CNPJ</strong> —
+<code>CNPJ_Companhia</code> (quem entrega) e <code>CNPJ</code> (a investida). <strong>792 dos 6.511 valores de <code>CNPJ</code> em 2025
+são o placeholder literal <code>00000000000000</code></strong>, que é o que a CVM publica para <strong>subsidiária no
+exterior sem CNPJ brasileiro</strong> (<code>AMERICANAS LUX</code>, <code>St. Marys Cement Inc.</code>): nenhum malformado,
+nenhum branco. Voltam <strong>como publicados</strong>, e a coluna segue declarada porque o contrato exige <strong>ao
+menos um</strong> válido — a aresta (um arquivo só de placeholders <strong>levanta</strong>) é pinada por teste.</p>
+<p>⚠️ <strong><code>transacao_parte_relacionada.Documento_Parte_Relacionada</code> fica FORA de <code>tuple_cnpj_cols</code>
+apesar de chegar 100% vazia em 2025.</strong> A irmã <code>Tipo_Pessoa</code> tem domínio <strong><code>PF/PJ</code></strong> na META: a
+coluna guarda <strong>CPF ou CNPJ</strong> conforme a linha, como o <code>Documento_Pessoa_Relacionada</code> da fatia 2.
+Declará-la passaria em todo ano vazio e quebraria no primeiro com dado.</p>
+<p>⚠️ <strong>Coluna vazia é propriedade do ANO, não do schema.</strong> Doze colunas de <code>participacao_sociedade</code> e
+três de <code>outro_valor_mobiliario</code> chegam 100% vazias em 2025 — entre elas <code>Data_Valor_Mercado</code> e
+<code>Data_Valor_Contabil</code>, que a META tipa <strong><code>date</code></strong> e portanto <strong>seguem colunas de data</strong> (tudo
+<code>NaT</code>). A asserção é sobre o <strong>dtype</strong>, nunca sobre <code>isna().all()</code>: branco vira NA sob <code>str</code>
+também.</p>
+<p>⚠️ <strong><code>Duracao_Transacao</code> é texto livre, não data</strong>, embora 879 das 11.238 linhas pareçam
+<code>DD/MM/YYYY</code> — a META a tipa <code>varchar</code> e a maioria dos valores é prosa ("indeterminado").</p>
 <p><strong>Particionado por ano</strong> — o <code>date_ref</code> seleciona o <strong>ano</strong>, e <strong>todos</strong> os readers do FRE baixam o
 <strong>mesmo</strong> arquivo (um <code>path_raw</code> escrito por um serve os outros).</p>
 <hr />
@@ -2408,7 +2553,7 @@ por teste <strong>nas duas direções</strong>, com o CGVN como contra-exemplo e
 declara o seu; nada é herdado.</p>
 <hr />
 <h2 id="coluna-de-cnpj-e-a-que-so-guarda-cnpj-o-nome-nao-e-o-teste">⚠️ Coluna de CNPJ é a que <strong>só</strong> guarda CNPJ — o nome não é o teste<a class="headerlink" href="#coluna-de-cnpj-e-a-que-so-guarda-cnpj-o-nome-nao-e-o-teste" title="Permanent link">&para;</a></h2>
-<p>Quase todo membro declara só o <code>CNPJ_Companhia</code>, mas <strong>dois declaram mais</strong>, e <strong>três colunas que
+<p>Quase todo membro declara só o <code>CNPJ_Companhia</code>, mas <strong>três declaram mais</strong>, e <strong>quatro colunas que
 parecem identificador ficam de fora</strong>. Cada caso foi decidido contando os valores reais de 2025:</p>
 <table>
 <thead>
@@ -2444,6 +2589,18 @@ parecem identificador ficam de fora</strong>. Cada caso foi decidido contando os
 <td>as 3 <code>CPF_CNPJ_*</code></td>
 <td>mistas por definição</td>
 </tr>
+<tr>
+<td><code>participacao_sociedade</code></td>
+<td><code>CNPJ_Companhia</code>, <strong><code>CNPJ</code></strong></td>
+<td>—</td>
+<td>o CNPJ da investida, 5.719 válidos + 792 placeholders</td>
+</tr>
+<tr>
+<td><code>transacao_parte_relacionada</code></td>
+<td><code>CNPJ_Companhia</code></td>
+<td><strong><code>Documento_Parte_Relacionada</code></strong></td>
+<td>CPF <strong>ou</strong> CNPJ (<code>Tipo_Pessoa</code> é PF/PJ), mesmo 100% vazia em 2025</td>
+</tr>
 </tbody>
 </table>
 <p><code>Documento_Pessoa_Relacionada</code> é o caso que uma regra pelo nome erra: <strong>não diz nem CPF nem CNPJ, e
@@ -2455,12 +2612,14 @@ vem pontuado (<code>00.000.000/0001-91</code>) e <code>CNPJ_Auditor</code>, na m
 publicados</strong>.</p>
 <hr />
 <h2 id="tipagem">Tipagem<a class="headerlink" href="#tipagem" title="Permanent link">&para;</a></h2>
-<p>Todas as colunas de data chegam <strong>100% ISO</strong>; branco vira <strong><code>NaT</code></strong>. Duas chegam <strong>inteiramente
-vazias</strong> em 2025 — <code>auditor.Data_Fim_Contratacao</code> (contrato em aberto não tem fim) e
-<code>posicao_acionaria.Data_Composicao_Capital_Social</code> — e <strong>seguem sendo data por contrato</strong>: um ano
-vazio não rebaixa a coluna para texto.</p>
+<p>Todas as colunas de data chegam <strong>100% ISO</strong>; branco vira <strong><code>NaT</code></strong>. <strong>Quatro</strong> chegam
+<strong>inteiramente vazias</strong> em 2025 — <code>auditor.Data_Fim_Contratacao</code> (contrato em aberto não tem fim),
+<code>posicao_acionaria.Data_Composicao_Capital_Social</code> e as duas de <code>participacao_sociedade</code>
+(<code>Data_Valor_Mercado</code>, <code>Data_Valor_Contabil</code>) — e <strong>seguem sendo data por contrato</strong>: um ano vazio
+não rebaixa a coluna para texto.</p>
 <p>Todo o restante é <strong>texto exato da fonte</strong>, incluindo <code>Valor_Capital</code> (monetário), <code>Quantidade_*</code> e
-<code>Numero_*</code> (contagens) e <code>Percentual_*</code>.</p>
+<code>Numero_*</code> (contagens), <code>Percentual_*</code> e — na fatia 4, a mais monetária do dataset — <code>Salario</code>,
+<code>Bonus_*</code>, <code>Montante_*</code>, <code>Preco_*</code> e <code>Saldo_*</code>.</p>
 <p>Nunca um float binário: um <code>float64</code> perde a escala publicada de forma irreversível e silenciosa, e
 <code>bin/check_dtypes.py</code> barra o atalho. Converta para <code>Decimal</code> a jusante se precisar de aritmética.</p>
 <hr />
@@ -2523,33 +2682,71 @@ um é <strong>gerado do seu próprio header</strong>, e os 5 pares são pinados 
 tem.</p>
 <p>⚠️ Em <code>administrador_PCD</code> as colunas <code>Quantidade_*</code> chegam <strong>parcialmente vazias</strong> (~1/5 das linhas
 em 2025). <strong>Vazio não é zero</strong> — é declaração ausente, e volta vazio.</p>
+<h2 id="mais-quatro-pares-de-mesma-largura-na-fatia-4-e-tres-deles-com-prefixo-identico">⚠️ Mais quatro pares de mesma largura na fatia 4 — e três deles com prefixo idêntico<a class="headerlink" href="#mais-quatro-pares-de-mesma-largura-na-fatia-4-e-tres-deles-com-prefixo-identico" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>cols</th>
+<th>par</th>
+<th>o que compartilham</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14</td>
+<td><code>acao_entregue</code> × <code>remuneracao_acao</code></td>
+<td><strong>as 10 primeiras colunas</strong></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>acao_entregue</code> × <code>remuneracao_maxima_minima_media</code></td>
+<td>as 8 primeiras</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>remuneracao_acao</code> × <code>remuneracao_maxima_minima_media</code></td>
+<td>as 8 primeiras</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>titulo_exterior</code> × <code>participacao_sociedade</code></td>
+<td>quase nada — só a largura</td>
+</tr>
+</tbody>
+</table>
+<p>O trio de 14 colunas é a <strong>colisão mais apertada do dataset</strong>: compartilha largura, prefixo e todo
+teste de entrada gerada — só o header pinado discorda. <strong>Nove pares no total</strong> entre as fatias 3 e 4.</p>
 <hr />
 <h2 id="uso">Uso<a class="headerlink" href="#uso" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion.cia_aberta</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">FreCiaAbertaCapitalSocialReader</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">FreCiaAbertaPosicaoAcionariaReader</span><span class="p">,</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">FreCiaAbertaReader</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># O índice dos formulários entregues no ano:</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">df_indice</span> <span class="o">=</span> <span class="n">FreCiaAbertaReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># O capital social, guardando o .zip cru (serve às outras fatias também):</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">df_capital</span> <span class="o">=</span> <span class="n">FreCiaAbertaCapitalSocialReader</span><span class="p">(</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">path_raw</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/bronze/cvm/fre&quot;</span><span class="p">),</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># A base acionária — o maior membro da fatia 2 (31.508 linhas em 2025):</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">df_acionistas</span> <span class="o">=</span> <span class="n">FreCiaAbertaPosicaoAcionariaReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Aritmética a jusante — Decimal, nunca float:</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">df_capital</span><span class="p">[</span><span class="s2">&quot;Valor_Capital&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">v</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">FreCiaAbertaRemuneracaoTotalOrgaoReader</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># O índice dos formulários entregues no ano:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">df_indice</span> <span class="o">=</span> <span class="n">FreCiaAbertaReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># O capital social, guardando o .zip cru (serve às outras fatias também):</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">df_capital</span> <span class="o">=</span> <span class="n">FreCiaAbertaCapitalSocialReader</span><span class="p">(</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">path_raw</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/bronze/cvm/fre&quot;</span><span class="p">),</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="c1"># A base acionária — o maior membro da fatia 2 (31.508 linhas em 2025):</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="n">df_acionistas</span> <span class="o">=</span> <span class="n">FreCiaAbertaPosicaoAcionariaReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># A remuneração por órgão — o membro mais largo da fatia 4 (27 colunas):</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">df_remuneracao</span> <span class="o">=</span> <span class="n">FreCiaAbertaRemuneracaoTotalOrgaoReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Aritmética a jusante — Decimal, nunca float:</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">df_capital</span><span class="p">[</span><span class="s2">&quot;Valor_Capital&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">v</span><span class="p">)</span>
 </span></code></pre></div>
 <p>O frame devolvido carrega, além das colunas da fonte, as seis colunas de
 <a href="../../api/">proveniência</a>.</p>

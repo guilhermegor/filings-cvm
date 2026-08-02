@@ -3244,10 +3244,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#freciaabertareader-26-readers-fatias-1-2-e-3-de-4" class="md-nav__link">
+  <a href="#freciaabertareader-36-readers-dataset-completo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FreCiaAberta*Reader (26 readers — fatias 1, 2 e 3 de 4)
+        FreCiaAberta*Reader (36 readers — dataset completo)
       
     </span>
   </a>
@@ -4903,10 +4903,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#freciaabertareader-26-readers-fatias-1-2-e-3-de-4" class="md-nav__link">
+  <a href="#freciaabertareader-36-readers-dataset-completo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FreCiaAberta*Reader (26 readers — fatias 1, 2 e 3 de 4)
+        FreCiaAberta*Reader (36 readers — dataset completo)
       
     </span>
   </a>
@@ -6687,13 +6687,13 @@ exato. Contracts <strong>pinados</strong> aos headers verbatim (12 e 11 cols).</
 </span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a><span class="c1"># df_[[&quot;CNPJ_Companhia&quot;, &quot;ID_Item&quot;, &quot;Capitulo&quot;, &quot;Pratica_Adotada&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="freciaabertareader-26-readers-fatias-1-2-e-3-de-4"><code>FreCiaAberta*Reader</code> (26 readers — fatias 1, 2 e 3 de 4)<a class="headerlink" href="#freciaabertareader-26-readers-fatias-1-2-e-3-de-4" title="Permanent link">&para;</a></h3>
+<h3 id="freciaabertareader-36-readers-dataset-completo"><code>FreCiaAberta*Reader</code> (36 readers — dataset completo)<a class="headerlink" href="#freciaabertareader-36-readers-dataset-completo" title="Permanent link">&para;</a></h3>
 <p><code>filings_cvm.ingestion.cia_aberta</code></p>
 <p>O <strong>Formulário de Referência</strong> (<code>CIA_ABERTA/DOC/FRE</code>, <code>fre_cia_aberta_AAAA.zip</code>) — <strong>o maior dataset
-do portal: 36 membros, ~131 mil linhas</strong>, entregue em <strong>4 fatias temáticas</strong>. Estão implementadas a
-<strong>1ª: índice + estrutura de capital</strong> (8 membros), a <strong>2ª: administração/pessoas</strong> (7 membros, todos
-os do dataset que carregam CPF) e a <strong>3ª: diversidade</strong> (11 membros de contagens agregadas). Página
-completa em
+do portal: 36 membros, ~131 mil linhas</strong>, entregue em <strong>4 fatias temáticas</strong>, todas implementadas:
+<strong>1ª: índice + estrutura de capital</strong> (8 membros), <strong>2ª: administração/pessoas</strong> (7 membros, todos
+os do dataset que carregam CPF), <strong>3ª: diversidade</strong> (11 membros de contagens agregadas) e
+<strong>4ª: remuneração + valores mobiliários + transações</strong> (10 membros). Página completa em
 <a href="../ingestion/fre_cia_aberta/">FRE Companhias Abertas</a>.</p>
 <table>
 <thead>
@@ -6861,6 +6861,66 @@ completa em
 <td>12</td>
 <td>1.036</td>
 </tr>
+<tr>
+<td><code>FreCiaAbertaAcaoEntregueReader</code></td>
+<td><code>acao_entregue</code></td>
+<td>14</td>
+<td>1.304</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoAcaoReader</code></td>
+<td><code>remuneracao_acao</code></td>
+<td>14</td>
+<td>1.565</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoMaximaMinimaMediaReader</code></td>
+<td><code>remuneracao_maxima_minima_media</code></td>
+<td>14</td>
+<td>3.307</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoTotalOrgaoReader</code></td>
+<td><code>remuneracao_total_orgao</code></td>
+<td>27</td>
+<td>6.320</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaRemuneracaoVariavelReader</code></td>
+<td><code>remuneracao_variavel</code></td>
+<td>18</td>
+<td>3.851</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaOutroValorMobiliarioReader</code></td>
+<td><code>outro_valor_mobiliario</code></td>
+<td>24</td>
+<td>2.735</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaTitularValorMobiliarioReader</code></td>
+<td><code>titular_valor_mobiliario</code></td>
+<td>9</td>
+<td>163</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaTituloExteriorReader</code></td>
+<td><code>titulo_exterior</code></td>
+<td>21</td>
+<td>122</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaParticipacaoSociedadeReader</code></td>
+<td><code>participacao_sociedade</code></td>
+<td>21</td>
+<td>6.511</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaTransacaoParteRelacionadaReader</code></td>
+<td><code>transacao_parte_relacionada</code></td>
+<td>22</td>
+<td>11.238</td>
+</tr>
 </tbody>
 </table>
 <blockquote>
@@ -6868,11 +6928,18 @@ completa em
 <code>CNPJ_Companhia</code>/<code>Data_Referencia</code>. <strong>O FCA faz igual, o CGVN NÃO</strong> — não há regra entre datasets,
 só medição. Pinado nas 2 direções, com o CGVN como contra-exemplo.</p>
 <p>⚠️ <strong>O FRE usa SEIS nomes de coluna de CNPJ</strong> ao longo dos 36 membros — cada contrato declara o
-seu. <code>auditor</code> declara <strong>2</strong> e <code>relacao_familiar</code> <strong>3</strong>.</p>
+seu. <code>auditor</code> declara <strong>2</strong>, <code>participacao_sociedade</code> <strong>2</strong> e <code>relacao_familiar</code> <strong>3</strong>.</p>
 <p>⚠️ <strong>Coluna de CNPJ é a que só guarda CNPJ; o nome não decide.</strong> Nenhuma coluna de CPF entra em
-<code>tuple_cnpj_cols</code>, e ficam de fora também as 3 <code>CPF_CNPJ_*</code> de <code>posicao_acionaria</code> e
+<code>tuple_cnpj_cols</code>, e ficam de fora também as 3 <code>CPF_CNPJ_*</code> de <code>posicao_acionaria</code>,
 <strong><code>relacao_subordinacao.Documento_Pessoa_Relacionada</code></strong> — que não diz nem CPF nem CNPJ e guarda os
-dois.</p>
+dois — e <strong><code>transacao_parte_relacionada.Documento_Parte_Relacionada</code></strong>, que é CPF-ou-CNPJ por
+definição (<code>Tipo_Pessoa</code> é PF/PJ) <strong>mesmo chegando 100% vazia em 2025</strong>.</p>
+<p>⚠️ <strong><code>participacao_sociedade.CNPJ</code> traz 792 placeholders <code>00000000000000</code></strong> (subsidiária no
+exterior sem CNPJ brasileiro) entre 5.719 válidos. Voltam como publicados; a coluna segue
+declarada porque o contrato exige <strong>ao menos um</strong> válido.</p>
+<p>⚠️ <strong>Coluna vazia é propriedade do ANO, não do schema.</strong> Doze colunas de <code>participacao_sociedade</code>
+chegam 100% vazias em 2025, incluindo <code>Data_Valor_Mercado</code>/<code>Data_Valor_Contabil</code>, que a META tipa
+<code>date</code> e portanto <strong>seguem colunas de data</strong> (tudo <code>NaT</code>).</p>
 <p>⚠️ <strong>A fatia 2 concentra todo o CPF do FRE</strong> (6 dos 7 membros). Volta como publicado; as fixtures
 de teste são <strong>só cabeçalho</strong>.</p>
 <p>⚠️ <strong>Os 11 membros de diversidade da fatia 3 NÃO são dado pessoal</strong> — são <strong>contagens agregadas</strong>
