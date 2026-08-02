@@ -3244,10 +3244,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#freciaabertareader-15-readers-fatias-1-e-2-de-4" class="md-nav__link">
+  <a href="#freciaabertareader-26-readers-fatias-1-2-e-3-de-4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FreCiaAberta*Reader (15 readers — fatias 1 e 2 de 4)
+        FreCiaAberta*Reader (26 readers — fatias 1, 2 e 3 de 4)
       
     </span>
   </a>
@@ -4903,10 +4903,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#freciaabertareader-15-readers-fatias-1-e-2-de-4" class="md-nav__link">
+  <a href="#freciaabertareader-26-readers-fatias-1-2-e-3-de-4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FreCiaAberta*Reader (15 readers — fatias 1 e 2 de 4)
+        FreCiaAberta*Reader (26 readers — fatias 1, 2 e 3 de 4)
       
     </span>
   </a>
@@ -6687,12 +6687,13 @@ exato. Contracts <strong>pinados</strong> aos headers verbatim (12 e 11 cols).</
 </span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a><span class="c1"># df_[[&quot;CNPJ_Companhia&quot;, &quot;ID_Item&quot;, &quot;Capitulo&quot;, &quot;Pratica_Adotada&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="freciaabertareader-15-readers-fatias-1-e-2-de-4"><code>FreCiaAberta*Reader</code> (15 readers — fatias 1 e 2 de 4)<a class="headerlink" href="#freciaabertareader-15-readers-fatias-1-e-2-de-4" title="Permanent link">&para;</a></h3>
+<h3 id="freciaabertareader-26-readers-fatias-1-2-e-3-de-4"><code>FreCiaAberta*Reader</code> (26 readers — fatias 1, 2 e 3 de 4)<a class="headerlink" href="#freciaabertareader-26-readers-fatias-1-2-e-3-de-4" title="Permanent link">&para;</a></h3>
 <p><code>filings_cvm.ingestion.cia_aberta</code></p>
 <p>O <strong>Formulário de Referência</strong> (<code>CIA_ABERTA/DOC/FRE</code>, <code>fre_cia_aberta_AAAA.zip</code>) — <strong>o maior dataset
 do portal: 36 membros, ~131 mil linhas</strong>, entregue em <strong>4 fatias temáticas</strong>. Estão implementadas a
-<strong>1ª: índice + estrutura de capital</strong> (8 membros) e a <strong>2ª: administração/pessoas</strong> (7 membros, todos
-os do dataset que carregam CPF). Página completa em
+<strong>1ª: índice + estrutura de capital</strong> (8 membros), a <strong>2ª: administração/pessoas</strong> (7 membros, todos
+os do dataset que carregam CPF) e a <strong>3ª: diversidade</strong> (11 membros de contagens agregadas). Página
+completa em
 <a href="../ingestion/fre_cia_aberta/">FRE Companhias Abertas</a>.</p>
 <table>
 <thead>
@@ -6794,6 +6795,72 @@ os do dataset que carregam CPF). Página completa em
 <td>9</td>
 <td>2.092</td>
 </tr>
+<tr>
+<td><code>FreCiaAbertaAdministradorPcdReader</code></td>
+<td><code>administrador_PCD</code></td>
+<td>10</td>
+<td>3.495</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaAdministradorDeclaracaoGeneroReader</code></td>
+<td><code>administrador_declaracao_genero</code></td>
+<td>12</td>
+<td>3.470</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaAdministradorDeclaracaoRacaReader</code></td>
+<td><code>administrador_declaracao_raca</code></td>
+<td>14</td>
+<td>3.470</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPcdReader</code></td>
+<td><code>empregado_PCD</code></td>
+<td>10</td>
+<td>1.082</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader</code></td>
+<td><code>empregado_local_declaracao_genero</code></td>
+<td>11</td>
+<td>3.118</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader</code></td>
+<td><code>empregado_local_declaracao_raca</code></td>
+<td>13</td>
+<td>3.117</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoLocalFaixaEtariaReader</code></td>
+<td><code>empregado_local_faixa_etaria</code></td>
+<td>9</td>
+<td>3.117</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader</code></td>
+<td><code>empregado_posicao_declaracao_genero</code></td>
+<td>11</td>
+<td>1.038</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader</code></td>
+<td><code>empregado_posicao_declaracao_raca</code></td>
+<td>13</td>
+<td>1.038</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader</code></td>
+<td><code>empregado_posicao_faixa_etaria</code></td>
+<td>9</td>
+<td>1.040</td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoLocalReader</code></td>
+<td><code>empregado_posicao_local</code></td>
+<td>12</td>
+<td>1.036</td>
+</tr>
 </tbody>
 </table>
 <blockquote>
@@ -6808,6 +6875,10 @@ seu. <code>auditor</code> declara <strong>2</strong> e <code>relacao_familiar</c
 dois.</p>
 <p>⚠️ <strong>A fatia 2 concentra todo o CPF do FRE</strong> (6 dos 7 membros). Volta como publicado; as fixtures
 de teste são <strong>só cabeçalho</strong>.</p>
+<p>⚠️ <strong>Os 11 membros de diversidade da fatia 3 NÃO são dado pessoal</strong> — são <strong>contagens agregadas</strong>
+(<code>Quantidade_Preto</code>, <code>Quantidade_Feminino</code>) por companhia e órgão/posição, sem indivíduo algum.
+Cuidado ao estendê-los: <strong>5 pares têm a mesma contagem de colunas e listas diferentes</strong>, então um
+contract copiado do irmão passa em tudo menos no header pinado.</p>
 <p>⚠️ <code>Valor_Capital</code>, <code>Quantidade_*</code>, <code>Numero_*</code> e <code>Percentual_*</code> ficam <strong>texto exato</strong> (regra do</p>
 <h1 id="157">157).<a class="headerlink" href="#157" title="Permanent link">&para;</a></h1>
 </blockquote>

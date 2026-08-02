@@ -1632,6 +1632,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#os-11-membros-da-fatia-3-diversidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Os 11 membros da fatia 3 — diversidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#o-indice-nao-segue-a-convencao-dos-proprios-satelites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1669,6 +1680,17 @@
     <span class="md-ellipsis">
       
         ⚠️ Dado pessoal (LGPD) — a fatia 2 concentra todo o CPF do FRE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cinco-pares-de-mesma-largura-na-fatia-3-o-risco-de-copiar-o-irmao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Cinco pares de mesma largura na fatia 3 — o risco de copiar o irmão
       
     </span>
   </a>
@@ -1965,6 +1987,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#os-11-membros-da-fatia-3-diversidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Os 11 membros da fatia 3 — diversidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#o-indice-nao-segue-a-convencao-dos-proprios-satelites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2002,6 +2035,17 @@
     <span class="md-ellipsis">
       
         ⚠️ Dado pessoal (LGPD) — a fatia 2 concentra todo o CPF do FRE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cinco-pares-de-mesma-largura-na-fatia-3-o-risco-de-copiar-o-irmao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Cinco pares de mesma largura na fatia 3 — o risco de copiar o irmão
       
     </span>
   </a>
@@ -2083,13 +2127,13 @@ implementado em <strong>4 PRs temáticos</strong>, cada um revisável e releasá
 <td><strong>2</strong></td>
 <td><strong>administração / pessoas (todos os membros com CPF)</strong></td>
 <td><strong>7</strong></td>
-<td>✅ <strong>esta</strong></td>
+<td>✅</td>
 </tr>
 <tr>
-<td>3</td>
-<td>diversidade (contagens agregadas)</td>
-<td>11</td>
-<td>⬜</td>
+<td><strong>3</strong></td>
+<td><strong>diversidade (contagens agregadas)</strong></td>
+<td><strong>11</strong></td>
+<td>✅ <strong>esta</strong></td>
 </tr>
 <tr>
 <td>4</td>
@@ -2099,6 +2143,7 @@ implementado em <strong>4 PRs temáticos</strong>, cada um revisável e releasá
 </tr>
 </tbody>
 </table>
+<p>Com esta fatia o FRE fica em <strong>26 dos 36 membros</strong>.</p>
 <hr />
 <h2 id="os-8-membros-da-fatia-1-indice-capital">Os 8 membros da fatia 1 — índice + capital<a class="headerlink" href="#os-8-membros-da-fatia-1-indice-capital" title="Permanent link">&para;</a></h2>
 <table>
@@ -2233,6 +2278,98 @@ implementado em <strong>4 PRs temáticos</strong>, cada um revisável e releasá
 </tr>
 </tbody>
 </table>
+<h2 id="os-11-membros-da-fatia-3-diversidade">Os 11 membros da fatia 3 — diversidade<a class="headerlink" href="#os-11-membros-da-fatia-3-diversidade" title="Permanent link">&para;</a></h2>
+<p>Todos com <strong>uma</strong> coluna de data (<code>Data_Referencia</code>, 100% ISO) e <strong>uma</strong> de CNPJ (<code>CNPJ_Companhia</code>).</p>
+<table>
+<thead>
+<tr>
+<th>reader</th>
+<th>membro</th>
+<th>cols</th>
+<th>linhas (2025)</th>
+<th>agrupa por</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FreCiaAbertaAdministradorPcdReader</code></td>
+<td><code>administrador_PCD</code></td>
+<td>10</td>
+<td>3.495</td>
+<td><code>Orgao_Administracao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaAdministradorDeclaracaoGeneroReader</code></td>
+<td><code>administrador_declaracao_genero</code></td>
+<td>12</td>
+<td>3.470</td>
+<td><code>Orgao_Administracao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaAdministradorDeclaracaoRacaReader</code></td>
+<td><code>administrador_declaracao_raca</code></td>
+<td>14</td>
+<td>3.470</td>
+<td><code>Orgao_Administracao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPcdReader</code></td>
+<td><code>empregado_PCD</code></td>
+<td>10</td>
+<td>1.082</td>
+<td><code>Codigo_Posicao</code> + <code>Posicao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader</code></td>
+<td><code>empregado_local_declaracao_genero</code></td>
+<td>11</td>
+<td>3.118</td>
+<td><code>Local</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader</code></td>
+<td><code>empregado_local_declaracao_raca</code></td>
+<td>13</td>
+<td>3.117</td>
+<td><code>Local</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoLocalFaixaEtariaReader</code></td>
+<td><code>empregado_local_faixa_etaria</code></td>
+<td>9</td>
+<td>3.117</td>
+<td><code>Local</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader</code></td>
+<td><code>empregado_posicao_declaracao_genero</code></td>
+<td>11</td>
+<td>1.038</td>
+<td><code>Posicao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader</code></td>
+<td><code>empregado_posicao_declaracao_raca</code></td>
+<td>13</td>
+<td>1.038</td>
+<td><code>Posicao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader</code></td>
+<td><code>empregado_posicao_faixa_etaria</code></td>
+<td>9</td>
+<td>1.040</td>
+<td><code>Posicao</code></td>
+</tr>
+<tr>
+<td><code>FreCiaAbertaEmpregadoPosicaoLocalReader</code></td>
+<td><code>empregado_posicao_local</code></td>
+<td>12</td>
+<td>1.036</td>
+<td><code>Posicao</code> × região</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Particionado por ano</strong> — o <code>date_ref</code> seleciona o <strong>ano</strong>, e <strong>todos</strong> os readers do FRE baixam o
 <strong>mesmo</strong> arquivo (um <code>path_raw</code> escrito por um serve os outros).</p>
 <hr />
@@ -2341,9 +2478,51 @@ acionista só pelo <code>ID_Acionista</code>.</p>
 das duas colunas irmãs. A grafia é preservada <strong>verbatim</strong>: "corrigir" faria a coluna não ser
 encontrada no arquivo real.</p>
 <p>⚠️ Os membros de <strong>diversidade</strong> (<code>*_declaracao_raca</code>, <code>*_declaracao_genero</code>, <code>*_PCD</code>,
-<code>*_faixa_etaria</code>, na fatia 3) <strong>não</strong> são dado pessoal sensível — são <strong>contagens agregadas</strong> por
+<code>*_faixa_etaria</code>, fatia 3) <strong>não</strong> são dado pessoal sensível — são <strong>contagens agregadas</strong> por
 companhia (<code>Quantidade_Preto</code>, <code>Quantidade_Feminino</code>). O nome do membro sugere o contrário; medir as
-colunas desmentiu.</p>
+colunas desmentiu. <strong>Nenhum deles tem CPF, nome de pessoa, ou qualquer identificador além do CNPJ da
+companhia</strong> — pinado por teste sobre as colunas, não sobre o nome.</p>
+<hr />
+<h2 id="cinco-pares-de-mesma-largura-na-fatia-3-o-risco-de-copiar-o-irmao">⚠️ Cinco pares de mesma largura na fatia 3 — o risco de copiar o irmão<a class="headerlink" href="#cinco-pares-de-mesma-largura-na-fatia-3-o-risco-de-copiar-o-irmao" title="Permanent link">&para;</a></h2>
+<p>Os membros de diversidade diferem entre si por <strong>uma coluna de agrupamento</strong> e pelos baldes que
+carregam. Cinco pares têm <strong>exatamente a mesma contagem de colunas</strong> e listas diferentes:</p>
+<table>
+<thead>
+<tr>
+<th>cols</th>
+<th>par</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9</td>
+<td><code>empregado_local_faixa_etaria</code> × <code>empregado_posicao_faixa_etaria</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>administrador_PCD</code> × <code>empregado_PCD</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>empregado_local_declaracao_genero</code> × <code>empregado_posicao_declaracao_genero</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>administrador_declaracao_genero</code> × <code>empregado_posicao_local</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>empregado_local_declaracao_raca</code> × <code>empregado_posicao_declaracao_raca</code></td>
+</tr>
+</tbody>
+</table>
+<p>Um contract copiado do irmão <strong>bate na largura</strong> e só falha contra o header pinado — por isso cada
+um é <strong>gerado do seu próprio header</strong>, e os 5 pares são pinados por teste. ⚠️ <code>administrador_PCD</code> e
+<code>empregado_PCD</code> têm 10 colunas cada e compartilham <strong>8</strong> — divergem em exatamente <strong>2</strong> cada: o primeiro agrupa por
+<code>Orgao_Administracao</code> e tem <code>Nao_Aplicavel</code>; o segundo agrupa por <code>Codigo_Posicao</code> + <code>Posicao</code> e não
+tem.</p>
+<p>⚠️ Em <code>administrador_PCD</code> as colunas <code>Quantidade_*</code> chegam <strong>parcialmente vazias</strong> (~1/5 das linhas
+em 2025). <strong>Vazio não é zero</strong> — é declaração ausente, e volta vazio.</p>
 <hr />
 <h2 id="uso">Uso<a class="headerlink" href="#uso" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
