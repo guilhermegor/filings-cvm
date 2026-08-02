@@ -56,11 +56,19 @@ devolver vazio, e `test_reader_retry_policy` agora afirma `len(roots) == 22` e `
 
 ## Aberto / próximo
 
-- [ ] **Release 0.26.0** (MINOR em 0.x = breaking) com a nota de migração — o `BREAKING CHANGE:`
-      no corpo do commit é o que o `cz changelog` publica.
-- [ ] Fatias **3/4** (diversidade, 11 membros) e **4/4** (remuneração, 10) do FRE.
-- [ ] Bônus já valendo: um leitor novo passa a tocar **2** `__init__` (o do dataset e o do root),
-      não 4 — menos colisão entre PRs de leitor.
+- [x] **Release 0.26.0** (MINOR em 0.x = breaking) com a nota de migração — publicado, tag
+      `v0.26.0`, install-verified nos 2 índices. O `BREAKING CHANGE:` no corpo do commit é o que o
+      `cz changelog` publica.
+- [x] Fatia **3/4** (diversidade, 11 membros) — #183 / PR #184, saiu na 0.26.2.
+- [ ] Fatia **4/4** (remuneração + val. mobiliários + transações, 10 membros) — **fecha o FRE**.
+- [x] ⚠️ **CORREÇÃO (fatia 3, #183): o bônus NÃO é "2 `__init__`".** Este ledger dizia que um leitor
+      novo passa a tocar **2** (dataset + root) — **errado para um root aninhado**. `cia_aberta` tem
+      uma camada `doc/`, então a cadeia é `doc/fre/` → `doc/` → `cia_aberta/` = **3**. A regra certa
+      é **contar os pacotes no caminho até o root**, não presumir 2 (o `ImportError` apareceu na hora
+      na fatia 3). ⚠️ E **o contract também entra em `contracts/__init__.py`** — esquecer isso **não
+      quebra nada** (o reader importa o contract do módulo direto), só a **contagem exportada**
+      denuncia. Ambas as regras já corrigidas no `CLAUDE.md`; esta linha fica como registro de que a
+      afirmação original estava errada. O bônus real segue valendo: **não são mais 4**.
 
 ## Fora de escopo (dívida pré-existente, deliberadamente não tocada)
 
