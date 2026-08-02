@@ -10,6 +10,9 @@ data is returned exactly as published and never validated as a company identifie
 module's docstring for what its columns actually contain.
 """
 
+from filings_cvm.ingestion.cia_aberta.doc.fre.acao_entregue import (
+	FreCiaAbertaAcaoEntregueReader,
+)
 from filings_cvm.ingestion.cia_aberta.doc.fre.administrador_declaracao_genero import (
 	FreCiaAbertaAdministradorDeclaracaoGeneroReader,
 )
@@ -66,6 +69,12 @@ from filings_cvm.ingestion.cia_aberta.doc.fre.mercado_estrangeiro import (
 	FreCiaAbertaMercadoEstrangeiroReader,
 )
 from filings_cvm.ingestion.cia_aberta.doc.fre.meta import MetaFreCiaAbertaReader
+from filings_cvm.ingestion.cia_aberta.doc.fre.outro_valor_mobiliario import (
+	FreCiaAbertaOutroValorMobiliarioReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.participacao_sociedade import (
+	FreCiaAbertaParticipacaoSociedadeReader,
+)
 from filings_cvm.ingestion.cia_aberta.doc.fre.posicao_acionaria import (
 	FreCiaAbertaPosicaoAcionariaReader,
 )
@@ -78,10 +87,32 @@ from filings_cvm.ingestion.cia_aberta.doc.fre.relacao_familiar import (
 from filings_cvm.ingestion.cia_aberta.doc.fre.relacao_subordinacao import (
 	FreCiaAbertaRelacaoSubordinacaoReader,
 )
+from filings_cvm.ingestion.cia_aberta.doc.fre.remuneracao_acao import (
+	FreCiaAbertaRemuneracaoAcaoReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.remuneracao_maxima_minima_media import (
+	FreCiaAbertaRemuneracaoMaximaMinimaMediaReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.remuneracao_total_orgao import (
+	FreCiaAbertaRemuneracaoTotalOrgaoReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.remuneracao_variavel import (
+	FreCiaAbertaRemuneracaoVariavelReader,
+)
 from filings_cvm.ingestion.cia_aberta.doc.fre.responsavel import FreCiaAbertaResponsavelReader
+from filings_cvm.ingestion.cia_aberta.doc.fre.titular_valor_mobiliario import (
+	FreCiaAbertaTitularValorMobiliarioReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.titulo_exterior import (
+	FreCiaAbertaTituloExteriorReader,
+)
+from filings_cvm.ingestion.cia_aberta.doc.fre.transacao_parte_relacionada import (
+	FreCiaAbertaTransacaoParteRelacionadaReader,
+)
 
 
 __all__ = [
+	"FreCiaAbertaAcaoEntregueReader",
 	"FreCiaAbertaAdministradorDeclaracaoGeneroReader",
 	"FreCiaAbertaAdministradorDeclaracaoRacaReader",
 	"FreCiaAbertaAdministradorMembroConselhoFiscalReader",
@@ -102,11 +133,20 @@ __all__ = [
 	"FreCiaAbertaEmpregadoPosicaoLocalReader",
 	"FreCiaAbertaMembroComiteReader",
 	"FreCiaAbertaMercadoEstrangeiroReader",
+	"FreCiaAbertaOutroValorMobiliarioReader",
+	"FreCiaAbertaParticipacaoSociedadeReader",
 	"FreCiaAbertaPosicaoAcionariaClasseAcaoReader",
 	"FreCiaAbertaPosicaoAcionariaReader",
 	"FreCiaAbertaReader",
 	"FreCiaAbertaRelacaoFamiliarReader",
 	"FreCiaAbertaRelacaoSubordinacaoReader",
+	"FreCiaAbertaRemuneracaoAcaoReader",
+	"FreCiaAbertaRemuneracaoMaximaMinimaMediaReader",
+	"FreCiaAbertaRemuneracaoTotalOrgaoReader",
+	"FreCiaAbertaRemuneracaoVariavelReader",
 	"FreCiaAbertaResponsavelReader",
+	"FreCiaAbertaTitularValorMobiliarioReader",
+	"FreCiaAbertaTituloExteriorReader",
+	"FreCiaAbertaTransacaoParteRelacionadaReader",
 	"MetaFreCiaAbertaReader",
 ]

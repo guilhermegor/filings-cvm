@@ -1,10 +1,10 @@
-"""Data contracts for the CVM open-data *FRE CIA_ABERTA* CSVs (ingestion) — groups 1–3 of 4.
+"""Data contracts for the CVM open-data *FRE CIA_ABERTA* CSVs (ingestion) — all 36 members.
 
 `fre_cia_aberta_AAAA.zip` (dataset `CIA_ABERTA/DOC/FRE`, *Formulário de Referência*) is the largest
-dataset in this portal: **36 members, ~131k rows**. It is implemented in four themed slices; this
-module holds the first three — the **index** plus the **capital-structure** tables, the
-**administração/pessoas** tables (every CPF-bearing member of the dataset), and the
-**diversidade** tables. The remaining group (remuneração) appends its contracts here.
+dataset in this portal: **36 members, ~131k rows**. It was implemented in four themed slices, all
+of which now live here — the **index** plus the **capital-structure** tables, the
+**administração/pessoas** tables (every CPF-bearing member of the dataset), the **diversidade**
+tables, and the **remuneração / valores mobiliários / transações** tables.
 
 ⚠️ **The diversidade members are AGGREGATE COUNTS, not sensitive personal data.** Names like
 `administrador_declaracao_raca` / `*_declaracao_genero` / `*_PCD` / `*_faixa_etaria` read as
@@ -43,9 +43,28 @@ the header:
   neither word in its name, so it is **excluded**.
 - `posicao_acionaria`'s three `CPF_CNPJ_*` columns are mixed by definition and are **excluded**;
   so is every `CPF*` column, which additionally carries personal data.
+- `transacao_parte_relacionada.Documento_Parte_Relacionada` is **excluded** although it arrives
+  100% empty in 2025 and would therefore pass any check. Its sibling `Tipo_Pessoa` has domain
+  `PF/PJ` in the META, so the column holds a CPF or a CNPJ depending on the row — declaring it
+  would pass every empty year and fail the first year that carries data.
+- `participacao_sociedade.CNPJ` **is** declared, even though 792 of its 6.511 values in 2025 are
+  the literal placeholder `00000000000000` — what the CVM publishes for subsidiaries abroad with
+  no Brazilian CNPJ. None is malformed and none is blank; the contract requires *at least one*
+  valid value, not all of them, so the placeholders are returned as published.
 
-Monetary and count columns (`Valor_Capital`, `Quantidade_*`, `Percentual_*`) stay **exact source
-text** — never a binary float; see `bin/check_dtypes.py`.
+⚠️ **Three members of the remuneração slice have 14 columns each and share their first ten** —
+`acao_entregue`, `remuneracao_acao` and `remuneracao_maxima_minima_media` differ only in their
+last four; `titulo_exterior` and `participacao_sociedade` collide at 21 columns with near-disjoint
+lists. As everywhere in this module, each contract comes from **its own** header.
+
+⚠️ **An empty column is a property of the year, not of the schema.** Twelve `participacao_sociedade`
+columns and three of `outro_valor_mobiliario` arrive 100% empty in 2025;
+`participacao_sociedade.Data_Valor_Mercado` and `Data_Valor_Contabil` are among them and are still
+typed `date` by the META, so they are coerced (every value `NaT`) rather than left as text.
+
+Monetary and count columns (`Valor_Capital`, `Quantidade_*`, `Percentual_*`, and the `Valor_*` /
+`Preco_*` / `Montante_*` / `Bonus_*` / `Salario` columns of the remuneração slice) stay **exact
+source text** — never a binary float; see `bin/check_dtypes.py`.
 """
 
 from __future__ import annotations
@@ -605,6 +624,273 @@ FRE_CIA_ABERTA_EMPREGADO_POSICAO_LOCAL = FileContract(
 		"Quantidade_Sudeste",
 		"Quantidade_Sul",
 		"Quantidade_Exterior",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_ACAO_ENTREGUE = FileContract(
+	"FRE CIA_ABERTA — ações entregues",
+	"fre_cia_aberta_acao_entregue",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Data_Inicio_Exercicio_Social",
+		"Data_Fim_Exercicio_Social",
+		"Orgao_Administracao",
+		"Quantidade_Total_Membros",
+		"Quantidade_Membros_Remunerados",
+		"Quantidade_Acoes",
+		"Preco_Medio_Ponderado_Aquisicao",
+		"Preco_Medio_Ponderado_Mercado",
+		"Valor_Diferenca_Aquisicao_Mercado",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_REMUNERACAO_ACAO = FileContract(
+	"FRE CIA_ABERTA — remuneração baseada em ações",
+	"fre_cia_aberta_remuneracao_acao",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Data_Inicio_Exercicio_Social",
+		"Data_Fim_Exercicio_Social",
+		"Orgao_Administracao",
+		"Quantidade_Total_Membros",
+		"Quantidade_Membros_Remunerados",
+		"Diluicao_Potencial",
+		"Preco_Medio_Ponderado_Opcoes_Em_Aberto",
+		"Preco_Medio_Ponderado_Opcoes_Perdidas",
+		"Preco_Medio_Ponderado_Opcoes_Exercidas",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_REMUNERACAO_MAXIMA_MINIMA_MEDIA = FileContract(
+	"FRE CIA_ABERTA — remuneração máxima, mínima e média",
+	"fre_cia_aberta_remuneracao_maxima_minima_media",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Data_Inicio_Exercicio_Social",
+		"Data_Fim_Exercicio_Social",
+		"Orgao_Administracao",
+		"Numero_Membros",
+		"Numero_Membros_Remunerados",
+		"Valor_Maior_Remuneracao",
+		"Valor_Menor_Remuneracao",
+		"Valor_Medio_Remuneracao",
+		"Observacao",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_REMUNERACAO_TOTAL_ORGAO = FileContract(
+	"FRE CIA_ABERTA — remuneração total por órgão",
+	"fre_cia_aberta_remuneracao_total_orgao",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Data_Inicio_Exercicio_Social",
+		"Data_Fim_Exercicio_Social",
+		"Total_Remuneracao",
+		"Orgao_Administracao",
+		"Numero_Membros",
+		"Total_Remuneracao_Orgao",
+		"Numero_Membros_Remunerados",
+		"Salario",
+		"Beneficios_Diretos_Indiretos",
+		"Participacoes_Comites",
+		"Outros_Valores_Fixos",
+		"Descricao_Outros_Remuneracoes_Fixas",
+		"Bonus",
+		"Participacao_Resultados",
+		"Participacao_Reunioes",
+		"Outros_Valores_Variaveis",
+		"Comissoes",
+		"Descricao_Outros_Remuneracoes_Variaveis",
+		"Pos_emprego",
+		"Cessacao_Cargo",
+		"Baseada_Acoes",
+		"Observacao",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_REMUNERACAO_VARIAVEL = FileContract(
+	"FRE CIA_ABERTA — remuneração variável",
+	"fre_cia_aberta_remuneracao_variavel",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Data_Inicio_Exercicio_Social",
+		"Data_Fim_Exercicio_Social",
+		"Orgao_Administracao",
+		"Quantidade_Total_Membros",
+		"Quantidade_Membros_Remunerados",
+		"Bonus_Valor_Minimo",
+		"Bonus_Valor_Maximo",
+		"Bonus_Valor_Metas_Atingidas",
+		"Bonus_Valor_Efetivo",
+		"Participacao_Valor_Minimo",
+		"Participacao_Valor_Maximo",
+		"Participacao_Valor_Metas_Atingidas",
+		"Participacao_Valor_Efetivo",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_OUTRO_VALOR_MOBILIARIO = FileContract(
+	"FRE CIA_ABERTA — outros valores mobiliários",
+	"fre_cia_aberta_outro_valor_mobiliario",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Valor_Mobiliario",
+		"Identificacao_Valor_Mobiliario",
+		"Data_Emissao",
+		"Data_Vencimento",
+		"Quantidade",
+		"Valor",
+		"Quantidade_Pessoa_Fisica",
+		"Quantidade_Pessoa_Juridica",
+		"Quantidade_Investidor_Institucional",
+		"Saldo_Devedor",
+		"Restricao_Circulacao",
+		"Descricao_Restricao_Circulacao",
+		"Conversibilidade",
+		"Condicao_Conversibilidade_Efeito_Capital_Social",
+		"Resgatavel",
+		"Hipotese_Resgate_Formula_Calculo",
+		"Caracteristicas_Valores_Mobiliarios_Divida",
+		"Condicao_Alteracao_Direitos",
+		"Outras_Caracteristicas_Relevantes",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_TITULAR_VALOR_MOBILIARIO = FileContract(
+	"FRE CIA_ABERTA — titulares de valores mobiliários",
+	"fre_cia_aberta_titular_valor_mobiliario",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Valor_Mobiliario",
+		"Quantidade_Pessoa_Fisica",
+		"Quantidade_Pessoa_Juridica",
+		"Quantidade_Investidor",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_TITULO_EXTERIOR = FileContract(
+	"FRE CIA_ABERTA — títulos emitidos no exterior",
+	"fre_cia_aberta_titulo_exterior",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Valor_Mobiliario",
+		"Identificacao_Valor_Mobiliario",
+		"Data_Emissao",
+		"Data_Vencimento",
+		"Quantidade",
+		"Valor_Nominal",
+		"Saldo_Devedor",
+		"Restricao_Circulacao",
+		"Descricao_Restricao_Circulacao",
+		"Conversibilidade",
+		"Condicao_Conversibilidade",
+		"Possibilidade_Resgate",
+		"Hipotese_Calculo_Resgate",
+		"Caracteristicas_Divida",
+		"Condicao_Alteracao_Direitos",
+		"Outras_Caracteristicas",
+	),
+	("CNPJ_Companhia",),
+)
+
+FRE_CIA_ABERTA_PARTICIPACAO_SOCIEDADE = FileContract(
+	"FRE CIA_ABERTA — participações em sociedades",
+	"fre_cia_aberta_participacao_sociedade",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"ID_Sociedade",
+		"Razao_Social",
+		"CNPJ",
+		"Tipo_Sociedade",
+		"Descricao_Atividades",
+		"Pais_Sede",
+		"UF_Sede",
+		"Municipio_Sede",
+		"Participacao_Emissor",
+		"Possui_Registro_CVM",
+		"Codigo_CVM",
+		"Razao_Aquisicao_Manutencao",
+		"Data_Valor_Mercado",
+		"Data_Valor_Contabil",
+		"Valor_Mercado",
+		"Valor_Contabil",
+	),
+	(
+		"CNPJ_Companhia",
+		"CNPJ",
+	),
+)
+
+FRE_CIA_ABERTA_TRANSACAO_PARTE_RELACIONADA = FileContract(
+	"FRE CIA_ABERTA — transações com partes relacionadas",
+	"fre_cia_aberta_transacao_parte_relacionada",
+	(
+		"CNPJ_Companhia",
+		"Data_Referencia",
+		"Versao",
+		"ID_Documento",
+		"Nome_Companhia",
+		"Parte_Relacionada",
+		"Tipo_Pessoa",
+		"Documento_Parte_Relacionada",
+		"Relacao_Emissor",
+		"Data_Transacao",
+		"Objeto_Contrato",
+		"Montante_Envolvido",
+		"Saldo_Existente",
+		"Montante_Interesse_Parte_Relacionada",
+		"Garantia_Seguro",
+		"Duracao_Transacao",
+		"Emprestimo_Divida",
+		"Rescisao",
+		"Natureza_Razao_Operacao",
+		"Taxa_Juros",
+		"Posicao_Contratual_Emissor",
+		"Especificacao_Posicao_Contratual_Emissor",
 	),
 	("CNPJ_Companhia",),
 )

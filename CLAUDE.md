@@ -527,10 +527,23 @@ Sob `CIA_ABERTA/CAD/`:
   (≠ o `https://…/ENET/…` do IPE/VLMO) e vai **como publicado**, não seguido. ⚠️ **META é
   `meta_cgvn_cia_aberta.zip`** (a forma padrão); as outras 3 dão 404, **incluindo a sem-prefixo que é
   a correta do FCA**. **9ª fatia da Wave 4; `DOC` em 4/7**
-- FRE (Formulário de Referência) — 🟡 **ingestion PARCIAL (fatias 1–3 de 4 — 26 dos 36 membros)**
+- FRE (Formulário de Referência) — ✅ **ingestion COMPLETA (36/36 membros)**
   `fre_cia_aberta_AAAA.zip` — ⚠️ **o MAIOR dataset do portal: 36 membros, ~131 mil linhas**, entregue
   em **4 PRs temáticos** (1: índice+capital ✅ · 2: administração/pessoas, **todos os com CPF** ✅ ·
-  3: diversidade (agregados) ✅ · 4: remuneração/val. mobiliários/transações ⬜).
+  3: diversidade (agregados) ✅ · 4: remuneração/val. mobiliários/transações ✅).
+  ⚠️ **A fatia 4 acrescentou 4 pares de mesma largura, 3 deles com PREFIXO IDÊNTICO:**
+  `acao_entregue`, `remuneracao_acao` e `remuneracao_maxima_minima_media` têm **14 colunas cada** e
+  os dois primeiros **compartilham as 10 primeiras** — a colisão mais apertada do dataset (9 pares
+  no total com as fatias 3+4). ⚠️ **`participacao_sociedade` tem DUAS colunas de CNPJ** e 792 dos
+  6.511 valores de `CNPJ` são o placeholder `00000000000000` (subsidiária no exterior sem CNPJ
+  brasileiro) — devolvidos **como publicados**; a coluna segue declarada porque o check exige **ao
+  menos um** válido. ⚠️ **`transacao_parte_relacionada.Documento_Parte_Relacionada` fica FORA de
+  `tuple_cnpj_cols` apesar de 100% VAZIA em 2025** — a irmã `Tipo_Pessoa` é `PF/PJ` na META, então é
+  CPF-ou-CNPJ por definição (mesma classe do `Documento_Pessoa_Relacionada`); declarar passaria em
+  todo ano vazio. ⚠️ **Coluna vazia é propriedade do ANO, não do schema:** 12 colunas de
+  `participacao_sociedade` chegam vazias, e `Data_Valor_Mercado`/`Data_Valor_Contabil` **seguem
+  data** (META `date`, tudo `NaT`). ⚠️ `Duracao_Transacao` traz 879 valores `DD/MM/YYYY` e **não é
+  data** (`varchar` na META, texto livre).
   ⚠️ **Os 11 membros de diversidade têm 5 PARES de mesma largura e listas diferentes**
   (9/10/11/12/13 cols) — diferem por **uma** coluna de agrupamento (`Local` × `Posicao` ×
   `Orgao_Administracao`) e pelos baldes; copiar o irmão bate na largura e só falha no header pinado.
@@ -561,7 +574,7 @@ Sob `CIA_ABERTA/CAD/`:
   `Quantidade_Feminino`); o PII real são os **6 membros com CPF** da fatia 2, com fixtures
   **header-only**. `Valor_*`/`Quantidade_*`/`Numero_*`/`Percentual_*` ficam texto exato. ⚠️ **META =
   `meta_fre_cia_aberta.zip`** (padrão), **50 membros para 36 de dados** e prefixo interno **misto**.
-  **10ª–11ª fatias da Wave 4; `DOC` em 5/7 (FRE parcial)**
+  **10ª–12ª fatias da Wave 4; `DOC` em 5/7 (FRE COMPLETO)**
 - ⬜ **ingestion** os outros 2 `DOC`: DFP, ITR — ambos `<ds>_cia_aberta_AAAA.zip`
   (ZIP anual), mas **contagem de membros muito diferente** (medido: IPE 1, VLMO 2, FCA 10) → grounding
   próprio para cada um · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
@@ -624,7 +637,7 @@ src/filings_cvm/
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
                            #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
-                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; entregue em 4 fatias temáticas — fatias 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF) e 3 (diversidade, 11, AGREGADOS) FEITAS = 26/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada guarda CNPJ+CPF e fica de fora; membros de diversidade são AGREGADOS, não PII)
+                           #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; COMPLETO em 4 fatias temáticas — 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF), 3 (diversidade, 11, AGREGADOS), 4 (remuneração/val. mob./transações, 10) = 36/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada e Documento_Parte_Relacionada guardam CNPJ+CPF e ficam de fora; membros de diversidade são AGREGADOS, não PII; participacao_sociedade tem 2 CNPJ cols com 792 placeholders 00000000000000)
                            #     DOC/{DFP,ITR} + EVENTOS pendentes (grounding próprio por dataset)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
