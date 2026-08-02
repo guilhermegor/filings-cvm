@@ -22,7 +22,7 @@ Nenhum header-only, nenhum ragged, **11 headers distintos**. Todos com 1 col de 
 ⚠️ **5 pares de mesma largura e listas diferentes** — o risco central desta fatia:
 9 (`local` × `posicao` faixa etária) · 10 (`administrador_PCD` × `empregado_PCD`) ·
 11 (`local` × `posicao` gênero) · 12 (`administrador_declaracao_genero` × `empregado_posicao_local`) ·
-13 (`local` × `posicao` raça). `administrador_PCD` e `empregado_PCD` compartilham **só 6** das 10.
+13 (`local` × `posicao` raça). `administrador_PCD` e `empregado_PCD` compartilham **8** das 10 (divergem em 2 cada).
 
 ⚠️ `administrador_PCD.Quantidade_*` chega ~1/5 **vazia** — declaração ausente, **não** zero.
 

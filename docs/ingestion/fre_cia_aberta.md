@@ -169,7 +169,7 @@ carregam. Cinco pares têm **exatamente a mesma contagem de colunas** e listas d
 
 Um contract copiado do irmão **bate na largura** e só falha contra o header pinado — por isso cada
 um é **gerado do seu próprio header**, e os 5 pares são pinados por teste. ⚠️ `administrador_PCD` e
-`empregado_PCD` têm 10 colunas cada e compartilham **só seis**: o primeiro agrupa por
+`empregado_PCD` têm 10 colunas cada e compartilham **8** — divergem em exatamente **2** cada: o primeiro agrupa por
 `Orgao_Administracao` e tem `Nao_Aplicavel`; o segundo agrupa por `Codigo_Posicao` + `Posicao` e não
 tem.
 

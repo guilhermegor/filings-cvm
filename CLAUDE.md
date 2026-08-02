@@ -534,7 +534,7 @@ Sob `CIA_ABERTA/CAD/`:
   ⚠️ **Os 11 membros de diversidade têm 5 PARES de mesma largura e listas diferentes**
   (9/10/11/12/13 cols) — diferem por **uma** coluna de agrupamento (`Local` × `Posicao` ×
   `Orgao_Administracao`) e pelos baldes; copiar o irmão bate na largura e só falha no header pinado.
-  `administrador_PCD` e `empregado_PCD` têm 10 cols cada e compartilham **só 6**. Em
+  `administrador_PCD` e `empregado_PCD` têm 10 cols cada e compartilham **8** (divergem em 2 cada). Em
   `administrador_PCD` as `Quantidade_*` chegam ~1/5 **vazias** — vazio **não** é zero.
   `ingestion/cia_aberta/doc/fre/*` (base privada `_base_fre_reader.py`); contracts
   `_internal/config/contracts/fre_cia_aberta.py`, **gerados dos headers e pinados**. **Particionado

@@ -8,7 +8,8 @@ personal data are the administração/pessoas ones.
 
 ⚠️ **Not the administrator sibling with a different filter.** Both members have 10 columns,
 but this one groups by `Codigo_Posicao` + `Posicao` and has **no** `Nao_Aplicavel`, while the
-administrator one groups by `Orgao_Administracao` and does. Only six columns are shared.
+administrator one groups by `Orgao_Administracao` and does. They share **8** of their 10
+columns, differing in exactly two each — which is what makes copying one onto the other easy.
 
 `Quantidade_*` columns stay **exact source text** — counts, never a binary float; convert
 downstream.
