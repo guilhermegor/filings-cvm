@@ -110,6 +110,12 @@ from filings_cvm.ingestion.cia_aberta.doc import (
 	VlmoCiaAbertaConReader,
 	VlmoCiaAbertaReader,
 )
+from filings_cvm.ingestion.cia_aberta.eventos import (
+	MetaRecompraAcoesReader,
+	RecompraAcoesIntermediariosReader,
+	RecompraAcoesQuantidadesReader,
+	RecompraAcoesReader,
+)
 
 
 __all__ = [
@@ -208,7 +214,11 @@ __all__ = [
 	"MetaFreCiaAbertaReader",
 	"MetaIpeCiaAbertaReader",
 	"MetaItrCiaAbertaReader",
+	"MetaRecompraAcoesReader",
 	"MetaVlmoCiaAbertaReader",
+	"RecompraAcoesIntermediariosReader",
+	"RecompraAcoesQuantidadesReader",
+	"RecompraAcoesReader",
 	"VlmoCiaAbertaConReader",
 	"VlmoCiaAbertaReader",
 ]

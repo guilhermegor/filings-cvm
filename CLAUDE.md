@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **45 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **46 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (45 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (46 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (28); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (29); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`45 = 17 .txt + 28 .zip`, e 45 contracts — o 46º nome
+⚠️ **Estes números são MEDIDOS do código** (`46 = 17 .txt + 29 .zip`, e 46 contracts — o 47º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
 `docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
@@ -463,10 +463,13 @@ não publica padrão XML de envio). Sob `OFERTA/DISTRIB/`:
   voltam **simétricas** (`distribuicao`/`resolucao_160`, `_MEMBER_STEM='oferta'`), diferente do
   INTERMED/COORD_OFERTA. **Quinta fatia da Wave 4 do #41; fecha a issue #14**
 
-**Companhias Abertas** — portal root `cia_aberta/`; **open-data only** (a CVM não publica padrão XML
-de envio). ⚠️ **É o maior root do portal** — três sub-roots: `CAD` (o cadastro, implementado),
-`DOC/{CGVN,DFP,FCA,FRE,IPE,ITR,VLMO}` (7 datasets de demonstrações, **pendentes**) e `EVENTOS`
-(**pendente**). Cada sub-dataset precisa de grounding próprio; não presumir a forma do vizinho.
+**Companhias Abertas** — portal root `cia_aberta/` ✅ **COMPLETO**; **open-data only** (a CVM não
+publica padrão XML de envio). ⚠️ **É o maior root do portal** — três sub-roots, todos implementados:
+`CAD` (o cadastro), `DOC/{CGVN,DFP,FCA,FRE,IPE,ITR,VLMO}` (**7/7**) e `EVENTOS/RECOMPRA_ACOES`
+(**1/1**). ⚠️ **Cada sub-dataset exigiu grounding próprio e nenhum presumiu a forma do vizinho** —
+e isso se pagou: o índice do FCA/FRE diverge dos próprios satélites mas o do CGVN não; o DFP e o ITR
+têm 18 de 19 headers idênticos e **exatamente 1** diferente; e o `EVENTOS` não segue o `DOC` em
+quatro pontos (snapshot, nome invertido, CamelCase, membros sem coluna de data).
 Sob `CIA_ABERTA/CAD/`:
 - Cadastro de Companhias Abertas — ✅ **ingestion** `cad_cia_aberta.csv` (**CSV solto**, não ZIP,
   **47 cols**, ~2.677 linhas) — `ingestion/cia_aberta/cad/cadastro/cadastro.py`
@@ -634,7 +637,28 @@ Sob `CIA_ABERTA/CAD/`:
   duplica cada conta, **sem chave única** · todos os 19 usam `CNPJ_CIA`/`DT_REFER` (100% válidos,
   medido sobre **valores distintos**) · todo `DT_*` 100% ISO · `COLUNA_DF` e `TP_RELAT_ESP`
   parcialmente vazias · META = `meta_itr_cia_aberta_txt.zip` (infixo `_txt`; as outras 3 dão 404)
-- ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES` — **o único pendente do root `cia_aberta/`**
+- Recompra de Ações (`EVENTOS/RECOMPRA_ACOES`) — ✅ **ingestion COMPLETA (3/3 membros)** —
+  **COM ESTE O ROOT `cia_aberta/` FICA COMPLETO** `cia_aberta_recompra_acoes.zip` (0,09 MB;
+  programa 11 cols/1.916 linhas + intermediários 3/4.269 + quantidades 5/2.381, todos ligados por
+  `ID_Programa`) — `ingestion/cia_aberta/eventos/recompra_acoes/*` (`RecompraAcoes*Reader`, base
+  privada `_base_recompra_acoes_reader.py`); contracts
+  `_internal/config/contracts/cia_aberta_recompra_acoes.py`, **gerados dos headers e pinados**.
+  **Inaugura o sub-root `eventos/`.**
+  ⚠️⚠️ **NÃO segue os vizinhos do `DOC`, em 4 pontos MEDIDOS:** (1) é **SNAPSHOT ⇒ sem `date_ref`**
+  (URL fixa; **um arquivo cobre de 1997 até hoje**, e a CVM sobrescreve no lugar); (2) o nome é
+  **INVERTIDO** — `cia_aberta_recompra_acoes.zip` põe o **root primeiro**, contra o
+  `dfp_cia_aberta_AAAA.zip` (dataset primeiro); (3) colunas em **CamelCase**
+  (`CNPJ_Companhia`/`Data_Deliberacao`), como o CGVN e **não** como DFP/ITR/FCA — **não há convenção
+  do root**, só medição (DFP pinado como contra-exemplo); (4) **2 dos 3 membros não têm NENHUMA
+  coluna de data**.
+  ⚠️⚠️ **`quantidades` NÃO declara coluna de CNPJ — porque não tem nenhuma.** `tuple_cnpj_cols`
+  vazio é **decisão medida, não esquecimento**; como vazio e esquecido são indistinguíveis num diff,
+  o teste afirma os **3** membros juntos (o vazio + os 2 que declaram, 100% válidos).
+  ⚠️ `Classe_Acao` chega vazia em **97,5%** (ação ordinária não tem classe) e outras 5 colunas
+  parcialmente vazias — vazio volta vazio. `ID_Programa` e `Quantidade_*` ficam texto exato.
+  META = `meta_cia_aberta_recompra_acoes.zip`, **medida 2 formas** (HEAD 200 + listagem do `META/`,
+  onde é o único arquivo); as outras 5 grafias dão 404, inclusive o infixo `_txt` que é o correto do
+  DFP/ITR **neste mesmo root**
 
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
@@ -698,7 +722,7 @@ src/filings_cvm/
                            #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; COMPLETO em 4 fatias temáticas — 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF), 3 (diversidade, 11, AGREGADOS), 4 (remuneração/val. mob./transações, 10) = 36/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada e Documento_Parte_Relacionada guardam CNPJ+CPF e ficam de fora; membros de diversidade são AGREGADOS, não PII; participacao_sociedade tem 2 CNPJ cols com 792 placeholders 00000000000000)
                            #     doc/dfp/ — DFP (dfp_cia_aberta_AAAA.zip, 19 membros/~1,17M linhas, anual; INVERTE a armadilha: 16 membros colapsam em 3 listas IDÊNTICAS, e por isso um swap con/ind era invisível — fechado por teste de identidade do membro; VL_CONTA com 10 casas E escala em ESCALA_MOEDA; todos usam CNPJ_CIA; META com infixo _txt)
                            #     doc/itr/ — ITR (itr_cia_aberta_AAAA.zip, 19 membros/3,64M linhas, anual; 18 dos 19 headers BYTE-IDÊNTICOS ao DFP e exatamente 1 não: parecer usa TP_RELAT_ESP onde o DFP usa TP_RELAT_AUD, mesma largura e posição — 18/19 idênticos é o que faz copiar o 19º; fecha o DOC 7/7)
-                           #     EVENTOS pendente (grounding próprio)
+                           #     eventos/recompra_acoes/ — RECOMPRA_ACOES (cia_aberta_recompra_acoes.zip, 3 membros ligados por ID_Programa, SNAPSHOT sem date_ref, série desde 1997; NÃO segue o DOC: nome invertido, CamelCase, 2 membros sem data; quantidades sem coluna de CNPJ — vazio MEDIDO). Com ele o root cia_aberta/ fica COMPLETO
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)

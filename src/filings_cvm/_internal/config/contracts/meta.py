@@ -107,3 +107,6 @@ META_CGVN_CIA_ABERTA = _meta_contract("cgvn_cia_aberta", "META — CGVN Companhi
 META_FRE_CIA_ABERTA = _meta_contract("fre_cia_aberta", "META — FRE Companhia Aberta")
 META_DFP_CIA_ABERTA = _meta_contract("dfp_cia_aberta", "META — DFP CIA_ABERTA")
 META_ITR_CIA_ABERTA = _meta_contract("itr_cia_aberta", "META — ITR CIA_ABERTA")
+META_CIA_ABERTA_RECOMPRA_ACOES = _meta_contract(
+	"cia_aberta_recompra_acoes", "META — RECOMPRA_ACOES"
+)
