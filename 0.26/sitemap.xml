@@ -2,210 +2,214 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/api/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/changelog/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/contributing/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/faq/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/usage/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/adm_cart/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/adm_fii/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/agente_auton/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/agente_fiduc/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/auditor/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cad_fi_hist/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cadastro_fi/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cda/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cgvn_cia_aberta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cia_aberta_cad/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cia_estrang/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/cia_incent/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/consultor_vlmob/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/contract_drift/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/coord_oferta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/crowdfunding/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/dfin_fii/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/dfp_cia_aberta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/eventual_fi/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/fca_cia_aberta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/fie/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/fre_cia_aberta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_anual_fii/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_fip/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_mensal_cra/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_mensal_cri/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_mensal_fiagro/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_mensal_fidc/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_mensal_fii/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_mensal_ots/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/inf_trimestral_fii/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/informe_diario/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/intermed/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/invnr/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/ipe_cia_aberta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
+    </url>
+    <url>
+         <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/itr_cia_aberta/</loc>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/lamina/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/lamina_carteira/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/meta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/oferta_distrib/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/portal_completeness/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/registro/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/securit_cepac_flat/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/ingestion/vlmo_cia_aberta/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/submission/informe_diario/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
     <url>
          <loc>https://guilhermegor.github.io/filings-cvm/0.26/submission/perfil_mensal/</loc>
-         <lastmod>2026-08-02</lastmod>
+         <lastmod>2026-08-03</lastmod>
     </url>
 </urlset>

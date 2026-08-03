@@ -1621,6 +1621,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ingestion/itr_cia_aberta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ITR Companhias Abertas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ingestion/meta/" class="md-nav__link">
         
   
@@ -3339,6 +3367,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#itrciaabertareader-19-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ItrCiaAberta*Reader (19 readers)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfpciaabertareader-19-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5044,6 +5083,17 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itrciaabertareader-19-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ItrCiaAberta*Reader (19 readers)
+      
+    </span>
+  </a>
   
 </li>
         
@@ -6903,6 +6953,102 @@ exato. Contracts <strong>pinados</strong> aos headers verbatim (12 e 11 cols).</
 </span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a><span class="c1"># df_[[&quot;CNPJ_Companhia&quot;, &quot;ID_Item&quot;, &quot;Capitulo&quot;, &quot;Pratica_Adotada&quot;]]</span>
 </span></code></pre></div>
 <hr />
+<h3 id="itrciaabertareader-19-readers"><code>ItrCiaAberta*Reader</code> (19 readers)<a class="headerlink" href="#itrciaabertareader-19-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.cia_aberta</code></p>
+<p>As <strong>Informações Trimestrais</strong> (<code>CIA_ABERTA/DOC/ITR</code>, <code>itr_cia_aberta_AAAA.zip</code>) — <strong>19 membros,
+3.640.994 linhas</strong>, o maior artefato que esta biblioteca lê (3× o DFP). Mesma forma do DFP: índice,
+oito demonstrações em <code>_con</code>/<code>_ind</code>, composição do capital e parecer. Página completa em
+<a href="../ingestion/itr_cia_aberta/">ITR Companhias Abertas</a>.</p>
+<table>
+<thead>
+<tr>
+<th>reader</th>
+<th>membro</th>
+<th>cols</th>
+<th>linhas (2025)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ItrCiaAbertaReader</code></td>
+<td>índice</td>
+<td>9</td>
+<td>2.257</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaBpaConReader</code> · <code>…BpaIndReader</code></td>
+<td><code>BPA_con</code> · <code>BPA_ind</code></td>
+<td>14</td>
+<td>181.678 · 276.195</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaBppConReader</code> · <code>…BppIndReader</code></td>
+<td><code>BPP_con</code> · <code>BPP_ind</code></td>
+<td>14</td>
+<td>310.302 · 465.952</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaDfcMdConReader</code> · <code>…DfcMdIndReader</code></td>
+<td><code>DFC_MD_con</code> · <code>DFC_MD_ind</code></td>
+<td>15</td>
+<td>1.538 · 1.795</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaDfcMiConReader</code> · <code>…DfcMiIndReader</code></td>
+<td><code>DFC_MI_con</code> · <code>DFC_MI_ind</code></td>
+<td>15</td>
+<td>139.342 · 189.402</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaDmplConReader</code> · <code>…DmplIndReader</code></td>
+<td><code>DMPL_con</code> · <code>DMPL_ind</code></td>
+<td>16</td>
+<td>623.847 · 700.872</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaDraConReader</code> · <code>…DraIndReader</code></td>
+<td><code>DRA_con</code> · <code>DRA_ind</code></td>
+<td>15</td>
+<td>32.114 · 33.000</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaDreConReader</code> · <code>…DreIndReader</code></td>
+<td><code>DRE_con</code> · <code>DRE_ind</code></td>
+<td>15</td>
+<td>156.900 · 226.309</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaDvaConReader</code> · <code>…DvaIndReader</code></td>
+<td><code>DVA_con</code> · <code>DVA_ind</code></td>
+<td>15</td>
+<td>116.854 · 173.507</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaComposicaoCapitalReader</code></td>
+<td><code>composicao_capital</code></td>
+<td>10</td>
+<td>2.079</td>
+</tr>
+<tr>
+<td><code>ItrCiaAbertaParecerReader</code></td>
+<td><code>parecer</code></td>
+<td>8</td>
+<td>7.051</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️⚠️ <strong>18 dos 19 membros são byte-idênticos ao DFP; exatamente 1 não é.</strong> O <code>parecer</code> grafa
+<code>TP_RELAT_ESP</code> (revisão especial) onde o DFP grafa <code>TP_RELAT_AUD</code> (auditoria) — <strong>mesma largura,
+mesma posição, 7 de 8 nomes</strong>. Copiar o contract do DFP erraria <strong>uma</strong> coluna e passaria em tudo
+menos no header pinado. <strong>18/19 idênticos é o que faz alguém copiar o 19º</strong>; a comparação é
+pinada nas 2 direções.</p>
+<p>⚠️⚠️ Herdadas do DFP e re-medidas aqui: <code>VL_CONTA</code> com 10 casas decimais e <strong>escala em
+<code>ESCALA_MOEDA</code></strong> (somar sem ler erra 1000×; os readers <strong>não</strong> reescalam) · 10 membros de lista
+idêntica ⇒ o swap <code>con</code>↔<code>ind</code> só é visível pelo <strong>teste de identidade do membro</strong> · <code>CD_CVM</code> com
+zero à esquerda · <code>ORDEM_EXERC</code> duplica cada conta, <strong>sem chave única</strong> · todos os 19 usam
+<code>CNPJ_CIA</code>/<code>DT_REFER</code> · META é <code>meta_itr_cia_aberta_txt.zip</code> (infixo <code>_txt</code>).</p>
+</blockquote>
 <h3 id="dfpciaabertareader-19-readers"><code>DfpCiaAberta*Reader</code> (19 readers)<a class="headerlink" href="#dfpciaabertareader-19-readers" title="Permanent link">&para;</a></h3>
 <p><code>filings_cvm.ingestion.cia_aberta</code></p>
 <p>As <strong>Demonstrações Financeiras Padronizadas</strong> (<code>CIA_ABERTA/DOC/DFP</code>, <code>dfp_cia_aberta_AAAA.zip</code>) —
@@ -7281,7 +7427,7 @@ Duas colunas chegam <strong>inteiramente vazias</strong> em 2025 (<code>auditor.
 </span><span id="__span-41-9"><a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a><span class="c1"># df_acionistas[[&quot;CNPJ_Companhia&quot;, &quot;Acionista&quot;, &quot;Percentual_Total_Acoes_Circulacao&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="metareader-44-readers"><code>Meta*Reader</code> (44 readers)<a class="headerlink" href="#metareader-44-readers" title="Permanent link">&para;</a></h3>
+<h3 id="metareader-45-readers"><code>Meta*Reader</code> (45 readers)<a class="headerlink" href="#metareader-45-readers" title="Permanent link">&para;</a></h3>
 <p>Os <strong>META</strong> — a spec que a própria CVM publica para cada dataset (<code>.../&lt;DATASET&gt;/META/</code>). Um reader
 por dataset; página completa em <a href="../ingestion/meta/">META (metadados da CVM)</a>.</p>
 <p><code>MetaInformeDiarioReader</code> · <code>MetaCdaReader</code> · <code>MetaLaminaReader</code> · <code>MetaCadastroFiReader</code> ·
