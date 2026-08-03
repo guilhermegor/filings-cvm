@@ -1505,6 +1505,35 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 
 ---
 
+### `RecompraAcoes*Reader` (3 readers)
+
+`filings_cvm.ingestion.cia_aberta`
+
+Os **programas de recompra de ações** (`CIA_ABERTA/EVENTOS/RECOMPRA_ACOES`,
+`cia_aberta_recompra_acoes.zip`) — o programa, suas corretoras e suas quantidades, todos ligados por
+`ID_Programa`. **Com este dataset o root `cia_aberta/` fica completo.** Página completa em
+[Recompra de Ações](ingestion/recompra_acoes.md).
+
+| reader | membro | cols | linhas |
+|---|---|---|---|
+| `RecompraAcoesReader` | `cia_aberta_recompra_acoes` | 11 | 1.916 |
+| `RecompraAcoesIntermediariosReader` | `..._intermediarios` | 3 | 4.269 |
+| `RecompraAcoesQuantidadesReader` | `..._quantidades` | 5 | 2.381 |
+
+> ⚠️⚠️ **Não segue os vizinhos do `DOC`, em 4 pontos medidos:** é **snapshot** (⇒ **sem
+> `date_ref`**; um arquivo cobre de **1997** até hoje) · o nome é **invertido**
+> (`cia_aberta_recompra_acoes.zip`, root primeiro) · as colunas são **CamelCase**
+> (`CNPJ_Companhia`/`Data_Deliberacao`), **não** `CNPJ_CIA`/`DT_REFER` · **2 dos 3 membros não têm
+> coluna de data**.
+
+> ⚠️⚠️ **`quantidades` não declara coluna de CNPJ — porque não tem nenhuma.** `tuple_cnpj_cols`
+> vazio é **decisão medida**, não esquecimento, e o teste afirma os 3 membros juntos (o vazio e os
+> 2 que declaram, ambos 100% válidos).
+
+> ⚠️ `Classe_Acao` chega vazia em **97,5%** das linhas (ação ordinária não tem classe); outras 5
+> colunas chegam parcialmente vazias. Vazio volta vazio · `ID_Programa` e `Quantidade_*` ficam
+> texto exato · META é `meta_cia_aberta_recompra_acoes.zip` (medida 2 formas).
+
 ### `ItrCiaAberta*Reader` (19 readers)
 
 `filings_cvm.ingestion.cia_aberta`
@@ -1686,7 +1715,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (45 readers)
+### `Meta*Reader` (46 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
