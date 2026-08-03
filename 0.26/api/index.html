@@ -1649,6 +1649,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ingestion/recompra_acoes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recompra de Ações
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ingestion/meta/" class="md-nav__link">
         
   
@@ -3363,6 +3391,17 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recompraacoesreader-3-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RecompraAcoes*Reader (3 readers)
+      
+    </span>
+  </a>
   
 </li>
         
@@ -5083,6 +5122,17 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recompraacoesreader-3-readers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RecompraAcoes*Reader (3 readers)
+      
+    </span>
+  </a>
   
 </li>
         
@@ -6953,6 +7003,55 @@ exato. Contracts <strong>pinados</strong> aos headers verbatim (12 e 11 cols).</
 </span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a><span class="c1"># df_[[&quot;CNPJ_Companhia&quot;, &quot;ID_Item&quot;, &quot;Capitulo&quot;, &quot;Pratica_Adotada&quot;]]</span>
 </span></code></pre></div>
 <hr />
+<h3 id="recompraacoesreader-3-readers"><code>RecompraAcoes*Reader</code> (3 readers)<a class="headerlink" href="#recompraacoesreader-3-readers" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.cia_aberta</code></p>
+<p>Os <strong>programas de recompra de ações</strong> (<code>CIA_ABERTA/EVENTOS/RECOMPRA_ACOES</code>,
+<code>cia_aberta_recompra_acoes.zip</code>) — o programa, suas corretoras e suas quantidades, todos ligados por
+<code>ID_Programa</code>. <strong>Com este dataset o root <code>cia_aberta/</code> fica completo.</strong> Página completa em
+<a href="../ingestion/recompra_acoes/">Recompra de Ações</a>.</p>
+<table>
+<thead>
+<tr>
+<th>reader</th>
+<th>membro</th>
+<th>cols</th>
+<th>linhas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RecompraAcoesReader</code></td>
+<td><code>cia_aberta_recompra_acoes</code></td>
+<td>11</td>
+<td>1.916</td>
+</tr>
+<tr>
+<td><code>RecompraAcoesIntermediariosReader</code></td>
+<td><code>..._intermediarios</code></td>
+<td>3</td>
+<td>4.269</td>
+</tr>
+<tr>
+<td><code>RecompraAcoesQuantidadesReader</code></td>
+<td><code>..._quantidades</code></td>
+<td>5</td>
+<td>2.381</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️⚠️ <strong>Não segue os vizinhos do <code>DOC</code>, em 4 pontos medidos:</strong> é <strong>snapshot</strong> (⇒ <strong>sem
+<code>date_ref</code></strong>; um arquivo cobre de <strong>1997</strong> até hoje) · o nome é <strong>invertido</strong>
+(<code>cia_aberta_recompra_acoes.zip</code>, root primeiro) · as colunas são <strong>CamelCase</strong>
+(<code>CNPJ_Companhia</code>/<code>Data_Deliberacao</code>), <strong>não</strong> <code>CNPJ_CIA</code>/<code>DT_REFER</code> · <strong>2 dos 3 membros não têm
+coluna de data</strong>.</p>
+<p>⚠️⚠️ <strong><code>quantidades</code> não declara coluna de CNPJ — porque não tem nenhuma.</strong> <code>tuple_cnpj_cols</code>
+vazio é <strong>decisão medida</strong>, não esquecimento, e o teste afirma os 3 membros juntos (o vazio e os
+2 que declaram, ambos 100% válidos).</p>
+<p>⚠️ <code>Classe_Acao</code> chega vazia em <strong>97,5%</strong> das linhas (ação ordinária não tem classe); outras 5
+colunas chegam parcialmente vazias. Vazio volta vazio · <code>ID_Programa</code> e <code>Quantidade_*</code> ficam
+texto exato · META é <code>meta_cia_aberta_recompra_acoes.zip</code> (medida 2 formas).</p>
+</blockquote>
 <h3 id="itrciaabertareader-19-readers"><code>ItrCiaAberta*Reader</code> (19 readers)<a class="headerlink" href="#itrciaabertareader-19-readers" title="Permanent link">&para;</a></h3>
 <p><code>filings_cvm.ingestion.cia_aberta</code></p>
 <p>As <strong>Informações Trimestrais</strong> (<code>CIA_ABERTA/DOC/ITR</code>, <code>itr_cia_aberta_AAAA.zip</code>) — <strong>19 membros,
@@ -7427,7 +7526,7 @@ Duas colunas chegam <strong>inteiramente vazias</strong> em 2025 (<code>auditor.
 </span><span id="__span-41-9"><a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a><span class="c1"># df_acionistas[[&quot;CNPJ_Companhia&quot;, &quot;Acionista&quot;, &quot;Percentual_Total_Acoes_Circulacao&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="metareader-45-readers"><code>Meta*Reader</code> (45 readers)<a class="headerlink" href="#metareader-45-readers" title="Permanent link">&para;</a></h3>
+<h3 id="metareader-46-readers"><code>Meta*Reader</code> (46 readers)<a class="headerlink" href="#metareader-46-readers" title="Permanent link">&para;</a></h3>
 <p>Os <strong>META</strong> — a spec que a própria CVM publica para cada dataset (<code>.../&lt;DATASET&gt;/META/</code>). Um reader
 por dataset; página completa em <a href="../ingestion/meta/">META (metadados da CVM)</a>.</p>
 <p><code>MetaInformeDiarioReader</code> · <code>MetaCdaReader</code> · <code>MetaLaminaReader</code> · <code>MetaCadastroFiReader</code> ·
