@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **44 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **45 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (44 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (45 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (27); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (28); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`44 = 17 .txt + 27 .zip`, e 44 contracts — o 45º nome
+⚠️ **Estes números são MEDIDOS do código** (`45 = 17 .txt + 28 .zip`, e 45 contracts — o 46º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
 `docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
@@ -616,9 +616,25 @@ Sob `CIA_ABERTA/CAD/`:
   duplica cada conta, **sem chave única** · **todos os 19 usam `CNPJ_CIA`/`DT_REFER`**, diferente do
   FCA/FRE cujos satélites trocam de convenção · META = `meta_dfp_cia_aberta_txt.zip` (**infixo
   `_txt`**; as outras 3 dão 404, inclusive a sem-prefixo que é a correta do FCA)
-- ⬜ **ingestion** o último `DOC`: ITR — `itr_cia_aberta_AAAA.zip` (ZIP anual, 30,14 MiB), com
-  **contagem de membros própria a medir** (medido até aqui: IPE 1, VLMO 2, FCA 10, CGVN 2, FRE 36,
-  DFP 19) · ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES`
+- ITR (Informações Trimestrais) — ✅ **ingestion COMPLETA (19/19 membros)** — **FECHA o `DOC` (7/7)**
+  `itr_cia_aberta_AAAA.zip` (31,63 MB, **3.640.994 linhas — 3× o DFP e o maior artefato da
+  biblioteca**) — `ingestion/cia_aberta/doc/itr/*` (`ItrCiaAberta*Reader`, base privada
+  `_base_itr_reader.py`); contracts `_internal/config/contracts/itr_cia_aberta.py`, **gerados dos
+  headers e pinados**. Mesma forma do DFP (19 membros → 6 listas; 16 demonstrações em 3).
+  ⚠️⚠️ **18 DOS 19 MEMBROS SÃO BYTE-IDÊNTICOS AO DFP E EXATAMENTE 1 NÃO É:** o `parecer` grafa
+  **`TP_RELAT_ESP`** (revisão especial, trimestral) onde o DFP grafa **`TP_RELAT_AUD`** (auditoria,
+  anual) — **mesma largura (8), mesma posição (5ª), 7 de 8 nomes**. Copiar o contract do DFP erraria
+  **uma** coluna e passaria em tudo menos no header pinado. **É o contraponto exato da lição do
+  DFP:** lá o achado foi "aqui membros irmãos SÃO idênticos"; levar isso ao dataset vizinho é o mesmo
+  erro — **18/19 idênticos é o que faz alguém copiar o 19º**. Pinado nas 2 direções, membro a membro,
+  contra as fixtures dos DOIS datasets.
+  ⚠️ Herdadas do DFP e **re-medidas** aqui: `VL_CONTA` 10 casas + **escala em `ESCALA_MOEDA`** ·
+  10 membros de lista idêntica ⇒ swap `con`↔`ind` só visível pelo **teste de identidade do membro**
+  (provado: `DRE_con` lendo `DRE_ind` fica vermelho) · `CD_CVM` com zero à esquerda · `ORDEM_EXERC`
+  duplica cada conta, **sem chave única** · todos os 19 usam `CNPJ_CIA`/`DT_REFER` (100% válidos,
+  medido sobre **valores distintos**) · todo `DT_*` 100% ISO · `COLUNA_DF` e `TP_RELAT_ESP`
+  parcialmente vazias · META = `meta_itr_cia_aberta_txt.zip` (infixo `_txt`; as outras 3 dão 404)
+- ⬜ **ingestion** `EVENTOS/RECOMPRA_ACOES` — **o único pendente do root `cia_aberta/`**
 
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
@@ -681,7 +697,8 @@ src/filings_cvm/
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
                            #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; COMPLETO em 4 fatias temáticas — 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF), 3 (diversidade, 11, AGREGADOS), 4 (remuneração/val. mob./transações, 10) = 36/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada e Documento_Parte_Relacionada guardam CNPJ+CPF e ficam de fora; membros de diversidade são AGREGADOS, não PII; participacao_sociedade tem 2 CNPJ cols com 792 placeholders 00000000000000)
                            #     doc/dfp/ — DFP (dfp_cia_aberta_AAAA.zip, 19 membros/~1,17M linhas, anual; INVERTE a armadilha: 16 membros colapsam em 3 listas IDÊNTICAS, e por isso um swap con/ind era invisível — fechado por teste de identidade do membro; VL_CONTA com 10 casas E escala em ESCALA_MOEDA; todos usam CNPJ_CIA; META com infixo _txt)
-                           #     DOC/ITR + EVENTOS pendentes (grounding próprio por dataset)
+                           #     doc/itr/ — ITR (itr_cia_aberta_AAAA.zip, 19 membros/3,64M linhas, anual; 18 dos 19 headers BYTE-IDÊNTICOS ao DFP e exatamente 1 não: parecer usa TP_RELAT_ESP onde o DFP usa TP_RELAT_AUD, mesma largura e posição — 18/19 idênticos é o que faz copiar o 19º; fecha o DOC 7/7)
+                           #     EVENTOS pendente (grounding próprio)
     _internal/             # PRIVATE — ships in the wheel, but not a public API
         utils/             # vendored helpers (dtypes, tabular_reader, retry, http_downloader,
                            #   text, zip_extractor, br_identifiers, typing/)
