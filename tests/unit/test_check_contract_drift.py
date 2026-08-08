@@ -390,6 +390,28 @@ def test_every_partial_dataset_is_a_real_meta_reader() -> None:
 	assert set(ccd._PARTIAL_DATASETS) <= set(ccd._META_MEMBERS)
 
 
+def test_every_meta_undescribed_reader_is_a_registered_member() -> None:
+	"""Each ``_META_UNDESCRIBED_READERS`` key is a real member of some dataset.
+
+	The entry suppresses a comparison, so a typo would silently suppress nothing while reading as
+	if it did — the same class of hole as a partial-dataset typo.
+	"""
+	set_members = {name for names in ccd._META_MEMBERS.values() for name in names}
+
+	assert set(ccd._META_UNDESCRIBED_READERS) <= set_members
+
+
+def test_a_meta_undescribed_reader_still_has_its_own_contract() -> None:
+	"""Skipping the META oracle must not leave a reader unchecked — its header oracle still runs.
+
+	The entry removes one of the two comparisons; the other has to still be reachable.
+	"""
+	dict_readers = iter_public_readers()
+
+	for str_name in ccd._META_UNDESCRIBED_READERS:
+		assert isinstance(ccd.contract_of(dict_readers[str_name]), FileContract), str_name
+
+
 def test_reader_to_meta_is_the_exact_inverse_of_the_registry() -> None:
 	"""``_READER_TO_META`` maps every member reader to its dataset — derived, never restated."""
 	dict_expected = {

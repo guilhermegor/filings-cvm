@@ -335,12 +335,17 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_LAMINA_FI,
 	META_MEDIDAS_MES_FIE,
 	META_OFERTA_DISTRIBUICAO,
+	META_PERFIL_MENSAL_FI,
 	META_REGISTRO_FUNDO_CLASSE,
 	META_VLMO_CIA_ABERTA,
 )
 from filings_cvm._internal.config.contracts.oferta_distribuicao import (
 	OFERTA_DISTRIBUICAO,
 	OFERTA_RESOLUCAO_160,
+)
+from filings_cvm._internal.config.contracts.perfil_mensal_fi import (
+	PERFIL_MENSAL_FI,
+	PERFIL_MENSAL_FI_PRE175,
 )
 from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
@@ -635,10 +640,13 @@ __all__ = [
 	"META_LAMINA_FI",
 	"META_MEDIDAS_MES_FIE",
 	"META_OFERTA_DISTRIBUICAO",
+	"META_PERFIL_MENSAL_FI",
 	"META_REGISTRO_FUNDO_CLASSE",
 	"META_VLMO_CIA_ABERTA",
 	"OFERTA_DISTRIBUICAO",
 	"OFERTA_RESOLUCAO_160",
+	"PERFIL_MENSAL_FI",
+	"PERFIL_MENSAL_FI_PRE175",
 	"REGISTRO_CLASSE",
 	"REGISTRO_FUNDO",
 	"REGISTRO_SUBCLASSE",

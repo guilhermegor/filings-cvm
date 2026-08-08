@@ -128,7 +128,7 @@ def test_every_reader_is_reachable_from_exactly_one_root() -> None:
 	"""
 	dict_readers = iter_public_readers()
 
-	assert len(dict_readers) == 283
+	assert len(dict_readers) == 286
 	assert all(issubclass(cls, IngestionReader) for cls in dict_readers.values())
 	# iter_public_readers raises on a duplicate name, so reaching here proves single ownership.
 	int_summed = sum(len(module.__all__) for module in iter_root_packages().values())
