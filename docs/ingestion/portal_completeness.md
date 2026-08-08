@@ -29,6 +29,22 @@ de deriva evita (`cad_fi` vs `cad_fi_hist`). Ao implementar um dataset do portal
 slug a `_IMPLEMENTED_PACKAGES`** — ele sai do gap. Um teste estrutural verifica que os slugs são
 bem-formados.
 
+### ⚠️ Esquecer essa edição é silencioso — e aconteceu
+
+A lista ficou parada em **21** slugs durante as Waves 3 e 4 inteiras, enquanto **23 datasets** eram
+entregues. Nada ficou vermelho: a omissão só aparece na **issue de rastreio**, que teste nenhum lê.
+Por semanas o job publicou "33 pendentes" quando a verdade eram **10**.
+
+O piso agora é testado, no **nível do root**: `unregistered_roots` exige que **todo portal root sob
+`ingestion/`** apareça como primeiro segmento de ao menos um slug (`cia_aberta-doc-itr` →
+`cia_aberta`). Os roots vêm de `iter_root_packages()`, que **levanta** em vez de devolver vazio, então
+o teste não pode passar por não ter achado nada.
+
+O gate é **deliberadamente grosso** — pergunta se o root aparece, nunca *quais* datasets dele estão
+prontos. Pegar isso exigiria derivar cobertura de nomes de reader, que é justamente a armadilha
+descrita acima. Ele pega o caso mais comum (um root novo inteiro entrar sem registro); um **segundo**
+dataset num root já registrado continua dependendo da edição manual.
+
 ## Só detecção — geração de reader fica de fora
 
 Reportar um gap é barato e seguro pré-1.0; gerar um reader **não** é — um reader gerado mexe num

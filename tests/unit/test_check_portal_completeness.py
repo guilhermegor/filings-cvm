@@ -9,6 +9,8 @@ import importlib.util
 from pathlib import Path
 import re
 
+from filings_cvm._internal.utils.introspection import iter_root_packages
+
 
 _PATH = Path(__file__).resolve().parents[2] / "bin" / "check_portal_completeness.py"
 _SPEC = importlib.util.spec_from_file_location("check_portal_completeness", _PATH)
@@ -86,3 +88,31 @@ def test_every_implemented_slug_is_a_well_formed_ckan_slug() -> None:
 def test_implemented_set_is_non_empty_and_deduped() -> None:
 	"""A frozenset can't hold duplicates; assert it's populated so the gap isn't the portal."""
 	assert len(cpc._IMPLEMENTED_PACKAGES) >= 20
+
+
+# ---- structural: no portal root ships unregistered ---------------------------------------------
+
+
+def test_unregistered_roots_flags_a_root_no_slug_covers() -> None:
+	"""A root contributing no slug is reported — the negative control for the gate below."""
+	assert cpc.unregistered_roots(frozenset({"fi", "securit"}), frozenset({"fi-doc-cda"})) == [
+		"securit"
+	]
+
+
+def test_unregistered_roots_accepts_a_root_covered_by_any_one_of_its_datasets() -> None:
+	"""Coverage is root-level: one slug is enough, and a slug for a root we lack is no error."""
+	frozenset_implemented = frozenset({"cia_aberta-doc-itr", "gone-cad"})
+
+	assert cpc.unregistered_roots(frozenset({"cia_aberta"}), frozenset_implemented) == []
+
+
+def test_every_portal_root_is_registered_in_the_implemented_set() -> None:
+	"""Every root under ``ingestion/`` contributes a slug — the drift that sat unseen for 2 waves.
+
+	Discovery goes through :func:`iter_root_packages`, which raises rather than returning empty,
+	so this cannot pass by finding nothing to check.
+	"""
+	frozenset_roots = frozenset(iter_root_packages())
+
+	assert cpc.unregistered_roots(frozenset_roots, cpc._IMPLEMENTED_PACKAGES) == []
