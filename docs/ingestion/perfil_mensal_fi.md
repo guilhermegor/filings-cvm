@@ -104,6 +104,7 @@ dataset (medido pela listagem). As outras três grafias que este portal usa em o
 
 ```python
 from datetime import date
+from pathlib import Path
 
 from filings_cvm.ingestion.fi import PerfilMensalPre175Reader, PerfilMensalReader
 
