@@ -285,6 +285,69 @@ df_ = EventualFiReader(date_ref=date(2025, 6, 15)).read()
 print(df_[["CNPJ_FUNDO_CLASSE", "TP_DOC", "DT_COMPTC", "LINK_ARQ"]].head())
 ```
 
+### `PerfilMensalReader` · `PerfilMensalPre175Reader`
+
+`filings_cvm.ingestion.fi.PerfilMensalReader` · `filings_cvm.ingestion.fi.PerfilMensalPre175Reader`
+
+Leem `perfil_mensal_fi_AAAAMM.csv` (`FI/DOC/PERFIL_MENSAL`) — o **perfil mensal** do fundo/classe:
+composição de cotistas por categoria, VaR e estresse, nocionais de derivativos e os blocos de
+concentração por comitente e por emissor. **CSV solto** (não ZIP), **particionado por mês**; 107
+colunas / 24.832 linhas / 13,19 MB em 2025-06. Página completa em
+[Perfil Mensal FI](ingestion/perfil_mensal_fi.md).
+
+É o lado da **leitura** do writer `PerfilMensal` (submission, V4) — mesmo padrão regulatório,
+**artefato diferente** (o dump aberto, não o XML de envio), então declara o seu próprio
+`FileContract`.
+
+> ⚠️⚠️ **Um padrão de nome, dois schemas.** A RCVM 175 trocou o bloco-chave no meio da série:
+> `CNPJ_FUNDO` (**106** colunas, até **`202311`**) virou `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE`
+> (**107**, a partir de **`202312`**). **As outras 105 colunas são idênticas** — por isso são dois
+> readers com um contract cada, cada um pinado ao seu próprio header publicado. Pedir a um reader um
+> mês do outro regime **levanta `ValueError` nomeando o irmão**, antes de baixar 13 MB.
+
+> ⚠️ **Só `CNPJ_FUNDO_CLASSE`/`CNPJ_FUNDO` é coluna de CNPJ.** As 6 colunas `CPF_CNPJ_*`
+> (`COMITENTE_1..3`, `EMISSOR_1..3`) guardam **CPF ou CNPJ** — a irmã `PF_PJ_*` é que diz qual, e o
+> caso `PF` ocorre na fonte — então ficam fora de `tuple_cnpj_cols`. São dado pessoal: as fixtures
+> são header-only.
+
+> ⚠️ **As 5 colunas `CENARIO_FPR_*` parecem numéricas e não são** — trazem `-0,0004` (vírgula
+> decimal) misturado a texto livre, e a META as declara `varchar(150)`. E `NR_DIA_CEM_PERC` /
+> `NR_DIA_CINQU_PERC` são `numeric(14,4)` apesar do prefixo `NR_`.
+
+#### `PerfilMensalReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **mês** de referência (só ano e mês são lidos). Padrão: hoje no regime aberto, e o **último mês coberto** no regime encerrado (`PerfilMensalPre175Reader` → `202311`). |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o `.csv` bruto. Padrão `None`: diretório temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+`PerfilMensalPre175Reader` tem a mesma assinatura.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Uma linha por fundo/classe no mês. `DT_COMPTC` e `DT_COTA_TAXA_PERFM` viram `datetime.date`; todo o
+resto é **texto exato** — as 53 colunas `numeric` (escalas 1/2/4) e as 17 `int` preservam o decimal
+publicado para um `Decimal` a jusante. `DT_COTA_TAXA_PERFM` chega ~84% vazia (vazio volta vazio) e
+traz sentinelas `1900-01-01`/`1901-01-01`, devolvidas como publicadas. Seis colunas chegam **100%
+vazias** em 2025-06 — vazio é propriedade do mês, não do schema. **Nenhuma chave única é afirmada.**
+
+Levanta `ValueError` (mês fora do regime do reader), `OSError` (falha de download) ou `ContractError`
+(CSV viola o contrato).
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion.fi import PerfilMensalPre175Reader, PerfilMensalReader
+
+df_ = PerfilMensalReader(date_ref=date(2025, 6, 15)).read()
+print(df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "PR_VAR_CARTEIRA", "NR_COTST_PF_VAREJO"]].head())
+
+df_pre = PerfilMensalPre175Reader(date_ref=date(2023, 6, 15)).read()
+print(df_pre[["CNPJ_FUNDO", "DT_COMPTC", "PR_VAR_CARTEIRA"]].head())
+```
+
 ### `CadastroFiReader`
 
 `filings_cvm.ingestion.CadastroFiReader`

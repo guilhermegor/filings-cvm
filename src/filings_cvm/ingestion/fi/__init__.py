@@ -47,6 +47,9 @@ from filings_cvm.ingestion.fi.doc import (
 	MetaEventualFiReader,
 	MetaInformeDiarioReader,
 	MetaLaminaReader,
+	MetaPerfilMensalFiReader,
+	PerfilMensalPre175Reader,
+	PerfilMensalReader,
 )
 
 
@@ -82,7 +85,10 @@ __all__ = [
 	"MetaEventualFiReader",
 	"MetaInformeDiarioReader",
 	"MetaLaminaReader",
+	"MetaPerfilMensalFiReader",
 	"MetaRegistroReader",
+	"PerfilMensalPre175Reader",
+	"PerfilMensalReader",
 	"RegistroClasseReader",
 	"RegistroFundoReader",
 	"RegistroSubclasseReader",

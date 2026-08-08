@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **46 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **47 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (46 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (47 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (17) ou `.zip` multi-membro (29); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (18) ou `.zip` multi-membro (29); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`46 = 17 .txt + 29 .zip`, e 46 contracts — o 47º nome
+⚠️ **Estes números são MEDIDOS do código** (`47 = 18 .txt + 29 .zip`, e 47 contracts — o 48º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
 `docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
@@ -279,6 +279,32 @@ envio; é o registro do que foi entregue, não um informe):
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
 - ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
+  · ✅ **ingestion** `perfil_mensal_fi_AAAAMM.csv` (**CSV solto**, não ZIP, **particionado por MÊS**,
+  série a partir de 201901; 107 cols / 24.832 linhas / 13,19 MB em 202506) —
+  `ingestion/fi/doc/perfil_mensal/*` (`PerfilMensalReader`, `PerfilMensalPre175Reader`, base privada
+  `_base_perfil_mensal_reader.py`); contracts `_internal/config/contracts/perfil_mensal_fi.py`,
+  **gerados dos headers e pinados** a `tests/fixtures/perfil_mensal_fi/*_header.csv`.
+  **Fecha a simetria: era o único padrão com writer de submission e sem reader.**
+  ⚠️⚠️ **UM PADRÃO DE NOME, DOIS SCHEMAS — e o corte é MEDIDO, não deduzido da norma:** a RCVM 175
+  trocou o bloco-chave no meio da série, `CNPJ_FUNDO` (**106** cols, até **202311**) → `TP_FUNDO_CLASSE`
+  + `CNPJ_FUNDO_CLASSE` (**107**, de **202312**). **As outras 105 são IDÊNTICAS** (`pré[1:] == pós[2:]`,
+  posição por posição) ⇒ derivar um contrato do outro acerta 105 de 106 nomes e só o header pinado
+  reprova. Daí **2 readers, 1 contract cada**, anti-cópia pinada nas 2 direções. Pedir a um reader um
+  mês do outro regime levanta **`ValueError` nomeando o irmão**, antes de baixar 13 MB; e o `date_ref`
+  padrão é **hoje** no regime aberto e o **último mês coberto** no encerrado (um reader que só levanta
+  sem argumentos não é construtível por gate genérico — foi o `test_reader_retry_policy` que provou).
+  ⚠️ **6 colunas `CPF_CNPJ_*`** (`COMITENTE_1..3`, `EMISSOR_1..3`) guardam **CPF ou CNPJ** — a irmã
+  `PF_PJ_*` (domínio `PF`/`PJ`) é que tipa, e o `PF` **ocorre na fonte** ⇒ **fora de `tuple_cnpj_cols`**,
+  fixtures header-only (LGPD). Só `CNPJ_FUNDO_CLASSE`/`CNPJ_FUNDO` é coluna de CNPJ.
+  ⚠️ **As 5 `CENARIO_FPR_*` parecem numéricas e NÃO são** — `-0,0004` com **vírgula** decimal misturado
+  a texto livre (`pessimista`), `varchar(150)` na META. ⚠️ `NR_DIA_CEM_PERC`/`NR_DIA_CINQU_PERC` são
+  `numeric(14,4)` apesar do prefixo `NR_` que nas vizinhas marca contagem — **o prefixo não é o tipo**.
+  ⚠️ 2 date cols (`DT_COMPTC`, `DT_COTA_TAXA_PERFM` ~84% vazia, com sentinelas `1900-01-01`/`1901-01-01`
+  honradas); **53 `numeric` + 17 `int` ficam texto exato**; **6 colunas 100% vazias** em 202506 — vazio é
+  propriedade do MÊS, não do schema. ⚠️ META = **`meta_perfil_mensal_fi.txt`**, `.txt` solto e **único
+  arquivo do `META/`** (medido pela listagem; as outras 3 grafias dão 404), com **107 campos = o header
+  pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
+  `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
 - ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
 - ⬜ Extrato das Informações sobre o Fundo — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
@@ -690,7 +716,9 @@ src/filings_cvm/
                            #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira),
-                           #       eventual/ (índice de documentos eventuais, CSV solto anual)
+                           #       eventual/ (índice de documentos eventuais, CSV solto anual),
+                           #       perfil_mensal/ (CSV solto MENSAL, 2 readers = 2 regimes RCVM 175
+                           #         + base privada; 106 cols até 202311, 107 de 202312)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
