@@ -51,12 +51,38 @@ _ISSUE_TITLE = "Datasets do portal da CVM ainda não implementados"
 
 # The CKAN package slugs this library already ingests. **Declared, never derived** — see the module
 # docstring. Keep in step with the CLAUDE.md catalog: implementing a portal dataset means adding
-# its slug here so it drops off the gap. 21 today.
+# its slug here so it drops off the gap. 44 today.
+#
+# ⚠️ Forgetting this edit is silent and it happened: the set sat at 21 for the whole of Waves 3
+# and 4 while 23 datasets shipped, so the weekly job kept publishing a gap list that was wrong by
+# more than half. Nothing was red — the omission only shows in the *issue*, which no test reads.
+# ``test_check_portal_completeness.py`` now asserts every portal root under ``ingestion/`` appears
+# as a slug prefix here, which catches a whole unregistered root (the dominant case).
 _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 	{
+		"adm_cart-cad",  # AdmCart{Pf,Pj,Diretor,Resp,Socios}Reader
+		"adm_fii-cad",  # CadastroAdmFiiReader
+		"agente_auton-cad",  # AgenteAuton{Pf,Pj}Reader
+		"agente_fiduc-cad",  # AgenteFiduc{Pf,Pj}Reader
+		"auditor-cad",  # Auditor{Pf,Pj}Reader
+		"cia_aberta-cad",  # CadastroCiaAbertaReader
+		"cia_aberta-doc-cgvn",  # CgvnCiaAberta*
+		"cia_aberta-doc-dfp",  # DfpCiaAberta*
+		"cia_aberta-doc-fca",  # FcaCiaAberta*
+		"cia_aberta-doc-fre",  # FreCiaAberta*
+		"cia_aberta-doc-ipe",  # IpeCiaAbertaReader
+		"cia_aberta-doc-itr",  # ItrCiaAberta*
+		"cia_aberta-doc-vlmo",  # VlmoCiaAberta*
+		"cia_aberta-eventos-recompra_acoes",  # RecompraAcoes*
+		"cia_estrang-cad",  # CadastroCiaEstrangReader
+		"cia_incent-cad",  # CadastroCiaIncentReader
+		"consultor_vlmob-cad",  # ConsultorVlmob{Pf,Pj,Diretor,Resp,Socios}Reader
+		"coord_oferta-cad",  # CoordOfertaReader + CoordOfertaRespReader
+		"crowdfunding-cad",  # CrowdfundingReader + Crowdfunding{AdmResp,Socios}Reader
 		"emissor_cepac-cad",  # CadastroEmissorCepacReader
 		"fi-cad",  # CadastroFiReader + Registro{Fundo,Classe,Subclasse} + CadastroFiHist*
 		"fi-doc-cda",  # CdaReader
+		"fi-doc-eventual",  # EventualFiReader
 		"fi-doc-inf_diario",  # InformeDiarioReader
 		"fi-doc-lamina",  # LaminaReader + LaminaCarteiraReader (rentab members still pending)
 		"fiagro-doc-inf_mensal",  # InfMensalFiagro*
@@ -70,6 +96,9 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"fii-doc-inf_trimestral",  # InfTrimestralFii*
 		"fip-doc-inf_quadrimestral",  # InfQuadrimestralFipReader
 		"fip-doc-inf_trimestral",  # InfTrimestralFipReader
+		"intermed-cad",  # IntermedReader + IntermedRespReader
+		"invnr-cad",  # InvnrRepres{Pf,Pj}Reader
+		"oferta-distrib",  # OfertaDistribuicaoReader + OfertaResolucao160Reader
 		"securit-doc-dfin_cra",  # DfinCraReader
 		"securit-doc-dfin_cri",  # DfinCriReader
 		"securit-doc-inf_mensal_cra",  # InfMensalCra*
@@ -102,6 +131,36 @@ def missing_packages(
 		``published − implemented``, sorted — the tracking backlog.
 	"""
 	return sorted(frozenset_published - frozenset_implemented)
+
+
+def unregistered_roots(
+	frozenset_roots: frozenset[str], frozenset_implemented: frozenset[str]
+) -> list[str]:
+	"""Return the portal roots that no declared slug covers, sorted.
+
+	A CKAN slug leads with its portal root (``cia_aberta-doc-itr`` → ``cia_aberta``), so a root
+	shipping readers while contributing **no** slug means the declaration was never updated. That
+	is the drift this catches, and it is otherwise invisible: the omission shows up only in the
+	tracking issue's gap list, which nothing asserts.
+
+	Deliberately **coarse** — it asks whether the root appears at all, never which of its datasets
+	are done. Deriving per-dataset coverage from reader names is the failure class the module
+	docstring rejects; a root-level floor needs no such mapping.
+
+	Parameters
+	----------
+	frozenset_roots : frozenset of str
+		The portal-root package names the library exposes under ``ingestion/``.
+	frozenset_implemented : frozenset of str
+		The slugs this library already ingests.
+
+	Returns
+	-------
+	list of str
+		The roots absent from every slug's leading segment, sorted.
+	"""
+	frozenset_covered = frozenset(str_slug.split("-")[0] for str_slug in frozenset_implemented)
+	return sorted(frozenset_roots - frozenset_covered)
 
 
 def build_issue_body(list_missing: list[str], int_published: int) -> str:
