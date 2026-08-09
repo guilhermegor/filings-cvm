@@ -643,6 +643,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../perfil_mensal_fi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perfil Mensal FI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cadastro_fi/" class="md-nav__link">
         
   
@@ -1814,6 +1842,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cobertura é declarada, nunca derivada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esquecer-essa-edicao-e-silencioso-e-aconteceu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Esquecer essa edição é silencioso — e aconteceu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2008,6 +2053,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cobertura é declarada, nunca derivada">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esquecer-essa-edicao-e-silencioso-e-aconteceu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Esquecer essa edição é silencioso — e aconteceu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2079,6 +2141,18 @@ famílias de reader (cadastro, registro, cad_fi_hist), e a granularidade do CKAN
 de deriva evita (<code>cad_fi</code> vs <code>cad_fi_hist</code>). Ao implementar um dataset do portal, <strong>adicione o seu
 slug a <code>_IMPLEMENTED_PACKAGES</code></strong> — ele sai do gap. Um teste estrutural verifica que os slugs são
 bem-formados.</p>
+<h3 id="esquecer-essa-edicao-e-silencioso-e-aconteceu">⚠️ Esquecer essa edição é silencioso — e aconteceu<a class="headerlink" href="#esquecer-essa-edicao-e-silencioso-e-aconteceu" title="Permanent link">&para;</a></h3>
+<p>A lista ficou parada em <strong>21</strong> slugs durante as Waves 3 e 4 inteiras, enquanto <strong>23 datasets</strong> eram
+entregues. Nada ficou vermelho: a omissão só aparece na <strong>issue de rastreio</strong>, que teste nenhum lê.
+Por semanas o job publicou "33 pendentes" quando a verdade eram <strong>10</strong>.</p>
+<p>O piso agora é testado, no <strong>nível do root</strong>: <code>unregistered_roots</code> exige que <strong>todo portal root sob
+<code>ingestion/</code></strong> apareça como primeiro segmento de ao menos um slug (<code>cia_aberta-doc-itr</code> →
+<code>cia_aberta</code>). Os roots vêm de <code>iter_root_packages()</code>, que <strong>levanta</strong> em vez de devolver vazio, então
+o teste não pode passar por não ter achado nada.</p>
+<p>O gate é <strong>deliberadamente grosso</strong> — pergunta se o root aparece, nunca <em>quais</em> datasets dele estão
+prontos. Pegar isso exigiria derivar cobertura de nomes de reader, que é justamente a armadilha
+descrita acima. Ele pega o caso mais comum (um root novo inteiro entrar sem registro); um <strong>segundo</strong>
+dataset num root já registrado continua dependendo da edição manual.</p>
 <h2 id="so-deteccao-geracao-de-reader-fica-de-fora">Só detecção — geração de reader fica de fora<a class="headerlink" href="#so-deteccao-geracao-de-reader-fica-de-fora" title="Permanent link">&para;</a></h2>
 <p>Reportar um gap é barato e seguro pré-1.0; gerar um reader <strong>não</strong> é — um reader gerado mexe num
 <code>FileContract</code> pinado ao header real, a superfície onde "testes verdes" não provam nada
