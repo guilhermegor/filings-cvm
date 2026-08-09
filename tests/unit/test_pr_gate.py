@@ -12,6 +12,7 @@ tests assert the contract that was written.
 
 import importlib.util
 from pathlib import Path
+import re
 import urllib.error
 
 import pytest
@@ -419,10 +420,23 @@ def test_workflow_declares_no_review_thread_trigger() -> None:
 	merely slow. The trigger reads so plausibly (the webhook event **does** exist, with `resolved`
 	/ `unresolved` types) that only `actionlint` or a live run tells you otherwise.
 
-	Asserted on the workflow's own text rather than a parsed YAML, so the check adds no dependency.
+	Asserted in **both** directions: a test that only forbids the bad trigger also passes on a
+	workflow with no triggers at all — the same total outage by another route. The absence check
+	matches the event as a **mapping key at any indentation**, so re-adding it nested, quoted or
+	differently indented still fails, while the name may still appear in the file's prose, where it
+	is the warning itself.
+
+	Read as text rather than parsed YAML on purpose: the contract here is that the file is a *valid
+	workflow*, and a YAML parser accepts the rejected version happily — it was well-formed YAML,
+	just not a workflow GitHub would run. Only `actionlint` decides that, so a YAML dependency that
+	cannot see the defect buys nothing.
 	"""
 	str_workflow = (_PATH.parents[1] / ".github" / "workflows" / "pr-gate.yaml").read_text("utf-8")
-	assert "\n  pull_request_review_thread:" not in str_workflow
+	assert re.search(r"^\s*pull_request:\s*$", str_workflow, re.MULTILINE) is not None
+	assert (
+		re.search(r"^\s*['\"]?pull_request_review_thread['\"]?\s*:", str_workflow, re.MULTILINE)
+		is None
+	)
 
 
 def test_enable_auto_merge_reports_a_graphql_refusal(

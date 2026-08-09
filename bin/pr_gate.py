@@ -586,6 +586,11 @@ def _merge_now(str_api: str, int_pr: int) -> bool:
 	is the *expected* outcome whenever anything is still blocking, and it is what tells the caller
 	to arm auto-merge instead — so it is reported, never raised.
 
+	``False`` means **any** unsuccessful attempt, not only a ``405``: a ``URLError`` or any other
+	``OSError`` surviving the retries lands here too. Falling back to auto-merge is right in both
+	cases — if something blocks, arming is accepted and GitHub takes over the waiting; if the call
+	merely failed, arming is the safety net for a PR that may already be mergeable.
+
 	Parameters
 	----------
 	str_api : str
@@ -596,7 +601,8 @@ def _merge_now(str_api: str, int_pr: int) -> bool:
 	Returns
 	-------
 	bool
-		True when the PR was merged; False when GitHub refused (something still blocks it).
+		True when the PR was merged; False after any unsuccessful attempt — GitHub refusing
+		because something still blocks it, or the call failing outright.
 	"""
 	try:
 		_api("PUT", f"{str_api}/pulls/{int_pr}/merge", {"merge_method": "squash"})

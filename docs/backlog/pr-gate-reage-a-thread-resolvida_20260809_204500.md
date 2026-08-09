@@ -34,23 +34,35 @@ partindo de "resolver thread não dispara nada na família `pull_request`" (verd
 ## Feito
 
 - [x] Gatilho inválido removido; o `on:` volta a ser só `pull_request`, com o comentário registrando
-  por que não se deve tentar de novo (nem com `pull_request_review*`).
+  por que não se deve tentar de novo. ⚠️ **Duas razões distintas, não uma:**
+  `pull_request_review_thread` **não é aceito no `on:`** (o arquivo é rejeitado);
+  `pull_request_review` e `pull_request_review_comment` **são** gatilhos válidos, mas **nenhum
+  dispara ao resolver uma thread** — logo não servem de substituto. Escrever "nem
+  `pull_request_review*`" achatava as duas coisas.
 - [x] `_enable_auto_merge` lê `errors` do corpo e imprime a razão no stderr.
 - [x] `_merge_now` (novo) devolve `bool`; o `main()` entrega o merge **no fim do run**:
   `if bool_merge and not _merge_now(...): _enable_auto_merge(...)`. Os dois casos são mutuamente
   exclusivos — a GitHub aceita o merge quando nada bloqueia, e aceita o armar quando algo bloqueia.
 - [x] **Não é preciso gatilho nenhum para a thread:** quem espera o último bloqueio cair é o
   auto-merge nativo, que observa check obrigatório **e** conversa não resolvida.
-- [x] `tests/unit/test_pr_gate.py`: 5 testes (72 passed) — inclusive um que **proíbe** o gatilho
-  inválido de voltar.
+- [x] `tests/unit/test_pr_gate.py`: **5 testes acrescentados** (4 no primeiro commit, 1 no segundo),
+  levando o arquivo de **67 para 72** — medido, não incrementado: `git diff main...HEAD` mostra 5
+  `+def test_`, todos sem `parametrize`, e `pytest -q` local fecha em `72 passed`. Um deles
+  **proíbe** o gatilho inválido de voltar, e é **negative-control**: reintroduzir o gatilho (na forma
+  citada `'pull_request_review_thread':`, que a asserção anterior por substring **deixava passar**)
+  põe o teste vermelho, e removê-lo o põe verde de novo.
 - [x] `docs/contributing.md` reescrito para a ordem certa + o aviso sobre o gatilho.
 
 ## Aberto
 
-- [ ] **Verificação de ponta a ponta neste próprio PR:** com a thread do CodeRabbit em aberto, o run
-  deve terminar com `not merged now (405) — arming auto-merge instead` e o PR com
-  `autoMergeRequest != null`. Ao resolver a thread, a **GitHub** funde sozinha, sem novo run.
-  Registrar aqui o que o log mostrou — é o dado que faltava desde o #214.
+- [ ] ⚠️ **Este PR NÃO pode ser a prova de ponta a ponta — e isso é medido, não suposto.** Ele toca
+  `tests/unit/test_pr_gate.py`, então `classify_risk` devolve `tests`, que **nunca** é
+  auto-fundível. O run `31336165715` confirma: `risk=tests size=L gate=passing auto_merge=False` — o
+  gate se recusou sozinho, corretamente. Logo nem `_merge_now` nem `_enable_auto_merge` chegam a ser
+  chamados aqui, e o caminho continua **sem exercício real**. A verificação precisa de um PR de
+  classe `docs`/`ci`/`deps` — o próximo da fila serve, e é ele que tem de registrar o log
+  (`not merged now (405) — arming auto-merge instead` + `autoMergeRequest != null`, e depois o merge
+  pelo próprio GitHub ao cair o último bloqueio).
 - [ ] **Falta um gate de lint de workflow (`actionlint`).** Foi ele que pegou isto, via CodeRabbit, e
   o repo não o tem: `yamllint` valida YAML, não o schema do Actions. Issue de follow-up + paridade
   pre-commit ↔ CI.
