@@ -17,6 +17,7 @@ nav:
       - Lâmina FIF: ingestion/lamina.md
       - Eventual FI: ingestion/eventual_fi.md
       - Perfil Mensal FI: ingestion/perfil_mensal_fi.md
+      - Extrato FI: ingestion/extrato_fi.md
       - Cadastro de Fundos (CAD/FI): ingestion/cadastro_fi.md
       - Registro RCVM 175: ingestion/registro.md
       - CAD/FI histórico: ingestion/cad_fi_hist.md

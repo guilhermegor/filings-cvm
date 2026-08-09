@@ -54,6 +54,11 @@ from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
+from filings_cvm._internal.config.contracts.extrato_fi import (
+	EXTRATO_FI,
+	EXTRATO_FI_PRE2020,
+	EXTRATO_FI_SNAPSHOT,
+)
 from filings_cvm._internal.config.contracts.inf_quadrimestral_fip import INF_QUADRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
 from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
@@ -111,6 +116,9 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"DfinCriReader": DFIN_CRI,
 	"DfinFiiReader": DFIN_FII,
 	"EventualFiReader": EVENTUAL_FI,
+	"ExtratoFiPre2020Reader": EXTRATO_FI_PRE2020,
+	"ExtratoFiReader": EXTRATO_FI,
+	"ExtratoFiSnapshotReader": EXTRATO_FI_SNAPSHOT,
 	"InfQuadrimestralFipReader": INF_QUADRIMESTRAL_FIP,
 	"InfTrimestralFipReader": INF_TRIMESTRAL_FIP,
 	"InformeDiarioReader": INFORME_DIARIO_FIF,
@@ -289,6 +297,13 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
 	"MetaEventualFiReader": ("EventualFiReader",),
+	# One META for the dataset; it describes the 117-column header, so it covers the current
+	# reader and the snapshot; the pre-2020 contract is out of its scope, as noted further down.
+	"MetaExtratoFiReader": (
+		"ExtratoFiReader",
+		"ExtratoFiSnapshotReader",
+		"ExtratoFiPre2020Reader",
+	),
 	"MetaInfAnualFiiReader": (
 		"InfAnualFiiAtivoAdquiridoReader",
 		"InfAnualFiiAtivoTransacaoReader",
@@ -416,6 +431,9 @@ _META_UNDESCRIBED_READERS: dict[str, str] = {
 	# all 107 of its fields, and no CNPJ_FUNDO at all. The pre-175 contract is pinned to its own
 	# published header instead, so the META can neither confirm nor refute that one.
 	"PerfilMensalPre175Reader": "META describes the post-RCVM 175 schema only",
+	# Same shape, different cause; the EXTRATO META lists the 117-column header only, so its
+	# 116-column pre-2020 contract has no field to reconcile against.
+	"ExtratoFiPre2020Reader": "META describes the 2020-onward schema only",
 }
 
 _PARTIAL_DATASETS: dict[str, str] = {
