@@ -118,7 +118,7 @@ O que o ruleset aplica:
 
 | Regra | Efeito |
 |---|---|
-| `pull_request` | Toda mudança passa por PR. **0 aprovações exigidas** — o GitHub não deixa o autor aprovar o próprio PR, então exigir ≥1 travaria um mantenedor solo. As conversas precisam estar resolvidas (`required_review_thread_resolution`), o que torna os comentários do Copilot **vinculantes**. |
+| `pull_request` | Toda mudança passa por PR. **0 aprovações exigidas** — o GitHub não deixa o autor aprovar o próprio PR, então exigir ≥1 travaria um mantenedor solo. As conversas precisam estar resolvidas (`required_review_thread_resolution`), o que torna **vinculante todo thread de review inline** — na prática, hoje, os do **CodeRabbit** (medido: foi essa regra que bloqueou os PRs #207 e #210 até as threads serem resolvidas). ⚠️ **Não** os do Copilot: a regra `copilot_code_review` está **inerte** neste repo (ver abaixo — é limitação de *plano de conta*), então ele não abre thread nenhuma. |
 | `required_status_checks` | Os testes (`Run Automated Tests`, nos 3 SOs) e o `build` da documentação **bloqueiam** o merge de fato. |
 | `code_scanning` | CodeQL: alertas de segurança `high_or_higher` e alertas de erro bloqueiam o merge. |
 | `copilot_code_review` | **Revisão automática do Copilot** em todo PR, revisando cada novo push (`review_on_push`). Grátis em repositórios públicos. |
