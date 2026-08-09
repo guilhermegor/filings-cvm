@@ -61,6 +61,10 @@ from filings_cvm._internal.config.contracts.ipe_cia_aberta import IPE_CIA_ABERTA
 from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
 from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
+from filings_cvm._internal.config.contracts.perfil_mensal_fi import (
+	PERFIL_MENSAL_FI,
+	PERFIL_MENSAL_FI_PRE175,
+)
 from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
 from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
 from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
@@ -114,6 +118,8 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"LaminaCarteiraReader": LAMINA_CARTEIRA_FIF,
 	"LaminaReader": LAMINA_FIF,
 	"MedidasMesFieReader": MEDIDAS_MES_FIE,
+	"PerfilMensalPre175Reader": PERFIL_MENSAL_FI_PRE175,
+	"PerfilMensalReader": PERFIL_MENSAL_FI,
 	"RegistroClasseReader": REGISTRO_CLASSE,
 	"RegistroFundoReader": REGISTRO_FUNDO,
 	"RegistroSubclasseReader": REGISTRO_SUBCLASSE,
@@ -380,6 +386,8 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaInvnrRepresReader": ("InvnrRepresPfReader", "InvnrRepresPjReader"),
 	"MetaLaminaReader": ("LaminaReader", "LaminaCarteiraReader"),
 	"MetaMedidasMesFieReader": ("MedidasMesFieReader",),
+	# The META lists the post-175 header only, but both readers share the dataset and its META URL.
+	"MetaPerfilMensalFiReader": ("PerfilMensalReader", "PerfilMensalPre175Reader"),
 	"MetaRegistroReader": (
 		"RegistroFundoReader",
 		"RegistroClasseReader",
@@ -395,6 +403,21 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 # dataset's META describes every member — including ones we have not implemented yet. This set is
 # grounded in the first live run (issue #115): every dataset here produced only expected
 # extra-column noise, never a required-column loss.
+# Readers whose contract the dataset's META **does not describe at all**, with the reason. Their
+# columns are left out of the META comparison; their *real header* oracle still runs, which is the
+# one that can actually vouch for them.
+#
+# This is the mirror image of ``_PARTIAL_DATASETS``: that one suppresses "META field the contract
+# omits", this one suppresses "contract column the META omits" — and only for a reader whose
+# contract was never in the META's scope. Without it the job reports the same explained line every
+# week forever, and a recurring known-false finding is how a report stops being read.
+_META_UNDESCRIBED_READERS: dict[str, str] = {
+	# CVM publishes one META for PERFIL_MENSAL and it describes the post-RCVM 175 header only —
+	# all 107 of its fields, and no CNPJ_FUNDO at all. The pre-175 contract is pinned to its own
+	# published header instead, so the META can neither confirm nor refute that one.
+	"PerfilMensalPre175Reader": "META describes the post-RCVM 175 schema only",
+}
+
 _PARTIAL_DATASETS: dict[str, str] = {
 	# CdaReader requires only the four key columns of a ~60-column file — a deliberate subset.
 	"MetaCdaReader": "subset contract — requires only the key columns of a ~60-column file",
@@ -682,6 +705,8 @@ def check_meta(
 	list_cols: list[str] = []
 	set_seen: set[str] = set()
 	for cls_member in tuple_members:
+		if cls_member.__name__ in _META_UNDESCRIBED_READERS:
+			continue
 		for str_col in contract_of(cls_member).tuple_required:
 			if str_col not in set_seen:
 				set_seen.add(str_col)

@@ -1,6 +1,7 @@
 """CVM open-data **document-dump** readers (`FI/DOC/*`).
 
-The monthly document dumps: Informe Diário (`INF_DIARIO`), CDA (`CDA`), and the Lâmina
+The monthly document dumps: Informe Diário (`INF_DIARIO`), CDA (`CDA`), Perfil Mensal
+(`PERFIL_MENSAL`, nested in :mod:`filings_cvm.ingestion.fi.doc.perfil_mensal`), and the Lâmina
 family (`LAMINA`, nested in :mod:`filings_cvm.ingestion.fi.doc.lamina`). Re-exported from
 `filings_cvm.ingestion`.
 """
@@ -19,6 +20,11 @@ from filings_cvm.ingestion.fi.doc.lamina import (
 	LaminaReader,
 	MetaLaminaReader,
 )
+from filings_cvm.ingestion.fi.doc.perfil_mensal import (
+	MetaPerfilMensalFiReader,
+	PerfilMensalPre175Reader,
+	PerfilMensalReader,
+)
 
 
 __all__ = [
@@ -31,4 +37,7 @@ __all__ = [
 	"MetaEventualFiReader",
 	"MetaInformeDiarioReader",
 	"MetaLaminaReader",
+	"MetaPerfilMensalFiReader",
+	"PerfilMensalPre175Reader",
+	"PerfilMensalReader",
 ]
