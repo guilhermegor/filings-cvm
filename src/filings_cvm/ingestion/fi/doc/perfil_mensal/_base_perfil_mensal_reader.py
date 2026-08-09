@@ -120,9 +120,11 @@ class _BasePerfilMensalReader(IngestionReader):
 		Raises
 		------
 		ValueError
-			If ``date_ref`` falls outside this reader's regime window. The message names the
-			sibling reader that serves that month, which a downstream ``ContractError`` about a
-			missing column would not.
+			If ``date_ref`` falls outside this reader's regime window. When another reader
+			serves that month the message **names it** — a downstream ``ContractError`` about a
+			missing column would not. When the month predates the published series it says so
+			instead, because pointing at a sibling that also lacks the month is worse than
+			useless.
 		"""
 		self._date_ref = date_ref if date_ref is not None else self._default_date_ref()
 		int_ym = self._date_ref.year * 100 + self._date_ref.month
