@@ -17,13 +17,20 @@ Three things happen here, in order:
    **opt-OUT**: a `ci`/`deps`/`docs` PR auto-merges by default (no label), so routine changes —
    Dependabot's weekly bumps included — flow hands-free; ``do-not-merge`` stops a specific PR. It
    rests on two repo settings (`allow_auto_merge`, `delete_branch_on_merge`) provisioned by
-   ``bin/enable_repo_rules.sh``. The mutation is answered with **HTTP 200 plus an ``errors``
-   array** when GitHub refuses it, so its outcome is read from the body, never from the status —
-   see :func:`_enable_auto_merge`. When the poll ends with the gate already ``passing`` and
-   nothing left to wait for, arming is pointless (GitHub refuses auto-merge on a PR that could be
-   merged right now), so the eligible PR is merged outright via ``PUT .../pulls/:n/merge`` — an
-   endpoint the ruleset still enforces server-side, so it is a shortcut through the *waiting*,
-   never through the *checks*.
+   ``bin/enable_repo_rules.sh``.
+
+**When the merge is handed over, and why it is the LAST thing the run does.** GitHub **refuses**
+``enablePullRequestAutoMerge`` on a pull request that could be merged right now ("Pull request is
+in clean status"), and it announces the refusal with **HTTP 200 plus an ``errors`` array** — not
+with a status code (see :func:`_enable_auto_merge`). Arming at the *start* of the run therefore
+hits the worst possible moment: at ``opened`` no check has registered and no review thread exists
+yet, so the PR looks mergeable, the mutation is refused, and the silence reads as success. That is
+the #214 defect, measured. So the hand-over happens **after** the poll: merge outright when the PR
+is actually mergeable (:func:`_merge_now`), and otherwise arm auto-merge, which is accepted
+precisely because something is still blocking. From there **GitHub** waits — for the required
+checks *and* for the unresolved conversations — and merges by itself. No workflow trigger observes
+a review thread being resolved (`pull_request_review_thread` is a webhook event, **not** a
+workflow trigger), and none needs to.
 
 **Why auto-MERGE and not auto-APPROVE.** The ruleset requires *0* approvals (a solo maintainer
 cannot approve their own PR), so a bot approval would unblock nothing — it would be decorative.
@@ -493,9 +500,11 @@ def _axes_from_checks(list_check_runs: list[dict]) -> list[tuple[str, str, str]]
 def main() -> int:
 	"""Classify the PR, label it, publish the sticky comment, and enable auto-merge when eligible.
 
-	Auto-merge is enabled once, up front — it is independent of the axes, because GitHub gates
-	the actual merge on the ruleset's required checks. The axes are then **polled in-run until
-	EVERY axis is terminal** (:func:`axes_are_terminal`) — *not* until the state stops being
+	The merge is handed over **last, never up front**. Arming auto-merge at ``opened`` — before any
+	check has registered and before any review thread exists — asks GitHub to queue a PR that looks
+	mergeable *right then*, which it refuses, silently (HTTP 200 + ``errors``). The axes are
+	**polled in-run until EVERY axis is terminal** (:func:`axes_are_terminal`) — *not* until the
+	state stops being
 	``pending``, which is the bug this loop used to have: a red axis outranks a pending one for
 	display, so a momentarily-red CodeQL broke the loop while other checks were still running,
 	freezing the sticky comment on "Blocked" for a PR that went green seconds later.
@@ -527,9 +536,6 @@ def main() -> int:
 	bool_merge = is_auto_mergeable(
 		str_risk, str_size, list_labels, bool_lockfile_only=is_lockfile_only(list_paths)
 	)
-	if bool_merge:
-		_enable_auto_merge(dict_pr["node_id"])
-
 	int_max_polls = int(os.environ.get("GATE_MAX_POLLS", "40"))
 	int_poll_s = int(os.environ.get("GATE_POLL_SECONDS", "20"))
 	str_state = "pending"
@@ -558,25 +564,27 @@ def main() -> int:
 		if int_poll < int_max_polls - 1:
 			time.sleep(int_poll_s)
 
-	# Arming auto-merge only helps while something is still pending. A run that ENDS on a green
-	# gate — every axis terminal and passing — has nothing left to wait for, and GitHub refuses to
-	# arm auto-merge on a PR that could be merged right now, so the eligible PR would sit open
-	# forever. That is the ordinary shape of a run started by the review-thread trigger — the
-	# checks went green long ago, and the last blocker was the thread that just got resolved.
-	if bool_merge and str_state == "passing":
-		_merge_now(str_api, int_pr)
+	# Hand the merge over, in the only order that works. Try the merge first, then arm auto-merge
+	# with whatever is left. The two are mutually exclusive by construction, since GitHub accepts
+	# the merge exactly when nothing blocks the PR, and accepts the arming exactly when something
+	# does. Whatever that blocker is — a red check, a check still running, an unresolved review
+	# thread — from here on GITHUB is the one watching for it to clear. The gate does not need, and
+	# cannot have, a trigger for that.
+	if bool_merge and not _merge_now(str_api, int_pr):
+		_enable_auto_merge(dict_pr["node_id"])
 
 	print(f"risk={str_risk} size={str_size} gate={str_state} auto_merge={bool_merge}")
 	return 0
 
 
-def _merge_now(str_api: str, int_pr: int) -> None:
+def _merge_now(str_api: str, int_pr: int) -> bool:
 	"""Squash-merge the pull request, letting GitHub refuse if the ruleset is not satisfied.
 
 	This is **not** a bypass: ``PUT /pulls/:n/merge`` is enforced server-side by the same
 	`pr-quality-gate` ruleset that holds native auto-merge, so a red check, a missing required
-	status or an unresolved review thread answers ``405`` and the merge does not happen. A failure
-	is non-fatal — the gate reports, the ruleset blocks — and the next trigger tries again.
+	status or an unresolved review thread answers ``405`` and the merge does not happen. A refusal
+	is the *expected* outcome whenever anything is still blocking, and it is what tells the caller
+	to arm auto-merge instead — so it is reported, never raised.
 
 	Parameters
 	----------
@@ -584,11 +592,18 @@ def _merge_now(str_api: str, int_pr: int) -> None:
 		Repo API base URL.
 	int_pr : int
 		Pull-request number.
+
+	Returns
+	-------
+	bool
+		True when the PR was merged; False when GitHub refused (something still blocks it).
 	"""
 	try:
 		_api("PUT", f"{str_api}/pulls/{int_pr}/merge", {"merge_method": "squash"})
 	except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
-		print(f"merge not performed: {cls_exc}", file=sys.stderr)
+		print(f"not merged now ({cls_exc}) — arming auto-merge instead", file=sys.stderr)
+		return False
+	return True
 
 
 def _enable_auto_merge(str_node_id: str) -> None:

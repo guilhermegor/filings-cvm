@@ -12,6 +12,7 @@ tests assert the contract that was written.
 
 import importlib.util
 from pathlib import Path
+import urllib.error
 
 import pytest
 
@@ -409,16 +410,19 @@ def test_client_error_is_not_retryable(int_status: int) -> None:
 	assert pr_gate.is_retryable_status(int_status) is False
 
 
-def test_workflow_reacts_to_a_resolved_review_thread() -> None:
-	"""The gate must be re-invited to look when a review thread is resolved.
+def test_workflow_declares_no_review_thread_trigger() -> None:
+	"""`pull_request_review_thread` is a webhook event, **not** a workflow trigger.
 
-	Regression (#216): resolving a thread fires **no** event in the `pull_request` family, so a PR
-	that opened `BLOCKED` on a review comment and went `CLEAN` when the thread was resolved was
-	never re-evaluated — measured on #214, which had to be merged by hand. Asserted on the
-	workflow's own text rather than a parsed YAML, so the check adds no dependency.
+	Regression (#216, caught on PR #217 before merge): adding it makes GitHub reject the whole file
+	— the run comes back "failed because of a workflow file issue" and the gate does not run at
+	all, so the PR gets no labels and no sticky comment, which looks exactly like a gate that is
+	merely slow. The trigger reads so plausibly (the webhook event **does** exist, with `resolved`
+	/ `unresolved` types) that only `actionlint` or a live run tells you otherwise.
+
+	Asserted on the workflow's own text rather than a parsed YAML, so the check adds no dependency.
 	"""
 	str_workflow = (_PATH.parents[1] / ".github" / "workflows" / "pr-gate.yaml").read_text("utf-8")
-	assert "\n  pull_request_review_thread:\n    types: [resolved, unresolved]\n" in str_workflow
+	assert "\n  pull_request_review_thread:" not in str_workflow
 
 
 def test_enable_auto_merge_reports_a_graphql_refusal(
@@ -483,7 +487,32 @@ def test_merge_now_squashes_through_the_merge_endpoint(monkeypatch: pytest.Monke
 			(str_method, str_url, dict_body)
 		),
 	)
-	pr_gate._merge_now("https://api.github.com/repos/o/r", 214)
+	assert pr_gate._merge_now("https://api.github.com/repos/o/r", 214) is True
 	assert list_calls == [
 		("PUT", "https://api.github.com/repos/o/r/pulls/214/merge", {"merge_method": "squash"})
 	]
+
+
+def test_merge_now_reports_false_when_github_refuses(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A refused merge is the SIGNAL to arm auto-merge, not an error to swallow.
+
+	GitHub answers 405 while anything still blocks the PR — a red check, a check still running, an
+	unresolved review thread. That is the case in which auto-merge is *accepted*, so `False` here
+	is what routes the caller to it.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam to refuse.
+	capsys : pytest.CaptureFixture
+		Captures the stderr line under test.
+	"""
+
+	def _refuse(*_args: object, **_kwargs: object) -> None:
+		raise urllib.error.HTTPError("u", 405, "Method Not Allowed", {}, None)  # type: ignore[arg-type]
+
+	monkeypatch.setattr(pr_gate, "_api", _refuse)
+	assert pr_gate._merge_now("https://api.github.com/repos/o/r", 214) is False
+	assert "arming auto-merge instead" in capsys.readouterr().err
