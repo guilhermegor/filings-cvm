@@ -12,8 +12,9 @@ while the yearly files carry far more. "Latest" is verified, not assumed: across
 that filed more than once in 2025, the snapshot date equals that year's maximum or is later —
 **zero** counter-examples.
 
-⚠️ **This is the one reader in the library that asserts a unique key.** One row per
-`CNPJ_FUNDO_CLASSE` is a measured property of *this artifact*; it does **not** hold for
+⚠️ **One row per `CNPJ_FUNDO_CLASSE` — the only unique key in the library, and it is *documented,
+not enforced*.** It is a measured property of *this artifact*; `read()` does not validate it, since
+a future duplicate would be a change at CVM for the drift job to catch. It does **not** hold for
 :class:`ExtratoFiReader`, whose grain is the filing.
 """
 

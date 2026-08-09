@@ -54,6 +54,10 @@ _SNAPSHOT_URL = _DIR_URL + "extrato_fi.csv"
 # ISO-only coercion would either drop it or misread day/month.
 _DATE_COLS: tuple[str, ...] = ("DT_COMPTC",)
 
+# First year CVM publishes at all (measured from the directory listing). A year before this has no
+# reader, so the window guard must say that rather than point at a sibling that also lacks it.
+_SERIES_FIRST_YEAR = 2015
+
 # Reader-owned default retry/backoff (CVM's open-data portal throttles under load): 5 attempts on a
 # capped exponential schedule (~2, 4, 8, 10 s). A per-instance ``retry_policy=`` still overrides.
 _DEFAULT_RETRY_POLICY: RetryPolicy = RetryPolicy(
@@ -208,9 +212,10 @@ class _BaseExtratoYearlyReader(_BaseExtratoReader):
 		Raises
 		------
 		ValueError
-			If ``date_ref``'s year falls outside this reader's regime window. The message names the
-			sibling reader that serves that year, which a downstream ``ContractError`` about a
-			missing column would not.
+			If ``date_ref``'s year falls outside this reader's regime window. When another reader
+			serves that year the message **names it** — a downstream ``ContractError`` about a
+			missing column would not. When the year predates the published series it says so
+			instead, because pointing at a sibling that also lacks the year is worse than useless.
 		"""
 		super().__init__(path_raw=path_raw, retry_policy=retry_policy, cls_logger=cls_logger)
 		self._date_ref = date_ref if date_ref is not None else self._default_date_ref()
@@ -218,10 +223,18 @@ class _BaseExtratoYearlyReader(_BaseExtratoReader):
 		if (self._FIRST_YEAR is not None and int_year < self._FIRST_YEAR) or (
 			self._LAST_YEAR is not None and int_year > self._LAST_YEAR
 		):
+			# A year before the series exists has no reader at all — naming the sibling there
+			# would send the caller to one that equally lacks it. Only an in-series year outside
+			# *this* regime has somewhere to go.
+			str_remedy = (
+				f"CVM publishes no file before {_SERIES_FIRST_YEAR}"
+				if int_year < _SERIES_FIRST_YEAR
+				else f"use {self._SIBLING} for that year"
+			)
 			raise ValueError(
 				f"{type(self).__name__} covers {self._LABEL} years "
 				f"{self._FIRST_YEAR or '...'}-{self._LAST_YEAR or '...'}; {int_year} is outside "
-				f"it — use {self._SIBLING} for that year"
+				f"it — {str_remedy}"
 			)
 		self._str_url = _YEARLY_URL.format(year=int_year)
 		self._str_filename = f"extrato_fi_{int_year}.csv"

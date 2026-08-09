@@ -18,9 +18,11 @@ the snapshot), while the yearly files carry far more (2025: 13.590 rows against 
 the snapshot). "Latest" was **verified**, not assumed: across the 2.469 funds with more than one
 filing in 2025, the snapshot date equals that year's maximum or is later — **zero** exceptions.
 
-⚠️ **This is the first artifact in the library with a genuine unique key.** Every other reader
-asserts "no grain is asserted"; here one row per ``CNPJ_FUNDO_CLASSE`` is a measured trait of the
-snapshot (it does **not** hold for the yearly files, where a fund may file repeatedly).
+⚠️ **This is the first artifact in the library whose key is unique — but the library does not
+enforce it.** One row per ``CNPJ_FUNDO_CLASSE`` is a **measured property of the source**, recorded
+here and in the docs; ``read()`` does not validate it, because a future duplicate would be a change
+at CVM, which is the drift job's job to notice, not a reason to make readers thick. It does **not**
+hold for the yearly files, where a fund may file repeatedly.
 
 ⚠️ **The yearly series carries two schemas, and the cutover is NOT RCVM 175.** Measured over the
 published headers:

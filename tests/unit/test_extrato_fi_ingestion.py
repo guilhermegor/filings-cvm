@@ -203,7 +203,6 @@ def test_the_snapshot_reads_the_unpartitioned_url(monkeypatch: pytest.MonkeyPatc
 	[
 		(ExtratoFiReader, date(2019, 12, 31), "ExtratoFiPre2020Reader"),
 		(ExtratoFiPre2020Reader, date(2020, 1, 1), "ExtratoFiReader"),
-		(ExtratoFiPre2020Reader, date(2014, 12, 31), "ExtratoFiReader"),
 	],
 )
 def test_a_year_outside_the_regime_raises_and_names_the_sibling(
@@ -212,6 +211,19 @@ def test_a_year_outside_the_regime_raises_and_names_the_sibling(
 	"""Asking a reader for the other regime's year fails fast, before any download."""
 	with pytest.raises(ValueError, match=str_sibling):
 		cls_reader(date_bad)
+
+
+def test_a_year_before_the_series_does_not_point_at_a_sibling() -> None:
+	"""2014 predates the published series, so **no** reader serves it.
+
+	Naming the sibling here would be actively wrong: ``ExtratoFiReader`` covers 2020 onward and
+	lacks 2014 just as much. The guard has to distinguish "the other regime has it" from "nobody
+	has it".
+	"""
+	with pytest.raises(ValueError, match="publishes no file before 2015") as exc:
+		ExtratoFiPre2020Reader(date(2014, 12, 31))
+
+	assert "ExtratoFiReader" not in str(exc.value)
 
 
 @pytest.mark.parametrize(

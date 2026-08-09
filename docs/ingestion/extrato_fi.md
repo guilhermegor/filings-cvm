@@ -33,9 +33,11 @@ A listagem do diretório entrega o que os nomes escondem:
 - "É o **mais recente**" foi **verificado**: nos **2.469** fundos com mais de uma entrega em 2025, a
   data do snapshot é o máximo do ano ou posterior — **zero** contraexemplos.
 
-> ⚠️ **É o único reader da biblioteca que afirma chave única.** Todos os outros dizem "nenhuma chave
-> única é afirmada"; aqui *uma linha por `CNPJ_FUNDO_CLASSE`* é propriedade **medida do snapshot** —
-> e **não** vale para o `ExtratoFiReader`, cujo grão é a entrega.
+> ⚠️ **É o único artefato do acervo com chave única — e ela é DOCUMENTADA, não imposta.** Todos os
+> outros readers dizem "nenhuma chave única é afirmada"; aqui *uma linha por `CNPJ_FUNDO_CLASSE`* é
+> propriedade **medida da fonte**. O `read()` **não** valida: uma duplicata futura seria mudança na
+> CVM, que é trabalho do job de deriva detectar, não motivo para engordar o reader. E **não** vale
+> para o `ExtratoFiReader`, cujo grão é a entrega.
 
 A CVM sobrescreve o snapshot no lugar, então só um `path_raw` persistido guarda o que ele dizia
 naquele dia.

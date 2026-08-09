@@ -214,6 +214,18 @@ def test_a_month_outside_the_regime_raises_and_names_the_sibling(
 		cls_reader(date_bad)
 
 
+def test_a_month_before_the_series_does_not_point_at_a_sibling() -> None:
+	"""2018-12 predates the published series, so **no** reader serves it.
+
+	Naming the sibling would be actively wrong: ``PerfilMensalReader`` covers ``202312`` onward and
+	lacks 2018 just as much. The guard separates "the other regime has it" from "nobody has it".
+	"""
+	with pytest.raises(ValueError, match="publishes no file before 201901") as exc:
+		PerfilMensalPre175Reader(date(2018, 12, 31))
+
+	assert "PerfilMensalReader" not in str(exc.value)
+
+
 @pytest.mark.parametrize(
 	("cls_reader", "date_ok"),
 	[

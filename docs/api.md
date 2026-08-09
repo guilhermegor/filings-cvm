@@ -357,9 +357,11 @@ uso de derivativos e os limites `PR_*_MIN`/`PR_*_MAX` por tipo de ativo. Página
 [Extrato FI](ingestion/extrato_fi.md).
 
 > ⚠️⚠️ **O dataset publica DOIS artefatos.** `extrato_fi_AAAA.csv` (anual) traz **toda** entrega do
-> ano; `extrato_fi.csv` (URL fixa, sem ano) é um **snapshot**: **uma linha por fundo**, o extrato
-> mais recente de cada um — 38.454 linhas / 38.454 CNPJ distintos, medido. **É o único reader da
-> biblioteca que afirma chave única**, e ela **não** vale para o anual.
+> ano; `extrato_fi.csv` (URL fixa, sem ano) é um **snapshot**: **uma linha por fundo/classe**, o
+> extrato mais recente de cada um — 38.454 linhas / 38.454 `CNPJ_FUNDO_CLASSE` distintos, medido.
+> É o único artefato do acervo em que a chave é única — mas **a biblioteca não a impõe**: é
+> propriedade **medida da fonte**, documentada, não validada no `read()`. E **não** vale para o
+> anual, cujo grão é a entrega.
 
 > ⚠️⚠️ **A série anual tem dois schemas e o corte NÃO é RCVM 175.** `CNPJ_FUNDO` (**116** cols, até
 > **2019**) → `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE` (**117**, de **2020**). A RCVM 175 é de
