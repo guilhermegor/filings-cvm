@@ -51,6 +51,10 @@ _BASE_URL = "https://dados.cvm.gov.br/dados/FI/DOC/PERFIL_MENSAL/DADOS/perfil_me
 # touched only the leading key block, so the date columns provably cannot differ between them.
 _DATE_COLS: tuple[str, ...] = ("DT_COMPTC", "DT_COTA_TAXA_PERFM")
 
+# First month CVM publishes at all (measured from the directory listing). A month before this has
+# no reader, so the window guard must say that rather than point at a sibling that also lacks it.
+_SERIES_FIRST_YM = 201901
+
 # Reader-owned default retry/backoff (CVM's open-data portal throttles under load): 5 attempts on a
 # capped exponential schedule (~2, 4, 8, 10 s). Both readers inherit it via ``_RETRY_POLICY``; a
 # per-instance ``retry_policy=`` still overrides.
@@ -116,19 +120,28 @@ class _BasePerfilMensalReader(IngestionReader):
 		Raises
 		------
 		ValueError
-			If ``date_ref`` falls outside this reader's regime window. The message names the
-			sibling reader that serves that month, which a downstream ``ContractError`` about a
-			missing column would not.
+			If ``date_ref`` falls outside this reader's regime window. When another reader
+			serves that month the message **names it** — a downstream ``ContractError`` about a
+			missing column would not. When the month predates the published series it says so
+			instead, because pointing at a sibling that also lacks the month is worse than
+			useless.
 		"""
 		self._date_ref = date_ref if date_ref is not None else self._default_date_ref()
 		int_ym = self._date_ref.year * 100 + self._date_ref.month
 		if (self._FIRST_YM is not None and int_ym < self._FIRST_YM) or (
 			self._LAST_YM is not None and int_ym > self._LAST_YM
 		):
+			# A month before the series exists has no reader at all — naming the sibling there
+			# would send the caller to one that equally lacks it.
+			str_remedy = (
+				f"CVM publishes no file before {_SERIES_FIRST_YM}"
+				if int_ym < _SERIES_FIRST_YM
+				else f"use {self._SIBLING} for that month"
+			)
 			raise ValueError(
 				f"{type(self).__name__} covers {self._LABEL} months "
 				f"{self._FIRST_YM or '...'}-{self._LAST_YM or '...'}; {int_ym} is outside it — "
-				f"use {self._SIBLING} for that month"
+				f"{str_remedy}"
 			)
 		self._path_raw = path_raw
 		self._retry_policy = retry_policy if retry_policy is not None else self._RETRY_POLICY

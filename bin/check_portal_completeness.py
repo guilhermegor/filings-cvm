@@ -51,7 +51,7 @@ _ISSUE_TITLE = "Datasets do portal da CVM ainda não implementados"
 
 # The CKAN package slugs this library already ingests. **Declared, never derived** — see the module
 # docstring. Keep in step with the CLAUDE.md catalog: implementing a portal dataset means adding
-# its slug here so it drops off the gap. 45 today.
+# its slug here so it drops off the gap. 46 today.
 #
 # ⚠️ Forgetting this edit is silent and it happened: the set sat at 21 for the whole of Waves 3
 # and 4 while 23 datasets shipped, so the weekly job kept publishing a gap list that was wrong by
@@ -83,6 +83,7 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"fi-cad",  # CadastroFiReader + Registro{Fundo,Classe,Subclasse} + CadastroFiHist*
 		"fi-doc-cda",  # CdaReader
 		"fi-doc-eventual",  # EventualFiReader
+		"fi-doc-extrato",  # ExtratoFiReader + ExtratoFiPre2020Reader + ExtratoFiSnapshotReader
 		"fi-doc-inf_diario",  # InformeDiarioReader
 		"fi-doc-lamina",  # LaminaReader + LaminaCarteiraReader (rentab members still pending)
 		"fi-doc-perfil_mensal",  # PerfilMensalReader + PerfilMensalPre175Reader

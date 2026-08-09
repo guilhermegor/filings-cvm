@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **47 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **48 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (47 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (48 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (18) ou `.zip` multi-membro (29); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (19) ou `.zip` multi-membro (29); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`47 = 18 .txt + 29 .zip`, e 47 contracts — o 48º nome
+⚠️ **Estes números são MEDIDOS do código** (`48 = 19 .txt + 29 .zip`, e 48 contracts — o 49º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
 `docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
@@ -306,7 +306,30 @@ envio; é o registro do que foi entregue, não um informe):
   pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
   `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
 - ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
-- ⬜ Extrato das Informações sobre o Fundo — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+- Extrato das Informações sobre o Fundo — ✅ **ingestion** dataset `FI/DOC/EXTRATO`, que publica
+  **DOIS artefatos**: `extrato_fi_AAAA.csv` (**CSV solto anual**, 2015–2026, **toda** entrega do ano)
+  e `extrato_fi.csv` (**URL fixa, sem ano**) — `ingestion/fi/doc/extrato/*` (`ExtratoFiReader` 117c
+  2020+, `ExtratoFiPre2020Reader` 116c 2015–2019, `ExtratoFiSnapshotReader`, bases privadas
+  `_base_extrato_reader.py`); contracts `_internal/config/contracts/extrato_fi.py`, **gerados dos
+  headers e pinados** a `tests/fixtures/extrato_fi/*_header.csv`.
+  ⚠️⚠️ **O `extrato_fi.csv` é SNAPSHOT, não o acumulado** — 38.454 linhas / **38.454 CNPJ distintos**
+  ⇒ 1 linha por fundo, o extrato mais recente de cada um; `DT_COMPTC` cobre 2015–2026 porque cada
+  fundo traz a data do SEU último. Toda linha dele também está no anual (**0** exclusivas), e o anual
+  tem muito mais (2025: 13.590 × 8.455). "Mais recente" **verificado**: nos 2.469 fundos com >1
+  entrega em 2025, **zero** contraexemplos. **É o ÚNICO reader do acervo que afirma CHAVE ÚNICA** — e
+  ela **não** vale para o anual, cujo grão é a entrega.
+  ⚠️⚠️ **Corte de schema em 2019→2020 e NÃO é RCVM 175:** `CNPJ_FUNDO` (116c) → `TP_FUNDO_CLASSE`+
+  `CNPJ_FUNDO_CLASSE` (117c). **Mesma troca do PERFIL_MENSAL, data diferente** (lá `202312`, aqui
+  `2020`) — a RCVM 175 é de **dez/2022**, logo não é a causa. **Por isso o reader é `Pre2020`, não
+  `Pre175`: nome é afirmação**, e copiar o do vizinho afirmaria causa que as datas desmentem (pinado
+  por teste). As outras **115 colunas são idênticas**, posição por posição.
+  ⚠️ **Só `DT_COMPTC` é data** (1 de 117 na META); **`PRAZO` é `varchar` com `DD/MM/YYYY`** e fica
+  texto (coagir misparseia dia/mês). **74 `numeric` + 4 `decimal` + 4 `int`** ficam texto exato, com
+  até **12 casas** (`TAXA_PERFM` = `0.010000000000`). Aspas existem e são literais sob `QUOTE_NONE`;
+  **zero linhas ragged** nos 3 artefatos. META = `meta_extrato_fi.txt` (`.txt` solto, único do
+  `META/`), **117 campos = o header atual exatamente** ⇒ **não é oráculo do contrato pré-2020**
+  (registrado em `_META_UNDESCRIBED_READERS`)
+- ⬜ **submission** Extrato — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
@@ -719,6 +742,9 @@ src/filings_cvm/
                            #       eventual/ (índice de documentos eventuais, CSV solto anual),
                            #       perfil_mensal/ (CSV solto MENSAL, 2 readers = 2 regimes RCVM 175
                            #         + base privada; 106 cols até 202311, 107 de 202312)
+                           #       extrato/ (DOIS artefatos: anual 2015-2026 + snapshot de URL fixa;
+                           #         3 readers, corte 116->117 cols em 2020 que NAO e RCVM 175;
+                           #         o snapshot e o unico reader com CHAVE UNICA)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)

@@ -118,6 +118,11 @@ from filings_cvm._internal.config.contracts.dfp_cia_aberta import (
 )
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
+from filings_cvm._internal.config.contracts.extrato_fi import (
+	EXTRATO_FI,
+	EXTRATO_FI_PRE2020,
+	EXTRATO_FI_SNAPSHOT,
+)
 from filings_cvm._internal.config.contracts.fca_cia_aberta import (
 	FCA_CIA_ABERTA,
 	FCA_CIA_ABERTA_AUDITOR,
@@ -317,6 +322,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_DFIN_FII,
 	META_DFP_CIA_ABERTA,
 	META_EVENTUAL_FI,
+	META_EXTRATO_FI,
 	META_FCA_CIA_ABERTA,
 	META_FRE_CIA_ABERTA,
 	META_INF_ANUAL_FII,
@@ -444,6 +450,9 @@ __all__ = [
 	"DFP_CIA_ABERTA_DVA_IND",
 	"DFP_CIA_ABERTA_PARECER",
 	"EVENTUAL_FI",
+	"EXTRATO_FI",
+	"EXTRATO_FI_PRE2020",
+	"EXTRATO_FI_SNAPSHOT",
 	"EXAMPLE_SOURCE",
 	"FCA_CIA_ABERTA",
 	"FCA_CIA_ABERTA_AUDITOR",
@@ -622,6 +631,7 @@ __all__ = [
 	"META_DFIN_FII",
 	"META_DFP_CIA_ABERTA",
 	"META_EVENTUAL_FI",
+	"META_EXTRATO_FI",
 	"META_FCA_CIA_ABERTA",
 	"META_FRE_CIA_ABERTA",
 	"META_INF_ANUAL_FII",

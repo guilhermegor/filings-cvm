@@ -348,6 +348,61 @@ df_pre = PerfilMensalPre175Reader(date_ref=date(2023, 6, 15)).read()
 print(df_pre[["CNPJ_FUNDO", "DT_COMPTC", "PR_VAR_CARTEIRA"]].head())
 ```
 
+### `ExtratoFiReader` · `ExtratoFiPre2020Reader` · `ExtratoFiSnapshotReader`
+
+`filings_cvm.ingestion.fi.ExtratoFiReader` · `…ExtratoFiPre2020Reader` · `…ExtratoFiSnapshotReader`
+
+Leem o **Extrato das Informações sobre o Fundo** (`FI/DOC/EXTRATO`) — condições cadastrais, taxas,
+uso de derivativos e os limites `PR_*_MIN`/`PR_*_MAX` por tipo de ativo. Página completa em
+[Extrato FI](ingestion/extrato_fi.md).
+
+> ⚠️⚠️ **O dataset publica DOIS artefatos.** `extrato_fi_AAAA.csv` (anual) traz **toda** entrega do
+> ano; `extrato_fi.csv` (URL fixa, sem ano) é um **snapshot**: **uma linha por fundo/classe**, o
+> extrato mais recente de cada um — 38.454 linhas / 38.454 `CNPJ_FUNDO_CLASSE` distintos, medido.
+> É o único artefato do acervo em que a chave é única — mas **a biblioteca não a impõe**: é
+> propriedade **medida da fonte**, documentada, não validada no `read()`. E **não** vale para o
+> anual, cujo grão é a entrega.
+
+> ⚠️⚠️ **A série anual tem dois schemas e o corte NÃO é RCVM 175.** `CNPJ_FUNDO` (**116** cols, até
+> **2019**) → `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE` (**117**, de **2020**). A RCVM 175 é de
+> dez/2022, então a norma não é a causa — daí o nome `Pre2020`, medido, e não `Pre175`. As outras
+> **115 colunas são idênticas**; cada contrato é pinado ao seu próprio header. Pedir a um reader um
+> ano do outro regime levanta `ValueError` nomeando o irmão.
+
+> ⚠️ **Só `DT_COMPTC` é data** (1 de 117 na META). `PRAZO` é `varchar` com `DD/MM/YYYY` e fica
+> **texto** — coagir misparsearia dia/mês. As 82 colunas numéricas ficam texto exato: algumas têm
+> **12 casas decimais**.
+
+#### `ExtratoFiReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `date_ref` | `datetime.date \| None` | Qualquer dia do **ano** de referência (só o ano é lido). Padrão: hoje no regime aberto, **2019** no encerrado (`ExtratoFiPre2020Reader`). |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o `.csv` bruto. Padrão `None`: temporário, descartado. |
+| `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. |
+| `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
+
+`ExtratoFiPre2020Reader` tem a mesma assinatura. **`ExtratoFiSnapshotReader` NÃO aceita `date_ref`**
+— a URL é fixa, e um período de referência seria uma mentira na assinatura.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+Anual: uma linha por extrato entregue no ano (**nenhuma chave única**). Snapshot: **uma linha por
+fundo/classe**. `DT_COMPTC` vira `datetime.date`; todo o resto é texto exato.
+
+Levanta `ValueError` (ano fora do regime), `OSError` (falha de download) ou `ContractError`.
+
+```python
+from datetime import date
+
+from filings_cvm.ingestion.fi import ExtratoFiReader, ExtratoFiSnapshotReader
+
+df_ = ExtratoFiSnapshotReader().read()
+print(df_[["CNPJ_FUNDO_CLASSE", "DT_COMPTC", "TAXA_ADM"]].head())
+
+df_2025 = ExtratoFiReader(date_ref=date(2025, 6, 15)).read()
+```
+
 ### `CadastroFiReader`
 
 `filings_cvm.ingestion.CadastroFiReader`
