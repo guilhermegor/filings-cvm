@@ -17,7 +17,13 @@ Three things happen here, in order:
    **opt-OUT**: a `ci`/`deps`/`docs` PR auto-merges by default (no label), so routine changes —
    Dependabot's weekly bumps included — flow hands-free; ``do-not-merge`` stops a specific PR. It
    rests on two repo settings (`allow_auto_merge`, `delete_branch_on_merge`) provisioned by
-   ``bin/enable_repo_rules.sh`` — without the first, the mutation silently no-ops.
+   ``bin/enable_repo_rules.sh``. The mutation is answered with **HTTP 200 plus an ``errors``
+   array** when GitHub refuses it, so its outcome is read from the body, never from the status —
+   see :func:`_enable_auto_merge`. When the poll ends with the gate already ``passing`` and
+   nothing left to wait for, arming is pointless (GitHub refuses auto-merge on a PR that could be
+   merged right now), so the eligible PR is merged outright via ``PUT .../pulls/:n/merge`` — an
+   endpoint the ruleset still enforces server-side, so it is a shortcut through the *waiting*,
+   never through the *checks*.
 
 **Why auto-MERGE and not auto-APPROVE.** The ruleset requires *0* approvals (a solo maintainer
 cannot approve their own PR), so a bot approval would unblock nothing — it would be decorative.
@@ -552,8 +558,37 @@ def main() -> int:
 		if int_poll < int_max_polls - 1:
 			time.sleep(int_poll_s)
 
+	# Arming auto-merge only helps while something is still pending. A run that ENDS on a green
+	# gate — every axis terminal and passing — has nothing left to wait for, and GitHub refuses to
+	# arm auto-merge on a PR that could be merged right now, so the eligible PR would sit open
+	# forever. That is the ordinary shape of a run started by the review-thread trigger — the
+	# checks went green long ago, and the last blocker was the thread that just got resolved.
+	if bool_merge and str_state == "passing":
+		_merge_now(str_api, int_pr)
+
 	print(f"risk={str_risk} size={str_size} gate={str_state} auto_merge={bool_merge}")
 	return 0
+
+
+def _merge_now(str_api: str, int_pr: int) -> None:
+	"""Squash-merge the pull request, letting GitHub refuse if the ruleset is not satisfied.
+
+	This is **not** a bypass: ``PUT /pulls/:n/merge`` is enforced server-side by the same
+	`pr-quality-gate` ruleset that holds native auto-merge, so a red check, a missing required
+	status or an unresolved review thread answers ``405`` and the merge does not happen. A failure
+	is non-fatal — the gate reports, the ruleset blocks — and the next trigger tries again.
+
+	Parameters
+	----------
+	str_api : str
+		Repo API base URL.
+	int_pr : int
+		Pull-request number.
+	"""
+	try:
+		_api("PUT", f"{str_api}/pulls/{int_pr}/merge", {"merge_method": "squash"})
+	except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
+		print(f"merge not performed: {cls_exc}", file=sys.stderr)
 
 
 def _enable_auto_merge(str_node_id: str) -> None:
@@ -572,13 +607,23 @@ def _enable_auto_merge(str_node_id: str) -> None:
 		"input: {pullRequestId: $id, mergeMethod: SQUASH}) { clientMutationId } }"
 	)
 	try:
-		_api(
+		dict_response = _api(
 			"POST",
 			"https://api.github.com/graphql",
 			{"query": str_query, "variables": {"id": str_node_id}},
 		)
 	except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
 		print(f"auto-merge not enabled: {cls_exc}", file=sys.stderr)
+		return
+	# GraphQL answers a REFUSAL with HTTP 200 and an `errors` array — "Pull request is in clean
+	# status", "auto merge is not allowed for this repository", … The status seam above sees none
+	# of that, so a refused mutation used to leave the log claiming auto-merge was on while the PR
+	# carried no auto-merge request at all. That is exactly what #214 showed, and with nothing
+	# printed there was no way to tell a refusal from a success. Read the body, not the status.
+	list_errors = (dict_response or {}).get("errors") or []
+	if list_errors:
+		str_detail = "; ".join(str(dict_err.get("message", dict_err)) for dict_err in list_errors)
+		print(f"auto-merge not enabled: {str_detail}", file=sys.stderr)
 
 
 def _apply_labels(

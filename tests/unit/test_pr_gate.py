@@ -1,8 +1,9 @@
 """Unit tests for the PR quality gate's classification logic.
 
-Only the **pure** functions are tested — classification, sizing, the auto-merge decision and the
-comment rendering. Every GitHub call lives behind `main()`/`_api()` and is never exercised here, so
-these tests need no network (the autouse guard in `conftest.py` blocks sockets anyway).
+Mostly the **pure** functions — classification, sizing, the auto-merge decision and the comment
+rendering. The two merge helpers are exercised too, with `_api` monkeypatched: the network lives
+behind that one seam, so asserting *what they ask GitHub for* still needs no socket (the autouse
+guard in `conftest.py` blocks them anyway).
 
 The rule that matters most: **`src/` is never auto-mergeable, at any size** — a one-character
 change to a `FileContract` is tiny *and* catastrophic, and every test still passes because the
@@ -406,3 +407,83 @@ def test_client_error_is_not_retryable(int_status: int) -> None:
 		The client-error HTTP status under test.
 	"""
 	assert pr_gate.is_retryable_status(int_status) is False
+
+
+def test_workflow_reacts_to_a_resolved_review_thread() -> None:
+	"""The gate must be re-invited to look when a review thread is resolved.
+
+	Regression (#216): resolving a thread fires **no** event in the `pull_request` family, so a PR
+	that opened `BLOCKED` on a review comment and went `CLEAN` when the thread was resolved was
+	never re-evaluated — measured on #214, which had to be merged by hand. Asserted on the
+	workflow's own text rather than a parsed YAML, so the check adds no dependency.
+	"""
+	str_workflow = (_PATH.parents[1] / ".github" / "workflows" / "pr-gate.yaml").read_text("utf-8")
+	assert "\n  pull_request_review_thread:\n    types: [resolved, unresolved]\n" in str_workflow
+
+
+def test_enable_auto_merge_reports_a_graphql_refusal(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A refused mutation must be visible — GraphQL says no with HTTP **200**, not with a status.
+
+	Regression (#214): the gate logged `auto_merge=True` while the PR carried no auto-merge request
+	at all, because the refusal lived in the response body that nobody read.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam, so no network is touched.
+	capsys : pytest.CaptureFixture
+		Captures the stderr line under test.
+	"""
+	monkeypatch.setattr(
+		pr_gate,
+		"_api",
+		lambda *_a, **_k: {"errors": [{"message": "Pull request is in clean status"}]},
+	)
+	pr_gate._enable_auto_merge("PR_node")
+	assert "auto-merge not enabled: Pull request is in clean status" in capsys.readouterr().err
+
+
+def test_enable_auto_merge_stays_silent_when_it_works(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A successful mutation says nothing — only a refusal is worth a line.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam, so no network is touched.
+	capsys : pytest.CaptureFixture
+		Captures stderr, asserted empty.
+	"""
+	monkeypatch.setattr(
+		pr_gate, "_api", lambda *_a, **_k: {"data": {"enablePullRequestAutoMerge": {}}}
+	)
+	pr_gate._enable_auto_merge("PR_node")
+	assert capsys.readouterr().err == ""
+
+
+def test_merge_now_squashes_through_the_merge_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The direct merge goes to the endpoint the ruleset still guards, with the squash method.
+
+	It is not a bypass: `PUT /pulls/:n/merge` is enforced server-side, so a red check or an
+	unresolved thread answers 405 and nothing merges.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam and records the call.
+	"""
+	list_calls: list[tuple[str, str, dict | None]] = []
+	monkeypatch.setattr(
+		pr_gate,
+		"_api",
+		lambda str_method, str_url, dict_body=None: list_calls.append(
+			(str_method, str_url, dict_body)
+		),
+	)
+	pr_gate._merge_now("https://api.github.com/repos/o/r", 214)
+	assert list_calls == [
+		("PUT", "https://api.github.com/repos/o/r/pulls/214/merge", {"merge_method": "squash"})
+	]

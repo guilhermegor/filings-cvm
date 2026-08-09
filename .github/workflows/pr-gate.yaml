@@ -10,14 +10,24 @@ name: PR Quality Gate
 # auto-merged at any size: a one-character change to a FileContract is tiny AND catastrophic, and
 # every test still passes because the tests assert the contract that was written.
 #
-# One trigger, on purpose. Adding `automerge` fires `labeled`, so opting in takes effect at once.
+# Two triggers, both about the merge becoming possible. Adding a label fires `labeled`, so opting
+# out with `do-not-merge` takes effect at once; RESOLVING A REVIEW THREAD fires nothing in the
+# `pull_request` family, which is why `pull_request_review_thread` is here. Measured on #214: a
+# `risk:docs`/`size:XS`/`gate:passing` PR sat BLOCKED on an open CodeRabbit thread, went CLEAN when
+# the thread was resolved, and was never merged — the gate had run once, at `opened`, and nothing
+# ever invited it to look again. Without this trigger the hands-free path only ever worked for PRs
+# nobody comments on, i.e. Dependabot's (CodeRabbit does not review bot PRs, measured in #208).
+#
 # The gate does NOT use a `workflow_run` trigger to catch check completion: that only fires from the
 # workflow file on the DEFAULT branch, so it can never fire for the PR that introduces the gate, and
 # is fragile even after merge. Instead `bin/pr_gate.py` polls the checks in-run until they finish, so
-# the sticky comment lands on the final result. Works on any branch, testable on this very PR.
+# the sticky comment lands on the final result. Works on any branch, testable on this very PR —
+# `pull_request_review_thread` checks out `refs/pull/N/merge` too, so it also runs the PR's own copy.
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  pull_request_review_thread:
+    types: [resolved, unresolved]
 
 permissions:
   contents: write        # enable auto-merge

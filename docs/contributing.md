@@ -197,6 +197,18 @@ checks obrigatórios do ruleset ficarem verdes. O script decide apenas *elegibil
 *se passou* continua sendo o ruleset. (Auto-**aprovação** seria inútil aqui: o ruleset exige **0**
 aprovações, então uma aprovação de bot não destravaria nada.)
 
+**Quando o gate reavalia — e por que uma thread de review conta.** Além dos eventos de `pull_request`
+(abertura, novo push, rótulo), o workflow escuta `pull_request_review_thread`. Resolver uma thread
+**não é** nenhum evento da família `pull_request`: sem esse gatilho, um PR que abriu bloqueado por um
+comentário de review ficava `CLEAN` e parado para sempre, porque o gate rodara uma vez só e ninguém o
+convidava a olhar de novo (medido no #214 — o auto-merge hands-free só funcionava de fato nos PRs que
+ninguém comenta, os do Dependabot).
+
+E quando a reavaliação encontra o PR **já verde**, armar auto-merge não resolve — a GitHub recusa
+armá-lo num PR que já poderia ser fundido. Nesse caso o gate funde direto, por `PUT /pulls/:n/merge`.
+Continua não burlando nada: esse endpoint é validado pelo mesmo ruleset do lado do servidor, então um
+check vermelho, um status obrigatório faltando ou uma thread em aberto devolvem `405` e nada funde.
+
 Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segunda fonte de verdade:
 *Require code quality results* (severidade subjetiva de IA no caminho do merge — `ruff`, `mypy` e os
 gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o
