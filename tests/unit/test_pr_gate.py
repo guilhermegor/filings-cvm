@@ -1,8 +1,9 @@
 """Unit tests for the PR quality gate's classification logic.
 
-Only the **pure** functions are tested — classification, sizing, the auto-merge decision and the
-comment rendering. Every GitHub call lives behind `main()`/`_api()` and is never exercised here, so
-these tests need no network (the autouse guard in `conftest.py` blocks sockets anyway).
+Mostly the **pure** functions — classification, sizing, the auto-merge decision and the comment
+rendering. The two merge helpers are exercised too, with `_api` monkeypatched: the network lives
+behind that one seam, so asserting *what they ask GitHub for* still needs no socket (the autouse
+guard in `conftest.py` blocks them anyway).
 
 The rule that matters most: **`src/` is never auto-mergeable, at any size** — a one-character
 change to a `FileContract` is tiny *and* catastrophic, and every test still passes because the
@@ -11,6 +12,8 @@ tests assert the contract that was written.
 
 import importlib.util
 from pathlib import Path
+import re
+import urllib.error
 
 import pytest
 
@@ -406,3 +409,124 @@ def test_client_error_is_not_retryable(int_status: int) -> None:
 		The client-error HTTP status under test.
 	"""
 	assert pr_gate.is_retryable_status(int_status) is False
+
+
+def test_workflow_declares_no_review_thread_trigger() -> None:
+	"""`pull_request_review_thread` is a webhook event, **not** a workflow trigger.
+
+	Regression (#216, caught on PR #217 before merge): adding it makes GitHub reject the whole file
+	— the run comes back "failed because of a workflow file issue" and the gate does not run at
+	all, so the PR gets no labels and no sticky comment, which looks exactly like a gate that is
+	merely slow. The trigger reads so plausibly (the webhook event **does** exist, with `resolved`
+	/ `unresolved` types) that only `actionlint` or a live run tells you otherwise.
+
+	Asserted in **both** directions: a test that only forbids the bad trigger also passes on a
+	workflow with no triggers at all — the same total outage by another route. The absence check
+	matches the event as a **mapping key at any indentation**, so re-adding it nested, quoted or
+	differently indented still fails, while the name may still appear in the file's prose, where it
+	is the warning itself.
+
+	Read as text rather than parsed YAML on purpose: the contract here is that the file is a *valid
+	workflow*, and a YAML parser accepts the rejected version happily — it was well-formed YAML,
+	just not a workflow GitHub would run. Only `actionlint` decides that, so a YAML dependency that
+	cannot see the defect buys nothing.
+	"""
+	str_workflow = (_PATH.parents[1] / ".github" / "workflows" / "pr-gate.yaml").read_text("utf-8")
+	assert re.search(r"^\s*pull_request:\s*$", str_workflow, re.MULTILINE) is not None
+	assert (
+		re.search(r"^\s*['\"]?pull_request_review_thread['\"]?\s*:", str_workflow, re.MULTILINE)
+		is None
+	)
+
+
+def test_enable_auto_merge_reports_a_graphql_refusal(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A refused mutation must be visible — GraphQL says no with HTTP **200**, not with a status.
+
+	Regression (#214): the gate logged `auto_merge=True` while the PR carried no auto-merge request
+	at all, because the refusal lived in the response body that nobody read.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam, so no network is touched.
+	capsys : pytest.CaptureFixture
+		Captures the stderr line under test.
+	"""
+	monkeypatch.setattr(
+		pr_gate,
+		"_api",
+		lambda *_a, **_k: {"errors": [{"message": "Pull request is in clean status"}]},
+	)
+	pr_gate._enable_auto_merge("PR_node")
+	assert "auto-merge not enabled: Pull request is in clean status" in capsys.readouterr().err
+
+
+def test_enable_auto_merge_stays_silent_when_it_works(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A successful mutation says nothing — only a refusal is worth a line.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam, so no network is touched.
+	capsys : pytest.CaptureFixture
+		Captures stderr, asserted empty.
+	"""
+	monkeypatch.setattr(
+		pr_gate, "_api", lambda *_a, **_k: {"data": {"enablePullRequestAutoMerge": {}}}
+	)
+	pr_gate._enable_auto_merge("PR_node")
+	assert capsys.readouterr().err == ""
+
+
+def test_merge_now_squashes_through_the_merge_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The direct merge goes to the endpoint the ruleset still guards, with the squash method.
+
+	It is not a bypass: `PUT /pulls/:n/merge` is enforced server-side, so a red check or an
+	unresolved thread answers 405 and nothing merges.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam and records the call.
+	"""
+	list_calls: list[tuple[str, str, dict | None]] = []
+	monkeypatch.setattr(
+		pr_gate,
+		"_api",
+		lambda str_method, str_url, dict_body=None: list_calls.append(
+			(str_method, str_url, dict_body)
+		),
+	)
+	assert pr_gate._merge_now("https://api.github.com/repos/o/r", 214) is True
+	assert list_calls == [
+		("PUT", "https://api.github.com/repos/o/r/pulls/214/merge", {"merge_method": "squash"})
+	]
+
+
+def test_merge_now_reports_false_when_github_refuses(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A refused merge is the SIGNAL to arm auto-merge, not an error to swallow.
+
+	GitHub answers 405 while anything still blocks the PR — a red check, a check still running, an
+	unresolved review thread. That is the case in which auto-merge is *accepted*, so `False` here
+	is what routes the caller to it.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Patches the API seam to refuse.
+	capsys : pytest.CaptureFixture
+		Captures the stderr line under test.
+	"""
+
+	def _refuse(*_args: object, **_kwargs: object) -> None:
+		raise urllib.error.HTTPError("u", 405, "Method Not Allowed", {}, None)  # type: ignore[arg-type]
+
+	monkeypatch.setattr(pr_gate, "_api", _refuse)
+	assert pr_gate._merge_now("https://api.github.com/repos/o/r", 214) is False
+	assert "arming auto-merge instead" in capsys.readouterr().err

@@ -197,6 +197,33 @@ checks obrigatórios do ruleset ficarem verdes. O script decide apenas *elegibil
 *se passou* continua sendo o ruleset. (Auto-**aprovação** seria inútil aqui: o ruleset exige **0**
 aprovações, então uma aprovação de bot não destravaria nada.)
 
+**Quando o merge é entregue — no fim do run, nunca no começo.** O gate não arma o auto-merge ao
+abrir o PR. O GitHub **recusa** `enablePullRequestAutoMerge` num PR que já poderia ser fundido
+("Pull request is in clean status"), e anuncia a recusa com **HTTP 200 + `errors`** — não com um
+status de erro. Armar no `opened` cai justamente no pior instante: nenhum check registrou ainda e
+nenhuma thread de review existe, então o PR *parece* fundível, a mutação é recusada, e o silêncio
+passa por sucesso. Foi esse o defeito do #214, e ele ficou invisível porque o log dizia
+`auto_merge=True`.
+
+Então a entrega acontece **depois** do poll: o gate tenta fundir direto (`PUT /pulls/:n/merge`) e cai
+no auto-merge **se a tentativa não tiver sucesso** — o caso esperado é a recusa do GitHub enquanto
+algo ainda bloqueia (`405`), mas a queda vale para **qualquer** falha da chamada, inclusive um erro
+de rede que sobreviva às retentativas. Nesse ponto armar o auto-merge é exatamente o
+comportamento certo: se algo bloqueia, ele é aceito e o GitHub assume a espera; se a falha foi de
+rede, ele é a rede de segurança para um PR que talvez já pudesse fundir. E se o próprio armar for
+recusado, a razão vai para o log — a recusa do GraphQL chega com **HTTP 200 + `errors`**, então o
+gate lê o corpo, nunca o status. Nada disso burla o ruleset: os dois caminhos são validados do lado
+do servidor.
+
+> ⚠️ **Não existe gatilho para "resolveram a thread".** `pull_request_review_thread` **não é aceito
+> no `on:`** — existe só como evento de *webhook*, e colocá-lo lá faz o GitHub **rejeitar o arquivo
+> inteiro** ("failed because of a workflow file issue"): o gate não roda de forma alguma, e o PR fica
+> sem rótulo e sem comentário, o que parece um gate apenas lento. `pull_request_review` e
+> `pull_request_review_comment`, por outro lado, **são** gatilhos válidos — só que nenhum deles
+> dispara ao resolver uma thread, então não servem de substituto. E não precisa de nenhum: quem
+> espera o último bloqueio cair — check obrigatório **ou** conversa não resolvida — é o próprio
+> auto-merge nativo, sem nenhum run de workflow envolvido.
+
 Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segunda fonte de verdade:
 *Require code quality results* (severidade subjetiva de IA no caminho do merge — `ruff`, `mypy` e os
 gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o

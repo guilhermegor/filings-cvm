@@ -11,6 +11,19 @@ name: PR Quality Gate
 # every test still passes because the tests assert the contract that was written.
 #
 # One trigger, on purpose. Adding `automerge` fires `labeled`, so opting in takes effect at once.
+#
+# ⚠️ `pull_request_review_thread` IS NOT A WORKFLOW TRIGGER — it exists only as a webhook event.
+# Adding it (attempted in #216) makes GitHub reject the whole file: the run comes back "failed
+# because of a workflow file issue" and the gate does not run AT ALL, so a PR gets no labels and no
+# sticky comment. Do not re-add it, and do not reach for `pull_request_review` /
+# `pull_request_review_comment` either — neither fires when a thread is resolved.
+#
+# There is no trigger for "the last blocker went away", and the gate does not need one: NATIVE
+# auto-merge is the thing that watches for it. GitHub holds an armed PR until every merge
+# requirement is met — required checks AND unresolved conversations — and merges by itself, with no
+# workflow run involved. That is why `bin/pr_gate.py` hands the merge over at the END of its run
+# (see `main`), when the PR is genuinely blocked and the mutation is accepted.
+#
 # The gate does NOT use a `workflow_run` trigger to catch check completion: that only fires from the
 # workflow file on the DEFAULT branch, so it can never fire for the PR that introduces the gate, and
 # is fragile even after merge. Instead `bin/pr_gate.py` polls the checks in-run until they finish, so
