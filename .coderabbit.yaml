@@ -1,0 +1,183 @@
+# CodeRabbit configuration — https://docs.coderabbit.ai/reference/configuration
+#
+# Two jobs, and only two:
+#
+# 1. `path_instructions` — turn this repo's conventions into something the review ENFORCES,
+#    instead of prose that only a reader of CLAUDE.md applies. Every instruction below is
+#    lifted from a CLAUDE.md that already governs that path; none is invented here.
+# 2. `tools` — decide, per linter, whether we already own that gate.
+#
+# ⚠️ THE TOOLS SECTION IS AN AUDIT, NEVER A BLANKET DISABLE. The rule people get half-right is
+# "disable the bot's linters that duplicate yours" — true, because two sources of truth for one
+# rule drift and double-report. The other half is what this repo learned the hard way: a linter
+# the bot runs AND WE DO NOT HAVE is not noise, it is evidence of a MISSING GATE. That is
+# literally how `actionlint` got here — CodeRabbit ran it, we did not, and it caught a workflow
+# GitHub rejected outright while every local hook was green (#217 → #218). So each entry below
+# answers one question — "do we own this gate?" — and a tool we do not own stays ON as a gap
+# detector until we either adopt it or record why we will not.
+#
+# ⚠️ Tools for languages this repo does not contain are NOT listed. They never fire, so an
+# `enabled: false` for them would be a decision nobody made, in a file nobody can then read.
+
+language: en-US
+
+reviews:
+  # The bot writes in English, like every other contributor-facing surface here (code, commit
+  # messages, CI output). Only the PUBLISHED documentation follows the site's language
+  # (mkdocs.yml theme.language, pt-BR). The boundary is the AUDIENCE, not the repository — so
+  # `language` above is NOT single-sourced from theme.language, deliberately.
+  # `assertive` on purpose, and it is a cost decision, not a taste one: this repo's protocol
+  # gives EVERY review thread a verified verdict (measured: 356–1126 chars per reply across 7
+  # real ones), so each extra finding costs a written answer. It is worth it while the
+  # path_instructions above are unproven — the pilot needs to see what they can catch, and a
+  # quiet profile would hide that behind "nothing to report". Revisit once #220 has its
+  # measurement.
+  profile: assertive
+
+  path_instructions:
+    - path: "src/filings_cvm/_internal/config/contracts/**"
+      instructions: >-
+        A FileContract must be GENERATED from the artifact's published header bytes and PINNED to
+        a fixture under tests/fixtures/<dataset>/, never transcribed and never copied from a
+        sibling dataset. A wrong contract passes 100% of the tests, because the tests assert the
+        contract that was written — the pinned header is the only non-tautological oracle. Flag
+        any contract whose column tuple appears derived from another dataset: sibling members
+        routinely share a width, a prefix, or even 18 of 19 headers and still differ in one
+        column. `tuple_cnpj_cols` declares ONLY columns that hold nothing but CNPJ: a column that
+        can hold a CPF (typically typed by a sibling PF/PJ column) stays out, even when the
+        current year's data happens to be all CNPJ. An empty `tuple_cnpj_cols` can be a measured
+        decision — do not flag it as an omission without checking the dataset notes.
+
+    - path: "src/filings_cvm/ingestion/**"
+      instructions: >-
+        Every reader takes `path_raw: Path | None = None` and routes the raw-artifact handling
+        through the shared `_internal/utils/raw_workspace.py` context manager — never re-branch on
+        the tempdir inside a reader. Reads go through `_internal.utils.tabular_reader`, typing
+        through `apply_dtypes` (never pandas inference), and Brazilian identifiers through
+        `_internal.utils.br_identifiers`. A returned frame must be provenance-stamped via
+        `stamp_provenance` AFTER contract validation. A new reader is registered along its own
+        package chain up to its portal root and STOPS there — never in the top-level
+        `filings_cvm/__init__.py` nor in `ingestion/__init__.py`; its contract also needs adding
+        to `_internal/config/contracts/__init__.py`, which nothing fails to catch on its own.
+
+    - path: "src/**/*.py"
+      instructions: >-
+        A number whose fractional part carries meaning is NEVER a binary float: `float64` cannot
+        represent most decimal fractions, the loss is silent and irreversible, and no contract or
+        single-value test fails. Such a column is exact text or `list_decimal_cols`. One public
+        class per module, named after the file; a private/shared base gets its own `_`-prefixed
+        file. Runtime type checking is mandatory: every class declares a checker metaclass from
+        `_internal.utils.typing` and every standalone function uses `@type_checker` — private
+        helpers included; the only exemptions are Pydantic models, the typing engine itself, and
+        dunders. NumPy docstrings, tabs, 99 columns, double quotes. Absolute imports only. Prefer
+        a dict dispatch over an if/elif chain that merely selects a value, and guard clauses over
+        nesting.
+
+    - path: "tests/**/*.py"
+      instructions: >-
+        pytest functions with fixtures, never unittest.TestCase. No test touches the real network
+        — mock the download boundary in the reader's own module, never the socket. Files under
+        tests/fixtures/ are VERBATIM source bytes and must not be reformatted, re-encoded, or
+        whitespace-normalised; they are the oracle. Watch for tautological assertions: a test that
+        builds its input from the same constant it then asserts proves nothing. A test whose
+        expectation is "absent"/"empty" is especially suspect, because an unrelated implementation
+        usually satisfies it too — assert the dtype or the identity, not just emptiness.
+
+    - path: "bin/**/*.sh"
+      instructions: >-
+        `set -euo pipefail`, logic in named functions driven by a `main "$@"` at the bottom, and
+        all user-facing status through `print_status <level> <message>` from lib/common.sh — never
+        a bare echo for status. Split `local x=$(cmd)` into a declaration plus an assignment
+        (SC2155 — the `local` keyword swallows the exit code). Guard every `cd` (`|| return` in a
+        sourced lib, `|| exit` in a standalone script). Any `# shellcheck disable=` other than the
+        globally excluded SC1091 must be line-scoped and carry a reason.
+
+    - path: ".github/workflows/**"
+      instructions: >-
+        Every lint/static/test gate must exist in BOTH .pre-commit-config.yaml AND this workflow,
+        changed in the same commit — CI runs its gates as explicit steps and does not invoke
+        `pre-commit run`, so adding a hook does not cover CI. An `on:` event must be a real
+        WORKFLOW TRIGGER, not merely a real webhook event: an invalid one makes GitHub reject the
+        whole file, so the workflow does not run at all and the symptom looks like a slow gate
+        rather than a dead one. A downloaded binary that will be EXECUTED must be pinned by
+        version and verified by checksum before extraction, and a failed install must fail the
+        job rather than fall through to a wrapper's graceful skip — a gate that reports its own
+        blindness as OK is worse than no gate.
+
+    - path: "docs/**"
+      instructions: >-
+        Everything under docs/ is published by MkDocs except folders listed in `exclude_docs`
+        (docs/backlog/), so a working note dropped at the docs/ root ships to readers. New
+        published pages are registered in mkdocs.yml `nav:` in the same commit. Any count or
+        roster restated in prose is derived knowledge that rots silently — when correcting one,
+        RE-MEASURE from the code, never increment.
+
+  auto_review:
+    enabled: true
+    drafts: false
+
+  tools:
+    # ── We own these gates. Disabled here so one rule has one home. ──────────────────────
+    # ruff.toml + pre-commit + CI
+    ruff:
+      enabled: false
+    # superseded by ruff
+    flake8:
+      enabled: false
+    pylint:
+      enabled: false
+    # bin/lint_shell.sh
+    shellcheck:
+      enabled: false
+    # bin/lint_yaml.sh + .yamllint
+    yamllint:
+      enabled: false
+    # bin/lint_sql.sh + .sqlfluff
+    sqlfluff:
+      enabled: false
+    # hadolint-docker hook
+    hadolint:
+      enabled: false
+    # ⭐ actionlint is the proof of this file's whole thesis: it lived ONLY here until #217
+    # showed a workflow GitHub rejected outright while every local hook was green. We adopted
+    # the gate (#218, bin/lint_actions.sh) — and only THEN did turning it off become honest.
+    actionlint:
+      enabled: false
+    # GitGuardian (a required check) + detect-private-key / detect-aws-credentials
+    gitleaks:
+      enabled: false
+    trufflehog:
+      enabled: false
+
+    # ── ⚠️ WE DO NOT OWN THESE. Left ON as gap detectors — see #220. ─────────────────────
+    # Each one is a standing question, not an oversight. Turning any of them off is only
+    # honest AFTER we adopt the gate or write down why we will not. What they report during
+    # this pilot is the measurement that decides.
+    #
+    # Actions SECURITY — NOT the same question as actionlint's schema check. This is the
+    # workflow-injection class (untrusted `github.event.*` interpolated into `run:`), and we
+    # have no gate for it at all.
+    zizmor:
+      enabled: true
+    # No markdown lint here; codespell covers spelling only.
+    markdownlint:
+      enabled: true
+    # The Makefile is a CI surface and is entirely ungated.
+    checkmake:
+      enabled: true
+    # Dependency CVEs — the still-open question in #90 (pip-audit vs Snyk).
+    osvScanner:
+      enabled: true
+    # PII: this repo handles CPF under LGPD and keeps its PII fixtures header-only ON PURPOSE,
+    # so this one is as likely to produce false positives as findings. Measuring which is the
+    # point of the pilot.
+    presidio:
+      enabled: true
+
+pre_merge_checks:
+  # `docstrings` is deliberately absent: bin/check_docstrings.py already owns it, in pre-commit
+  # and in CI, and a second source of truth for one rule drifts.
+  title:
+    mode: warning
+    requirements: >-
+      Conventional Commits: feat, fix, chore, docs, refactor, test — with an optional scope.
