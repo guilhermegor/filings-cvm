@@ -127,6 +127,7 @@ lint:
 	@bash bin/lint_shell.sh
 	@bash bin/lint_sql.sh
 	@bash bin/lint_yaml.sh
+	@bash bin/lint_actions.sh
 
 check_docstrings:
 	@$(POETRY) run python bin/check_docstrings.py

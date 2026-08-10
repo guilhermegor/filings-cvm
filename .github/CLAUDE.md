@@ -33,9 +33,35 @@ CI runs its gates as **explicit steps** (it does *not* invoke `pre-commit run`),
 adding a hook to `.pre-commit-config.yaml` does **not** automatically cover CI — you
 must add the matching step to `tests.yaml` yourself. The canonical set to keep
 mirrored: codespell, `check_docstrings.py`, `check_typing.py`, `check_provenance.py`,
-`check_dtypes.py`, ruff check + format, mypy, the shell/sql/yaml lint gates, unit +
-integration tests, and the coverage `fail-under` threshold. After changing a gate, confirm
-both files list it.
+`check_dtypes.py`, ruff check + format, mypy, the shell/sql/yaml/**actions** lint gates,
+unit + integration tests, and the coverage `fail-under` threshold. After changing a gate,
+confirm both files list it.
+
+### ⚠️ `yamllint` does not lint the workflows in this directory — `actionlint` does
+
+They answer different questions, and only one of them is about *this* folder:
+
+| tool | question | verdict on the #217 defect |
+|---|---|---|
+| `yamllint` | is this well-formed YAML, styled consistently? | ✅ **passed** |
+| `actionlint` | is this a workflow GitHub will actually run? | ❌ `unknown Webhook event` |
+
+`pull_request_review_thread` is a real **webhook** event and **not** a workflow trigger.
+Putting it in `on:` made GitHub reject the file whole — *"This run likely failed because of
+a workflow file issue"* — so **no run happened at all**: the PR got no labels and no gate
+comment, which reads like a slow gate rather than a dead one. Every local hook was green.
+
+So `bin/lint_actions.sh` (hook `lint-actions` + the CI step) is the gate for anything under
+`.github/workflows/`. Two things about it are deliberate:
+
+- **It is not a Poetry dev-dep.** `actionlint-py` is **sdist-only** and downloads the Go
+  binary at build time, which would put a network fetch inside every `poetry install` on all
+  three matrices (`shellcheck-py`/`shfmt-py` ship real wheels — that difference is the whole
+  argument). CI installs a pinned binary from the release page and **fails if it is missing**,
+  rather than falling through to the wrapper's graceful skip.
+- **It pins `SHELLCHECK_OPTS=--severity=warning`.** `actionlint` shells out to shellcheck for
+  every `run:` block; without the pin, inline workflow snippets would be held to a *stricter*
+  bar than `bin/*.sh` (`bin/CLAUDE.md`: warning-and-above). Schema errors are unaffected.
 
 The coverage floor is single-sourced in `.coveragerc` (`[report] fail_under`), so the
 pre-commit `coverage-check` hook and the CI coverage gate share one value — never pass a

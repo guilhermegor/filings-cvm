@@ -1,11 +1,14 @@
 name: Run Tests
 
 on:
+  # `workflow_call` is used by both release workflows, which gate on this workflow's job
+  # outcome via `needs:` — a failed called workflow fails the caller. It declares NO
+  # outputs: it used to expose `ready_for_release: ${{ jobs.test.result == 'success' }}`,
+  # which was dead AND wrong. Dead because nothing ever read it; wrong because inside
+  # `on.workflow_call.outputs.value` the `jobs.<id>` context exposes only `outputs`, never
+  # `result` — so the expression referenced a property that does not exist, and an output
+  # advertising "did the tests pass" could never say yes. Surfaced by actionlint (#218).
   workflow_call:
-    outputs:
-      ready_for_release:
-        description: "Whether all tests passed successfully"
-        value: ${{ jobs.test.result == 'success' }}
   workflow_dispatch:
   pull_request:
     branches:
@@ -163,17 +166,40 @@ jobs:
         # "found twice" error on the deeper DDD tree).
         run: cd src && poetry run mypy --config-file ../mypy.ini .
 
-      - name: Run Non-Python Lint Gates (shell, sql, yaml)
+      - name: Run Non-Python Lint Gates (shell, sql, yaml, actions)
         if: runner.os == 'Linux'
         # Mirrors `make lint` and the pre-commit lint-* hooks (one home, zero drift).
-        # shellcheck/shfmt are system tools; install them so the shell gate actually runs
-        # in CI (the wrappers skip gracefully on a box without them).
+        # shellcheck/shfmt/actionlint are system tools; install them so
+        # the gates actually RUN in CI — the wrappers skip gracefully on a box without
+        # them, which is right locally and would be a placebo here.
+        #
+        # actionlint is pinned and fetched from its release page, not piped from a remote
+        # install script, and NOT taken as a poetry dev-dep: `actionlint-py` is sdist-only
+        # and downloads the binary at build time, which would put a network fetch inside
+        # every `poetry install` on all three matrices.
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          # Pinning the VERSION only pins what to ask for; it does not pin what arrives. The
+          # digest is what makes the download reproducible and makes a swapped/corrupted
+          # asset fail loudly instead of being unpacked and RUN. Recompute on every bump:
+          #   sha256sum actionlint_<v>_linux_amd64.tar.gz
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
         run: |
           sudo apt-get update && sudo apt-get install -y shellcheck
           poetry run pip install shfmt-py >/dev/null 2>&1 || true
+          curl -sSLf -o /tmp/actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          echo "${ACTIONLINT_SHA256}  /tmp/actionlint.tar.gz" | sha256sum --check --status \
+            || { echo "actionlint checksum mismatch — refusing to extract"; exit 1; }
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          sudo install -m 0755 /tmp/actionlint /usr/local/bin/actionlint
+          # A failed install must FAIL here, never fall through to the wrapper's graceful
+          # skip — a gate that reports its own blindness as OK is worse than no gate.
+          command -v actionlint >/dev/null || { echo "actionlint missing after install"; exit 1; }
           bash bin/lint_shell.sh --check
           bash bin/lint_sql.sh
           bash bin/lint_yaml.sh
+          bash bin/lint_actions.sh
 
       - name: Run Integration Tests
         # `|| [ $? -eq 5 ]` tolerates pytest exit 5 ("no tests collected") so a
