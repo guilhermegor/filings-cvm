@@ -40,7 +40,7 @@ A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente an
 > sem comentário do gate) parece lentidão, não morte. O `actionlint` é **opcional localmente**:
 > `make lint` avisa e segue se ele não estiver instalado, mas na CI a ausência **falha o job**, de
 > propósito. Para tê-lo aqui, baixe o binário da página de releases
-> (<https://github.com/rhysd/actionlint>) — ele **não** entra como dev-dep do Poetry: o
+> (<https://github.com/rhysd/actionlint/releases>) — ele **não** entra como dev-dep do Poetry: o
 > `actionlint-py` é *sdist-only* e baixa o binário em tempo de build, o que colocaria um download
 > dentro de todo `poetry install`, nas três matrizes de SO.
 

@@ -87,7 +87,12 @@ main() {
 		bool_poetry_ok=true
 	fi
 
-	mapfile -t list_files < <(find .github/workflows -name '*.yaml' -o -name '*.yml' -type f)
+	# The parentheses are load-bearing: `-o` binds LOOSER than the implicit `-a`, so
+	# `-name '*.yaml' -o -name '*.yml' -type f` parses as
+	# `(-name '*.yaml') OR (-name '*.yml' AND -type f)` — the `-type f` guards only the
+	# second branch, and a DIRECTORY named `*.yaml` under .github/workflows would enter the
+	# list and make actionlint fail on it. Reproduced before fixing.
+	mapfile -t list_files < <(find .github/workflows \( -name '*.yaml' -o -name '*.yml' \) -type f)
 	if [[ ${#list_files[@]} -eq 0 ]]; then
 		print_status error "no workflows found under .github/workflows — refusing to pass vacuously"
 		exit 1
