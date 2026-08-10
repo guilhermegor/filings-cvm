@@ -87,15 +87,56 @@ gate ou escrever por que não. O que eles reportarem no piloto é a medição qu
    ⚠️ **O zero do #221 não mede o profile** — o diff é uma config declarativa mais um ledger, sem
    lógica a criticar. Amostra de 1, e da classe errada. **Não concluir nada daqui.**
 
-⚠️ **Sobre as `path_instructions`: ainda SEM sinal.** O review foi `No actionable comments`, então
-este PR **não** mede se elas mudam a revisão — mede só que o arquivo é lido. Seguem 2–3 PRs de
-medição real, e o primeiro com código de verdade é o que conta.
+⚠️ **Sobre as `path_instructions`: ainda SEM sinal nesta rodada.** O review foi
+`No actionable comments`, então este PR **não** mede se elas mudam a revisão — mede só que o arquivo
+é lido.
+
+## ✅ Medição 2 — PR #227 · **o primeiro sinal real, e ele veio das instruções**
+
+Primeiro PR revisado com a config completa em `main` (`code_guidelines` apontando para os
+`CLAUDE.md`, `assertive`, `abort_on_close: false`). **3 achados, os 3 marcados
+`_Source: Path instructions_`** — ou seja, produzidos pelas instruções, não pela análise genérica.
+**Os 3 procediam**, verificados contra o código antes de aceitar:
+
+| achado | verificação |
+|---|---|
+| faltava `docs/submission/` no checklist | a listagem de `docs/` traz `ingestion` **e** `submission` |
+| ⚠️ **regra de reader aplicada a writer** | `submission/__init__.py:34-35` reexporta **direto** (sem portal root) e `grep -rn FileContract src/filings_cvm/submission/*.py` volta **vazio** |
+| conclusão explícita só p/ mudança interna | deixava de fora a mudança **pública** que legitimamente não pede doc |
+
+⚠️⚠️ **O segundo é o achado que justifica o piloto inteiro.** Eu escrevi uma regra de **leitor** e a
+apliquei a um glob `{ingestion,submission}` que inclui **escritor** — onde as **duas** afirmações são
+falsas. A instrução mandaria o revisor cobrar `FileContract` e cadeia de portal root de um writer que
+não tem nem um nem outro: **revisão confiante e errada**, sem nada vermelho em lugar nenhum.
+
+E o detalhe que fecha o círculo: **esse era exatamente o risco escrito no *Reviewer Focus* do próprio
+PR** (*"instrução errada custa mais que instrução ausente"*). O risco que eu declarei se materializou
+no PR que o declarou — e quem pegou foi a config que o PR estava introduzindo.
+
+**Consequência de desenho:** a instrução foi **dividida por direção**. As duas metades desta
+biblioteca **não compartilham caminho de registro**, então um glob único sobre `{ingestion,submission}`
+é errado por construção. Comentário no arquivo registra o porquê, para ninguém re-unificar.
+
+**Comparação com a linha de base (`chill`, sem config):**
+
+| PR | profile | config | achados | procediam | origem |
+|---|---|---|---|---|---|
+| #210 | `chill` | — | 5 | 4 | genérica |
+| #217 | `chill` | — | 1 | 1 | genérica (`actionlint`) |
+| #219 | `chill` | — | 3 | 3 | genérica |
+| #221 | `assertive` | parcial | 0 | — | — (diff sem lógica) |
+| **#227** | `assertive` | **completa** | **3** | **3** | ⭐ **path instructions** |
+
+⚠️ **Ainda não dá para atribuir o resultado ao `profile`** — a amostra é 1 PR por configuração, e as
+classes de diff são diferentes. O que **está** medido é a **origem**: as instruções produzem achados
+que a análise genérica não produzia, e a precisão nesta rodada foi **3/3**.
 
 ## Aberto
 
-- [ ] **A medição das `path_instructions`** — ao longo de 2–3 PRs: o que ele passou a pegar que não
-  pegava, e o que virou ruído. **Linha de base sem config:** #210 (5 achados, 4 procediam), #214,
-  #217 (1, procedia), #219 (3, os 3 procediam).
+- [ ] **Continuar a medição** por mais 1–2 PRs com código de verdade (um reader novo é o caso ideal,
+  já que as instruções mais fortes são as de `contracts/**` e `ingestion/**`). Perguntas em aberto:
+  taxa de **ruído** (0 até agora) e se o `code_guidelines` (ler os `CLAUDE.md`) produz achado
+  próprio, distinguível dos das `path_instructions`.
 - [ ] **Gate de schema para `.coderabbit.yaml`** — hoje o `yamllint` aprova (é YAML válido), do
   mesmo jeito que aprovava o workflow inválido do #217. A validação que pegou isto foi **ad-hoc**
   contra o schema publicado; sem gate, o próximo erro de chave volta a ser silencioso.
