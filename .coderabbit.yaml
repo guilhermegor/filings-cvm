@@ -26,12 +26,22 @@ reviews:
   # messages, CI output). Only the PUBLISHED documentation follows the site's language
   # (mkdocs.yml theme.language, pt-BR). The boundary is the AUDIENCE, not the repository — so
   # `language` above is NOT single-sourced from theme.language, deliberately.
+  # profile — the three values, so a future revisit needs no doc lookup (schema.v2.json):
+  #   quiet      only the most important feedback
+  #   chill      balanced feedback              ← THE DEFAULT
+  #   assertive  more feedback, may feel nitpicky
+  #
+  # ⚠️ EVERY REVIEW BEFORE THIS FILE EXISTED RAN ON `chill`, by default — there was no
+  # .coderabbit.yaml in the repo. So the baseline recorded in the #220 ledger (#210: 5 findings,
+  # 4 valid · #217: 1, valid · #219: 3, all 3 valid) IS the chill baseline, and it is directly
+  # comparable to what assertive produces from here on. That comparison is the pilot.
+  #
   # `assertive` on purpose, and it is a cost decision, not a taste one: this repo's protocol
   # gives EVERY review thread a verified verdict (measured: 356–1126 chars per reply across 7
   # real ones), so each extra finding costs a written answer. It is worth it while the
   # path_instructions above are unproven — the pilot needs to see what they can catch, and a
-  # quiet profile would hide that behind "nothing to report". Revisit once #220 has its
-  # measurement.
+  # quieter profile would hide that behind "nothing to report". Revisit once #220 has its
+  # measurement; `chill` is the fallback, since it is what produced the baseline.
   profile: assertive
 
   path_instructions:
@@ -174,10 +184,22 @@ reviews:
     presidio:
       enabled: true
 
-pre_merge_checks:
-  # `docstrings` is deliberately absent: bin/check_docstrings.py already owns it, in pre-commit
-  # and in CI, and a second source of truth for one rule drifts.
-  title:
-    mode: warning
-    requirements: >-
-      Conventional Commits: feat, fix, chore, docs, refactor, test — with an optional scope.
+  # ⚠️ THIS BLOCK LIVES UNDER `reviews`, NOT AT THE TOP LEVEL. It shipped at the top level in
+  # #221 and CodeRabbit **ignored it whole** (`Unrecognized key: "pre_merge_checks"`), reporting
+  # it in a NOTE inside the review comment — on a PR that auto-merged, so nobody would have read
+  # it. Measured against the published schema
+  # (storage.googleapis.com/coderabbit_public_assets/schema.v2.json): the valid top level is
+  # chat / code_generation / early_access / enable_free_tier / inheritance / issue_enrichment /
+  # knowledge_base / language / reviews / tone_instructions.
+  #
+  # The docs page lists `pre_merge_checks` as its own section, which is what misled me — and
+  # that is the #217 lesson in a new suit: **a documentation reference confirms a name EXISTS;
+  # it does not tell you WHERE it is accepted.** For a config file, validate against the
+  # published schema, never against the prose. (#222)
+  pre_merge_checks:
+    # `docstrings` is deliberately absent: bin/check_docstrings.py already owns it, in pre-commit
+    # and in CI, and a second source of truth for one rule drifts.
+    title:
+      mode: warning
+      requirements: >-
+        Conventional Commits: feat, fix, chore, docs, refactor, test — with an optional scope.
