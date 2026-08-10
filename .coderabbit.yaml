@@ -1,12 +1,27 @@
-# CodeRabbit configuration — https://docs.coderabbit.ai/reference/configuration
+# CodeRabbit configuration.
 #
-# Two jobs, and only two:
+# ⚠️ VALIDATE AGAINST THE SCHEMA, NOT THE DOCS PAGE:
+#   https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+# The docs reference lists `pre_merge_checks` as its own section, which reads as top-level — it
+# is not, it lives under `reviews`, and shipping it at the top level made CodeRabbit ignore the
+# block WHOLE while every gate here stayed green (#222). A documentation page confirms that a
+# name EXISTS; it does not tell you WHERE it is accepted. Same shape as #217, where a real
+# webhook event was not a valid workflow trigger. Re-validate this file against the schema after
+# any edit.
 #
-# 1. `path_instructions` — turn this repo's conventions into something the review ENFORCES,
-#    instead of prose that only a reader of CLAUDE.md applies. Every instruction below is
-#    lifted from a CLAUDE.md that already governs that path; none is invented here.
-# 2. `tools` — decide, per linter, whether we already own that gate.
+# Three jobs:
 #
+# 1. `knowledge_base.code_guidelines` — point the bot at the CLAUDE.md files themselves, so the
+#    house conventions have ONE home and cannot drift from a copy pasted in here.
+# 2. `path_instructions` — restate only what is CRITICAL and path-scoped, where being wrong is
+#    expensive. Deliberate redundancy, not duplication for its own sake.
+# 3. `tools` — decide, per linter, whether we already own that gate.
+#
+# ⚠️ EVERY BEHAVIOURAL KEY IS PINNED, INCLUDING THE ONES THAT MATCH TODAY'S DEFAULT, and each
+# carries `(default: X)`. A default that flips server-side changes what happens here without a
+# commit — and this repo has been bitten three times in two days by "the thing I verified was
+# not the thing that decides". The file is the truth; the annotation makes a future drift
+# visible as a diff against reality rather than a silent behaviour change.
 # ⚠️ THE TOOLS SECTION IS AN AUDIT, NEVER A BLANKET DISABLE. The rule people get half-right is
 # "disable the bot's linters that duplicate yours" — true, because two sources of truth for one
 # rule drift and double-report. The other half is what this repo learned the hard way: a linter
@@ -19,7 +34,100 @@
 # ⚠️ Tools for languages this repo does not contain are NOT listed. They never fire, so an
 # `enabled: false` for them would be a decision nobody made, in a file nobody can then read.
 
-language: en-US
+language: en-US # (default: en-US) see the audience note under `profile`
+tone_instructions: "" # (default: "") no persona; the review's job is findings, not voice
+early_access: false # (default: false) opt out of unreleased behaviour on a repo that ships to PyPI
+enable_free_tier: true # (default: true)
+inheritance: false # (default: false) no parent config to inherit from — this file is the whole truth
+
+# ⭐ THE HOUSE CONVENTIONS HAVE ONE HOME, AND IT IS NOT THIS FILE.
+# CodeRabbit reads these documents and reviews against them, so the layered CLAUDE.md tree stays
+# the single source of truth. Copying those rules in here instead would create a second copy that
+# drifts the day a CLAUDE.md changes — the same failure class as a count restated in prose.
+knowledge_base:
+  opt_out: false # (default: false) retention is what makes `learnings` work at all
+  web_search:
+    enabled: true # (default: true) CVM/regulatory context is genuinely external
+  code_guidelines:
+    enabled: true # (default: true)
+    filePatterns: # (default: []) — the whole point of this block
+      - "**/CLAUDE.md" # root + bin/ + tests/ + docs/ + .github/, layered on purpose
+      - "docs/contributing.md" # the contributor-facing rules (gate, auto-merge, branches)
+  learnings:
+    scope: auto # (default: auto) 'auto' = local for a public repo, which this is
+    approval_delay: 0 # (default: 0) apply learnings immediately; a solo maintainer is the approver
+  issues:
+    scope: local # (default: auto) ← see the visibility trap below
+  pull_requests:
+    scope: local # (default: auto) ← same
+  # ⚠️ `auto` IS NOT A CONSTANT — IT READS REPOSITORY VISIBILITY. For `scope` it means "local for
+  # a public repo, global for a private one"; for the integrations below it means "disabled for
+  # public repos". This repo is public today, so `auto` behaves as `local`/`disabled` — and the
+  # day it flips to private, every one of these changes behaviour with NO commit and no diff.
+  # Pinning the value we actually want removes that hidden dependency. Same reasoning as pinning
+  # a default: the file must be the truth.
+  automatic_repository_linking: false # (default: false)
+  linked_repositories: [] # (default: []) — blueprintx is a candidate, but linking is its own call
+  mcp:
+    usage: disabled # (default: auto) no MCP server in this review path
+    disabled_servers: [] # (default: null)
+  jira:
+    usage: disabled # (default: auto) tracker here is GitHub Issues
+    project_keys: []
+    excluded_project_keys: []
+  linear:
+    usage: disabled # (default: auto) same
+    team_keys: []
+
+chat:
+  art: false # (default: true) ASCII art in every reply is noise in a thread that must carry verdicts
+  auto_reply: true # (default: true)
+  allow_non_org_members: true # (default: true) public repo — outside contributors may ask
+  integrations:
+    jira:
+      usage: disabled # (default: auto — which means "disabled for public repos"; pinned, see above)
+    linear:
+      usage: disabled # (default: auto)
+
+# What the finishing touches WRITE, when someone asks for them. These mirror the house rules
+# rather than restating them, because generated code has to pass the same gates as hand-written
+# code — bin/check_docstrings.py, the typing gate, ruff with tabs at 99 columns.
+code_generation:
+  docstrings:
+    language: en-US # (default: en-US) code and docstrings are English here
+    path_instructions:
+      - path: "src/**/*.py"
+        instructions: >-
+          NumPy-style docstrings, indented with TABS, wrapped at 99 columns. Document every
+          parameter with its type and every return value; document a raised exception ONLY if the
+          function actually raises it — a documented-but-never-raised exception is what
+          bin/check_docstrings.py reports. Explain WHY, not what: the code already shows what.
+  unit_tests:
+    path_instructions:
+      - path: "tests/**/*.py"
+        instructions: >-
+          pytest functions with fixtures, never unittest.TestCase; name them
+          test_<unit>_<scenario>_<expected_outcome> and assert ONE behaviour each. Never touch the
+          network — mock the download boundary inside the reader's own module. ⚠️ A test that
+          builds its input from the same contract it then asserts is a TAUTOLOGY and proves
+          nothing: the non-tautological oracle is the verbatim published header pinned under
+          tests/fixtures/. Prefer asserting a dtype or an identity over asserting emptiness, since
+          an unrelated implementation usually satisfies "empty" too.
+
+# Acts on ISSUES, not PRs. Issues here are authored through a strict template by the `/issue`
+# skill (Objetivo / Escopo / Documentação), and they are the record of a decision — so generated
+# content stays OUT of them, for exactly the reason the PR description stays human.
+issue_enrichment:
+  auto_enrich:
+    enabled: false # (default: false)
+  planning:
+    enabled: true # (default: true) available on request
+    auto_planning:
+      enabled: false # (default: true) ← but never unasked
+      labels: []
+  labeling:
+    labeling_instructions: []
+    auto_apply_labels: false # (default: false) one label owner, and it is the gate
 
 reviews:
   # The bot writes in English, like every other contributor-facing surface here (code, commit
@@ -44,6 +152,100 @@ reviews:
   # measurement; `chill` is the fallback, since it is what produced the baseline.
   profile: assertive
 
+  # ⭐ DO NOT ABANDON A REVIEW WHEN THE PR MERGES. (default: true — which aborts it.)
+  # Measured twice: a `docs`/`ci` PR is auto-merge-eligible and merges the moment the required
+  # checks go green, which is FASTER than the review completes. #221 merged before the bot said
+  # anything; #223 merged while its comment literally read "Currently processing new changes in
+  # this PR" — and `required_review_thread_resolution` did not help, because that rule blocks an
+  # unresolved thread that EXISTS, it does not wait for a reviewer to arrive.
+  # This does not stop the merge. It stops the finding from being thrown away: the review lands
+  # on the merged PR and becomes a follow-up issue instead of nothing at all.
+  abort_on_close: false
+
+  # ── The PR description belongs to the human ───────────────────────────────────────────────
+  # This repo enforces a 5-section PR template with a blocking hook, so generated content must
+  # not land in the description. `high_level_summary_in_walkthrough` moves the summary into the
+  # walkthrough COMMENT, leaving the description exactly as authored.
+  high_level_summary: true # (default: true)
+  high_level_summary_in_walkthrough: true # (default: false) ← protects the PR template
+  high_level_summary_placeholder: "@coderabbitai summary" # (default: same)
+  high_level_summary_instructions: >-
+    Write a concise bullet-point summary for a reviewer who knows this codebase. Lead with what
+    changed and why, not with file names. Call out explicitly, when present: a change under
+    `_internal/config/contracts/` (a one-character edit there is tiny AND catastrophic, and every
+    test still passes because the tests assert the contract that was written); a new or changed
+    column typed as a binary float when its fractional part carries meaning; a column added to
+    `tuple_cnpj_cols` that can hold a CPF; a gate added to `.pre-commit-config.yaml` without the
+    matching step in `.github/workflows/tests.yaml`, or the reverse; and any change to a
+    published `docs/` page that restates a count derived from the code. If none of those apply,
+    say so in one line rather than padding the summary.
+
+  # Fires ONLY when the PR title contains the placeholder below — opt-in per PR, never automatic.
+  auto_title_placeholder: "@coderabbitai" # (default: same)
+  auto_title_instructions: >-
+    The PR title becomes the SQUASH COMMIT SUBJECT when the quality gate auto-merges, so it must
+    satisfy the same rules as a commit subject here: Conventional Commits
+    (`<type>(<scope>): <subject>`) with type one of feat, fix, chore, docs, refactor, test; at
+    most 72 characters; imperative mood; lowercase after the colon; no trailing period. Scope is
+    the area touched (`ci`, `ingestion`, `submission`, `docs`). Describe the CHANGE, not the
+    file. Write it in the same language as the repository's recent commit subjects.
+
+  # ── Walkthrough content ───────────────────────────────────────────────────────────────────
+  collapse_walkthrough: true # (default: true) keeps a long PR page navigable
+  changed_files_summary: true # (default: true)
+  sequence_diagrams: true # (default: true) cheap, and the reader/contract flows benefit
+  estimate_code_review_effort: true # (default: true)
+  assess_linked_issues: true # (default: true) every PR here closes an issue — this checks the fit
+  related_issues: true # (default: true)
+  related_prs: true # (default: true) datasets recur; the sibling PR is usually the anti-copy oracle
+  poem: false # (default: false) pinned deliberately, per the "no generated voice" line above
+  in_progress_fortune: false # (default: true) same reason
+  enable_prompt_for_ai_agents: true # (default: true) the "Prompt for AI Agents" block is actionable
+  review_status: true # (default: true) a SKIPPED review must be visible, never silent
+  review_details: false # (default: false)
+  review_progress: true # (default: true)
+  commit_status: true # (default: true) legacy status; NOT wired as a required check — see #208
+  fail_commit_status: false # (default: false) a review error must not red a PR whose code is fine
+
+  # ⚠️ LABELS HAVE EXACTLY ONE OWNER, AND IT IS `bin/pr_gate.py`.
+  # It writes `risk:*` / `size:*` / `gate:*` and replaces only its own. A second labeller either
+  # fights it or suggests labels that do not exist in the repo — and a bot config declaring a
+  # non-existent label errors on every PR it touches (measured previously with dependabot.yml).
+  suggested_labels: false # (default: true)
+  auto_apply_labels: false # (default: false)
+  suggested_reviewers: false # (default: true) solo maintainer; the suggestion is always the same
+  auto_assign_reviewers: false # (default: false)
+  disable_cache: false # (default: false)
+
+  # Reviewing a generated artifact is pure noise: its diff tracks a machine, not a decision. The
+  # lockfile is the worked example — its size follows how many dependency hashes moved, which is
+  # why the size veto exempts it too. Everything else stays reviewable ON PURPOSE, including
+  # tests/fixtures/: a fixture changing IS the event worth noticing, because it is the one oracle
+  # in the suite that we did not author.
+  path_filters: # (default: [])
+    - "!poetry.lock"
+    - "!coverage.xml"
+    - "!coverage.svg"
+
+  # Public repo, so this one is live. It flags spam/low-quality PRs from outside.
+  # ⚠️ `slop_detection.label` is the ONLY key in this file left unpinned, and that is a decision,
+  # not an omission — recorded here because a missing key and a forgotten key look identical in a
+  # diff. The schema types it as a string with no "explicitly none" value, and naming a label here
+  # would break the one-owner rule (`bin/pr_gate.py` owns every label on a PR) and would error on
+  # every PR if the label did not exist in the repo. Absent = no label applied, which is right.
+  slop_detection:
+    enabled: true # (default: true)
+
+  labeling_instructions: [] # (default: []) unused — pr_gate.py owns labels
+  suggested_reviewers_instructions: [] # (default: []) unused — solo maintainer
+  mutually_exclusive_groups: {} # (default: {})
+  post_merge_actions: [] # (default: [])
+
+  # ⚠️ THESE ARE THE EMPHATIC SUBSET, NOT THE RULEBOOK. The rulebook is the CLAUDE.md tree, which
+  # `knowledge_base.code_guidelines.filePatterns` above points at directly. What is restated here
+  # is only what is path-scoped AND expensive to get wrong — a wrong contract, a laundered float,
+  # a CPF declared as CNPJ. Deliberate redundancy where it pays; everything else stays in its one
+  # home. When a rule below and a CLAUDE.md disagree, the CLAUDE.md wins and THIS FILE IS STALE.
   path_instructions:
     - path: "src/filings_cvm/_internal/config/contracts/**"
       instructions: >-
@@ -123,8 +325,40 @@ reviews:
         RE-MEASURE from the code, never increment.
 
   auto_review:
-    enabled: true
-    drafts: false
+    enabled: true # (default: true)
+    auto_incremental_review: true # (default: true) re-review on each push — the fix must be seen
+    auto_pause_after_reviewed_commits: 0 # (default: 5) NEVER pause: a long PR is exactly where a
+    # late commit is least reviewed, and a silent pause
+    # is a gate that stops without saying so
+    drafts: false # (default: false) a draft is not asking yet
+    description_keyword: "" # (default: "") irrelevant while `enabled` is true
+    ignore_title_keywords: [] # (default: []) no escape hatch by title — "wip"/"skip" in a title
+    # must not silently buy a pass past the reviewer
+    labels: [] # (default: []) review every PR, not a label-selected subset
+    base_branches: [] # (default: []) only `main` exists as a base here
+    ignore_usernames: [] # (default: []) do NOT skip bots — measured in #208 that CodeRabbit
+    # already declines to review bot PRs on its own; listing them
+    # here would hide that behaviour behind our own config
+
+  # All of these are TRIGGERED by a checkbox or an `@coderabbitai` command — none runs on its own,
+  # so leaving them on costs nothing and keeps the tool available when it is actually wanted.
+  # ⚠️ Whatever they generate is still a proposal: it must pass this repo's own gates (NumPy
+  # docstrings via bin/check_docstrings.py, the typing gate, the fixture-as-oracle rule) before it
+  # can land. A generated test that asserts the contract we wrote is a tautology, not coverage.
+  finishing_touches:
+    docstrings:
+      enabled: true # (default: true)
+    unit_tests:
+      enabled: true # (default: true)
+    simplify:
+      enabled: true # (default: false) opt-in review for reuse/efficiency, on request
+    autofix:
+      enabled: true # (default: true)
+    fix_ci:
+      enabled: true # (default: true)
+    resolve_merge_conflict:
+      enabled: true # (default: true)
+    custom: [] # (default: [])
 
   tools:
     # ── We own these gates. Disabled here so one rule has one home. ──────────────────────
@@ -197,9 +431,42 @@ reviews:
   # it does not tell you WHERE it is accepted.** For a config file, validate against the
   # published schema, never against the prose. (#222)
   pre_merge_checks:
-    # `docstrings` is deliberately absent: bin/check_docstrings.py already owns it, in pre-commit
-    # and in CI, and a second source of truth for one rule drifts.
+    override_requested_reviewers_only: false # (default: false) solo maintainer; nobody else could
+    # override, so this would lock the checks
+
+    # ⚠️ `docstrings` is OFF, not merely absent: bin/check_docstrings.py owns docstring coverage,
+    # in pre-commit AND in CI. Two sources of truth for one rule drift and double-report.
+    docstrings:
+      mode: "off" # (default: warning)
+      threshold: 80 # (default: 80) inert while mode is off; pinned so a mode change is deliberate
+
+    # ⭐ THE PR TITLE IS THE SQUASH COMMIT SUBJECT when the gate auto-merges — and NOTHING
+    # validates it today: commitizen and gitlint run on the COMMIT MESSAGE at commit time, never
+    # on the PR title. So this is the only check on a string that lands in `main`'s history.
+    #
+    # ⚠️ UPGRADE PATH, deliberately not taken here: per the schema, `mode: error` only BLOCKS when
+    # `request_changes_workflow: true` — that flag is what gives these checks teeth, and without
+    # it `error` merely posts louder. Turning both on would close the gap for real, at the cost of
+    # a bot able to block a merge. Left as a conscious decision for after the #220 measurement.
     title:
-      mode: warning
+      mode: warning # (default: warning) → `error` + request_changes_workflow to make it binding
       requirements: >-
-        Conventional Commits: feat, fix, chore, docs, refactor, test — with an optional scope.
+        Conventional Commits `<type>(<scope>): <subject>`, type one of feat, fix, chore, docs,
+        refactor, test. At most 72 characters. Imperative mood, lowercase after the colon, no
+        trailing period. The subject must describe the change, not the files touched.
+    description:
+      mode: warning # (default: warning) the 5-section template is already hook-enforced at creation
+    issue_assessment:
+      mode: warning # (default: warning) every PR here closes an issue; a mismatch is worth saying
+    custom_checks: [] # (default: [])
+
+  # ⚠️ FALSE, and it is the interesting one. Two halves, and only one is inert here:
+  #   • the "auto-approve once comments are resolved" half IS inert — the ruleset requires ZERO
+  #     approvals (a solo maintainer cannot approve their own PR), so a bot approval unblocks
+  #     nothing. Same reasoning as `pr_gate.py`'s "why auto-MERGE and not auto-APPROVE".
+  #   • the other half is NOT inert: this flag is what lets `pre_merge_checks.*.mode: error`
+  #     actually block a merge (see the title check above).
+  # It does NOT fix the measured race, though: #221 and #223 merged before any review existed, and
+  # a review that never happened cannot request changes. Flip it only together with an `error`
+  # mode, and only after deciding a bot may hold a merge.
+  request_changes_workflow: false # (default: false)
