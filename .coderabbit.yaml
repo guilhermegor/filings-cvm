@@ -272,6 +272,24 @@ reviews:
         `filings_cvm/__init__.py` nor in `ingestion/__init__.py`; its contract also needs adding
         to `_internal/config/contracts/__init__.py`, which nothing fails to catch on its own.
 
+    # The DOCS half of a reader/writer PR, which is the half that gets forgotten. Advisory on
+    # purpose: whether a given change needs a doc edit is a JUDGEMENT (a private-helper rename
+    # needs none), and a mechanical "touched src/ ⇒ must touch docs/" rule would be satisfied by
+    # a whitespace edit while missing real drift — measured: 107 of 290 public readers are absent
+    # from docs/api.md today, and every one of those PRs did touch docs/.
+    - path: "src/filings_cvm/{ingestion,submission}/**"
+      instructions: >-
+        A new or renamed PUBLIC reader/writer is only half-delivered without its documentation.
+        Check, and say which apply: an entry in `docs/api.md` (every public reader belongs there);
+        the dataset's own page under `docs/ingestion/`; the catalog and Layout tree in the root
+        `CLAUDE.md`; `docs/index.md`; and `mkdocs.yml` `nav:` when a page is added. Also check the
+        registration chain — a new reader is exported along its own package `__init__` files up to
+        its portal root and STOPS there (never the top-level `filings_cvm/__init__.py`), and its
+        contract must be added to `_internal/config/contracts/__init__.py`, which nothing fails to
+        catch on its own. Any count restated in prose must be RE-MEASURED from the code, never
+        incremented. If the change is internal and needs no doc edit, say so explicitly rather
+        than staying silent.
+
     - path: "src/**/*.py"
       instructions: >-
         A number whose fractional part carries meaning is NEVER a binary float: `float64` cannot
