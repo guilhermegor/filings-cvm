@@ -60,3 +60,38 @@ gate ou escrever por que não. O que eles reportarem no piloto é a medição qu
 - [ ] **Este PR é a primeira medição de si mesmo:** o `.coderabbit.yaml` vale para o PR que o
   introduz? Registrar o que for observado — se não valer, a 1ª medição real é o PR seguinte.
 - [ ] Destilar para `templates/common/` (blueprintx#129) **só depois** da medição.
+
+## ⚠️ Achado do gate sobre si mesmo — `.coderabbit.yaml` é INVISÍVEL ao `classify_risk`
+
+O gate rotulou este PR **`risk:docs`**, e a medição explica por quê: `.coderabbit.yaml` **não casa
+nenhuma regra** de `_RISK_RULES` (`bin/pr_gate.py:74-92`) — não é `src/`, `tests/`, lockfile, nem
+prefixo de `ci` (`.github/`, `bin/`, `Makefile`, `tasks.sh`, `.pre-commit-config.yaml`,
+`.coveragerc`, `.codespellrc`, `.yamllint`), nem termina em `.md`. A classe **veio inteira do
+ledger** (`docs/backlog/*.md` → `docs`).
+
+**Duas consequências, e a segunda é a que importa:**
+
+1. Sozinho, o arquivo cairia em `other` ⇒ **não** auto-fundível. Conservador, tudo bem.
+2. **Acompanhado de qualquer arquivo `docs`, ele herda `docs` ⇒ auto-fundível.** Ou seja, **o
+   arquivo que governa como todo PR é revisado pode fundir sozinho**, pegando carona na classe do
+   vizinho de diff.
+
+⚠️ **E ele tem exatamente a forma que o próprio repo usa para justificar que `src/` nunca
+auto-funde:** uma mudança de **um caractere** (`auto_review.enabled: true` → `false`) reduz a
+cobertura de revisão em silêncio, e **todos os testes passam**, porque não há teste que afirme o
+conteúdo desta config.
+
+**Não corrigido neste PR** — é decisão de desenho, não conserto óbvio, e mudar o classificador aqui
+seria alargar o escopo. As opções, para decidir com o mantenedor:
+
+- **(a)** acrescentar `.coderabbit.yaml` aos prefixos de `ci` — rótulo passa a ser honesto, mas
+  `ci` **também** é auto-fundível, então **não muda a elegibilidade**;
+- **(b)** criar a noção de *"governa o próprio gate"* (`.coderabbit.yaml`,
+  `bin/enable_repo_rules.sh`, talvez `.github/workflows/pr-gate.yaml`) como classe **não**
+  auto-fundível — é o mesmo argumento do `src/`, aplicado à guarda em vez do produto;
+- **(c)** aceitar como está, registrando que a trava real é a
+  `required_review_thread_resolution` (as threads do CodeRabbit são vinculantes, então nada funde
+  com thread aberta).
+
+**Rede de segurança hoje:** a (c) vale de fato — este PR só funde depois de as threads do review
+serem resolvidas. Então o risco é de *classificação*, não de merge sem revisão.
