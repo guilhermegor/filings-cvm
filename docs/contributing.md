@@ -28,10 +28,21 @@ faltando.
 ```bash
 make unit_tests          # poetry run pytest tests/unit/
 make integration_tests   # poetry run pytest tests/integration/
-make lint                # ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml
+make lint                # ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml/actions
 ```
 
 A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente antes de dar push.
+
+> ⚠️ **O gate de workflows é o `actionlint`, não o `yamllint`.** Os dois respondem perguntas
+> diferentes: o `yamllint` diz se o arquivo é YAML bem-formado; o `actionlint` diz se ele é um
+> *workflow que o GitHub roda*. Um `on:` com evento inexistente passa no primeiro e faz o GitHub
+> **rejeitar o arquivo inteiro** — o workflow não roda de forma alguma, e o sintoma (PR sem rótulo,
+> sem comentário do gate) parece lentidão, não morte. O `actionlint` é **opcional localmente**:
+> `make lint` avisa e segue se ele não estiver instalado, mas na CI a ausência **falha o job**, de
+> propósito. Para tê-lo aqui, baixe o binário da página de releases
+> (<https://github.com/rhysd/actionlint>) — ele **não** entra como dev-dep do Poetry: o
+> `actionlint-py` é *sdist-only* e baixa o binário em tempo de build, o que colocaria um download
+> dentro de todo `poetry install`, nas três matrizes de SO.
 
 ## Servindo a documentação localmente
 

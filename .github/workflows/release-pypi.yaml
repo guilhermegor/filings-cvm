@@ -146,7 +146,7 @@ jobs:
           fi
           if [ ${#without_groups[@]} -gt 0 ]; then
             echo "Excluding groups: ${without_groups[*]}"
-            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
+            poetry install --no-interaction --no-root --without "$(IFS=,; echo "${without_groups[*]}")"
           else
             echo "No groups to exclude, installing all dependencies"
             poetry install --no-interaction --no-root

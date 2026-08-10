@@ -150,6 +150,7 @@ lint() {
 	bash "$SCRIPT_DIR/bin/lint_shell.sh"
 	bash "$SCRIPT_DIR/bin/lint_sql.sh"
 	bash "$SCRIPT_DIR/bin/lint_yaml.sh"
+	bash "$SCRIPT_DIR/bin/lint_actions.sh"
 }
 
 check_docstrings() {

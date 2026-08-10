@@ -8,10 +8,11 @@ tests-with-every-change rule onto shell like this:
 - **Integration** = invoke the script via ``subprocess`` and assert on observable
   behaviour (exit code, a created file/dir, a status line) — this module.
 
-See ``tests/CLAUDE.md`` (Testing shell scripts) for the convention. Two seams are
+See ``tests/CLAUDE.md`` (Testing shell scripts) for the convention. Three seams are
 covered: ``bin/poetry_exec.sh`` (the Poetry resolver wrapper every recipe routes
-through) and ``bin/precommit.sh`` (hook install that must skip gracefully off a git
-work tree instead of aborting ``init``).
+through), ``bin/precommit.sh`` (hook install that must skip gracefully off a git
+work tree instead of aborting ``init``), and ``bin/lint_actions.sh`` (the workflow
+schema gate, with the negative control that proves it rejects the defect it exists for).
 """
 
 import os
@@ -182,3 +183,90 @@ def test_precommit_registers_safe_directory_for_shared_worktree(tmp_path: Path) 
 	assert str(path_repo) in str_cfg or "%(prefix)" in str_cfg
 	# The self-heal never fabricates a repo and never emits the "no git repo" skip.
 	assert "No git repository here" not in str_output
+
+
+# --------------------------
+# bin/lint_actions.sh
+# --------------------------
+
+
+def _skip_without_actionlint() -> None:
+	"""Skip the calling test when neither a venv nor a system ``actionlint`` resolves.
+
+	The wrapper skips gracefully (exit 0) on a box without the linter — right locally,
+	but it means "passed" cannot be read as "linted". These tests therefore assert on a
+	real run or not at all.
+	"""
+	if shutil.which("actionlint") is not None:
+		return
+	cls_probe = subprocess.run(  # noqa: S603 — constant argv, no untrusted input
+		[shutil.which("poetry") or "poetry", "run", "actionlint", "--version"],
+		capture_output=True,
+		text=True,
+		check=False,
+	)
+	if cls_probe.returncode != 0:
+		pytest.skip("actionlint unavailable -- integration guard only")
+
+
+def test_lint_actions_passes_on_the_repository_workflows() -> None:
+	"""Every workflow in the repo passes the schema gate, and the run is not vacuous.
+
+	The second assertion is the one that matters: ``actionlint`` exits 0 when handed no
+	files, so a wrapper whose discovery silently matched nothing would report success
+	forever. The status line carries the count precisely so that cannot hide.
+	"""
+	_skip_without_actionlint()
+	cls_result = _run("lint_actions.sh")
+	str_output = cls_result.stdout + cls_result.stderr
+
+	assert cls_result.returncode == 0, str_output
+	assert "workflow(s)" in str_output
+	assert "0 workflow(s)" not in str_output
+
+
+def test_lint_actions_rejects_a_trigger_that_is_not_a_workflow_event(tmp_path: Path) -> None:
+	"""The gate fails on ``pull_request_review_thread`` — the defect that motivated it.
+
+	Negative control, and the whole point of the gate: this file is **valid YAML** and
+	passes ``yamllint``, so the only tool that can tell it apart from a working workflow
+	is the schema linter. In #217 the real thing reached CI and GitHub rejected the file
+	outright — the workflow did not run at all, which reads as a merely slow gate rather
+	than a dead one.
+
+	Runs ``actionlint`` directly on a synthetic file rather than through the wrapper: the
+	wrapper lints the repo's own (green) workflows, so the defect has to be introduced
+	somewhere it cannot corrupt the working tree.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided scratch directory holding the synthetic workflow.
+	"""
+	_skip_without_actionlint()
+	path_workflow = tmp_path / "broken.yaml"
+	path_workflow.write_text(
+		"name: Broken\n"
+		"on:\n"
+		"  pull_request_review_thread:\n"
+		"    types: [resolved, unresolved]\n"
+		"jobs:\n"
+		"  noop:\n"
+		"    runs-on: ubuntu-latest\n"
+		"    steps:\n"
+		"      - run: echo hi\n",
+		encoding="utf-8",
+	)
+
+	str_actionlint = shutil.which("actionlint")
+	list_argv = (
+		[str_actionlint, str(path_workflow)]
+		if str_actionlint is not None
+		else [shutil.which("poetry") or "poetry", "run", "actionlint", str(path_workflow)]
+	)
+	cls_result = subprocess.run(  # noqa: S603 — constant argv plus a pytest tmp path
+		list_argv, capture_output=True, text=True, check=False
+	)
+
+	assert cls_result.returncode != 0
+	assert "unknown Webhook event" in cls_result.stdout + cls_result.stderr

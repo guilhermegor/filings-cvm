@@ -175,6 +175,17 @@ repos:
           - yaml
         pass_filenames: false
 
+      # yamllint above validates YAML; it says NOTHING about whether the document is a
+      # workflow GitHub will run. #217 shipped an `on:` trigger that does not exist, passed
+      # every hook here, and GitHub rejected the file whole — the workflow did not run at
+      # all. Scoped by `files:` because only these paths are workflows.
+      - id: lint-actions
+        name: actionlint (github actions schema)
+        entry: bash bin/lint_actions.sh
+        language: system
+        files: ^\.github/workflows/.*\.(yaml|yml)$
+        pass_filenames: false
+
       - id: lint-sql
         name: sqlfluff (sql lint)
         entry: bash bin/lint_sql.sh
