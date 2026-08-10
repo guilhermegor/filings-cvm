@@ -176,9 +176,20 @@ seria alargar o escopo. As opções, para decidir com o mantenedor:
 - **(b)** criar a noção de *"governa o próprio gate"* (`.coderabbit.yaml`,
   `bin/enable_repo_rules.sh`, talvez `.github/workflows/pr-gate.yaml`) como classe **não**
   auto-fundível — é o mesmo argumento do `src/`, aplicado à guarda em vez do produto;
-- **(c)** aceitar como está, registrando que a trava real é a
-  `required_review_thread_resolution` (as threads do CodeRabbit são vinculantes, então nada funde
-  com thread aberta).
+- ~~**(c)** aceitar como está, registrando que a trava real é a
+  `required_review_thread_resolution`.~~ ⛔ **DESCARTADA — MEDIDA COMO FALSA, 2×.**
 
-**Rede de segurança hoje:** a (c) vale de fato — este PR só funde depois de as threads do review
-serem resolvidas. Então o risco é de *classificação*, não de merge sem revisão.
+⚠️ **A "rede de segurança" que eu supus aqui NÃO existe.** Escrevi que a (c) valia porque as threads
+do CodeRabbit são vinculantes, então nada fundiria com thread aberta. **Errado**: a regra bloqueia
+thread **existente e não resolvida** — ela **não espera o revisor chegar**.
+
+Medido nos dois sentidos:
+
+- **#221** fundiu **antes** de o bot comentar qualquer coisa;
+- **#223** fundiu **durante** a review, com o comentário do bot dizendo literalmente
+  *"Currently processing new changes in this PR"*.
+
+Ou seja, não é corrida de timing: **é ausência de regra**. Num PR de classe auto-fundível que o bot
+ainda não comentou, **não há trava nenhuma**. Sobram (a) e (b) — e a (b) ganhou força, porque o
+comportamento seguro já acontece por acidente quando o `.coderabbit.yaml` vem sozinho no diff
+(classe `other`, medido no #227), e só falha quando ele pega carona num diff com `docs/`.
