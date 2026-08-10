@@ -14,7 +14,7 @@ e mesmo assim ficou aberto até ser mergeado à mão. No log do run `31332843721
   (4xx/5xx), então é **cego por construção** para esse canal.
 - [x] **E foi recusada porque o gate armava no pior instante.** O `main()` armava o auto-merge
   **antes** do poll — no `opened`, quando nenhum check registrou e nenhuma thread existe, ou seja,
-  quando o PR *parece* fundível. A GitHub recusa armar auto-merge exatamente nesse estado
+  quando o PR *parece* fundível. O GitHub recusa armar auto-merge exatamente nesse estado
   ("Pull request is in clean status").
 
 ## A hipótese ERRADA que este branch tentou primeiro — e como caiu
@@ -23,7 +23,7 @@ A primeira tentativa foi acrescentar `pull_request_review_thread: [resolved, unr
 partindo de "resolver thread não dispara nada na família `pull_request`" (verdade) e de uma consulta
 à doc de **webhooks**, que confirma o evento e os tipos (também verdade, e **irrelevante**).
 
-- [x] **`pull_request_review_thread` NÃO é gatilho de workflow.** A GitHub rejeitou o arquivo
+- [x] **`pull_request_review_thread` NÃO é gatilho de workflow.** O GitHub rejeitou o arquivo
   inteiro: o run `31335491644` voltou *"This run likely failed because of a workflow file issue"*, e
   **não houve nenhum run de `pull_request`** para o PR #217 — daí o PR ter ficado sem rótulo e sem
   comentário fixo. Levantado pelo CodeRabbit (actionlint 1.7.12: *unknown Webhook event*) e
@@ -42,7 +42,8 @@ partindo de "resolver thread não dispara nada na família `pull_request`" (verd
 - [x] `_enable_auto_merge` lê `errors` do corpo e imprime a razão no stderr.
 - [x] `_merge_now` (novo) devolve `bool`; o `main()` entrega o merge **no fim do run**:
   `if bool_merge and not _merge_now(...): _enable_auto_merge(...)`. Os dois casos são mutuamente
-  exclusivos — a GitHub aceita o merge quando nada bloqueia, e aceita o armar quando algo bloqueia.
+  exclusivos — o GitHub aceita o merge quando nada bloqueia, e aceita armar o auto-merge quando
+  algo bloqueia.
 - [x] **Não é preciso gatilho nenhum para a thread:** quem espera o último bloqueio cair é o
   auto-merge nativo, que observa check obrigatório **e** conversa não resolvida.
 - [x] `tests/unit/test_pr_gate.py`: **5 testes acrescentados** (4 no primeiro commit, 1 no segundo),
