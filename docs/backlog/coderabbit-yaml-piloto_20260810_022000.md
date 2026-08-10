@@ -47,12 +47,58 @@ gate ou escrever por que não. O que eles reportarem no piloto é a medição qu
 ⚠️ **Tools de linguagens que este repo não tem ficam FORA do arquivo** — nunca disparam, então um
 `enabled: false` para elas seria decisão que ninguém tomou, num arquivo que aí ninguém consegue ler.
 
+## ✅ Medição 1 — o próprio PR #221 (e ela rendeu 4 fatos, 3 deles inesperados)
+
+1. ⚠️⚠️ **A config subiu com um bloco INVÁLIDO e ninguém teria visto.** `pre_merge_checks` foi
+   escrito no **topo** e não é chave válida ali — o CodeRabbit **ignorou o bloco inteiro**
+   (`Unrecognized key: "pre_merge_checks"`) e reportou num `NOTE` **dentro do comentário de
+   review**, num PR que **fundiu sozinho**. Eu havia conferido as chaves na *configuration
+   reference*, que lista `pre_merge_checks` como seção própria. **A doc confirma que o nome
+   EXISTE; ela não diz ONDE ele é aceito.** Corrigido no #222, agora validado contra o **schema
+   publicado** (top-level, `reviews.*` e os 57 `tools` — 0 chave inválida).
+2. ⭐ **O auto-merge funcionou — 1ª vez desde o #216.** `risk=docs size=L gate=passing
+   auto_merge=True`, `mergedBy: app/github-actions`. Era a prova pendente, e ela só apareceu num PR
+   **sem arquivo de teste** — exatamente como o achado estrutural do #219 previa.
+3. ⚠️ **O bug #104 reproduziu (4ª observação):** merge por bot ⇒ issue **OPEN**, branch remota
+   **viva**, card travado em *In progress*. Remediado pelo caminho documentado
+   (`gh workflow run reconcile-merged-prs.yaml`), **nunca à mão** — o sweep fechou a issue e apagou
+   a branch.
+4. ⚠️ **`required_review_thread_resolution` NÃO é trava num PR sem thread.** O CodeRabbit revisou e
+   disse `No actionable comments`, mas o PR **fundiu antes** de qualquer thread existir. A regra
+   bloqueia thread **existente e não resolvida** — ela não espera o revisor chegar. Isso muda a
+   leitura da opção **(c)** do achado abaixo: a "rede de segurança" que eu supus **não existe** para
+   um PR que o bot não comenta.
+
+5. ✅ **PERGUNTA RESPONDIDA: o `.coderabbit.yaml` VALE para o PR que o introduz.** Prova direta — o
+   aviso `Unrecognized key` só pode ter vindo de o bot **ter lido o arquivo do próprio PR**. Então
+   o #221 já foi revisado sob `assertive`, e a medição começa nele, não no seguinte.
+6. ✅ **A linha de base é `chill`, e isso agora é fato, não suposição.** Não existia
+   `.coderabbit.yaml` no repo até o #221, e o `profile` **default do schema é `chill`** — logo
+   **todos** os reviews anteriores (#210, #214, #217, #219) rodaram em `chill`. A comparação
+   `chill` × `assertive` é portanto direta:
+
+   | PR | profile | achados | procediam |
+   |---|---|---|---|
+   | #210 | `chill` (default) | 5 | 4 |
+   | #217 | `chill` (default) | 1 | 1 |
+   | #219 | `chill` (default) | 3 | 3 |
+   | **#221** | **`assertive`** | **0** | — |
+
+   ⚠️ **O zero do #221 não mede o profile** — o diff é uma config declarativa mais um ledger, sem
+   lógica a criticar. Amostra de 1, e da classe errada. **Não concluir nada daqui.**
+
+⚠️ **Sobre as `path_instructions`: ainda SEM sinal.** O review foi `No actionable comments`, então
+este PR **não** mede se elas mudam a revisão — mede só que o arquivo é lido. Seguem 2–3 PRs de
+medição real, e o primeiro com código de verdade é o que conta.
+
 ## Aberto
 
-- [ ] **A medição** — ao longo de 2–3 PRs, registrar aqui: o que ele passou a pegar que não pegava,
-  o que virou ruído, e se as `path_instructions` de fato mudaram a revisão. **Linha de base sem
-  config:** os reviews de #210 (5 achados, 4 procediam), #214, #217 (1, procedia) e #219 (3, os 3
-  procediam).
+- [ ] **A medição das `path_instructions`** — ao longo de 2–3 PRs: o que ele passou a pegar que não
+  pegava, e o que virou ruído. **Linha de base sem config:** #210 (5 achados, 4 procediam), #214,
+  #217 (1, procedia), #219 (3, os 3 procediam).
+- [ ] **Gate de schema para `.coderabbit.yaml`** — hoje o `yamllint` aprova (é YAML válido), do
+  mesmo jeito que aprovava o workflow inválido do #217. A validação que pegou isto foi **ad-hoc**
+  contra o schema publicado; sem gate, o próximo erro de chave volta a ser silencioso.
 - [x] `profile: assertive` — **decidido pelo mantenedor**, ciente do custo: o protocolo da casa dá
   veredito verificado a **toda** thread (medido: 356–1126 chars por resposta em 7 reais), então cada
   achado a mais custa uma resposta escrita. Vale enquanto as `path_instructions` são não-provadas —
