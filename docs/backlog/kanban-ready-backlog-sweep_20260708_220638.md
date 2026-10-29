@@ -121,7 +121,7 @@ nothing and spends a number that can never be reclaimed.
   inside a reader. Applies to **#6–#14 without exception**, and is retrofitted onto the already
   -merged `InformeDiarioReader` (#5) in the same PR that introduces the seam.
 
-  *Why:* these packages feed the future **bedrock** financial-markets datalake (raw, myriad
+  *Why:* these packages feed the future **marketdata-fm** financial-markets datalake (raw, myriad
   formats) + medallion warehouse (bronze/silver/gold), scraped on an Airflow schedule. When an
   upstream contract changes and a transform breaks, the raw artifact on disk makes the failure
   replayable from the exact bytes; a log-sniffing agent can then open an issue via `/issue`,

@@ -87,4 +87,4 @@ se listassem o header inteiro (issue #117).
 ## Escopo
 
 Reporta deriva; **não conserta**. O conserto (agente propondo PR sobre contracts pinados ao header
-real) é o loop da bedrock-fm e fica fora daqui.
+real) é o loop da marketdata-fm e fica fora daqui.
