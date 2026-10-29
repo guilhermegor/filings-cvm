@@ -44,6 +44,22 @@ def _bin_script(str_name: str) -> Path:
 	return Path(__file__).resolve().parents[2] / "bin" / str_name
 
 
+def _env_without_git() -> dict[str, str]:
+	"""Return the current environment minus every ``GIT_*`` variable.
+
+	A hook run during ``git commit`` in a linked worktree exports the git-dir variable. Inherited
+	by a child process, it makes ``rev-parse`` report "inside a work tree" from an unrelated tmp
+	dir, and makes ``git init`` re-initialise the CALLER's repository, writing
+	``core.bare=true`` into the shared config and leaving the main checkout unusable.
+
+	Returns
+	-------
+	dict of {str: str}
+		A copy of ``os.environ`` with the ``GIT_*`` keys removed.
+	"""
+	return {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+
+
 def _run(
 	str_script: str,
 	*args: str,
@@ -70,10 +86,7 @@ def _run(
 		The finished process with decoded ``stdout`` and ``stderr``.
 	"""
 	str_bash = shutil.which("bash") or "bash"
-	# Git's own environment variables are dropped because a hook run during a commit in a
-	# linked worktree exports the git-dir one, which makes rev-parse report "inside a work
-	# tree" even from an unrelated tmp dir and defeats the off-a-git-tree scenario under test.
-	dict_full_env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+	dict_full_env = _env_without_git()
 	dict_full_env.update(dict_env or {})
 	# The argument vector is constant and trusted -- a resolved bash plus the repo's own
 	# script -- with no untrusted input interpolated, so the bandit subprocess warning is
@@ -167,7 +180,7 @@ def test_precommit_registers_safe_directory_for_shared_worktree(tmp_path: Path) 
 	path_global_cfg = path_home / ".gitconfig"
 	# A real work tree; the throwaway HOME/config isolates the global safe.directory write.
 	subprocess.run(  # noqa: S603
-		[str_git, "init", "-q", str(path_repo)], check=True
+		[str_git, "init", "-q", str(path_repo)], check=True, env=_env_without_git()
 	)
 
 	dict_env = {
