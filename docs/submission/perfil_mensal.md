@@ -92,6 +92,21 @@ xml = PerfilMensal().export(doc)
 assert "<TOTAL_RECURS_BR>10,99</TOTAL_RECURS_BR>" in xml   # 10,99 — não 11,00
 ```
 
+### Campos de sensibilidade (Q13–15): quatro casas
+
+Segundo o padrão V4 da CVM, `VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL`,
+`VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO` e `VAR_PATRIM_FDO_N_PRECO_ACOES` são "% PL numérico
+com **quatro** casas decimais" (campos `var_diar_perc_patrim_fdo_var_n_taxa_anual`,
+`var_diar_perc_patrim_fdo_var_n_taxa_cambio` e `var_patrim_fdo_n_preco_acoes`). O excesso é
+truncado (`ROUND_DOWN`), inclusive para valores negativos. Já
+`VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS` (Q12) continua com duas casas.
+
+```python
+# ... var_patrim_fdo_n_preco_acoes="-1.23456789" na linha ...
+xml = PerfilMensal().export(doc)
+assert "<VAR_PATRIM_FDO_N_PRECO_ACOES>-1,2345</VAR_PATRIM_FDO_N_PRECO_ACOES>" in xml
+```
+
 ### Várias classes de fundo em um só documento
 
 `rows` aceita uma lista — cada item vira um bloco `<ROW_PERFIL>`.

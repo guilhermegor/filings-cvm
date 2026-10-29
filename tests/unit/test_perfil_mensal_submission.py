@@ -4,6 +4,7 @@ Cover the money/validation paths: XML structure, comma-decimal formatting,
 ROUND_DOWN truncation, and check-digit CNPJ rejection.
 """
 
+from decimal import Decimal
 from pathlib import Path
 
 from pydantic import ValidationError
@@ -91,6 +92,72 @@ def test_export_truncates_excess_precision_round_down() -> None:
 	assert xml is not None
 	assert "<TOTAL_RECURS_BR>10,99</TOTAL_RECURS_BR>" in xml
 	assert "11,00" not in xml
+
+
+# CVM V4 Q13-15: "Numérico com quatro casas decimais" (field name, XML tag).
+SENSITIVITY_FIELDS = [
+	("var_diar_perc_patrim_fdo_var_n_taxa_anual", "VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL"),
+	("var_diar_perc_patrim_fdo_var_n_taxa_cambio", "VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO"),
+	("var_patrim_fdo_n_preco_acoes", "VAR_PATRIM_FDO_N_PRECO_ACOES"),
+]
+
+
+def _row_with_sensitivity(field: str, value: str) -> PerfilMensalRow:
+	"""Build a minimal row that sets one sensitivity field."""
+	return PerfilMensalRow(
+		cnpj_fdo=VALID_CNPJ,
+		nr_client=_zero_client_count(),
+		total_recurs_exter="0",
+		total_recurs_br="0",
+		tot_ativos_p_relac="0",
+		tot_ativos_cred_priv="0",
+		**{field: value},
+	)
+
+
+@pytest.mark.parametrize(("field", "_tag"), SENSITIVITY_FIELDS)
+@pytest.mark.parametrize(
+	("raw", "expected"),
+	[
+		("1.23456789", Decimal("1.2345")),
+		("-1.23456789", Decimal("-1.2345")),
+		("0.99999", Decimal("0.9999")),
+	],
+)
+def test_sensitivity_field_truncates_to_four_places_round_down(
+	field: str, _tag: str, raw: str, expected: Decimal
+) -> None:
+	"""Q13-15 keep four decimal places and truncate toward zero, never round."""
+	row = _row_with_sensitivity(field, raw)
+
+	assert getattr(row, field) == expected
+
+
+@pytest.mark.parametrize(("field", "tag"), SENSITIVITY_FIELDS)
+@pytest.mark.parametrize(
+	("raw", "rendered"),
+	[("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")],
+)
+def test_export_sensitivity_tag_renders_four_places(
+	field: str, tag: str, raw: str, rendered: str
+) -> None:
+	"""Each Q13-15 XML tag carries exactly four decimal places."""
+	xml = PerfilMensal().export(_document(_row_with_sensitivity(field, raw)))
+
+	assert xml is not None
+	assert f"<{tag}>{rendered}</{tag}>" in xml
+
+
+def test_export_worst_case_stress_keeps_two_places() -> None:
+	"""Q12 (worst-case stress) stays at two places; only Q13-15 moved to four."""
+	row = _row_with_sensitivity("var_diar_perc_cota_fdo_pior_cen_estress", "1.23456")
+	xml = PerfilMensal().export(_document(row))
+
+	assert xml is not None
+	assert (
+		"<VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS>1,23</VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS>"
+		in xml
+	)
 
 
 def test_invalid_cnpj_is_rejected() -> None:
