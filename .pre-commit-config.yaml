@@ -106,6 +106,15 @@ repos:
         types:
           - file
 
+      # Mirrors the CI `poetry check --lock` step (same command), so a stale
+      # poetry.lock fails on the developer's machine instead of minutes later in CI.
+      - id: poetry-lock-check
+        name: poetry.lock is in sync with pyproject.toml
+        entry: bash bin/poetry_exec.sh check --lock
+        language: system
+        files: ^(pyproject\.toml|poetry\.lock)$
+        pass_filenames: false
+
       - id: check-docstrings
         name: docstring type/raises consistency check
         entry: bash bin/poetry_exec.sh run python bin/check_docstrings.py
