@@ -58,15 +58,10 @@ site/
 # Corporate CA (generated locally by `make get_corporate_ca` — never committed)
 bin/corporate_ca.pem
 
-# Scaffoldable lessons — local working copy only; the canonical, cross-project
-# store lives globally in ~/.claude/memory/lessons/. Never committed here.
-docs/blueprintx-lessons.md
-# dotfiles-dev toolchain lessons — local backport queue for ~/github/dotfiles-dev.
-# Never committed here; lands in dotfiles-dev via its own PR.
-docs/dotfiles-dev-lessons.md
-# bedrock-fm architecture record — design notes for the downstream consumer project.
-# Internal working document; never committed here.
-docs/bedrock-fm-lessons.md
+# Generated lessons mirrors (BlueprintX + dotfiles-dev backport queues) — local
+# read-only copies; the canonical stores live globally under ~/.claude/memory/.
+# Never committed here.
+.specs/_lessons/
 
 # Environment files — ignore real env files, keep .env.example tracked
 .env
