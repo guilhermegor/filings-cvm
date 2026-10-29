@@ -1,7 +1,7 @@
 # Work ledger — #97 public META download module
 
 Branch `feat/ingestion-meta-download-97`. Expõe um **módulo público** que baixa os **META**
-(a spec que a própria CVM publica) de cada dataset do open data, para o datalake do bedrock-fm e
+(a spec que a própria CVM publica) de cada dataset do open data, para o datalake do marketdata-fm e
 para o loop do sniffer. `feat` em `src/` → **release PATCH** depois do merge.
 
 Este arquivo é o **spec + ledger** desta branch (design validado com o usuário em 2026-07-15).

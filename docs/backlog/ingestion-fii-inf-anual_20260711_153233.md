@@ -24,7 +24,7 @@ FII queue: #56 INF_MENSAL ✅ (0.15.0) → #57 DFIN ✅ (0.16.0) → #58 INF_TRI
       - `diretor_responsavel` and `representante_cotista` carry a **`CPF`** — a natural person's id.
         Read as exact text, **never** CNPJ-validated. Test asserts the value survives and that
         `CPF` is not in the contract's `tuple_cnpj_cols`. **Personal data** — flag for the
-        downstream (bedrock-fm) layer.
+        downstream (marketdata-fm) layer.
 - [x] `CNPJ_Fundo_Classe` is the only CNPJ-validated column; `CNPJ_Prestador`,
       `CNPJ_Administrador` and the `complemento` counterparty CNPJs are read as text.
 - [x] Wiring at every level (inf_anual → doc → fii → ingestion → public API) + contracts aggregator.
@@ -47,5 +47,5 @@ FII queue: #56 INF_MENSAL ✅ (0.15.0) → #57 DFIN ✅ (0.16.0) → #58 INF_TRI
 ## Notes
 
 - The `CPF` columns are the first personal data the library ingests. Worth a standing note for
-  bedrock-fm: bronze keeps it verbatim (it is what CVM published), but the gold layer / any API
+  marketdata-fm: bronze keeps it verbatim (it is what CVM published), but the gold layer / any API
   surface must treat it as PII (LGPD).
