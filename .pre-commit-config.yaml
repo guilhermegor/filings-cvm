@@ -186,6 +186,13 @@ repos:
         files: ^\.github/workflows/.*\.(yaml|yml)$
         pass_filenames: false
 
+      - id: readme-structure
+        name: README structure (plain headings, slug sections, Authors links)
+        entry: bash bin/check_readme_structure.sh README.md
+        language: system
+        files: ^(README\.md|bin/check_readme_structure\.sh|bin/lib/md_structure\.sh)$
+        pass_filenames: false
+
       - id: lint-sql
         name: sqlfluff (sql lint)
         entry: bash bin/lint_sql.sh

@@ -1,13 +1,22 @@
-# filings-cvm <img src="assets/cvm-logo.png" align="right" width="200" style="border-radius: 15px;" alt="filings-cvm">
+<!-- readme-archetype: library -->
+# filings-cvm
+
+<p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/filings-cvm/main/assets/cvm-logo.png" width="200" alt="Emblema da CVM"></p>
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
-![PyPI Version](https://img.shields.io/pypi/v/filings-cvm)
-![PyPI Downloads](https://static.pepy.tech/badge/filings-cvm)
-[![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff)
-![Test Coverage](./coverage.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+[![PyPI Version](https://img.shields.io/pypi/v/filings-cvm)](https://pypi.org/project/filings-cvm/)
 [![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://guilhermegor.github.io/filings-cvm/)
+[![Linting](https://img.shields.io/badge/linting-ruff_%7C_codespell-blue)](https://github.com/astral-sh/ruff)
+[![Type-checked: mypy](https://img.shields.io/badge/type--checked-mypy-blue)](https://mypy-lang.org/)
+![Test Coverage](https://raw.githubusercontent.com/guilhermegor/filings-cvm/main/coverage.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Open Issues](https://img.shields.io/github/issues/guilhermegor/filings-cvm)
+![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
+![PyPI Downloads](https://static.pepy.tech/badge/filings-cvm)
+
+<!-- slug: overview -->
+## Visão geral
 
 Biblioteca Python **tipada** para os padrões de arquivo XML regulatórios da
 [CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários). Monte, valide e
@@ -23,16 +32,8 @@ arredondados, para que um valor reportado jamais seja inflado.
 > oficial da CVM — <https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp> —
 > não desta documentação.
 
-## 📖 Documentação
-
-A documentação completa (em pt-BR) fica em **<https://guilhermegor.github.io/filings-cvm/>**
-ou pode ser servida localmente:
-
-```bash
-make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_server)
-```
-
-## ✨ Funcionalidades
+<!-- slug: features -->
+## Funcionalidades
 
 Toda solução vive em uma de duas macrosseções:
 
@@ -45,7 +46,7 @@ O **schema compartilhado** (modelos Pydantic que espelham cada padrão XML) é n
 relação à direção e reexportado pelas seções públicas — você importa tudo de que precisa a
 partir de `filings_cvm.submission`.
 
-### 🧩 Padrões implementados (envio)
+### Padrões implementados (envio)
 
 - ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp)) — `PerfilMensal` / `PerfilMensalDocument`
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp)) — `InformeDiario` / `InformeDiarioDocument`
@@ -53,7 +54,18 @@ partir de `filings_cvm.submission`.
 Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes —
 consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
 
-## 🚀 Primeiros Passos
+<!-- slug: documentation -->
+## Documentação
+
+A documentação completa (em pt-BR) fica em **<https://guilhermegor.github.io/filings-cvm/>**
+ou pode ser servida localmente:
+
+```bash
+make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_server)
+```
+
+<!-- slug: getting-started -->
+## Primeiros Passos
 
 ### Pré-requisitos
 
@@ -61,6 +73,7 @@ consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de
 - Poetry (recomendado)
 - Opcional: Makefile (ou use `./tasks.sh` no Git Bash / Windows)
 
+<!-- slug: install -->
 ### Instalação
 
 **Como dependência:**
@@ -80,6 +93,7 @@ make init            # cria a .venv e instala os hooks de pre-commit
                      # (sem make: ./tasks.sh init)
 ```
 
+<!-- slug: usage -->
 ### Uso básico
 
 ```python
@@ -111,20 +125,13 @@ df = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()   # dump mensal inf_
 O exemplo completo (incluindo o bloco obrigatório de contagem de clientes) está em
 **[Uso](https://guilhermegor.github.io/filings-cvm/usage/)**.
 
-### Execução dos testes
+<!-- slug: project-structure -->
+## Estrutura do projeto
 
-```bash
-make unit_tests      # pytest tests/unit/
-make test_cov        # cobertura + badge (coverage.svg)
-make lint            # ruff, codespell, pydocstyle, check_docstrings
-make help            # lista todos os comandos disponíveis
-```
-
-## 📂 Estrutura do projeto
-
-```
+```text
 filings-cvm/
 ├── assets/                 # logo e imagens do projeto
+├── bin/                    # scripts de gate e utilitários (inclui check_readme_structure.sh)
 ├── docs/                   # documentação MkDocs (pt-BR) — make docs_server
 ├── mkdocs.yml              # configuração do site de documentação
 ├── src/filings_cvm/
@@ -140,7 +147,40 @@ filings-cvm/
 └── README.md
 ```
 
-## 🤝 Contribuição
+<!-- slug: development -->
+## Desenvolvimento
+
+```bash
+make unit_tests      # pytest tests/unit/
+make test_cov        # cobertura + badge (coverage.svg)
+make lint            # ruff, codespell, pydocstyle, check_docstrings
+make help            # lista todos os comandos disponíveis
+```
+
+O `README.md` em si é validado por `bin/check_readme_structure.sh` (hook `readme-structure`
+no pre-commit e passo equivalente no CI): títulos sem emoji, marcadores `<!-- slug: ... -->`
+nas seções obrigatórias e lista de autores com links do GitHub e do LinkedIn.
+
+<!-- slug: public-api -->
+## API pública
+
+Cada seção é dona dos seus nomes; o `filings_cvm.__all__` de topo guarda apenas o que não
+pertence a nenhuma delas. Tudo sob `_internal/` é privado.
+
+| O quê | Importe de |
+|-------|------------|
+| Um reader de ingestão | `filings_cvm.ingestion.<raiz_do_portal>` (ex.: `filings_cvm.ingestion.fi`) |
+| Um writer de envio | `filings_cvm.submission` |
+| `RetryPolicy`, `__version__` | `filings_cvm` |
+
+<!-- slug: publishing -->
+## Publicação
+
+As versões saem pelos workflows `release-test-pypi.yaml` (ensaio no Test PyPI) e
+`release-pypi.yaml` (PyPI + GitHub Release) em `.github/workflows/`; a tag git é a versão.
+
+<!-- slug: contributing -->
+## Contribuição
 
 Contribuições são bem-vindas — leia o
 [docs/contributing.md](docs/contributing.md) antes de abrir sua primeira branch. Fluxo
@@ -158,17 +198,26 @@ aplica, e `make enable_repo_rules` o (re)aplica sozinho; nenhuma configuração 
 GitHub é necessária. Detalhes em
 [docs/contributing.md](docs/contributing.md#o-ruleset-pr-quality-gate-revisão-automática-e-proteção-da-branch).
 
-## 👨‍💻 Autores
-
-**Guilherme Rodrigues**
-
-[![GitHub](https://img.shields.io/badge/GitHub-guilhermegor-181717?style=flat&logo=github)](https://github.com/guilhermegor)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Guilherme_Rodrigues-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/guilhermegor/)
-
-## 📜 Licença
+<!-- slug: license -->
+## Licença
 
 Este projeto é licenciado sob a Licença **MIT** — veja [LICENSE](LICENSE).
 
-## 🙌 Agradecimentos
+<!-- slug: authors -->
+## Autores
 
-- Gerado a partir do template **lib-minimal** via [BlueprintX](https://github.com/guilhermegor/BlueprintX).
+- Guilherme Rodrigues — [GitHub](https://github.com/guilhermegor) | [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
+
+<!-- slug: useful-links -->
+## Links úteis
+
+- [Documentação](https://guilhermegor.github.io/filings-cvm/)
+- [PyPI](https://pypi.org/project/filings-cvm/)
+- [Repositório no GitHub](https://github.com/guilhermegor/filings-cvm)
+- [Issues](https://github.com/guilhermegor/filings-cvm/issues)
+
+---
+
+<sub>Agradecimentos: gerado a partir do template **lib-minimal** via
+[BlueprintX](https://github.com/guilhermegor/BlueprintX). Biblioteca não oficial,
+mantida pela comunidade: sem afiliação ou endosso da CVM; o emblema é do regulador.</sub>

@@ -70,7 +70,11 @@ def _run(
 		The finished process with decoded ``stdout`` and ``stderr``.
 	"""
 	str_bash = shutil.which("bash") or "bash"
-	dict_full_env = {**os.environ, **dict_env} if dict_env else None
+	# Git's own environment variables are dropped because a hook run during a commit in a
+	# linked worktree exports the git-dir one, which makes rev-parse report "inside a work
+	# tree" even from an unrelated tmp dir and defeats the off-a-git-tree scenario under test.
+	dict_full_env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+	dict_full_env.update(dict_env or {})
 	# The argument vector is constant and trusted -- a resolved bash plus the repo's own
 	# script -- with no untrusted input interpolated, so the bandit subprocess warning is
 	# a false positive here.
