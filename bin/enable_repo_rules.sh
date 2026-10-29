@@ -78,8 +78,10 @@ ruleset_body() {
 	# required_approving_review_count is 0 ON PURPOSE: GitHub does not let an author approve
 	# their own PR, so any value >= 1 would lock a SOLO maintainer out of merging their own
 	# work. The rule still forces every change through a PR — which is the actual guardrail.
-	# required_review_thread_resolution makes the Copilot review comments binding: they must be
-	# resolved (or explicitly dismissed) before the merge button unlocks.
+	# required_review_thread_resolution makes EVERY inline review thread binding, whoever opens
+	# it (in practice today, CodeRabbit): each must be resolved before the merge button unlocks.
+	# The copilot_code_review rule below is INERT on this account (a plan limit), so Copilot
+	# opens no threads and none of the binding ones come from it.
 	cat <<-JSON
 		{
 		  "name": "$STR_RULESET_NAME",
