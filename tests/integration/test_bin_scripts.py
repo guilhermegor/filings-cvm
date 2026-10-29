@@ -17,6 +17,7 @@ schema gate, with the negative control that proves it rejects the defect it exis
 
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 
@@ -239,7 +240,7 @@ def test_lint_actions_passes_on_the_repository_workflows() -> None:
 
 	assert cls_result.returncode == 0, str_output
 	assert "workflow(s)" in str_output
-	assert "0 workflow(s)" not in str_output
+	assert not re.search(r"(?<!\d)0 workflow\(s\)", str_output)
 
 
 def test_lint_actions_rejects_a_trigger_that_is_not_a_workflow_event(tmp_path: Path) -> None:

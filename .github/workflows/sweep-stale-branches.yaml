@@ -1,0 +1,48 @@
+name: Sweep Stale Branches
+
+# Second line of defence behind reconcile-merged-prs.yaml (issue #230). That workflow walks recently
+# merged PRs (7-day window); this one walks the real list of remote BRANCHES and deletes each whose
+# head-branch PR is MERGED — so a branch that outlived the other sweep's window (scheduled workflow
+# auto-disabled after 60 idle days, a week of failed runs, a burst of >50 PRs) is still caught.
+# The criterion is PR state, never git ancestry: this repo squash-merges, so ancestry never matches.
+# Scheduled events are exempt from the GITHUB_TOKEN "no new workflow runs" rule; the one-time-trigger
+# paragraph the .github/CLAUDE.md scheduling policy asks for is this one.
+on:
+  schedule:
+    - cron: "43 5 * * 1"   # Mondays 05:43 UTC (offset from a round hour to dodge load spikes)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "List what would be deleted without deleting"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write        # delete merged head branches (git refs)
+  pull-requests: read    # look up the PRs of each branch
+
+# Same group as reconcile-merged-prs: both mutate refs and must never run together (see #104).
+concurrency:
+  group: reconcile-merged-prs
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: Sweep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Sweep Stale Branches
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          # Scheduled runs have no inputs → apply; a manual dispatch defaults to a dry run.
+          SWEEP_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: python bin/sweep_stale_branches.py
