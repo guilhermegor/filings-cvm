@@ -230,9 +230,10 @@ o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixad
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
 ⚠️ **Estes números são MEDIDOS do código** (`48 = 19 .txt + 29 .zip`, e 48 contracts — o 49º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
-`test_meta_readers.py` deriva a verdade de `__all__` mas cobre **`docs/ingestion/meta.md` e
-`docs/api.md`, NÃO este arquivo** — então **atualize esta contagem no mesmo commit do reader novo**,
-senão ela estagna sem nada ficar vermelho (já aconteceu duas vezes: ficou em 37 com 38 exportados,
+`test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
+parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
+`docs/api.md` ficam de fora) — a contagem estagnar agora deixa a suíte vermelha. Antes do gate,
+ela estagnava sem nada ficar vermelho (já aconteceu duas vezes: ficou em 37 com 38 exportados,
 e o parêntese dos números medidos ficou em `38 = 16 + 22` enquanto o texto acima já dizia 42).
 **Ao corrigir, RE-MEDIR do código, nunca incrementar** — foi re-medindo que se viu que os dois
 números do mesmo parágrafo discordavam.
