@@ -355,7 +355,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 		list[str]
 			XML lines for stress-scenario and DV01-style sensitivity fields.
 		"""
-		# Per the CVM Perfil standard every sensitivity field uses two decimal places.
+		# Per the CVM V4 standard the stress field has 2 decimal places and Q13 to Q15 have 4.
 		pairs: list[tuple[str, Decimal | None, int]] = [
 			(
 				"VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS",
@@ -365,14 +365,14 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			(
 				"VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL",
 				row.var_diar_perc_patrim_fdo_var_n_taxa_anual,
-				2,
+				4,
 			),
 			(
 				"VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO",
 				row.var_diar_perc_patrim_fdo_var_n_taxa_cambio,
-				2,
+				4,
 			),
-			("VAR_PATRIM_FDO_N_PRECO_ACOES", row.var_patrim_fdo_n_preco_acoes, 2),
+			("VAR_PATRIM_FDO_N_PRECO_ACOES", row.var_patrim_fdo_n_preco_acoes, 4),
 		]
 		return [
 			f"{ind}    <{tag}>{self._fmt_decimal(val, places)}</{tag}>"

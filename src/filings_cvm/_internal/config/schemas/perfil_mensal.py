@@ -38,6 +38,12 @@ OneDecimalField = Annotated[
 TwoDecimalField = Annotated[
 	Decimal, BeforeValidator(truncate_to_scale(2)), Field(decimal_places=2)
 ]
+# Q13-15 sensitivity fields (VAR_DIAR_PERC_PATRIM_FDO_VAR_N_*, VAR_PATRIM_FDO_N_PRECO_ACOES):
+# "Numérico com quatro casas decimais", no integer-digit bound and no sign bound (the
+# scenarios are negative shocks), so VarPercentPlField's max_digits=14 does not apply.
+FourDecimalField = Annotated[
+	Decimal, BeforeValidator(truncate_to_scale(4)), Field(decimal_places=4)
+]
 FiveDecimalField = Annotated[
 	Decimal, BeforeValidator(truncate_to_scale(5)), Field(decimal_places=5)
 ]
@@ -307,9 +313,9 @@ class PerfilMensalRow(BaseModel):
 	total_recurs_br: TwoDecimalField
 	variacao_perc_val_cota: VarPercValCota | None = None
 	var_diar_perc_cota_fdo_pior_cen_estress: TwoDecimalField | None = None
-	var_diar_perc_patrim_fdo_var_n_taxa_anual: TwoDecimalField | None = None
-	var_diar_perc_patrim_fdo_var_n_taxa_cambio: TwoDecimalField | None = None
-	var_patrim_fdo_n_preco_acoes: TwoDecimalField | None = None
+	var_diar_perc_patrim_fdo_var_n_taxa_anual: FourDecimalField | None = None
+	var_diar_perc_patrim_fdo_var_n_taxa_cambio: FourDecimalField | None = None
+	var_patrim_fdo_n_preco_acoes: FourDecimalField | None = None
 	variacao_diar_perc_patrim_fdo_var_n_outros: VarOutros | None = None
 	valor_noc_tot_contrat_deriv_mant_fdo: NominalRiskBlock | None = None
 	lista_oper_curs_merc_balcao: list[OtcOperation] | None = Field(default=None, max_length=3)
