@@ -240,6 +240,45 @@ Duas regras da UI ficam **deliberadamente desligadas**, para não criar uma segu
 gates de `bin/check_*.py` já cobrem qualidade de forma determinística) e *Restrict code coverage* (o
 piso já é single-source em `.coveragerc`, aplicado por pre-commit + CI).
 
+### Auto-merge e commit empilhado — o push que chega depois do merge é perdido
+
+Numa classe auto-fundível (`docs`/`ci`/`deps`, sem arquivo de teste), **o PR funde no instante em que
+os checks ficam verdes**, em segundos. Acrescentar um commit a um PR já aberto vira uma corrida — e
+quando ela é perdida, o commit fica **órfão**. Medido em 3 ocorrências numa sessão (#221, #223, #225):
+em dois casos o `push` **teve sucesso** e `origin/<branch>` avançou, mas o PR já estava mergeado — o
+trabalho ficou na branch e **em lugar nenhum além dela**. Nada falha: o PR está verde e fundido, e o
+commit simplesmente não está no `main`.
+
+> ⚠️ **É consequência de o auto-merge funcionar, não um defeito dele.** Quanto melhor ele funciona,
+> mais estreita a janela. E a `required_review_thread_resolution` **não** protege: ela bloqueia thread
+> **existente e não resolvida**, não espera um revisor chegar (o #223 fundiu com o CodeRabbit ainda
+> "processando novas mudanças"). A política de auto-merge não muda — o que muda é o seu hábito.
+
+**Como evitar:**
+
+- **Conclua o trabalho antes de abrir o PR** numa classe auto-fundível.
+- Se precisar continuar depois de aberto, aplique o rótulo `do-not-merge` **antes** do push seguinte
+  — não depois.
+- Ou aceite abrir um segundo PR para o que vier depois.
+
+**Como detectar.** Depois de **todo** `push` num PR já aberto, compare o PR com o HEAD local:
+
+```bash
+gh pr view <N> --json state,headRefOid
+git rev-parse HEAD
+```
+
+`state=MERGED` com `headRefOid` **diferente** do HEAD local significa **commit órfão**.
+
+**Como recuperar.** Crie uma branch nova a partir do `main` atualizado, traga o commit com
+`git cherry-pick <sha>` e abra um PR novo:
+
+```bash
+git fetch origin
+git switch -c <nova-branch> origin/main
+git cherry-pick <sha-orfao>
+```
+
 ### Higiene de branches — apagar depois do merge, **arquivar** as de incidente
 
 Depois do merge, a branch vai embora. Só o `main` e a `gh-pages` vivem no remoto.
