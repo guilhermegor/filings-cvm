@@ -7,6 +7,7 @@ import zipfile
 
 import pytest
 
+from filings_cvm._internal.config.contracts import meta as meta_module
 from filings_cvm._internal.config.contracts.meta import META_CAD_FI, META_COLUMNS, META_DFIN_CRA
 from filings_cvm._internal.utils.introspection import iter_public_readers
 from filings_cvm._internal.utils.tabular_reader import FileContract
@@ -196,3 +197,58 @@ def test_meta_source_keys_are_unique_across_every_reader() -> None:
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	]
 	assert len(list_keys) == len(set(list_keys))
+
+
+_PATH_CLAUDE_MD = Path(__file__).resolve().parents[2] / "CLAUDE.md"
+
+# Each claim in the root CLAUDE.md's META paragraph, keyed by what it counts. Anchored on the
+# surrounding wording so the CVM-sourced figures ("41 campos", "19 membros") are never matched.
+_RE_CLAUDE_MD_COUNTS = {
+	"readers": re.compile(r"\*\*(\d+) readers\*\* \(`Meta\*Reader`\)"),
+	"factory": re.compile(r"\((\d+) instâncias de um factory"),
+	"txt_prose": re.compile(r"`\.txt` solto \((\d+)\)"),
+	"zip_prose": re.compile(r"`\.zip` multi-membro \((\d+)\)"),
+	"measured_total": re.compile(r"`(\d+) = \d+ \.txt \+ \d+ \.zip`"),
+	"measured_txt": re.compile(r"`\d+ = (\d+) \.txt \+ \d+ \.zip`"),
+	"measured_zip": re.compile(r"`\d+ = \d+ \.txt \+ (\d+) \.zip`"),
+	"contracts": re.compile(r"e (\d+) contracts"),
+}
+
+
+def test_claude_md_meta_counts_match_the_real_numbers() -> None:
+	"""The root CLAUDE.md is read by the next agent as instruction, so its counts are gated too.
+
+	#160 updated `docs/` to 38 while this file kept saying 37 and the whole suite stayed green
+	(#161). Every expected value is derived from the package, never hardcoded.
+	"""
+	dict_readers = {
+		str_name: cls_reader
+		for str_name, cls_reader in iter_public_readers().items()
+		if str_name.startswith("Meta") and str_name.endswith("Reader")
+	}
+	int_txt = sum(c._META_URL.endswith(".txt") for c in dict_readers.values())
+	int_zip = sum(c._META_URL.endswith(".zip") for c in dict_readers.values())
+	assert int_txt + int_zip == len(dict_readers)
+	# META_COLUMNS is the shared tuple, not a contract — only FileContract instances count.
+	int_contracts = sum(
+		isinstance(obj, FileContract)
+		for str_name, obj in vars(meta_module).items()
+		if str_name.startswith("META_")
+	)
+
+	dict_expected = {
+		"readers": len(dict_readers),
+		"factory": int_contracts,
+		"txt_prose": int_txt,
+		"zip_prose": int_zip,
+		"measured_total": len(dict_readers),
+		"measured_txt": int_txt,
+		"measured_zip": int_zip,
+		"contracts": int_contracts,
+	}
+	str_flat = " ".join(_PATH_CLAUDE_MD.read_text(encoding="utf-8").split())
+	for str_key, re_claim in _RE_CLAUDE_MD_COUNTS.items():
+		list_found = [int(s) for s in re_claim.findall(str_flat)]
+		# A regex that matches nothing checks nothing — reworded prose must fail loudly here.
+		assert list_found, f"CLAUDE.md META claim {str_key!r} not found — did its wording change?"
+		assert set(list_found) == {dict_expected[str_key]}, str_key
