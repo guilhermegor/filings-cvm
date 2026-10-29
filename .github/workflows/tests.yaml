@@ -131,6 +131,13 @@ jobs:
         # (gate parity with pre-commit) — a hook-only gate is bypassed by `--no-verify`.
         run: poetry run python bin/check_dtypes.py
 
+      - name: Run README Structure Gate
+        if: runner.os == 'Linux'
+        # Mirrors the `readme-structure` pre-commit hook: plain headings, slug markers on the
+        # required sections, Authors with GitHub + LinkedIn links. Explicit CI step (gate
+        # parity with pre-commit) so a `--no-verify` commit cannot bypass it.
+        run: bash bin/check_readme_structure.sh README.md
+
       - name: Run Work-Ledger Enforcement
         if: runner.os == 'Linux' && github.event_name == 'pull_request'
         # Mirrors the `check-backlog-ledger` pre-commit hook: a branch touching any src/ci path
