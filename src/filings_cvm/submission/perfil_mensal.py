@@ -401,7 +401,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			f"{saxutils.escape(vo.fator_risco_outros[:400])}"
 			f"</FATOR_RISCO_OUTROS>",
 			f"{ind}        <VAL_PERCENT_OUTROS>"
-			f"{self._fmt_decimal(vo.val_percent_outros, 2)}"
+			f"{self._fmt_decimal(vo.val_percent_outros, 4)}"
 			f"</VAL_PERCENT_OUTROS>",
 			f"{ind}    </VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS>",
 		]

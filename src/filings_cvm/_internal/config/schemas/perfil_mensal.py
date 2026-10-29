@@ -182,7 +182,7 @@ class VarOutros(BaseModel):
 	"""VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS - sensitivity to a non-standard risk factor."""
 
 	fator_risco_outros: str = Field(max_length=400)
-	val_percent_outros: TwoDecimalField
+	val_percent_outros: FourDecimalField
 
 
 class NominalRiskFactor(BaseModel):

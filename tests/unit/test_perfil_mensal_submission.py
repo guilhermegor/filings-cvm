@@ -160,6 +160,50 @@ def test_export_worst_case_stress_keeps_two_places() -> None:
 	)
 
 
+def _row_with_outros(value: str) -> PerfilMensalRow:
+	"""Build a minimal row that sets VAL_PERCENT_OUTROS."""
+	return PerfilMensalRow(
+		cnpj_fdo=VALID_CNPJ,
+		nr_client=_zero_client_count(),
+		total_recurs_exter="0",
+		total_recurs_br="0",
+		tot_ativos_p_relac="0",
+		tot_ativos_cred_priv="0",
+		variacao_diar_perc_patrim_fdo_var_n_outros=VarOutros(
+			fator_risco_outros="fator", val_percent_outros=value
+		),
+	)
+
+
+@pytest.mark.parametrize(
+	("raw", "expected"),
+	[
+		("1.23456789", Decimal("1.2345")),
+		("-1.23456789", Decimal("-1.2345")),
+		("0.99999", Decimal("0.9999")),
+	],
+)
+def test_val_percent_outros_truncates_to_four_places_round_down(
+	raw: str, expected: Decimal
+) -> None:
+	"""VAL_PERCENT_OUTROS keeps four decimal places and truncates, never rounds."""
+	row = _row_with_outros(raw)
+
+	assert row.variacao_diar_perc_patrim_fdo_var_n_outros.val_percent_outros == expected
+
+
+@pytest.mark.parametrize(
+	("raw", "rendered"),
+	[("1.23456789", "1,2345"), ("-1.23456789", "-1,2345"), ("2", "2,0000")],
+)
+def test_export_val_percent_outros_renders_four_places(raw: str, rendered: str) -> None:
+	"""The VAL_PERCENT_OUTROS XML tag carries exactly four decimal places."""
+	xml = PerfilMensal().export(_document(_row_with_outros(raw)))
+
+	assert xml is not None
+	assert f"<VAL_PERCENT_OUTROS>{rendered}</VAL_PERCENT_OUTROS>" in xml
+
+
 def test_invalid_cnpj_is_rejected() -> None:
 	"""A CNPJ that fails the check digits raises a validation error."""
 	with pytest.raises(ValidationError):
