@@ -46,6 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          # Scheduled runs have no inputs → apply; a manual dispatch defaults to a dry run.
-          SWEEP_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+          # Scheduled runs only report for now (owner decision on #265); real deletes happen through
+          # a manual dispatch with dry_run unticked.
+          SWEEP_DRY_RUN: ${{ github.event_name != 'workflow_dispatch' || inputs.dry_run }}
         run: python bin/sweep_stale_branches.py
