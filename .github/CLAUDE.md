@@ -33,7 +33,7 @@ CI runs its gates as **explicit steps** (it does *not* invoke `pre-commit run`),
 adding a hook to `.pre-commit-config.yaml` does **not** automatically cover CI — you
 must add the matching step to `tests.yaml` yourself. The canonical set to keep
 mirrored: codespell, `check_docstrings.py`, `check_typing.py`, `check_provenance.py`,
-`check_dtypes.py`, ruff check + format, mypy, the shell/sql/yaml/**actions** lint gates,
+`check_dtypes.py`, `check_docs_sections.py`, ruff check + format, mypy, the shell/sql/yaml/**actions** lint gates,
 unit + integration tests, and the coverage `fail-under` threshold. After changing a gate,
 confirm both files list it.
 
