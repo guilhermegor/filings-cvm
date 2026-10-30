@@ -19,6 +19,5 @@ Branch: `ci/230-sweep-stale-branches` · Issue: #230 · Backstop to `reconcile-m
 
 ## Restante
 
-- Decisao do dono: o `schedule` apaga de verdade ou comeca em dry run (auto-merge retido no #265).
-
-- [x] Completed — kept as a record.
+- [ ] Decisao do dono: o `schedule` apaga de verdade ou comeca em dry run (auto-merge retido no
+  #265). Hoje o run agendado apaga.
