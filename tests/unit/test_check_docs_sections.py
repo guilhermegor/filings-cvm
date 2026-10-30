@@ -151,3 +151,28 @@ def test_real_docs_pass() -> None:
 	text = (_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
 	assert cds.check_docs(_ROOT / "docs", text) == []
 	assert cds.stale_allowlist(_ROOT / "docs") == []
+
+
+def test_canonical_slugs_are_the_six_required_pages() -> None:
+	"""Pinned literally: the other tests derive from the constant, so they cannot catch a drop."""
+	assert set(cds.CANONICAL_SLUGS) == {
+		"index",
+		"usage",
+		"api",
+		"faq",
+		"contributing",
+		"changelog",
+	}
+
+
+def test_headings_strips_a_closing_sequence(tmp_path: Path) -> None:
+	"""``## Descrição ##`` renders as ``Descrição``, and ``C#`` keeps its hash."""
+	page = tmp_path / "a.md"
+	page.write_text("## Descrição ##\n\n## C#\n", encoding="utf-8")
+	assert cds._headings(page) == {"Descrição", "C#"}
+
+
+def test_is_excluded_top_level_templates_only() -> None:
+	"""MkDocs drops ``/templates/`` by default, but not a nested folder of that name."""
+	assert cds._is_excluded("templates/a.md", [])
+	assert not cds._is_excluded("ingestion/templates/a.md", [])

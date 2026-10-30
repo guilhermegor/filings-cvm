@@ -122,11 +122,12 @@ def _excluded(mkdocs_text: str) -> list[str]:
 def _is_excluded(rel: str, patterns: list[str]) -> bool:
 	"""Whether MkDocs excludes a docs-relative path.
 
-	Dot-files/dirs are excluded implicitly; patterns apply in order and the last match wins,
-	so a later ``!pattern`` re-includes. Only the ``dir/`` and bare-name forms are handled (all
-	this repo uses); ``check_docs`` rejects a wildcard pattern rather than misread it.
+	Dot-files/dirs and the top-level ``templates/`` are excluded implicitly (MkDocs defaults);
+	patterns apply in order and the last match wins, so a later ``!pattern`` re-includes.
+	Only the ``dir/`` and bare-name forms are handled (all this repo uses);
+	``check_docs`` rejects a wildcard pattern rather than misread it.
 	"""
-	excluded = any(part.startswith(".") for part in rel.split("/"))
+	excluded = rel.startswith("templates/") or any(p.startswith(".") for p in rel.split("/"))
 	for pat in patterns:
 		negate = pat.startswith("!")
 		body = pat[1:] if negate else pat
@@ -156,7 +157,7 @@ def _headings(path: pathlib.Path) -> set[str]:
 		elif m := _FENCE.match(line):
 			fence = m.group(1)
 		elif line.startswith("## "):
-			found.add(line[3:].strip())
+			found.add(re.sub(r"\s+#+$", "", line[3:].strip()))
 		elif "<!--" in line:
 			in_comment = "-->" not in line.rsplit("<!--", 1)[1]
 	return found
