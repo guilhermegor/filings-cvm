@@ -18,6 +18,7 @@ Safety, in order of precedence (all unit-tested):
 * the default branch and ``gh-pages`` are never deleted;
 * a branch with **any** ``OPEN`` PR is never deleted, even if an older PR of it merged (it was
   reused);
+* the base of an open PR is never deleted: GitHub would close that PR;
 * a branch with no PR, or only ``CLOSED`` (unmerged) PRs, is work in progress — kept;
 * a merged PR only counts when its head is still the branch tip: commits pushed after the
   merge never reached ``main``, and deleting the branch would lose them;
@@ -138,8 +139,31 @@ def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
 	return json.loads(bytes_out) if bytes_out else {}
 
 
+def _paged(str_url: str) -> list[Any]:
+	"""Collect every page of a list endpoint.
+
+	Parameters
+	----------
+	str_url : str
+		Absolute API URL ending in ``?`` or ``&``, ready for the paging parameters.
+
+	Returns
+	-------
+	list
+		The items of all pages; ``Any`` because it is a JSON boundary.
+	"""
+	list_items: list[Any] = []
+	int_page = 1
+	while True:
+		list_page = _api("GET", f"{str_url}per_page={_PER_PAGE}&page={int_page}")
+		list_items.extend(list_page)
+		if len(list_page) < _PER_PAGE:
+			return list_items
+		int_page += 1
+
+
 def _list_branches(str_api: str) -> dict[str, str]:
-	"""Return every remote branch name mapped to its tip SHA, following pagination.
+	"""Return every remote branch name mapped to its tip SHA.
 
 	Parameters
 	----------
@@ -151,14 +175,26 @@ def _list_branches(str_api: str) -> dict[str, str]:
 	dict
 		Branch name to tip commit SHA.
 	"""
-	dict_tips: dict[str, str] = {}
-	int_page = 1
-	while True:
-		list_page = _api("GET", f"{str_api}/branches?per_page={_PER_PAGE}&page={int_page}")
-		dict_tips.update({dict_b["name"]: dict_b["commit"]["sha"] for dict_b in list_page})
-		if len(list_page) < _PER_PAGE:
-			return dict_tips
-		int_page += 1
+	return {dict_b["name"]: dict_b["commit"]["sha"] for dict_b in _paged(f"{str_api}/branches?")}
+
+
+def _open_pr_bases(str_api: str) -> set[str]:
+	"""Return the base branches of every open PR.
+
+	Not caught by the caller: without this list no deletion is safe, so a failed read ends the
+	run before anything is deleted.
+
+	Parameters
+	----------
+	str_api : str
+		The ``.../repos/{owner}/{name}`` API base.
+
+	Returns
+	-------
+	set of str
+		Branch names that an open PR targets.
+	"""
+	return {dict_pr["base"]["ref"] for dict_pr in _paged(f"{str_api}/pulls?state=open&")}
 
 
 def _pr_states(str_api: str, str_owner: str, str_branch: str, str_tip: str) -> list[str]:
@@ -197,6 +233,28 @@ def _pr_states(str_api: str, str_owner: str, str_branch: str, str_tip: str) -> l
 	]
 
 
+def _already_gone(cls_exc: Exception) -> bool:
+	"""Return whether a failed DELETE means the ref no longer exists.
+
+	GitHub answers 422 both for a missing ref and for a refusal such as a ruleset, so a 422
+	counts only when its body names the missing ref. Anything else is a real failure.
+
+	Parameters
+	----------
+	cls_exc : Exception
+		The error raised by the DELETE.
+
+	Returns
+	-------
+	bool
+		``True`` for a 404, or a 422 saying ``Reference does not exist``.
+	"""
+	int_code = getattr(cls_exc, "code", None)
+	if int_code == 422:  # noqa: PLR2004
+		return b"Reference does not exist" in cls_exc.read()
+	return int_code == 404  # noqa: PLR2004
+
+
 def main() -> int:
 	"""Sweep every remote branch; delete (unless dry run) those whose PR merged.
 
@@ -216,10 +274,14 @@ def main() -> int:
 
 	str_default = _api("GET", str_api)["default_branch"]
 	dict_tips = _list_branches(str_api)
+	set_bases = _open_pr_bases(str_api)
 	dict_states: dict[str, list[str]] = {}
 	int_lookup_failed = 0
 	for str_branch, str_tip in dict_tips.items():
 		if str_branch in _PROTECTED | {str_default}:
+			continue
+		if str_branch in set_bases:
+			print(f"branch={str_branch} kept: base of an open PR")
 			continue
 		try:
 			dict_states[str_branch] = _pr_states(str_api, str_owner, str_branch, str_tip)
@@ -237,8 +299,8 @@ def main() -> int:
 			_api("DELETE", f"{str_api}/git/refs/heads/{urllib.parse.quote(str_branch, safe='/')}")
 			print(f"branch={str_branch} deleted")
 		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
-			if getattr(cls_exc, "code", None) in (404, 422):
-				print(f"branch={str_branch} already gone ({cls_exc.code})", file=sys.stderr)
+			if _already_gone(cls_exc):
+				print(f"branch={str_branch} already gone", file=sys.stderr)
 				continue
 			int_delete_failed += 1
 			print(f"branch={str_branch} delete failed (kept): {cls_exc}", file=sys.stderr)

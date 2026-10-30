@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 from pathlib import Path
 from typing import Any
 import urllib.error
@@ -80,6 +81,8 @@ def _fake_api(list_calls: list[str], dict_prs: dict[str, list[dict]]) -> Any:  #
 				{"name": str_n, "commit": {"sha": f"tip-{str_n}"}}
 				for str_n in ["main", "gh-pages", *dict_prs]
 			]
+		if "state=open" in str_url:
+			return []
 		if "/pulls" in str_url:
 			str_head = urllib.parse.unquote(str_url.split("head=")[1].split("&")[0])
 			str_branch = str_head.split(":")[1]
@@ -136,7 +139,7 @@ def test_main_default_is_dry_run_and_deletes_nothing(
 
 
 def test_main_keeps_branch_with_commits_pushed_after_merge(
-	monkeypatch: pytest.MonkeyPatch,
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
 	"""A merged PR whose head is not the tip proves nothing about the tip: no DELETE."""
 	list_calls: list[str] = []
@@ -145,6 +148,49 @@ def test_main_keeps_branch_with_commits_pushed_after_merge(
 	dict_prs = {"feat/reused": [_merged("older-sha")]}
 	monkeypatch.setattr(mod, "_api", _fake_api(list_calls, dict_prs))
 	assert mod.main() == 0
+	assert list_calls == []
+	str_out = capsys.readouterr().out
+	assert "1 with PR lookup" in str_out
+	assert "0 stale" in str_out
+
+
+def test_main_keeps_merged_branch_that_is_the_base_of_an_open_pr(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""Deleting a stacked PR's base closes that PR, so the base stays while its siblings go."""
+	list_calls: list[str] = []
+	dict_prs = {"feat/base": [_merged("tip-feat/base")], "feat/x": [_merged("tip-feat/x")]}
+	fn_fake = _fake_api(list_calls, dict_prs)
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		if "state=open" in str_url:
+			return [{"base": {"ref": "feat/base"}}]
+		return fn_fake(str_method, str_url)
+
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _api)
+	assert mod.main() == 0
+	assert len(list_calls) == 1
+	assert list_calls[0].endswith("feat/x")
+	assert "branch=feat/base kept: base of an open PR" in capsys.readouterr().out
+
+
+def test_main_open_pr_read_failure_deletes_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""Without the open-PR list no deletion is safe, so the run ends before any DELETE."""
+	list_calls: list[str] = []
+	fn_fake = _fake_api(list_calls, {"feat/a": [_merged("tip-feat/a")]})
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		if "state=open" in str_url:
+			raise urllib.error.URLError("timed out")
+		return fn_fake(str_method, str_url)
+
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _api)
+	with pytest.raises(urllib.error.URLError):
+		mod.main()
 	assert list_calls == []
 
 
@@ -188,7 +234,7 @@ def test_main_lookup_failure_keeps_branch_and_fails_the_run(
 	fn_fake = _fake_api(list_calls, dict_prs)
 
 	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
-		if "/pulls" in str_url:
+		if "head=" in str_url:
 			raise urllib.error.URLError("timed out")
 		return fn_fake(str_method, str_url)
 
@@ -200,17 +246,27 @@ def test_main_lookup_failure_keeps_branch_and_fails_the_run(
 	assert "1 lookup failure(s)" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("int_code", [404, 422])
+def _http_error(int_code: int, bytes_body: bytes) -> urllib.error.HTTPError:
+	"""Build an HTTP error whose body can be read, as a real response's can."""
+	return urllib.error.HTTPError("u", int_code, "x", {}, io.BytesIO(bytes_body))  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+	("int_code", "bytes_body"), [(404, b""), (422, b'{"message":"Reference does not exist"}')]
+)
 def test_main_already_gone_branch_is_not_a_failure(
-	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], int_code: int
+	monkeypatch: pytest.MonkeyPatch,
+	capsys: pytest.CaptureFixture[str],
+	int_code: int,
+	bytes_body: bytes,
 ) -> None:
-	"""A 404 or 422 on DELETE means the branch is gone: exit 0, no failure counted."""
+	"""A 404, or a 422 naming the missing ref, means gone: exit 0, no failure counted."""
 	list_calls: list[str] = []
 	fn_fake = _fake_api(list_calls, {"feat/a": [_merged("tip-feat/a")]})
 
 	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
 		if str_method == "DELETE":
-			raise urllib.error.HTTPError("u", int_code, "gone", {}, None)  # type: ignore[arg-type]
+			raise _http_error(int_code, bytes_body)
 		return fn_fake(str_method, str_url)
 
 	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
@@ -218,6 +274,25 @@ def test_main_already_gone_branch_is_not_a_failure(
 	monkeypatch.setattr(mod, "_api", _api)
 	assert mod.main() == 0
 	assert "0 delete failure(s)" in capsys.readouterr().out
+
+
+def test_main_422_refusal_is_a_failure_not_already_gone(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A ruleset's 422 leaves the branch in place, so it must fail the run."""
+	list_calls: list[str] = []
+	fn_fake = _fake_api(list_calls, {"feat/a": [_merged("tip-feat/a")]})
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		if str_method == "DELETE":
+			raise _http_error(422, b'{"message":"Repository rule violations found"}')
+		return fn_fake(str_method, str_url)
+
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _api)
+	assert mod.main() == 1
+	assert "1 delete failure(s)" in capsys.readouterr().out
 
 
 def test_list_branches_follows_pagination_to_the_last_short_page(

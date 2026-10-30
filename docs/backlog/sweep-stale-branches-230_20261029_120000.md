@@ -15,6 +15,8 @@ Branch: `ci/230-sweep-stale-branches` · Issue: #230 · Backstop to `reconcile-m
 - [x] Falha de lookup ou delete e contada, nao interrompe o laco, e o run sai com status 1.
 - [x] Testes unitarios, incluindo controle negativo, guardas e paginacao.
 
+- [x] Base de PR aberto nunca e apagada; 422 de regra conta como falha, nao como "ja apagada".
+
 ## Restante
 
 - Decisao do dono: o `schedule` apaga de verdade ou comeca em dry run (auto-merge retido no #265).
