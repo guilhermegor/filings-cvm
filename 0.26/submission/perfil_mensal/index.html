@@ -481,6 +481,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#campos-de-sensibilidade-q1315-quatro-casas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Campos de sensibilidade (Q13–15): quatro casas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#varias-classes-de-fundo-em-um-so-documento" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2140,6 +2151,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#campos-de-sensibilidade-q1315-quatro-casas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Campos de sensibilidade (Q13–15): quatro casas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#varias-classes-de-fundo-em-um-so-documento" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2282,35 +2304,49 @@ performance, etc.) e a lista completa de modelos estão na <a href="../../api/">
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">xml</span> <span class="o">=</span> <span class="n">PerfilMensal</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">assert</span> <span class="s2">&quot;&lt;TOTAL_RECURS_BR&gt;10,99&lt;/TOTAL_RECURS_BR&gt;&quot;</span> <span class="ow">in</span> <span class="n">xml</span>   <span class="c1"># 10,99 — não 11,00</span>
 </span></code></pre></div>
+<h3 id="campos-de-sensibilidade-q1315-quatro-casas">Campos de sensibilidade (Q13–15): quatro casas<a class="headerlink" href="#campos-de-sensibilidade-q1315-quatro-casas" title="Permanent link">&para;</a></h3>
+<p>Segundo o padrão V4 da CVM, <code>VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL</code>,
+<code>VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO</code> e <code>VAR_PATRIM_FDO_N_PRECO_ACOES</code> são "% PL numérico
+com <strong>quatro</strong> casas decimais" (campos <code>var_diar_perc_patrim_fdo_var_n_taxa_anual</code>,
+<code>var_diar_perc_patrim_fdo_var_n_taxa_cambio</code> e <code>var_patrim_fdo_n_preco_acoes</code>). O excesso é
+truncado (<code>ROUND_DOWN</code>), inclusive para valores negativos. Já
+<code>VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS</code> (Q12) continua com duas casas.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># ... var_patrim_fdo_n_preco_acoes=&quot;-1.23456789&quot; na linha ...</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">xml</span> <span class="o">=</span> <span class="n">PerfilMensal</span><span class="p">()</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">assert</span> <span class="s2">&quot;&lt;VAR_PATRIM_FDO_N_PRECO_ACOES&gt;-1,2345&lt;/VAR_PATRIM_FDO_N_PRECO_ACOES&gt;&quot;</span> <span class="ow">in</span> <span class="n">xml</span>
+</span></code></pre></div>
+<p><code>VAL_PERCENT_OUTROS</code> (<code>variacao_diar_perc_patrim_fdo_var_n_outros.val_percent_outros</code>, sensibilidade
+a outro fator de risco) também é "numérico com <strong>quatro</strong> casas decimais" no padrão V4 e segue a
+mesma regra: truncado com <code>ROUND_DOWN</code>, renderizado com quatro casas (<code>2</code> vira <code>2,0000</code>).</p>
 <h3 id="varias-classes-de-fundo-em-um-so-documento">Várias classes de fundo em um só documento<a class="headerlink" href="#varias-classes-de-fundo-em-um-so-documento" title="Permanent link">&para;</a></h3>
 <p><code>rows</code> aceita uma lista — cada item vira um bloco <code>&lt;ROW_PERFIL&gt;</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">doc</span> <span class="o">=</span> <span class="n">PerfilMensalDocument</span><span class="p">(</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">header</span><span class="o">=</span><span class="n">DocumentHeader</span><span class="p">(</span><span class="n">dt_compt</span><span class="o">=</span><span class="s2">&quot;01/2025&quot;</span><span class="p">,</span> <span class="n">dt_gerac_arq</span><span class="o">=</span><span class="s2">&quot;15/01/2025&quot;</span><span class="p">),</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">rows</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="n">PerfilMensalRow</span><span class="p">(</span><span class="n">cnpj_fdo</span><span class="o">=</span><span class="s2">&quot;11222333000181&quot;</span><span class="p">,</span> <span class="n">nr_client</span><span class="o">=</span><span class="n">clientes</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>                        <span class="n">total_recurs_exter</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">total_recurs_br</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>                        <span class="n">tot_ativos_p_relac</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">tot_ativos_cred_priv</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">),</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">PerfilMensalRow</span><span class="p">(</span><span class="n">cnpj_fdo</span><span class="o">=</span><span class="s2">&quot;11444777000161&quot;</span><span class="p">,</span> <span class="n">nr_client</span><span class="o">=</span><span class="n">clientes</span><span class="p">,</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>                        <span class="n">total_recurs_exter</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">total_recurs_br</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>                        <span class="n">tot_ativos_p_relac</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">tot_ativos_cred_priv</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">),</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="p">],</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">doc</span> <span class="o">=</span> <span class="n">PerfilMensalDocument</span><span class="p">(</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">header</span><span class="o">=</span><span class="n">DocumentHeader</span><span class="p">(</span><span class="n">dt_compt</span><span class="o">=</span><span class="s2">&quot;01/2025&quot;</span><span class="p">,</span> <span class="n">dt_gerac_arq</span><span class="o">=</span><span class="s2">&quot;15/01/2025&quot;</span><span class="p">),</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">rows</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="n">PerfilMensalRow</span><span class="p">(</span><span class="n">cnpj_fdo</span><span class="o">=</span><span class="s2">&quot;11222333000181&quot;</span><span class="p">,</span> <span class="n">nr_client</span><span class="o">=</span><span class="n">clientes</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                        <span class="n">total_recurs_exter</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">total_recurs_br</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                        <span class="n">tot_ativos_p_relac</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">tot_ativos_cred_priv</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">),</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">PerfilMensalRow</span><span class="p">(</span><span class="n">cnpj_fdo</span><span class="o">=</span><span class="s2">&quot;11444777000161&quot;</span><span class="p">,</span> <span class="n">nr_client</span><span class="o">=</span><span class="n">clientes</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>                        <span class="n">total_recurs_exter</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">total_recurs_br</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>                        <span class="n">tot_ativos_p_relac</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">tot_ativos_cred_priv</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">),</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="p">],</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="rejeicao-de-cnpj-invalido">Rejeição de CNPJ inválido<a class="headerlink" href="#rejeicao-de-cnpj-invalido" title="Permanent link">&para;</a></h3>
 <p>Um CNPJ com dígitos verificadores incorretos levanta <code>ValidationError</code> já na construção — falhe
 cedo, antes de gerar qualquer XML.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.submission</span><span class="w"> </span><span class="kn">import</span> <span class="n">PerfilMensalRow</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">try</span><span class="p">:</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">PerfilMensalRow</span><span class="p">(</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="n">cnpj_fdo</span><span class="o">=</span><span class="s2">&quot;12345678000100&quot;</span><span class="p">,</span>   <span class="c1"># dígitos verificadores inválidos</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">nr_client</span><span class="o">=</span><span class="n">clientes</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">total_recurs_exter</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">total_recurs_br</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="n">tot_ativos_p_relac</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">tot_ativos_cred_priv</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="p">)</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CNPJ recusado:&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.submission</span><span class="w"> </span><span class="kn">import</span> <span class="n">PerfilMensalRow</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">PerfilMensalRow</span><span class="p">(</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">cnpj_fdo</span><span class="o">=</span><span class="s2">&quot;12345678000100&quot;</span><span class="p">,</span>   <span class="c1"># dígitos verificadores inválidos</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">nr_client</span><span class="o">=</span><span class="n">clientes</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="n">total_recurs_exter</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">total_recurs_br</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="n">tot_ativos_p_relac</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">tot_ativos_cred_priv</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CNPJ recusado:&quot;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
 </span></code></pre></div>
 
 

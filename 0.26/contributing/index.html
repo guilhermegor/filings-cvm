@@ -2027,6 +2027,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#auto-merge-e-commit-empilhado-o-push-que-chega-depois-do-merge-e-perdido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-merge e commit empilhado — o push que chega depois do merge é perdido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2193,6 +2204,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#auto-merge-e-commit-empilhado-o-push-que-chega-depois-do-merge-e-perdido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-merge e commit empilhado — o push que chega depois do merge é perdido
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2249,9 +2271,21 @@ faltando.</p>
 <h2 id="testes-e-lint">Testes e lint<a class="headerlink" href="#testes-e-lint" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>unit_tests<span class="w">          </span><span class="c1"># poetry run pytest tests/unit/</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>make<span class="w"> </span>integration_tests<span class="w">   </span><span class="c1"># poetry run pytest tests/integration/</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>make<span class="w"> </span>lint<span class="w">                </span><span class="c1"># ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>make<span class="w"> </span>lint<span class="w">                </span><span class="c1"># ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml/actions</span>
 </span></code></pre></div>
 <p>A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente antes de dar push.</p>
+<blockquote>
+<p>⚠️ <strong>O gate de workflows é o <code>actionlint</code>, não o <code>yamllint</code>.</strong> Os dois respondem perguntas
+diferentes: o <code>yamllint</code> diz se o arquivo é YAML bem-formado; o <code>actionlint</code> diz se ele é um
+<em>workflow que o GitHub roda</em>. Um <code>on:</code> com evento inexistente passa no primeiro e faz o GitHub
+<strong>rejeitar o arquivo inteiro</strong> — o workflow não roda de forma alguma, e o sintoma (PR sem rótulo,
+sem comentário do gate) parece lentidão, não morte. O <code>actionlint</code> é <strong>opcional localmente</strong>:
+<code>make lint</code> avisa e segue se ele não estiver instalado, mas na CI a ausência <strong>falha o job</strong>, de
+propósito. Para tê-lo aqui, baixe o binário da página de releases
+(<a href="https://github.com/rhysd/actionlint/releases">https://github.com/rhysd/actionlint/releases</a>) — ele <strong>não</strong> entra como dev-dep do Poetry: o
+<code>actionlint-py</code> é <em>sdist-only</em> e baixa o binário em tempo de build, o que colocaria um download
+dentro de todo <code>poetry install</code>, nas três matrizes de SO.</p>
+</blockquote>
 <h2 id="servindo-a-documentacao-localmente">Servindo a documentação localmente<a class="headerlink" href="#servindo-a-documentacao-localmente" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>make<span class="w"> </span>docs_server<span class="w">   </span><span class="c1"># mkdocs serve em http://0.0.0.0:8000</span>
 </span></code></pre></div>
@@ -2323,7 +2357,7 @@ mantenedor, não um job de workflow.</p>
 <tbody>
 <tr>
 <td><code>pull_request</code></td>
-<td>Toda mudança passa por PR. <strong>0 aprovações exigidas</strong> — o GitHub não deixa o autor aprovar o próprio PR, então exigir ≥1 travaria um mantenedor solo. As conversas precisam estar resolvidas (<code>required_review_thread_resolution</code>), o que torna os comentários do Copilot <strong>vinculantes</strong>.</td>
+<td>Toda mudança passa por PR. <strong>0 aprovações exigidas</strong> — o GitHub não deixa o autor aprovar o próprio PR, então exigir ≥1 travaria um mantenedor solo. As conversas precisam estar resolvidas (<code>required_review_thread_resolution</code>), o que torna <strong>vinculante todo thread de review inline</strong> — na prática, hoje, os do <strong>CodeRabbit</strong> (medido: foi essa regra que bloqueou os PRs #207 e #210 até as threads serem resolvidas). ⚠️ <strong>Não</strong> os do Copilot: a regra <code>copilot_code_review</code> está <strong>inerte</strong> neste repo (ver abaixo — é limitação de <em>plano de conta</em>), então ele não abre thread nenhuma.</td>
 </tr>
 <tr>
 <td><code>required_status_checks</code></td>
@@ -2441,10 +2475,67 @@ exceção: é lá, num range editado à mão, que o risco de dependência de fat
 checks obrigatórios do ruleset ficarem verdes. O script decide apenas <em>elegibilidade</em>; quem decide
 <em>se passou</em> continua sendo o ruleset. (Auto-<strong>aprovação</strong> seria inútil aqui: o ruleset exige <strong>0</strong>
 aprovações, então uma aprovação de bot não destravaria nada.)</p>
+<p><strong>Quando o merge é entregue — no fim do run, nunca no começo.</strong> O gate não arma o auto-merge ao
+abrir o PR. O GitHub <strong>recusa</strong> <code>enablePullRequestAutoMerge</code> num PR que já poderia ser fundido
+("Pull request is in clean status"), e anuncia a recusa com <strong>HTTP 200 + <code>errors</code></strong> — não com um
+status de erro. Armar no <code>opened</code> cai justamente no pior instante: nenhum check registrou ainda e
+nenhuma thread de review existe, então o PR <em>parece</em> fundível, a mutação é recusada, e o silêncio
+passa por sucesso. Foi esse o defeito do #214, e ele ficou invisível porque o log dizia
+<code>auto_merge=True</code>.</p>
+<p>Então a entrega acontece <strong>depois</strong> do poll: o gate tenta fundir direto (<code>PUT /pulls/:n/merge</code>) e cai
+no auto-merge <strong>se a tentativa não tiver sucesso</strong> — o caso esperado é a recusa do GitHub enquanto
+algo ainda bloqueia (<code>405</code>), mas a queda vale para <strong>qualquer</strong> falha da chamada, inclusive um erro
+de rede que sobreviva às retentativas. Nesse ponto armar o auto-merge é exatamente o
+comportamento certo: se algo bloqueia, ele é aceito e o GitHub assume a espera; se a falha foi de
+rede, ele é a rede de segurança para um PR que talvez já pudesse fundir. E se o próprio armar for
+recusado, a razão vai para o log — a recusa do GraphQL chega com <strong>HTTP 200 + <code>errors</code></strong>, então o
+gate lê o corpo, nunca o status. Nada disso burla o ruleset: os dois caminhos são validados do lado
+do servidor.</p>
+<blockquote>
+<p>⚠️ <strong>Não existe gatilho para "resolveram a thread".</strong> <code>pull_request_review_thread</code> <strong>não é aceito
+no <code>on:</code></strong> — existe só como evento de <em>webhook</em>, e colocá-lo lá faz o GitHub <strong>rejeitar o arquivo
+inteiro</strong> ("failed because of a workflow file issue"): o gate não roda de forma alguma, e o PR fica
+sem rótulo e sem comentário, o que parece um gate apenas lento. <code>pull_request_review</code> e
+<code>pull_request_review_comment</code>, por outro lado, <strong>são</strong> gatilhos válidos — só que nenhum deles
+dispara ao resolver uma thread, então não servem de substituto. E não precisa de nenhum: quem
+espera o último bloqueio cair — check obrigatório <strong>ou</strong> conversa não resolvida — é o próprio
+auto-merge nativo, sem nenhum run de workflow envolvido.</p>
+</blockquote>
 <p>Duas regras da UI ficam <strong>deliberadamente desligadas</strong>, para não criar uma segunda fonte de verdade:
 <em>Require code quality results</em> (severidade subjetiva de IA no caminho do merge — <code>ruff</code>, <code>mypy</code> e os
 gates de <code>bin/check_*.py</code> já cobrem qualidade de forma determinística) e <em>Restrict code coverage</em> (o
 piso já é single-source em <code>.coveragerc</code>, aplicado por pre-commit + CI).</p>
+<h3 id="auto-merge-e-commit-empilhado-o-push-que-chega-depois-do-merge-e-perdido">Auto-merge e commit empilhado — o push que chega depois do merge é perdido<a class="headerlink" href="#auto-merge-e-commit-empilhado-o-push-que-chega-depois-do-merge-e-perdido" title="Permanent link">&para;</a></h3>
+<p>Numa classe auto-fundível (<code>docs</code>/<code>ci</code>/<code>deps</code>, sem arquivo de teste), <strong>o PR funde no instante em que
+os checks ficam verdes</strong>, em segundos. Acrescentar um commit a um PR já aberto vira uma corrida — e
+quando ela é perdida, o commit fica <strong>órfão</strong>. Medido em 3 ocorrências numa sessão (#221, #223, #225):
+em dois casos o <code>push</code> <strong>teve sucesso</strong> e <code>origin/&lt;branch&gt;</code> avançou, mas o PR já estava mergeado — o
+trabalho ficou na branch e <strong>em lugar nenhum além dela</strong>. Nada falha: o PR está verde e fundido, e o
+commit simplesmente não está no <code>main</code>.</p>
+<blockquote>
+<p>⚠️ <strong>É consequência de o auto-merge funcionar, não um defeito dele.</strong> Quanto melhor ele funciona,
+mais estreita a janela. E a <code>required_review_thread_resolution</code> <strong>não</strong> protege: ela bloqueia thread
+<strong>existente e não resolvida</strong>, não espera um revisor chegar (o #223 fundiu com o CodeRabbit ainda
+"processando novas mudanças"). A política de auto-merge não muda — o que muda é o seu hábito.</p>
+</blockquote>
+<p><strong>Como evitar:</strong></p>
+<ul>
+<li><strong>Conclua o trabalho antes de abrir o PR</strong> numa classe auto-fundível.</li>
+<li>Se precisar continuar depois de aberto, aplique o rótulo <code>do-not-merge</code> <strong>antes</strong> do push seguinte
+  — não depois.</li>
+<li>Ou aceite abrir um segundo PR para o que vier depois.</li>
+</ul>
+<p><strong>Como detectar.</strong> Depois de <strong>todo</strong> <code>push</code> num PR já aberto, compare o PR com o HEAD local:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>gh<span class="w"> </span>pr<span class="w"> </span>view<span class="w"> </span>&lt;N&gt;<span class="w"> </span>--json<span class="w"> </span>state,headRefOid
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD
+</span></code></pre></div>
+<p><code>state=MERGED</code> com <code>headRefOid</code> <strong>diferente</strong> do HEAD local significa <strong>commit órfão</strong>.</p>
+<p><strong>Como recuperar.</strong> Crie uma branch nova a partir do <code>main</code> atualizado, traga o commit com
+<code>git cherry-pick &lt;sha&gt;</code> e abra um PR novo:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>git<span class="w"> </span>fetch<span class="w"> </span>origin
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>&lt;nova-branch&gt;<span class="w"> </span>origin/main
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>git<span class="w"> </span>cherry-pick<span class="w"> </span>&lt;sha-orfao&gt;
+</span></code></pre></div>
 <h3 id="higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente">Higiene de branches — apagar depois do merge, <strong>arquivar</strong> as de incidente<a class="headerlink" href="#higiene-de-branches-apagar-depois-do-merge-arquivar-as-de-incidente" title="Permanent link">&para;</a></h3>
 <p>Depois do merge, a branch vai embora. Só o <code>main</code> e a <code>gh-pages</code> vivem no remoto.</p>
 <blockquote>
