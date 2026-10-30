@@ -19,6 +19,8 @@ Safety, in order of precedence (all unit-tested):
 * a branch with **any** ``OPEN`` PR is never deleted, even if an older PR of it merged (it was
   reused);
 * a branch with no PR, or only ``CLOSED`` (unmerged) PRs, is work in progress — kept;
+* a merged PR only counts when its head is still the branch tip: commits pushed after the
+  merge never reached ``main``, and deleting the branch would lose them;
 * deletion needs ``SWEEP_DRY_RUN`` to be explicitly false; the default is **dry run**.
 
 The run always reports how many branches it examined, so a sweep that can delete nothing says so
@@ -42,6 +44,8 @@ import urllib.request
 _GH_API = "https://api.github.com"
 
 _PER_PAGE = 100
+
+_TIMEOUT_S = 30
 
 # Branches that are never sweep targets, whatever their PRs say.
 _PROTECTED = frozenset({"main", "gh-pages"})
@@ -129,13 +133,13 @@ def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
 	cls_req = urllib.request.Request(str_url, method=str_method)  # noqa: S310
 	cls_req.add_header("Authorization", f"Bearer {os.environ['GITHUB_TOKEN']}")
 	cls_req.add_header("Accept", "application/vnd.github+json")
-	with urllib.request.urlopen(cls_req) as cls_resp:  # noqa: S310
+	with urllib.request.urlopen(cls_req, timeout=_TIMEOUT_S) as cls_resp:  # noqa: S310
 		bytes_out = cls_resp.read()
 	return json.loads(bytes_out) if bytes_out else {}
 
 
-def _list_branches(str_api: str) -> list[str]:
-	"""Return every remote branch name, following pagination.
+def _list_branches(str_api: str) -> dict[str, str]:
+	"""Return every remote branch name mapped to its tip SHA, following pagination.
 
 	Parameters
 	----------
@@ -144,25 +148,26 @@ def _list_branches(str_api: str) -> list[str]:
 
 	Returns
 	-------
-	list of str
-		Branch names.
+	dict
+		Branch name to tip commit SHA.
 	"""
-	list_names: list[str] = []
+	dict_tips: dict[str, str] = {}
 	int_page = 1
 	while True:
 		list_page = _api("GET", f"{str_api}/branches?per_page={_PER_PAGE}&page={int_page}")
-		list_names.extend(dict_b["name"] for dict_b in list_page)
+		dict_tips.update({dict_b["name"]: dict_b["commit"]["sha"] for dict_b in list_page})
 		if len(list_page) < _PER_PAGE:
-			return list_names
+			return dict_tips
 		int_page += 1
 
 
-def _pr_states(str_api: str, str_owner: str, str_branch: str) -> list[str]:
+def _pr_states(str_api: str, str_owner: str, str_branch: str, str_tip: str) -> list[str]:
 	"""Return the states of every same-repo PR whose head is the branch.
 
 	``head=owner:branch`` restricts to this repo's own branches, so a fork PR that happens to
 	share the branch name is not counted as evidence. ``merged_at`` distinguishes MERGED from
-	CLOSED, since REST reports both as ``closed``.
+	CLOSED, since REST reports both as ``closed``. A merged PR whose head is not the branch tip
+	counts as ``CLOSED``: the tip holds commits that PR never carried.
 
 	Parameters
 	----------
@@ -172,6 +177,8 @@ def _pr_states(str_api: str, str_owner: str, str_branch: str) -> list[str]:
 		Repository owner.
 	str_branch : str
 		The branch name.
+	str_tip : str
+		The branch tip commit SHA.
 
 	Returns
 	-------
@@ -181,7 +188,11 @@ def _pr_states(str_api: str, str_owner: str, str_branch: str) -> list[str]:
 	str_head = urllib.parse.quote(f"{str_owner}:{str_branch}", safe="")
 	list_prs = _api("GET", f"{str_api}/pulls?head={str_head}&state=all&per_page={_PER_PAGE}")
 	return [
-		"OPEN" if dict_pr["state"] == "open" else "MERGED" if dict_pr["merged_at"] else "CLOSED"
+		"OPEN"
+		if dict_pr["state"] == "open"
+		else "MERGED"
+		if dict_pr["merged_at"] and dict_pr["head"]["sha"] == str_tip
+		else "CLOSED"
 		for dict_pr in list_prs
 	]
 
@@ -203,17 +214,18 @@ def main() -> int:
 	bool_dry = is_dry_run(os.environ.get("SWEEP_DRY_RUN"))
 
 	str_default = _api("GET", str_api)["default_branch"]
-	list_branches = _list_branches(str_api)
+	dict_tips = _list_branches(str_api)
 	dict_states: dict[str, list[str]] = {}
-	for str_branch in list_branches:
+	for str_branch, str_tip in dict_tips.items():
 		if str_branch in _PROTECTED | {str_default}:
 			continue
 		try:
-			dict_states[str_branch] = _pr_states(str_api, str_owner, str_branch)
+			dict_states[str_branch] = _pr_states(str_api, str_owner, str_branch, str_tip)
 		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
 			print(f"branch={str_branch} lookup failed (kept): {cls_exc}", file=sys.stderr)
 
 	list_doomed = branches_to_delete(dict_states, str_default)
+	int_failed = 0
 	for str_branch in list_doomed:
 		if bool_dry:
 			print(f"branch={str_branch} would delete (dry run)")
@@ -221,14 +233,16 @@ def main() -> int:
 		try:
 			_api("DELETE", f"{str_api}/git/refs/heads/{urllib.parse.quote(str_branch, safe='/')}")
 			print(f"branch={str_branch} deleted")
-		except urllib.error.HTTPError as cls_exc:
-			if cls_exc.code not in (404, 422):
-				raise
-			print(f"branch={str_branch} already gone ({cls_exc.code})", file=sys.stderr)
+		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
+			if getattr(cls_exc, "code", None) in (404, 422):
+				print(f"branch={str_branch} already gone ({cls_exc.code})", file=sys.stderr)
+				continue
+			int_failed += 1
+			print(f"branch={str_branch} delete failed (kept): {cls_exc}", file=sys.stderr)
 	str_mode = "dry run" if bool_dry else "applied"
 	print(
-		f"examined {len(list_branches)} branch(es), {len(dict_states)} with PR lookup, "
-		f"{len(list_doomed)} stale ({str_mode})"
+		f"examined {len(dict_tips)} branch(es), {len(dict_states)} with PR lookup, "
+		f"{len(list_doomed)} stale ({str_mode}), {int_failed} delete failure(s)"
 	)
 	return 0
 

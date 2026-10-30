@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 from typing import Any
+import urllib.error
 import urllib.parse
 
 import pytest
@@ -29,7 +30,7 @@ _SPEC.loader.exec_module(mod)
 		([], "keep-no-merged-pr"),
 	],
 )
-def test_branch_verdict(list_states: list[str], str_expected: str) -> None:
+def test_branch_verdict_classifies_pr_states(list_states: list[str], str_expected: str) -> None:
 	"""Only a merged PR with no open PR earns deletion."""
 	assert mod.branch_verdict(list_states) == str_expected
 
@@ -75,7 +76,10 @@ def _fake_api(list_calls: list[str], dict_prs: dict[str, list[dict]]) -> Any:  #
 			list_calls.append(urllib.parse.unquote(str_url))
 			return {}
 		if "/branches" in str_url:
-			return [{"name": str_n} for str_n in ["main", "gh-pages", *dict_prs]]
+			return [
+				{"name": str_n, "commit": {"sha": f"tip-{str_n}"}}
+				for str_n in ["main", "gh-pages", *dict_prs]
+			]
 		if "/pulls" in str_url:
 			str_head = urllib.parse.unquote(str_url.split("head=")[1].split("&")[0])
 			str_branch = str_head.split(":")[1]
@@ -85,11 +89,20 @@ def _fake_api(list_calls: list[str], dict_prs: dict[str, list[dict]]) -> Any:  #
 	return _api
 
 
+def _merged(str_head_sha: str) -> dict[str, Any]:
+	"""Build a merged PR payload whose head is the given commit."""
+	return {
+		"state": "closed",
+		"merged_at": "2026-01-01T00:00:00Z",
+		"head": {"sha": str_head_sha},
+	}
+
+
 _PRS = {
-	"feat/open": [{"state": "open", "merged_at": None}],
+	"feat/open": [{"state": "open", "merged_at": None, "head": {"sha": "tip-feat/open"}}],
 	"feat/wip": [],
-	"feat/closed": [{"state": "closed", "merged_at": None}],
-	"feat/done": [{"state": "closed", "merged_at": "2026-01-01T00:00:00Z"}],
+	"feat/closed": [{"state": "closed", "merged_at": None, "head": {"sha": "tip-feat/closed"}}],
+	"feat/done": [_merged("tip-feat/done")],
 }
 
 
@@ -120,3 +133,47 @@ def test_main_default_is_dry_run_and_deletes_nothing(
 	str_out = capsys.readouterr().out
 	assert "would delete (dry run)" in str_out
 	assert "1 stale (dry run)" in str_out
+
+
+def test_main_keeps_branch_with_commits_pushed_after_merge(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A merged PR whose head is not the tip proves nothing about the tip: no DELETE."""
+	list_calls: list[str] = []
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	dict_prs = {"feat/reused": [_merged("older-sha")]}
+	monkeypatch.setattr(mod, "_api", _fake_api(list_calls, dict_prs))
+	assert mod.main() == 0
+	assert list_calls == []
+
+
+@pytest.mark.parametrize(
+	"cls_exc",
+	[
+		urllib.error.HTTPError("u", 500, "boom", {}, None),  # type: ignore[arg-type]
+		urllib.error.URLError("timed out"),
+	],
+)
+def test_main_delete_failure_skips_branch_and_still_reports(
+	monkeypatch: pytest.MonkeyPatch,
+	capsys: pytest.CaptureFixture[str],
+	cls_exc: Exception,
+) -> None:
+	"""A failed DELETE is counted, the next branch is still tried, and the summary prints."""
+	list_calls: list[str] = []
+	dict_prs = {"feat/a": [_merged("tip-feat/a")], "feat/b": [_merged("tip-feat/b")]}
+	fn_fake = _fake_api(list_calls, dict_prs)
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		if str_method == "DELETE" and str_url.endswith("feat/a"):
+			raise cls_exc
+		return fn_fake(str_method, str_url)
+
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _api)
+	assert mod.main() == 0
+	assert len(list_calls) == 1
+	assert list_calls[0].endswith("feat/b")
+	assert "1 delete failure(s)" in capsys.readouterr().out
