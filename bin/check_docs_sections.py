@@ -81,7 +81,7 @@ LEGACY_NONCOMPLIANT: frozenset[str] = frozenset(
 )
 
 _NAV_PAGE = re.compile(r"""([\w./-]+\.md)['"]?\s*$""")
-_FENCE = re.compile(r"^\s*(```|~~~)")
+_FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 
 
 def _nav_pages(mkdocs_text: str) -> set[str]:
@@ -94,7 +94,7 @@ def _nav_pages(mkdocs_text: str) -> set[str]:
 			continue
 		if in_nav and line and not line[0].isspace() and not line.startswith("#"):
 			break
-		# A YAML comment starts at "#" at line start or after whitespace (not inside a path).
+		# YAML comments begin at line start or after whitespace, never inside a path.
 		line = re.sub(r"(^|\s)#.*$", "", line)
 		if in_nav and (m := _NAV_PAGE.search(line)):
 			pages.add(m.group(1))
@@ -108,6 +108,9 @@ def _excluded(mkdocs_text: str) -> list[str]:
 	for line in mkdocs_text.splitlines():
 		if line.startswith("exclude_docs:"):
 			in_block = True
+			inline = line.partition(":")[2].strip().lstrip("|>+-").strip()
+			if inline:
+				patterns.append(inline)
 			continue
 		if in_block and line and not line[0].isspace():
 			break
@@ -120,8 +123,8 @@ def _is_excluded(rel: str, patterns: list[str]) -> bool:
 	"""Whether MkDocs excludes a docs-relative path.
 
 	Dot-files/dirs are excluded implicitly; patterns apply in order and the last match wins,
-	so a later ``!pattern`` re-includes. Only the ``dir/`` and bare-name forms are handled
-	(all this repo uses); wildcards are not.
+	so a later ``!pattern`` re-includes. Only the ``dir/`` and bare-name forms are handled (all
+	this repo uses); ``check_docs`` rejects a wildcard pattern rather than misread it.
 	"""
 	excluded = any(part.startswith(".") for part in rel.split("/"))
 	for pat in patterns:
@@ -137,14 +140,25 @@ def _is_excluded(rel: str, patterns: list[str]) -> bool:
 
 
 def _headings(path: pathlib.Path) -> set[str]:
-	"""Return the level-2 heading texts of a markdown file, ignoring fenced code blocks."""
+	"""Return the level-2 heading texts of a markdown file.
+
+	Text that does not render as a heading is skipped: a fenced block, closed only by the same
+	symbol at the same length (the ``pymdownx.superfences`` rule), and an HTML comment.
+	"""
 	found: set[str] = set()
-	in_fence = False
+	fence: str | None = None
+	in_comment = False
 	for line in path.read_text(encoding="utf-8").splitlines():
-		if _FENCE.match(line):
-			in_fence = not in_fence
-		elif not in_fence and line.startswith("## "):
+		if in_comment:
+			in_comment = "-->" not in line
+		elif fence:
+			fence = None if line.strip() == fence else fence
+		elif m := _FENCE.match(line):
+			fence = m.group(1)
+		elif line.startswith("## "):
 			found.add(line[3:].strip())
+		elif "<!--" in line:
+			in_comment = "-->" not in line.rsplit("<!--", 1)[1]
 	return found
 
 
@@ -153,6 +167,10 @@ def check_docs(docs_dir: pathlib.Path, mkdocs_text: str) -> list[str]:
 	errors: list[str] = []
 	nav = _nav_pages(mkdocs_text)
 	patterns = _excluded(mkdocs_text)
+
+	for pat in patterns:
+		if set(pat) & set("*?["):
+			errors.append(f"exclude_docs pattern {pat!r} uses a wildcard this gate cannot read")
 
 	for slug in CANONICAL_SLUGS:
 		if not (docs_dir / f"{slug}.md").is_file():
@@ -178,8 +196,19 @@ def check_docs(docs_dir: pathlib.Path, mkdocs_text: str) -> list[str]:
 	return errors
 
 
+def stale_allowlist(docs_dir: pathlib.Path) -> list[str]:
+	"""Return an error for each ``LEGACY_NONCOMPLIANT`` entry whose page no longer exists."""
+	return [
+		f"docs/{rel} no longer exists: remove it from LEGACY_NONCOMPLIANT"
+		for rel in sorted(LEGACY_NONCOMPLIANT)
+		if not (docs_dir / rel).is_file()
+	]
+
+
 if __name__ == "__main__":
-	problems = check_docs(pathlib.Path("docs"), pathlib.Path("mkdocs.yml").read_text("utf-8"))
+	docs = pathlib.Path("docs")
+	problems = check_docs(docs, pathlib.Path("mkdocs.yml").read_text("utf-8"))
+	problems += stale_allowlist(docs)
 	for problem in problems:
 		print(f"❌ {problem}")
 	sys.exit(1 if problems else 0)

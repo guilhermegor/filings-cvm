@@ -87,6 +87,56 @@ def test_check_docs_heading_inside_code_fence_does_not_count(tmp_path: Path) -> 
 	assert len(errs) == 1 and "Exemplos" in errs[0]
 
 
+def test_headings_longer_fence_is_not_closed_by_a_shorter_one(tmp_path: Path) -> None:
+	"""A three-backtick line inside a four-backtick block leaves the block open."""
+	page = tmp_path / "p.md"
+	page.write_text("````md\n```\n## Exemplos\n````\n## Real\n", encoding="utf-8")
+	assert cds._headings(page) == {"Real"}
+
+
+def test_headings_longer_fence_is_not_closed_by_a_longer_one(tmp_path: Path) -> None:
+	"""The closing fence must match the opener's length exactly, not merely reach it."""
+	page = tmp_path / "p.md"
+	page.write_text("````md\n`````\n## Exemplos\n````\n## Real\n", encoding="utf-8")
+	assert cds._headings(page) == {"Real"}
+
+
+def test_headings_skips_multiline_html_comment(tmp_path: Path) -> None:
+	"""A heading inside an HTML comment does not render, so it does not count."""
+	page = tmp_path / "p.md"
+	page.write_text("<!--\n## Tipagem\n-->\n## Real\n", encoding="utf-8")
+	assert cds._headings(page) == {"Real"}
+
+
+def test_headings_comment_marker_inside_fence_opens_no_comment(tmp_path: Path) -> None:
+	"""A literal ``<!--`` in a fenced block does not swallow the rest of the page."""
+	page = tmp_path / "p.md"
+	page.write_text("```html\n<!--\n```\n## Real\n", encoding="utf-8")
+	assert cds._headings(page) == {"Real"}
+
+
+def test_excluded_reads_same_line_value() -> None:
+	"""``exclude_docs: backlog/`` counts, and the ``|`` block marker is not a pattern."""
+	assert cds._excluded("exclude_docs: backlog/\n") == ["backlog/"]
+	assert cds._excluded("exclude_docs: |\n  backlog/\n") == ["backlog/"]
+
+
+def test_check_docs_wildcard_exclude_pattern_fails(tmp_path: Path) -> None:
+	"""A wildcard the gate cannot read is named, not silently misread."""
+	errs = cds.check_docs(_tree(tmp_path), _MKDOCS + "  drafts/*.md\n")
+	assert len(errs) == 1 and "drafts/*.md" in errs[0]
+
+
+def test_stale_allowlist_names_a_deleted_page(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""An allowlist entry whose page is gone is an error; a present one is not."""
+	docs = _tree(tmp_path)
+	monkeypatch.setattr(cds, "LEGACY_NONCOMPLIANT", {"ingestion/a.md", "ingestion/gone.md"})
+	errs = cds.stale_allowlist(docs)
+	assert len(errs) == 1 and "ingestion/gone.md" in errs[0]
+
+
 def test_is_excluded_negation_and_dotfiles() -> None:
 	"""Last match wins, `!` re-includes, and dot-paths are excluded implicitly."""
 	assert cds._is_excluded("backlog/x.md", ["backlog/"])
@@ -100,3 +150,4 @@ def test_real_docs_pass() -> None:
 	"""The repository's own docs satisfy the gate."""
 	text = (_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
 	assert cds.check_docs(_ROOT / "docs", text) == []
+	assert cds.stale_allowlist(_ROOT / "docs") == []
