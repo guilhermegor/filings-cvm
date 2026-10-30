@@ -51,14 +51,28 @@ jobs:
           virtualenvs-create: true
           version: 2.2.1
 
+      # Unconditional and BEFORE the cache restore / any pyproject rewrite: it must run on a warm
+      # cache too, and check the same tree a developer checks locally. Fail loud on a stale lock
+      # instead of silently regenerating it — regenerating (rm + poetry lock) would re-resolve and
+      # upgrade every dependency to the latest in-range version, a non-reproducible build that can
+      # pull a breaking release. (A version bump does NOT invalidate the lock — only a dependency
+      # change does — so `make bump_version` never trips this.)
+      - name: Check Lock File Is In Sync
+        run: |
+          if ! poetry check --lock; then
+            echo "::error::poetry.lock is out of sync with pyproject.toml — run 'poetry lock' locally and commit the result." >&2
+            exit 1
+          fi
+
+      # Key on poetry.lock too: a lock-only change (what Dependabot's lockfile-only bumps produce)
+      # must miss the cache, else the install is skipped and a stale .venv is tested green (#195).
+      # Cache build output only — never a tracked file, or the restore overwrites the committed lock.
       - name: Load Cached Virtual Environment
         id: cached-venv
         uses: actions/cache@v6
         with:
-          path: |
-            .venv
-            poetry.lock
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock', 'pyproject.toml') }}
 
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
@@ -72,18 +86,6 @@ jobs:
               content = re.sub(r"pywin32\s*=.*\n", "", content)
           print(content)
           ' > pyproject.toml
-
-          # Fail loud on a stale lock instead of silently regenerating it. A poetry.lock
-          # that no longer matches pyproject.toml means dependencies changed without
-          # re-locking; regenerating here (rm + poetry lock) would re-resolve and upgrade
-          # every dependency to the latest in-range version — a non-reproducible build that
-          # can silently pull a breaking release. Require an intentional `poetry lock` +
-          # commit instead. (A version bump does NOT invalidate the lock — only a dependency
-          # change does — so `make bump_version` never trips this.)
-          if ! poetry check --lock; then
-            echo "::error::poetry.lock is out of sync with pyproject.toml — run 'poetry lock' locally and commit the result." >&2
-            exit 1
-          fi
 
           echo "No groups to exclude, installing all dependencies"
           poetry install --no-interaction --no-root

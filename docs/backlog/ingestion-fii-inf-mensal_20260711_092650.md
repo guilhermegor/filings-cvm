@@ -43,6 +43,6 @@ FII queue (one artifact = one PR): **#56 INF_MENSAL (3)** → #57 DFIN (1) → #
 ## Notes
 
 - No unique key: the grain is (fundo, mês, versão) — a refiled month repeats. Readers stay thin and
-  do not de-duplicate; that is the consumer's `Versao` filter (bedrock gold layer).
+  do not de-duplicate; that is the consumer's `Versao` filter (marketdata-fm gold layer).
 - DFIN (#57) is a plain **CSV**, not a ZIP, and is an *index* of financial statements carrying a
   `Link_Download` column — the reader will return the index and **not** follow the link.

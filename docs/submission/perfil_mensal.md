@@ -107,6 +107,10 @@ xml = PerfilMensal().export(doc)
 assert "<VAR_PATRIM_FDO_N_PRECO_ACOES>-1,2345</VAR_PATRIM_FDO_N_PRECO_ACOES>" in xml
 ```
 
+`VAL_PERCENT_OUTROS` (`variacao_diar_perc_patrim_fdo_var_n_outros.val_percent_outros`, sensibilidade
+a outro fator de risco) também é "numérico com **quatro** casas decimais" no padrão V4 e segue a
+mesma regra: truncado com `ROUND_DOWN`, renderizado com quatro casas (`2` vira `2,0000`).
+
 ### Várias classes de fundo em um só documento
 
 `rows` aceita uma lista — cada item vira um bloco `<ROW_PERFIL>`.

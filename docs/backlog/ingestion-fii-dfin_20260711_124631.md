@@ -42,6 +42,6 @@ FII queue (one artifact = one PR): #56 INF_MENSAL ✅ → **#57 DFIN (1)** → #
 ## Notes
 
 - DFIN is the only FII dataset that is a bare CSV; the other three are multi-member ZIPs.
-- The `Link_Download` → fnet document is the natural first thing a downstream (bedrock-fm) gold
+- The `Link_Download` → fnet document is the natural first thing a downstream (marketdata-fm) gold
   layer would fetch; keeping the reader from following it is what preserves the thin-reader
-  boundary (fetching + parsing PDFs belongs downstream, per the bedrock-fm design notes).
+  boundary (fetching + parsing PDFs belongs downstream, per the marketdata-fm design notes).
