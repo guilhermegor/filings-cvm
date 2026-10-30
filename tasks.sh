@@ -103,7 +103,7 @@ test_cov() {
 	poetry_exec run pytest tests/unit/ --cov=src
 	poetry_exec run coverage report -m
 	poetry_exec run coverage xml -o coverage.xml
-	poetry_exec run genbadge coverage -i coverage.xml -o coverage.svg
+	poetry_exec run genbadge coverage --local -i coverage.xml -o coverage.svg
 }
 
 test_cov_report() {
