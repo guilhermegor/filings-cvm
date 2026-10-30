@@ -218,3 +218,23 @@ def test_main_already_gone_branch_is_not_a_failure(
 	monkeypatch.setattr(mod, "_api", _api)
 	assert mod.main() == 0
 	assert "0 delete failure(s)" in capsys.readouterr().out
+
+
+def test_list_branches_follows_pagination_to_the_last_short_page(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A full page means more may follow, so a branch on page two is still found."""
+	monkeypatch.setattr(mod, "_PER_PAGE", 2)
+	dict_pages = {
+		"1": [
+			{"name": "a", "commit": {"sha": "tip-a"}},
+			{"name": "b", "commit": {"sha": "tip-b"}},
+		],
+		"2": [{"name": "c", "commit": {"sha": "tip-c"}}],
+	}
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		return dict_pages[str_url.rsplit("page=", 1)[1]]
+
+	monkeypatch.setattr(mod, "_api", _api)
+	assert mod._list_branches("api") == {"a": "tip-a", "b": "tip-b", "c": "tip-c"}
