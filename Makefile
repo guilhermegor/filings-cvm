@@ -82,7 +82,7 @@ test_cov:
 	@$(POETRY) run pytest tests/unit/ --cov=src
 	@$(POETRY) run coverage report -m
 	@$(POETRY) run coverage xml -o coverage.xml
-	@$(POETRY) run genbadge coverage -i coverage.xml -o coverage.svg
+	@$(POETRY) run genbadge coverage --local -i coverage.xml -o coverage.svg
 
 # Whole-tree HTML coverage for drill-down (never narrow --cov=<module>, which
 # reports "no data" on the full suite). Open htmlcov/index.html or `make test_cov_serve`.

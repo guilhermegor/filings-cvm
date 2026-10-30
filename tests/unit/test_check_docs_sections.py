@@ -72,6 +72,30 @@ def test_check_docs_allowlisted_page_tolerated_then_stale_fails(
 	assert "remove it from LEGACY_NONCOMPLIANT" in cds.check_docs(good, _MKDOCS)[0]
 
 
+def test_nav_pages_ignores_comments_and_reads_quoted_paths() -> None:
+	"""A commented-out entry is not registered; a quoted path is."""
+	text = "nav:\n  # - Old: old.md\n  - A: 'a.md'\n  - B: \"b.md\"\n  - C: c.md  # note x.md\n"
+	assert cds._nav_pages(text) == {"a.md", "b.md", "c.md"}
+
+
+def test_check_docs_heading_inside_code_fence_does_not_count(tmp_path: Path) -> None:
+	"""A required heading that only appears inside a fenced block is still missing."""
+	fenced = (
+		"# T\n\n## Descrição\n\n## Tipagem\n\n## Política de retry\n\n```md\n## Exemplos\n```\n"
+	)
+	errs = cds.check_docs(_tree(tmp_path, fenced), _MKDOCS)
+	assert len(errs) == 1 and "Exemplos" in errs[0]
+
+
+def test_is_excluded_negation_and_dotfiles() -> None:
+	"""Last match wins, `!` re-includes, and dot-paths are excluded implicitly."""
+	assert cds._is_excluded("backlog/x.md", ["backlog/"])
+	assert not cds._is_excluded("backlog/x.md", ["backlog/", "!backlog/x.md"])
+	assert cds._is_excluded(".hidden/x.md", [])
+	assert cds._is_excluded("a/.b.md", [])
+	assert not cds._is_excluded("a.md", [])
+
+
 def test_real_docs_pass() -> None:
 	"""The repository's own docs satisfy the gate."""
 	text = (_ROOT / "mkdocs.yml").read_text(encoding="utf-8")

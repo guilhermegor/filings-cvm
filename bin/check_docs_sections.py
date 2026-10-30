@@ -80,7 +80,8 @@ LEGACY_NONCOMPLIANT: frozenset[str] = frozenset(
 	}
 )
 
-_NAV_PAGE = re.compile(r"([\w./-]+\.md)\s*$")
+_NAV_PAGE = re.compile(r"""([\w./-]+\.md)['"]?\s*$""")
+_FENCE = re.compile(r"^\s*(```|~~~)")
 
 
 def _nav_pages(mkdocs_text: str) -> set[str]:
@@ -93,6 +94,8 @@ def _nav_pages(mkdocs_text: str) -> set[str]:
 			continue
 		if in_nav and line and not line[0].isspace() and not line.startswith("#"):
 			break
+		# A YAML comment starts at "#" at line start or after whitespace (not inside a path).
+		line = re.sub(r"(^|\s)#.*$", "", line)
 		if in_nav and (m := _NAV_PAGE.search(line)):
 			pages.add(m.group(1))
 	return pages
@@ -114,23 +117,35 @@ def _excluded(mkdocs_text: str) -> list[str]:
 
 
 def _is_excluded(rel: str, patterns: list[str]) -> bool:
-	"""Whether a docs-relative path matches an ``exclude_docs`` pattern (dir/ or filename)."""
+	"""Whether MkDocs excludes a docs-relative path.
+
+	Dot-files/dirs are excluded implicitly; patterns apply in order and the last match wins,
+	so a later ``!pattern`` re-includes. Only the ``dir/`` and bare-name forms are handled
+	(all this repo uses); wildcards are not.
+	"""
+	excluded = any(part.startswith(".") for part in rel.split("/"))
 	for pat in patterns:
-		if pat.endswith("/"):
-			if rel.startswith(pat) or f"/{pat}" in f"/{rel}":
-				return True
-		elif rel == pat or rel.endswith(f"/{pat}"):
-			return True
-	return False
+		negate = pat.startswith("!")
+		body = pat[1:] if negate else pat
+		if body.endswith("/"):
+			hit = rel.startswith(body) or f"/{body}" in f"/{rel}"
+		else:
+			hit = rel == body or rel.endswith(f"/{body}")
+		if hit:
+			excluded = not negate
+	return excluded
 
 
 def _headings(path: pathlib.Path) -> set[str]:
-	"""Return the level-2 heading texts of a markdown file."""
-	return {
-		line[3:].strip()
-		for line in path.read_text(encoding="utf-8").splitlines()
-		if line.startswith("## ")
-	}
+	"""Return the level-2 heading texts of a markdown file, ignoring fenced code blocks."""
+	found: set[str] = set()
+	in_fence = False
+	for line in path.read_text(encoding="utf-8").splitlines():
+		if _FENCE.match(line):
+			in_fence = not in_fence
+		elif not in_fence and line.startswith("## "):
+			found.add(line[3:].strip())
+	return found
 
 
 def check_docs(docs_dir: pathlib.Path, mkdocs_text: str) -> list[str]:

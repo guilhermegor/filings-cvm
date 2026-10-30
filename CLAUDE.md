@@ -904,6 +904,15 @@ placebo.
     checker-metaclass class (e.g. `LogsEmitter(LogEmitter)`) is already checked.
 
   The `check-typing` pre-commit hook (`bin/check_typing.py`) enforces this across all of `src/`.
+- **A new reader's contract is grounded in the real published header, cross-checked against
+  META.** Generate the `FileContract` from the downloaded artifact's header and pin it to a
+  verbatim fixture: the header is the source of column **order** and of the long names. The
+  dataset's `META/meta_<x>.*` is a complementary oracle — types, descriptions, the field-name
+  set — but CVM truncates its names at 50 chars and never keeps the file's order, so it cannot
+  define the contract. Every reader must be listed in `bin/check_contract_drift.py`
+  (`_META_MEMBERS`, enforced by `tests/unit/test_check_contract_drift.py`) so the weekly,
+  non-blocking drift job compares both oracles. A reader whose schema its dataset's META does not
+  describe also goes in `_META_UNDESCRIBED_READERS`.
 
 ## Releasing to PyPI
 
