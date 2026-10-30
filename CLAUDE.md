@@ -909,8 +909,10 @@ placebo.
   verbatim fixture: the header is the source of column **order** and of the long names. The
   dataset's `META/meta_<x>.*` is a complementary oracle — types, descriptions, the field-name
   set — but CVM truncates its names at 50 chars and never keeps the file's order, so it cannot
-  define the contract. Register the reader in `bin/check_contract_drift.py` (`_META_MEMBERS`)
-  so the weekly, non-blocking drift job compares both oracles; no META → header alone.
+  define the contract. Every reader must be listed in `bin/check_contract_drift.py`
+  (`_META_MEMBERS`, enforced by `tests/unit/test_check_contract_drift.py`) so the weekly,
+  non-blocking drift job compares both oracles. A reader whose schema its dataset's META does not
+  describe also goes in `_META_UNDESCRIBED_READERS`.
 
 ## Releasing to PyPI
 
