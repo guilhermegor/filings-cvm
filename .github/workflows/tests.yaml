@@ -230,7 +230,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
         run: |
           poetry run pytest --cov=src --cov-report=xml --no-header -q tests/unit/
-          poetry run genbadge coverage -i coverage.xml -o coverage.svg
+          poetry run genbadge coverage --local -i coverage.xml -o coverage.svg
 
       - name: Upload Badge
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
