@@ -62,6 +62,8 @@ def test_never_deletes_default_or_protected_branch() -> None:
 		("garbage", True),
 		("false", False),
 		("FALSE", False),
+		("0", False),
+		("no", False),
 	],
 )
 def test_is_dry_run_defaults_to_true(str_raw: str | None, bool_expected: bool) -> None:
@@ -78,7 +80,7 @@ def _fake_api(list_calls: list[str], dict_prs: dict[str, list[dict]]) -> Any:  #
 			return {}
 		if "/branches" in str_url:
 			return [
-				{"name": str_n, "commit": {"sha": f"tip-{str_n}"}}
+				{"name": str_n, "commit": {"sha": f"tip-{str_n}"}, "protected": False}
 				for str_n in ["main", "gh-pages", *dict_prs]
 			]
 		if "state=open" in str_url:
@@ -92,12 +94,13 @@ def _fake_api(list_calls: list[str], dict_prs: dict[str, list[dict]]) -> Any:  #
 	return _api
 
 
-def _merged(str_head_sha: str) -> dict[str, Any]:
+def _merged(str_head_sha: str, str_base: str = "main") -> dict[str, Any]:
 	"""Build a merged PR payload whose head is the given commit."""
 	return {
 		"state": "closed",
 		"merged_at": "2026-01-01T00:00:00Z",
 		"head": {"sha": str_head_sha},
+		"base": {"ref": str_base},
 	}
 
 
@@ -174,6 +177,29 @@ def test_main_keeps_merged_branch_that_is_the_base_of_an_open_pr(
 	assert len(list_calls) == 1
 	assert list_calls[0].endswith("feat/x")
 	assert "branch=feat/base kept: base of an open PR" in capsys.readouterr().out
+
+
+def test_main_keeps_branch_merged_into_a_non_default_base(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A PR merged into a feature branch never reached the default branch: no DELETE."""
+	list_calls: list[str] = []
+	dict_prs = {"feat/a": [_merged("tip-feat/a", "feat/other")]}
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _fake_api(list_calls, dict_prs))
+	assert mod.main() == 0
+	assert list_calls == []
+
+
+def test_list_branches_skips_protected_branches(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""GitHub's own ``protected`` flag excludes a branch from the sweep."""
+	list_page = [
+		{"name": "release", "commit": {"sha": "tip-r"}, "protected": True},
+		{"name": "feat/a", "commit": {"sha": "tip-a"}, "protected": False},
+	]
+	monkeypatch.setattr(mod, "_api", lambda _m, _u: list_page)
+	assert mod._list_branches("u") == {"feat/a": "tip-a"}
 
 
 def test_main_open_pr_read_failure_deletes_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -302,10 +328,10 @@ def test_list_branches_follows_pagination_to_the_last_short_page(
 	monkeypatch.setattr(mod, "_PER_PAGE", 2)
 	dict_pages = {
 		"1": [
-			{"name": "a", "commit": {"sha": "tip-a"}},
-			{"name": "b", "commit": {"sha": "tip-b"}},
+			{"name": "a", "commit": {"sha": "tip-a"}, "protected": False},
+			{"name": "b", "commit": {"sha": "tip-b"}, "protected": False},
 		],
-		"2": [{"name": "c", "commit": {"sha": "tip-c"}}],
+		"2": [{"name": "c", "commit": {"sha": "tip-c"}, "protected": False}],
 	}
 
 	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401

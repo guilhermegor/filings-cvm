@@ -17,6 +17,8 @@ Branch: `ci/230-sweep-stale-branches` · Issue: #230 · Backstop to `reconcile-m
 
 - [x] Base de PR aberto nunca e apagada; 422 de regra conta como falha, nao como "ja apagada".
 
+- [x] Branch protegida fica de fora; PR so conta se fundiu na branch padrao; SHA vai no log.
+
 ## Restante
 
 - [ ] Decisao do dono: o `schedule` apaga de verdade ou comeca em dry run (auto-merge retido no

@@ -15,13 +15,13 @@ ancestry-based sweep would exit green forever while deleting nothing.
 
 Safety, in order of precedence (all unit-tested):
 
-* the default branch and ``gh-pages`` are never deleted;
+* the default branch, ``gh-pages`` and any branch GitHub reports as protected are never deleted;
 * a branch with **any** ``OPEN`` PR is never deleted, even if an older PR of it merged (it was
   reused);
 * the base of an open PR is never deleted: GitHub would close that PR;
 * a branch with no PR, or only ``CLOSED`` (unmerged) PRs, is work in progress — kept;
-* a merged PR only counts when its head is still the branch tip: commits pushed after the
-  merge never reached ``main``, and deleting the branch would lose them;
+* a merged PR only counts when it merged into the default branch and its head is still the
+  branch tip: otherwise the tip holds commits that may never have reached the default branch;
 * deletion needs ``SWEEP_DRY_RUN`` to be explicitly false; the default is **dry run**.
 
 The run always reports how many branches it examined, so a sweep that can delete nothing says so
@@ -163,7 +163,7 @@ def _paged(str_url: str) -> list[Any]:
 
 
 def _list_branches(str_api: str) -> dict[str, str]:
-	"""Return every remote branch name mapped to its tip SHA.
+	"""Return every unprotected remote branch name mapped to its tip SHA.
 
 	Parameters
 	----------
@@ -175,7 +175,11 @@ def _list_branches(str_api: str) -> dict[str, str]:
 	dict
 		Branch name to tip commit SHA.
 	"""
-	return {dict_b["name"]: dict_b["commit"]["sha"] for dict_b in _paged(f"{str_api}/branches?")}
+	return {
+		dict_b["name"]: dict_b["commit"]["sha"]
+		for dict_b in _paged(f"{str_api}/branches?")
+		if not dict_b["protected"]
+	}
 
 
 def _open_pr_bases(str_api: str) -> set[str]:
@@ -197,13 +201,16 @@ def _open_pr_bases(str_api: str) -> set[str]:
 	return {dict_pr["base"]["ref"] for dict_pr in _paged(f"{str_api}/pulls?state=open&")}
 
 
-def _pr_states(str_api: str, str_owner: str, str_branch: str, str_tip: str) -> list[str]:
+def _pr_states(
+	str_api: str, str_owner: str, str_branch: str, str_tip: str, str_default: str
+) -> list[str]:
 	"""Return the states of every same-repo PR whose head is the branch.
 
 	``head=owner:branch`` restricts to this repo's own branches, so a fork PR that happens to
 	share the branch name is not counted as evidence. ``merged_at`` distinguishes MERGED from
-	CLOSED, since REST reports both as ``closed``. A merged PR whose head is not the branch tip
-	counts as ``CLOSED``: the tip holds commits that PR never carried.
+	CLOSED, since REST reports both as ``closed``. A merged PR counts as ``CLOSED`` unless its
+	head is the branch tip and its base is the default branch: otherwise the tip holds commits
+	that may never have reached the default branch.
 
 	Parameters
 	----------
@@ -215,6 +222,8 @@ def _pr_states(str_api: str, str_owner: str, str_branch: str, str_tip: str) -> l
 		The branch name.
 	str_tip : str
 		The branch tip commit SHA.
+	str_default : str
+		The repository default branch.
 
 	Returns
 	-------
@@ -222,12 +231,14 @@ def _pr_states(str_api: str, str_owner: str, str_branch: str, str_tip: str) -> l
 		``OPEN``/``MERGED``/``CLOSED`` per PR.
 	"""
 	str_head = urllib.parse.quote(f"{str_owner}:{str_branch}", safe="")
-	list_prs = _api("GET", f"{str_api}/pulls?head={str_head}&state=all&per_page={_PER_PAGE}")
+	list_prs = _paged(f"{str_api}/pulls?head={str_head}&state=all&")
 	return [
 		"OPEN"
 		if dict_pr["state"] == "open"
 		else "MERGED"
-		if dict_pr["merged_at"] and dict_pr["head"]["sha"] == str_tip
+		if dict_pr["merged_at"]
+		and dict_pr["head"]["sha"] == str_tip
+		and dict_pr["base"]["ref"] == str_default
 		else "CLOSED"
 		for dict_pr in list_prs
 	]
@@ -249,10 +260,11 @@ def _already_gone(cls_exc: Exception) -> bool:
 	bool
 		``True`` for a 404, or a 422 saying ``Reference does not exist``.
 	"""
-	int_code = getattr(cls_exc, "code", None)
-	if int_code == 422:  # noqa: PLR2004
+	if not isinstance(cls_exc, urllib.error.HTTPError):
+		return False
+	if cls_exc.code == 422:  # noqa: PLR2004
 		return b"Reference does not exist" in cls_exc.read()
-	return int_code == 404  # noqa: PLR2004
+	return cls_exc.code == 404  # noqa: PLR2004
 
 
 def main() -> int:
@@ -284,7 +296,9 @@ def main() -> int:
 			print(f"branch={str_branch} kept: base of an open PR")
 			continue
 		try:
-			dict_states[str_branch] = _pr_states(str_api, str_owner, str_branch, str_tip)
+			dict_states[str_branch] = _pr_states(
+				str_api, str_owner, str_branch, str_tip, str_default
+			)
 		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
 			int_lookup_failed += 1
 			print(f"branch={str_branch} lookup failed (kept): {cls_exc}", file=sys.stderr)
@@ -297,7 +311,7 @@ def main() -> int:
 			continue
 		try:
 			_api("DELETE", f"{str_api}/git/refs/heads/{urllib.parse.quote(str_branch, safe='/')}")
-			print(f"branch={str_branch} deleted")
+			print(f"branch={str_branch} deleted (tip {dict_tips[str_branch]})")
 		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
 			if _already_gone(cls_exc):
 				print(f"branch={str_branch} already gone", file=sys.stderr)
