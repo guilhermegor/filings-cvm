@@ -173,7 +173,48 @@ def test_main_delete_failure_skips_branch_and_still_reports(
 	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
 	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
 	monkeypatch.setattr(mod, "_api", _api)
-	assert mod.main() == 0
+	assert mod.main() == 1
 	assert len(list_calls) == 1
 	assert list_calls[0].endswith("feat/b")
 	assert "1 delete failure(s)" in capsys.readouterr().out
+
+
+def test_main_lookup_failure_keeps_branch_and_fails_the_run(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A failed PR lookup deletes nothing, still reports, and exits non-zero."""
+	list_calls: list[str] = []
+	dict_prs = {"feat/a": [_merged("tip-feat/a")]}
+	fn_fake = _fake_api(list_calls, dict_prs)
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		if "/pulls" in str_url:
+			raise urllib.error.URLError("timed out")
+		return fn_fake(str_method, str_url)
+
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _api)
+	assert mod.main() == 1
+	assert list_calls == []
+	assert "1 lookup failure(s)" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("int_code", [404, 422])
+def test_main_already_gone_branch_is_not_a_failure(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], int_code: int
+) -> None:
+	"""A 404 or 422 on DELETE means the branch is gone: exit 0, no failure counted."""
+	list_calls: list[str] = []
+	fn_fake = _fake_api(list_calls, {"feat/a": [_merged("tip-feat/a")]})
+
+	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
+		if str_method == "DELETE":
+			raise urllib.error.HTTPError("u", int_code, "gone", {}, None)  # type: ignore[arg-type]
+		return fn_fake(str_method, str_url)
+
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+	monkeypatch.setenv("SWEEP_DRY_RUN", "false")
+	monkeypatch.setattr(mod, "_api", _api)
+	assert mod.main() == 0
+	assert "0 delete failure(s)" in capsys.readouterr().out

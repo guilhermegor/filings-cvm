@@ -201,12 +201,13 @@ def main() -> int:
 	"""Sweep every remote branch; delete (unless dry run) those whose PR merged.
 
 	A single branch's API failure is logged and skipped so one bad lookup never sinks the run —
-	and a skipped branch is simply kept, the safe direction.
+	and a skipped branch is simply kept, the safe direction. Failures are counted and fail the
+	run at the end, so a sweep that could not do its job is not reported green.
 
 	Returns
 	-------
 	int
-		Process exit code (always 0; the next weekly tick is the retry).
+		``1`` if any branch lookup or delete failed, otherwise ``0``.
 	"""
 	str_repo = os.environ["GITHUB_REPOSITORY"]
 	str_owner = str_repo.split("/", 1)[0]
@@ -216,16 +217,18 @@ def main() -> int:
 	str_default = _api("GET", str_api)["default_branch"]
 	dict_tips = _list_branches(str_api)
 	dict_states: dict[str, list[str]] = {}
+	int_lookup_failed = 0
 	for str_branch, str_tip in dict_tips.items():
 		if str_branch in _PROTECTED | {str_default}:
 			continue
 		try:
 			dict_states[str_branch] = _pr_states(str_api, str_owner, str_branch, str_tip)
 		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
+			int_lookup_failed += 1
 			print(f"branch={str_branch} lookup failed (kept): {cls_exc}", file=sys.stderr)
 
 	list_doomed = branches_to_delete(dict_states, str_default)
-	int_failed = 0
+	int_delete_failed = 0
 	for str_branch in list_doomed:
 		if bool_dry:
 			print(f"branch={str_branch} would delete (dry run)")
@@ -237,14 +240,15 @@ def main() -> int:
 			if getattr(cls_exc, "code", None) in (404, 422):
 				print(f"branch={str_branch} already gone ({cls_exc.code})", file=sys.stderr)
 				continue
-			int_failed += 1
+			int_delete_failed += 1
 			print(f"branch={str_branch} delete failed (kept): {cls_exc}", file=sys.stderr)
 	str_mode = "dry run" if bool_dry else "applied"
 	print(
 		f"examined {len(dict_tips)} branch(es), {len(dict_states)} with PR lookup, "
-		f"{len(list_doomed)} stale ({str_mode}), {int_failed} delete failure(s)"
+		f"{len(list_doomed)} stale ({str_mode}), {int_lookup_failed} lookup failure(s), "
+		f"{int_delete_failed} delete failure(s)"
 	)
-	return 0
+	return 1 if int_lookup_failed or int_delete_failed else 0
 
 
 if __name__ == "__main__":
