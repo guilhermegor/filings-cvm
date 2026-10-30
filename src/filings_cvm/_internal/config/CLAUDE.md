@@ -55,6 +55,11 @@ note exists to prevent.
 Pydantic owns its metaclass and validates at construction, so schema models are the one place
 in `src/` that must **not** carry a `TypeChecker` metaclass (see the root `CLAUDE.md`).
 
+**Enforced.** `bin/check_schemas.py` (pre-commit `check-schemas` + the CI step of the same name)
+fails any class in a `schemas/*.py` module that does not derive from `BaseModel` — directly or
+via another class in the same file. Domain `Enum`/`StrEnum`/`IntEnum` and `X = Y` re-export
+aliases are allowed.
+
 ## The `ports/` sub-package
 
 A **port** is the private behavioural ABC (hexagonal ports-and-adapters) that every class of a

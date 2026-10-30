@@ -139,6 +139,14 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-schemas
+        name: schema modules hold only pydantic models
+        entry: bash bin/poetry_exec.sh run python bin/check_schemas.py
+        language: system
+        types:
+          - python
+        pass_filenames: false
+
       - id: check-dtypes
         name: no binary float dtype for an ingested value
         entry: bash bin/poetry_exec.sh run python bin/check_dtypes.py
