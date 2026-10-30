@@ -6,11 +6,12 @@ behavioural class (service, adapter, port) from leaking into a schema file. This
 structural form, in the line of ``bin/check_typing.py`` and ``bin/check_provenance.py``.
 
 Rule, for every ``.py`` under ``src/**/_internal/config/schemas/`` (``__init__.py`` excluded):
-**every ``class`` defined in the module must derive from ``BaseModel``** — directly, or
+**every ``class`` defined in the module must derive from ``pydantic.BaseModel``** — directly, or
 transitively through another class defined in the same file. A domain ``Enum`` / ``StrEnum`` /
-``IntEnum`` is allowed (a model field's value set). Re-export aliases (``X = Y`` assignments) are
-not classes and are never inspected. Every violation is a hard error (exit 1) naming file, line,
-and class.
+``IntEnum`` is allowed (a model field's value set). Bases are resolved through the module's
+imports, so an unrelated class that is merely named ``BaseModel`` fails. Re-export aliases
+(``X = Y`` assignments) are not classes and are never inspected. Every violation is a hard error
+(exit 1) naming file, line, and class.
 """
 
 import ast
@@ -18,32 +19,75 @@ import pathlib
 import sys
 
 
-_MODEL_BASES = frozenset({"BaseModel"})
-_ENUM_BASES = frozenset({"Enum", "StrEnum", "IntEnum"})
+_ALLOWED_IMPORTS = {
+	"pydantic": frozenset({"BaseModel"}),
+	"enum": frozenset({"Enum", "StrEnum", "IntEnum"}),
+}
 
 
-def _base_name(base: ast.expr) -> str | None:
-	"""Return the unqualified name of a class base (``a.B`` -> ``B``), or ``None``.
+def _imported_bases(tree: ast.Module) -> tuple[set[str], dict[str, frozenset[str]]]:
+	"""Resolve which local names are bound to an allowed base by the module's imports.
+
+	Parameters
+	----------
+	tree : ast.Module
+		The parsed module.
+
+	Returns
+	-------
+	tuple[set[str], dict[str, frozenset[str]]]
+		Names bound by ``from pydantic import BaseModel [as X]`` and the like, and the module
+		aliases bound by ``import pydantic [as p]`` with the attributes each one allows.
+	"""
+	names: set[str] = set()
+	modules: dict[str, frozenset[str]] = {}
+	for node in ast.walk(tree):
+		if (
+			isinstance(node, ast.ImportFrom)
+			and node.level == 0
+			and node.module in _ALLOWED_IMPORTS
+		):
+			names |= {
+				alias.asname or alias.name
+				for alias in node.names
+				if alias.name in _ALLOWED_IMPORTS[node.module]
+			}
+		elif isinstance(node, ast.Import):
+			for alias in node.names:
+				if alias.name in _ALLOWED_IMPORTS:
+					modules[alias.asname or alias.name] = _ALLOWED_IMPORTS[alias.name]
+	return names, modules
+
+
+def _is_allowed(base: ast.expr, names: set[str], modules: dict[str, frozenset[str]]) -> bool:
+	"""Return whether a class base resolves to an allowed base or an allowed in-file class.
 
 	Parameters
 	----------
 	base : ast.expr
 		One entry of ``ClassDef.bases``.
+	names : set[str]
+		Local names known to be allowed.
+	modules : dict[str, frozenset[str]]
+		Module aliases and the attributes each one allows.
 
 	Returns
 	-------
-	str | None
-		The base's name, or ``None`` for shapes such as ``Generic[T]``.
+	bool
+		``True`` for an allowed base; ``False`` for anything else, ``Generic[T]`` included.
 	"""
 	if isinstance(base, ast.Name):
-		return base.id
-	if isinstance(base, ast.Attribute):
-		return base.attr
-	return None
+		return base.id in names
+	if isinstance(base, ast.Attribute) and isinstance(base.value, ast.Name):
+		return base.attr in modules.get(base.value.id, frozenset())
+	return False
 
 
 def _offenders(tree: ast.Module) -> list[ast.ClassDef]:
 	"""Return the classes of a module that do not derive from ``BaseModel`` (or an Enum).
+
+	Acceptance is per definition, not per name, so a later non-model class cannot hide behind an
+	earlier model of the same name.
 
 	Parameters
 	----------
@@ -55,21 +99,19 @@ def _offenders(tree: ast.Module) -> list[ast.ClassDef]:
 	list[ast.ClassDef]
 		Offending classes, in source order.
 	"""
+	names, modules = _imported_bases(tree)
 	classes = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
-	allowed = set(_MODEL_BASES) | _ENUM_BASES
+	good: set[ast.ClassDef] = set()
 	# Iterate until stable, since a subclass of an allowed in-file class is allowed too.
 	grew = True
-	good: set[str] = set()
 	while grew:
 		grew = False
 		for cls in classes:
-			if cls.name in good:
-				continue
-			if any(_base_name(b) in allowed for b in cls.bases):
-				good.add(cls.name)
-				allowed.add(cls.name)
+			if cls not in good and any(_is_allowed(b, names, modules) for b in cls.bases):
+				good.add(cls)
+				names.add(cls.name)
 				grew = True
-	return sorted((c for c in classes if c.name not in good), key=lambda c: c.lineno)
+	return sorted((c for c in classes if c not in good), key=lambda c: c.lineno)
 
 
 def check_file(filepath: str) -> int:
