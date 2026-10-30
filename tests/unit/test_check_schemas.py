@@ -5,7 +5,6 @@ Loaded by path (``bin/`` is not an importable package). Each case writes a tiny 
 """
 
 import importlib.util
-import os
 from pathlib import Path
 
 import pytest
@@ -97,13 +96,48 @@ def test_later_nonmodel_cannot_hide_behind_same_named_model(tmp_path: Path) -> N
 	assert cs.check_file(_write(tmp_path, src)) == 1
 
 
-def test_real_schema_tree_is_clean_and_nonempty() -> None:
-	"""The gate inspects real files (guards against a path glob that matches nothing)."""
-	cwd = Path.cwd()
-	os.chdir(_ROOT)
-	try:
-		files = cs._schema_files()
-	finally:
-		os.chdir(cwd)
+def test_nested_class_is_checked(tmp_path: Path) -> None:
+	"""A class nested in a model is still a class, and this gate reports it on purpose."""
+	src = "from pydantic import BaseModel\nclass A(BaseModel):\n\tclass Config: ...\n"
+	assert cs.check_file(_write(tmp_path, src)) == 1
+
+
+def test_real_schema_tree_is_clean_and_nonempty(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""The gate inspects real files, from any working directory."""
+	monkeypatch.chdir(tmp_path)
+	files = cs._schema_files()
 	assert {p.name for p in files} >= {"informe_diario.py", "perfil_mensal.py"}
-	assert sum(cs.check_file(str(_ROOT / p)) for p in files) == 0
+	assert sum(cs.check_file(str(p)) for p in files) == 0
+	assert cs.main() == 0
+
+
+def test_schema_files_finds_nested_modules(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A module in a subfolder of ``schemas/`` is collected."""
+	nested = tmp_path / "src" / "pkg" / "_internal" / "config" / "schemas" / "fidc"
+	nested.mkdir(parents=True)
+	(nested / "foo.py").write_text("", encoding="utf-8")
+	(nested.parent / "__init__.py").write_text("", encoding="utf-8")
+	monkeypatch.setattr(cs, "_ROOT", tmp_path)
+	assert [p.name for p in cs._schema_files()] == ["foo.py"]
+
+
+def test_main_with_no_schema_files_fails(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""Finding nothing to check is a failure, or a renamed directory would pass forever."""
+	monkeypatch.setattr(cs, "_ROOT", tmp_path)
+	assert cs.main() == 1
+	assert "nothing was checked" in capsys.readouterr().out
+
+
+def test_main_with_a_violation_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The entry point exits non-zero on an offending class, the path CI actually takes."""
+	folder = tmp_path / "src" / "pkg" / "_internal" / "config" / "schemas"
+	folder.mkdir(parents=True)
+	(folder / "bad.py").write_text("class Service: ...\n", encoding="utf-8")
+	monkeypatch.setattr(cs, "_ROOT", tmp_path)
+	assert cs.main() == 1

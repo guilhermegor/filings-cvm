@@ -11,13 +11,19 @@ transitively through another class defined in the same file. A domain ``Enum`` /
 ``IntEnum`` is allowed (a model field's value set). Bases are resolved through the module's
 imports, so an unrelated class that is merely named ``BaseModel`` fails. Re-export aliases
 (``X = Y`` assignments) are not classes and are never inspected. Every violation is a hard error
-(exit 1) naming file, line, and class.
+(exit 1) naming file, line, and class. Finding no schema module at all is also an error.
+
+Known limits, on purpose: a base must be in the same file or the inheritance chain stops there,
+one allowed base is enough (so ``class K(str, Enum)`` passes, and so would a mixin beside
+``BaseModel``), and nested classes are checked like any other.
 """
 
 import ast
 import pathlib
 import sys
 
+
+_ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 _ALLOWED_IMPORTS = {
 	"pydantic": frozenset({"BaseModel"}),
@@ -132,15 +138,17 @@ def check_file(filepath: str) -> int:
 	bad = _offenders(tree)
 	for cls in bad:
 		print(
-			f"❌ {filepath}:{cls.lineno}: class {cls.name} does not derive from BaseModel — "
-			f"a schema module holds only pydantic models (and domain Enums); put behaviour in "
-			f"ports/ or the section package."
+			f"❌ {filepath}:{cls.lineno}: class {cls.name} does not derive from BaseModel "
+			f"in this file — a schema module holds only pydantic models (and domain Enums); "
+			f"put behaviour in ports/ or the section package."
 		)
 	return len(bad)
 
 
 def _schema_files() -> list[pathlib.Path]:
-	"""Collect every schema module under ``src/**/_internal/config/schemas/``.
+	"""Collect every schema module under ``src/**/_internal/config/schemas/``, nested ones too.
+
+	Anchored on this file, so the result does not depend on the working directory.
 
 	Returns
 	-------
@@ -149,13 +157,24 @@ def _schema_files() -> list[pathlib.Path]:
 	"""
 	return sorted(
 		p
-		for p in pathlib.Path("src").rglob("_internal/config/schemas/*.py")
+		for d in (_ROOT / "src").rglob("_internal/config/schemas")
+		for p in d.rglob("*.py")
 		if p.name != "__init__.py"
 	)
 
 
-if __name__ == "__main__":
+def main() -> int:
+	"""Check every schema module; finding none is a failure, never a clean run.
+
+	Returns
+	-------
+	int
+		Process exit code.
+	"""
 	files = _schema_files()
+	if not files:
+		print("❌ check_schemas: no schema modules found under src/, so nothing was checked")
+		return 1
 	n_classes = sum(
 		isinstance(n, ast.ClassDef)
 		for p in files
@@ -163,4 +182,8 @@ if __name__ == "__main__":
 	)
 	total_errors = sum(check_file(str(p)) for p in files)
 	print(f"check_schemas: inspected {len(files)} files, {n_classes} classes")
-	sys.exit(1 if total_errors > 0 else 0)
+	return 1 if total_errors > 0 else 0
+
+
+if __name__ == "__main__":
+	sys.exit(main())
