@@ -139,6 +139,21 @@ def test_open_pr_bases_collects_every_base(monkeypatch: pytest.MonkeyPatch) -> N
 	assert reconcile._open_pr_bases("api") == {"feat/a", "main"}
 
 
+def test_open_pr_bases_reads_past_a_full_page(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""A full page means more may follow, so a base on page two still counts."""
+	list_urls: list[str] = []
+
+	def _fake_api(_str_method: str, str_url: str) -> list[dict]:
+		list_urls.append(str_url)
+		if str_url.endswith("page=1"):
+			return [{"base": {"ref": "main"}}] * 100
+		return [{"base": {"ref": "feat/late"}}]
+
+	monkeypatch.setattr(reconcile, "_api", _fake_api)
+	assert reconcile._open_pr_bases("api") == {"main", "feat/late"}
+	assert [str_url[-6:] for str_url in list_urls] == ["page=1", "page=2"]
+
+
 def test_reconcile_pr_keeps_a_branch_that_is_the_base_of_an_open_pr(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
