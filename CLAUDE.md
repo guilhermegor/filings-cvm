@@ -77,7 +77,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
-- ⬜ Balanço (`PadraoXMLBalanco.asp`)
+- Balanço — ✅ **submission** COFI 4016 (`PadraoXMLBalanco.asp` não define XML: só upload COS 4016 ou COFI 4016; implementado o **COFI 4016**, largura fixa de 71 colunas, `.cvm`, layout em `PadraoCOFI.aspx`) — `submission/balanco.py` (`Balanco`); schema `_internal/config/schemas/balanco.py`; camada de registros COFI compartilhada com o COFI 4010 em `_internal/utils/cofi_records.py`, plano em `cofi_plan.py`, críticas D1/D4/D5/E1/E4/E5/EX/G1-G3 em `balanco_checks.py` · ⬜ COS 4016
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
 - ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
 - Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **17
