@@ -475,6 +475,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../submission/extrato/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extrato V3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../submission/inf_mensal_fidc/" class="md-nav__link">
         
   
@@ -763,6 +791,34 @@
     
   
     Eventual FI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../entrega_fi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entrega FI
   
 
     
@@ -2080,10 +2136,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-51-readers" class="md-nav__link">
+  <a href="#os-52-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 51 readers
+        Os 52 readers
       
     </span>
   </a>
@@ -2380,10 +2436,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-51-readers" class="md-nav__link">
+  <a href="#os-52-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 51 readers
+        Os 52 readers
       
     </span>
   </a>
@@ -2434,7 +2490,7 @@
 
 <h1 id="meta-metadados-da-cvm-leitura"><strong>META (metadados da CVM) — leitura</strong><a class="headerlink" href="#meta-metadados-da-cvm-leitura" title="Permanent link">&para;</a></h1>
 <p>Leitura (← CVM) dos <strong>META</strong> — a <em>especificação que a própria CVM publica</em> para cada dataset do
-<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>51 no total</strong>,
+<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>52 no total</strong>,
 todos sob <code>.../&lt;DATASET&gt;/META/</code>.</p>
 <blockquote>
 <p><strong>Veja também:</strong> <a href="../../api/">Referência da API</a> · <a href="../../usage/">Uso</a> · <a href="../">Proveniência</a>.</p>
@@ -2524,7 +2580,7 @@ do <strong>hist</strong> para quem pediu <code>cad_fi</code>. Por isso <strong>c
 nunca derivada. Os nomes são irregulares de fato: <code>meta_inf_mensal_cri.zip</code>, mas
 <code>meta_cda_fi_txt.zip</code> / <code>meta_lamina_fi_txt.zip</code> / <code>meta_inf_mensal_fidc_txt.zip</code> (infixo <code>_txt</code>).</p>
 <hr />
-<h2 id="os-51-readers">Os 51 readers<a class="headerlink" href="#os-51-readers" title="Permanent link">&para;</a></h2>
+<h2 id="os-52-readers">Os 52 readers<a class="headerlink" href="#os-52-readers" title="Permanent link">&para;</a></h2>
 <p>Todos devolvem <strong>o mesmo formato</strong>: uma linha por campo declarado.</p>
 <table>
 <thead>
@@ -2588,6 +2644,11 @@ tabela alguma) — como as seis colunas de proveniência. Os <strong>valores</st
 <td><code>FI/DOC/EVENTUAL</code></td>
 <td><code>MetaEventualFiReader</code></td>
 <td><code>.txt</code> (11 campos)</td>
+</tr>
+<tr>
+<td><code>FI/DOC/ENTREGA</code></td>
+<td><code>MetaEntregaFiReader</code></td>
+<td><code>.txt</code> (11 campos — o header dos 2 membros)</td>
 </tr>
 <tr>
 <td><code>FI/DOC/PERFIL_MENSAL</code></td>

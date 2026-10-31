@@ -473,6 +473,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../submission/extrato/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extrato V3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../submission/inf_mensal_fidc/" class="md-nav__link">
         
   
@@ -759,6 +787,34 @@
     
   
     Eventual FI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/entrega_fi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entrega FI
   
 
     
@@ -2388,6 +2444,8 @@ segue em <code>filings_cvm</code>.</li>
 </ul>
 <h3 id="feat">Feat<a class="headerlink" href="#feat" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>submission</strong>: add Extrato V3 XML writer (#315)</li>
+<li><strong>ingestion</strong>: add FI/DOC/ENTREGA readers (#285) (#288)</li>
 <li><strong>submission</strong>: add the Cadastro de Ativos writer (#311)</li>
 <li><strong>ingestion</strong>: add the FI Balancete readers (#281) (#283)</li>
 <li><strong>submission</strong>: add the Informe de Fundo 157 writer (#301)</li>
@@ -2457,6 +2515,8 @@ segue em <code>filings_cvm</code>.</li>
 </ul>
 <h3 id="fix">Fix<a class="headerlink" href="#fix" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>drift</strong>: probe the two closed series the job skipped (#323)</li>
+<li><strong>gate</strong>: ignore hook GIT_DIR in the roster lookup (#327)</li>
 <li><strong>drift</strong>: drop META-only sections and undescribed FRE members (#316)</li>
 <li><strong>contracts</strong>: pass the CNPJ check on empty partitions (#319)</li>
 <li><strong>ci</strong>: key the venv cache on the resolved Python patch (#286)</li>
