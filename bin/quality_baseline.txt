@@ -105,6 +105,9 @@ complexity 2 tests/unit/test_retry.py
 complexity 4 tests/unit/test_securit_cepac_flat_ingestion.py
 complexity 15 tests/unit/test_sweep_stale_branches.py
 complexity 5 tests/unit/test_vlmo_cia_aberta_ingestion.py
+all-exports 1 src/filings_cvm/_internal/config/ports/__init__.py
+all-exports 193 src/filings_cvm/_internal/config/schemas/__init__.py
+all-exports 1 src/filings_cvm/ingestion/__init__.py
 one-assert 9 tests/unit/test_adm_cart_ingestion.py
 one-assert 6 tests/unit/test_agente_auton_ingestion.py
 one-assert 6 tests/unit/test_agente_fiduc_ingestion.py
@@ -146,7 +149,7 @@ one-assert 5 tests/unit/test_inf_fundo_157_submission.py
 one-assert 5 tests/unit/test_inf_mensal_cra_ingestion.py
 one-assert 7 tests/unit/test_inf_mensal_cri_ingestion.py
 one-assert 5 tests/unit/test_inf_mensal_fiagro_ingestion.py
-one-assert 4 tests/unit/test_inf_mensal_fidc_ingestion.py
+one-assert 5 tests/unit/test_inf_mensal_fidc_ingestion.py
 one-assert 6 tests/unit/test_inf_mensal_fidc_submission.py
 one-assert 5 tests/unit/test_inf_mensal_fii_ingestion.py
 one-assert 7 tests/unit/test_inf_mensal_ots_ingestion.py
@@ -183,6 +186,3 @@ one-assert 3 tests/unit/test_securit_cepac_flat_ingestion.py
 one-assert 10 tests/unit/test_sweep_stale_branches.py
 one-assert 4 tests/unit/test_tabular_reader.py
 one-assert 8 tests/unit/test_vlmo_cia_aberta_ingestion.py
-all-exports 1 src/filings_cvm/_internal/config/ports/__init__.py
-all-exports 193 src/filings_cvm/_internal/config/schemas/__init__.py
-all-exports 1 src/filings_cvm/ingestion/__init__.py

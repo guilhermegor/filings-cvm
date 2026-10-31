@@ -84,7 +84,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
 - Informe Quadrimestral (FIP) — ✅ **submission V2** (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) — `submission/informe_quadrimestral.py` (`InformeQuadrimestral`); schema `_internal/config/schemas/informe_quadrimestral.py`; validadores em `_internal/utils/xml_fields.py` · ⬜ Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
-- Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **17
+- Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **18
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
   `_internal/config/contracts/inf_mensal_fidc.py`. Inaugura o portal root `fidc/` (irmão de `fi/`)
@@ -812,7 +812,7 @@ src/filings_cvm/
                            #       balancete/ (ZIP mensal de 1 membro; 2 readers, corte 5->6 cols em 202311 MEDIDO)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
-        fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
+        fidc/              #   FIDC/ — inf_mensal/ (18 table readers + private base)
         fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
