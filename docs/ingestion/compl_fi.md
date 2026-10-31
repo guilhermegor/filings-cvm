@@ -29,7 +29,7 @@ membro e nenhum corte de schema:
 | `compl_fi_prest` | `ComplFiPrestReader` | 5 | 39.592 |
 
 Os membros compartilham só o bloco-chave `TP_FUNDO`/`CNPJ_FUNDO`/`DT_COMPTC`; o resto difere. O
-membro é escolhido por **nome exato** — `compl_fi_AAAAMM.csv` é prefixo dos outros três. Um `date_ref`
+membro é escolhido por **nome exato** — só o radical `compl_fi` é prefixo dos outros três nomes, então um match por prefixo confundiria os membros. Um `date_ref`
 fora de `201801`–`201904` levanta `ValueError` antes de qualquer download; o padrão é o último mês.
 
 ## Tipagem

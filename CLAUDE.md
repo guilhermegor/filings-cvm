@@ -744,7 +744,7 @@ src/filings_cvm/
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
                            #   22 ROOT PACKAGES, never the readers
-        _base_meta_reader.py   # PRIVATE base for the 42 Meta*Reader (shared across every root)
+        _base_meta_reader.py   # PRIVATE base for the 49 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:

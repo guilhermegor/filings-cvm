@@ -44,13 +44,13 @@ LIST_READERS = [
 
 
 def _row(tuple_cols: tuple[str, ...]) -> list[str]:
-	"""Build one plausible row; text columns carry accents and a literal quote."""
+	"""Build one plausible row; text columns carry accents and a leading, unbalanced quote."""
 	dict_over = {
 		"TP_FUNDO": "FI",
 		"CNPJ_FUNDO": VALID_CNPJ,
 		"CNPJ_AG_RISCO": VALID_CNPJ,
 		"DT_COMPTC": "2018-06-30",
-		"NM_PREST_SERV": 'Administração "ABC" S.A.',
+		"NM_PREST_SERV": '"ABC Administração "S.A.',
 	}
 	return [dict_over.get(str_col, "") for str_col in tuple_cols]
 
@@ -163,7 +163,7 @@ def test_text_keeps_accents_literal_quotes_and_empty_cells(
 
 	df_ = ComplFiPrestReader(REF).read()
 
-	assert df_["NM_PREST_SERV"].iloc[0] == 'Administração "ABC" S.A.'
+	assert df_["NM_PREST_SERV"].iloc[0] == '"ABC Administração "S.A.'
 	assert df_["DS_SERV_PREST"].isna().iloc[0]
 
 
@@ -206,3 +206,44 @@ def test_the_meta_url_is_the_txt_infixed_zip() -> None:
 	assert MetaComplFiReader._META_URL.endswith("/COMPL/META/meta_compl_fi_txt.zip")
 	assert MetaComplFiReader._CONTRACT.str_source_key == "meta_compl_fi"
 	assert MetaComplFiReader._MEMBER_STEM == "compl_fi"
+
+
+def test_section_labels_are_asymmetric_by_design() -> None:
+	"""The META's four ``section`` labels are ``compl_fi``/``inf``/``inf_cotst``/``prest``.
+
+	``meta_compl_fi.txt`` is the bare ``_MEMBER_STEM`` so it keeps the whole stem; the other three
+	reduce to their suffix. Measured from ``_section_of``, pinned so it is not silently "tidied".
+	"""
+	cls_reader = MetaComplFiReader()
+	list_names = [
+		"meta_compl_fi.txt",
+		"meta_compl_fi_inf.txt",
+		"meta_compl_fi_inf_cotst.txt",
+		"meta_compl_fi_prest.txt",
+	]
+
+	assert [cls_reader._section_of(n) for n in list_names] == [
+		"compl_fi",
+		"inf",
+		"inf_cotst",
+		"prest",
+	]
+
+
+def test_a_mix_of_empty_and_valid_rating_agency_cnpj_passes(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""``CNPJ_AG_RISCO`` is partly empty in the source; empty rows must not fail the contract."""
+	list_cols = COMPL_FI.tuple_required
+	row_full = _row(list_cols)
+	row_empty = [
+		("" if c == "CNPJ_AG_RISCO" else v) for c, v in zip(list_cols, row_full, strict=True)
+	]
+	dict_members = _all_members()
+	dict_members["compl_fi_201806.csv"] = _csv(list_cols, [row_full, row_empty])
+	_patch_download(monkeypatch, dict_members)
+
+	df_ = ComplFiReader(REF).read()
+
+	assert df_["CNPJ_AG_RISCO"].tolist()[0] == VALID_CNPJ
+	assert df_["CNPJ_AG_RISCO"].isna().tolist() == [False, True]
