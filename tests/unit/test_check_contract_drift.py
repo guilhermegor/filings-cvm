@@ -309,6 +309,67 @@ def test_check_meta_partial_still_flags_a_missing_required_column(
 	assert "'B'" in list_problems[0]
 
 
+def test_check_meta_ignores_the_fields_of_a_meta_only_section(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A META section describing a member CVM does not ship contributes no field (issue #115)."""
+	df_meta = pd.DataFrame({"section": ["s", "s", "ghost"], "field": ["A", "B", "Z"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	monkeypatch.setattr(ccd, "archived_meta_only_sections", lambda *_a: frozenset())
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	assert ccd.check_meta(cls_meta, (cls_member,)) == []
+
+
+def test_check_meta_reports_a_meta_only_section_the_archive_now_ships(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""An exempted section that gains a real CSV is reported and its fields are no longer muted."""
+	df_meta = pd.DataFrame({"section": ["s", "s", "ghost"], "field": ["A", "B", "Z"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	monkeypatch.setattr(ccd, "archived_meta_only_sections", lambda *_a: frozenset({"ghost"}))
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	list_problems = ccd.check_meta(cls_meta, (cls_member,))
+
+	assert len(list_problems) == 2
+	assert "'ghost' now ships a CSV" in list_problems[0]
+	assert "'Z'" in list_problems[1]
+
+
+def test_sections_of_members_labels_real_archive_names_like_the_meta() -> None:
+	"""Real 2025 member filenames map onto the META's own labels (FRE and INF_ANUAL_FII)."""
+	dict_readers = iter_public_readers()
+	frozenset_fre = ccd.sections_of_members(
+		dict_readers["MetaFreCiaAbertaReader"],
+		("fre_cia_aberta_2025.csv", "fre_cia_aberta_auditor_2025.csv"),
+	)
+	frozenset_fii = ccd.sections_of_members(
+		dict_readers["MetaInfAnualFiiReader"], ("inf_anual_fii_representante_cotista_2025.csv",)
+	)
+
+	assert frozenset_fre == {"fre_cia_aberta", "fre_cia_aberta_auditor"}
+	assert frozenset_fii == {"representante_cotista"}
+
+
+def test_check_meta_still_flags_a_new_field_in_a_described_section(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""Excluding a META-only section must not mute a field CVM adds to a real member's section."""
+	df_meta = pd.DataFrame({"section": ["s", "s", "s", "ghost"], "field": ["A", "B", "C", "Z"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	monkeypatch.setattr(ccd, "archived_meta_only_sections", lambda *_a: frozenset())
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	list_problems = ccd.check_meta(cls_meta, (cls_member,))
+
+	assert len(list_problems) == 1
+	assert "'C'" in list_problems[0]
+
+
 def test_check_real_header_suppresses_extra_for_a_partial_dataset(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -401,6 +462,48 @@ def test_every_meta_undescribed_reader_is_a_registered_member() -> None:
 	assert set(ccd._META_UNDESCRIBED_READERS) <= set_members
 
 
+def test_every_meta_only_section_key_is_a_real_meta_reader() -> None:
+	"""Each ``_META_ONLY_SECTIONS`` key is a registered META reader (a typo can't hide here)."""
+	assert set(ccd._META_ONLY_SECTIONS) <= set(ccd._META_MEMBERS)
+
+
+def test_meta_only_sections_never_name_an_implemented_member() -> None:
+	"""A section we read must never be excluded — that would mute its META oracle in silence.
+
+	Each member's ``_MEMBER_STEM`` goes through the META reader's own ``_section_of``, so it is
+	compared in the META's labelling: FRE keeps the dataset prefix, INF_ANUAL_FII strips it, and
+	a raw stem comparison could never match the latter.
+	"""
+	dict_readers = iter_public_readers()
+	for str_meta, frozenset_sections in ccd._META_ONLY_SECTIONS.items():
+		reader_meta = dict_readers[str_meta]()
+		set_sections = {
+			reader_meta._section_of(f"meta_{dict_readers[str_name]._MEMBER_STEM}.txt")
+			for str_name in ccd._META_MEMBERS[str_meta]
+		}
+		assert not (frozenset_sections & set_sections), str_meta
+
+
+def test_fre_members_absent_from_the_fre_meta_are_declared_undescribed() -> None:
+	"""The 8 FRE members the published META has no section for are excluded from its oracle.
+
+	Measured on the live META (issue #115): 50 sections, none for the PCD / empregado_local /
+	empregado_posicao members — their real headers match the contracts byte for byte.
+	"""
+	set_expected = {
+		"FreCiaAbertaAdministradorPcdReader",
+		"FreCiaAbertaEmpregadoPcdReader",
+		"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader",
+		"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader",
+		"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader",
+		"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader",
+		"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader",
+		"FreCiaAbertaEmpregadoPosicaoLocalReader",
+	}
+
+	assert set_expected <= set(ccd._META_UNDESCRIBED_READERS)
+
+
 def test_a_meta_undescribed_reader_still_has_its_own_contract() -> None:
 	"""Skipping the META oracle must not leave a reader unchecked — its header oracle still runs.
 
@@ -421,3 +524,44 @@ def test_reader_to_meta_is_the_exact_inverse_of_the_registry() -> None:
 	}
 
 	assert dict_expected == ccd._READER_TO_META
+
+
+def test_closed_series_readers_are_probed_at_their_last_published_month() -> None:
+	"""Every closed-series probe date must construct; rolling dates would raise ValueError."""
+	from filings_cvm.ingestion.fi import (
+		BalanceteFiPre202311Reader,
+		ComplFiInfCotstReader,
+		ComplFiInfReader,
+		ComplFiPrestReader,
+		ComplFiReader,
+	)
+
+	for cls_reader in (
+		ComplFiReader,
+		ComplFiInfReader,
+		ComplFiInfCotstReader,
+		ComplFiPrestReader,
+		BalanceteFiPre202311Reader,
+	):
+		tuple_dates = ccd._CLOSED_SERIES_PROBES[cls_reader.__name__]
+		for date_ref in tuple_dates:
+			cls_reader(date_ref=date_ref)
+		with pytest.raises(ValueError):
+			cls_reader(date_ref=ccd._probe_dates()[0])
+
+
+def test_check_real_header_uses_the_closed_series_probe_date() -> None:
+	"""A closed-series reader is built with its override date, not a rolling one."""
+	list_seen: list[object] = []
+	df_read = pd.DataFrame(columns=["A", "B", *FileContract.PROVENANCE_COLUMNS])
+	cls_reader = _fake_reader(_CONTRACT, frame=df_read, dated=True, name="ComplFiReader")
+	cls_init = cls_reader.__init__
+
+	def _spy(self: object, date_ref: object = None, retry_policy: object = None) -> None:
+		list_seen.append(date_ref)
+		cls_init(self, date_ref, retry_policy)
+
+	cls_reader.__init__ = _spy
+
+	assert ccd.check_real_header(cls_reader) == []
+	assert list_seen == [ccd._CLOSED_SERIES_PROBES["ComplFiReader"][0]]
