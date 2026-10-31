@@ -11,6 +11,7 @@ nav:
       - Informe Diário: submission/informe_diario.md
       - Lâmina V3: submission/lamina.md
       - Informe Mensal FIDC: submission/inf_mensal_fidc.md
+      - Informe Semestral INR: submission/inr_semestral.md
       - CDA: submission/cda.md
   - Leitura (← CVM):
       - Visão geral: ingestion/index.md
