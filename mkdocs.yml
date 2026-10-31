@@ -12,6 +12,7 @@ nav:
       - Informe Quadrimestral: submission/informe_quadrimestral.md
       - Informe de Fundo 157: submission/inf_fundo_157.md
       - Lâmina V3: submission/lamina.md
+      - Extrato V3: submission/extrato.md
       - Informe Mensal FIDC: submission/inf_mensal_fidc.md
       - CDA: submission/cda.md
       - Cadastro de Ativos: submission/cadastro_ativos.md
@@ -22,6 +23,7 @@ nav:
       - Lâmina carteira FIF: ingestion/lamina_carteira.md
       - Lâmina FIF: ingestion/lamina.md
       - Eventual FI: ingestion/eventual_fi.md
+      - Entrega FI: ingestion/entrega_fi.md
       - Balancete FI: ingestion/balancete_fi.md
       - Complemento FI: ingestion/compl_fi.md
       - Perfil Mensal FI: ingestion/perfil_mensal_fi.md
