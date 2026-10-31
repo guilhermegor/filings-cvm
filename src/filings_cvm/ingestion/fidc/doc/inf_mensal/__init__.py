@@ -1,4 +1,4 @@
-"""CVM Informe Mensal FIDC readers — the 17 table members of ``inf_mensal_fidc_AAAAMM.zip``.
+"""CVM Informe Mensal FIDC readers — the 18 table members of ``inf_mensal_fidc_AAAAMM.zip``.
 
 One reader per table of the FIDC monthly report (Tabelas I–X plus X's sub-tables), over a shared
 private base (`_base_inf_mensal_fidc_reader`), plus its META reader. Re-exported from
@@ -24,6 +24,9 @@ from filings_cvm.ingestion.fidc.doc.inf_mensal.inf_mensal_fidc_tab_vi import (
 )
 from filings_cvm.ingestion.fidc.doc.inf_mensal.inf_mensal_fidc_tab_vii import (
 	InfMensalFidcTabVIIReader,
+)
+from filings_cvm.ingestion.fidc.doc.inf_mensal.inf_mensal_fidc_tab_viii import (
+	InfMensalFidcTabVIIIReader,
 )
 from filings_cvm.ingestion.fidc.doc.inf_mensal.inf_mensal_fidc_tab_x import InfMensalFidcTabXReader
 from filings_cvm.ingestion.fidc.doc.inf_mensal.inf_mensal_fidc_tab_x_1 import (
@@ -59,6 +62,7 @@ __all__ = [
 	"InfMensalFidcTabIReader",
 	"InfMensalFidcTabIVReader",
 	"InfMensalFidcTabIXReader",
+	"InfMensalFidcTabVIIIReader",
 	"InfMensalFidcTabVIIReader",
 	"InfMensalFidcTabVIReader",
 	"InfMensalFidcTabVReader",
