@@ -1992,7 +1992,11 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
 `MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader` · `MetaComplFiReader` ·
-`MetaBalanceteFiReader`
+`MetaBalanceteFiReader` · `MetaEntregaFiReader` · `MetaEventualFiReader` · `MetaExtratoFiReader` ·
+`MetaPerfilMensalFiReader` · `MetaCadCiaAbertaReader` · `MetaIpeCiaAbertaReader` ·
+`MetaVlmoCiaAbertaReader` · `MetaFcaCiaAbertaReader` · `MetaCgvnCiaAbertaReader` ·
+`MetaFreCiaAbertaReader` · `MetaDfpCiaAbertaReader` · `MetaItrCiaAbertaReader` ·
+`MetaRecompraAcoesReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
