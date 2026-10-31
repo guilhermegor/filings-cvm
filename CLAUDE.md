@@ -84,7 +84,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
   `_internal/config/contracts/inf_mensal_fidc.py`. Inaugura o portal root `fidc/` (irmão de `fi/`)
-  · ⬜ **submission** até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`) · a partir de 2019-11-01 (`PadraoXMLMensalFIDC576.asp`)
+  · **submission** — ⬜ até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`, descontinuado) · ✅ a partir de
+  2019-11-01 (`PadraoXMLMensalFIDC576.asp`) — `submission/inf_mensal_fidc.py` (`InfMensalFidc`);
+  schema `_internal/config/schemas/inf_mensal_fidc.py`
 - Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
   snapshot `cad_fi.csv` — `ingestion/fi/cad/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
