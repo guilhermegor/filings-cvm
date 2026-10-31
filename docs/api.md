@@ -22,6 +22,7 @@ from filings_cvm import RetryPolicy
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
 
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Balancete](submission/balancete.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 > **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Lâmina V3](submission/lamina.md), [CDA V4](submission/cda.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
@@ -149,6 +150,23 @@ InfMensalFidc().export(doc, output_path="fidc.xml")          # grava arquivo, re
 ```
 
 Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
+
+---
+
+### `Balancete`
+
+`filings_cvm.submission.Balancete`
+
+Serializa um `BalanceteDocument` (`BalanceteFundo` → `BalanceteConta`) no padrão **COFI 4010**
+(largura fixa, registros de 71 posições, `.cvm`; não é XML). Detalhes em
+[Balancete](submission/balancete.md).
+
+```python
+from filings_cvm.submission import Balancete
+
+Balancete().export(doc)                           # retorna str
+Balancete().export(doc, output_path="b.cvm")      # grava ASCII, retorna None
+```
 
 ---
 

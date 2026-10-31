@@ -10,6 +10,11 @@ and serialise them through a single import:
     from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
 """
 
+from filings_cvm._internal.config.schemas.balancete import (
+	BalanceteConta,
+	BalanceteDocument,
+	BalanceteFundo,
+)
 from filings_cvm._internal.config.schemas.cda import (
 	CdaAplic,
 	CdaAtivoExt,
@@ -136,6 +141,7 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm.submission.balancete import Balancete
 from filings_cvm.submission.cda import (
 	Cda,
 )
@@ -156,6 +162,10 @@ __all__ = [
 	"Amort",
 	"Amortizacao",
 	"AplicAtivo",
+	"Balancete",
+	"BalanceteConta",
+	"BalanceteDocument",
+	"BalanceteFundo",
 	"CaptMes",
 	"CaptaResgaAmorti",
 	"CartSegmt",

@@ -78,7 +78,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ✅ **submission V4** (`PadraoXMLCDANetV4.aspx`) — `submission/cda.py` (`Cda`); schema `_internal/config/schemas/cda.py` · ⬜ V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
-- ⬜ Balancete (`PadraoXMLBalancete.asp`)
+- Balancete — ✅ **submission COFI 4010** (largura fixa `.cvm`, **não XML**: `PadraoXMLBalancete.asp` só aceita upload COS 4010/COFI 4010; layout em `PadraoCOFI.aspx`) — `submission/balancete.py` (`Balancete`); schema `_internal/config/schemas/balancete.py`; camada de registros `_internal/utils/cofi_records.py` (compartilhada com COFI 4016) · ⬜ COS 4010 (BACEN)
 - ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
 - Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **17
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
