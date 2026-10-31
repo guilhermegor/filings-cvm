@@ -62,6 +62,11 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_v3 import (
+	PatrimonyDistributionV3,
+	PerfilMensalV3Document,
+	PerfilMensalV3Row,
+)
 
 
 __all__ = [
@@ -104,8 +109,11 @@ __all__ = [
 	"NominalRiskFactor",
 	"OtcOperation",
 	"PatrimonyDistribution",
+	"PatrimonyDistributionV3",
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
+	"PerfilMensalV3Document",
+	"PerfilMensalV3Row",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",

@@ -160,6 +160,11 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_v3 import (
+	PatrimonyDistributionV3,
+	PerfilMensalV3Document,
+	PerfilMensalV3Row,
+)
 from filings_cvm.submission.cadastro_ativos import (
 	CadastroAtivos,
 )
@@ -179,6 +184,7 @@ from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
+from filings_cvm.submission.perfil_mensal_v3 import PerfilMensalV3
 
 
 __all__ = [
@@ -293,10 +299,14 @@ __all__ = [
 	"PassivPosicoes",
 	"PassivValores",
 	"PatrimonyDistribution",
+	"PatrimonyDistributionV3",
 	"Patrliq",
 	"PerfilMensal",
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
+	"PerfilMensalV3",
+	"PerfilMensalV3Document",
+	"PerfilMensalV3Row",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",

@@ -50,6 +50,17 @@ PerfilMensal().export(doc, output_path="perfil.xml")   # grava arquivo, retorna 
 
 Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
 
+### `PerfilMensalV3`
+
+`filings_cvm.submission.PerfilMensalV3`
+
+Serializa um `PerfilMensalV3Document` (padrão Perfil Mensal V3; `DISTR_PATRIM` obrigatório) com
+`VERSAO=3.0`, reaproveitando o serializador do `PerfilMensal`. Veja [Perfil Mensal V3](submission/perfil_mensal_v3.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+Mesma semântica do `PerfilMensal.export`, sem o parâmetro `versao`.
+
 ### `InfFundo157`
 
 `filings_cvm.submission.InfFundo157`

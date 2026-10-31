@@ -353,7 +353,7 @@ envio; é o registro do que foi entregue, não um informe):
   arquivo do `META/`** (medido pela listagem; as outras 3 grafias dão 404), com **107 campos = o header
   pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
   `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
-- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
+- ✅ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) — `submission/perfil_mensal_v3.py` (`PerfilMensalV3`); schema `_internal/config/schemas/perfil_mensal_v3.py`. Mesma sequência de tags/escalas do V4 (medido contra as duas páginas), `VERSAO` 3.0; única diferença: `DISTR_PATRIM` (16 `PR_*`) obrigatório. ⬜ 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
 - Extrato das Informações sobre o Fundo — ✅ **ingestion** dataset `FI/DOC/EXTRATO`, que publica
   **DOIS artefatos**: `extrato_fi_AAAA.csv` (**CSV solto anual**, 2015–2026, **toda** entrega do ano)
   e `extrato_fi.csv` (**URL fixa, sem ano**) — `ingestion/fi/doc/extrato/*` (`ExtratoFiReader` 117c
