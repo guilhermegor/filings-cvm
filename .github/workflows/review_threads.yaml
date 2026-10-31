@@ -1,0 +1,79 @@
+name: Review Threads
+
+# Fails a PR whose review threads are not FINISHED (an author reply AND resolved), or whose HEAD
+# commit no reviewer in `.review-bots.yaml` has reviewed. Imported from the BlueprintX scaffold
+# (#296). The logic and its measurements live in `bin/check_review_threads.py`.
+#
+# ⚠️ NOT a required check. Making it one is an owner decision (branch ruleset), and it would block
+# every PR that CodeRabbit or the reviewer ladder has not reviewed at HEAD.
+#
+# Triggers: review and comment events re-run the verdict when a reply lands. Resolving a thread
+# fires NO workflow event (`pull_request_review_thread` is webhook-only, see `pr-gate.yaml`), so
+# after resolving the last thread re-run this check or push.
+#
+# Plain `setup-python` + a pinned `pyyaml`, NOT `poetry install`: the gate needs only `pyyaml`
+# and `gh`, and it runs on every review comment. Same choice as `pr-gate.yaml`.
+on:
+  pull_request:
+  pull_request_review:
+  pull_request_review_comment:
+  issue_comment:
+    types: [created, edited, deleted]
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write   # rerun_stale_gate_runs.sh re-runs this gate's stale red runs at the same head
+
+concurrency:
+  group: review-threads-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  review-threads:
+    name: Review threads answered
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # An issue comment on a plain issue (not a PR) has nothing to gate.
+    if: >-
+      github.event_name != 'issue_comment' ||
+      github.event.issue.pull_request != null
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set Up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install --quiet "pyyaml==6.0.3"
+
+      - name: Every review thread is answered and resolved
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          REVIEW_THREADS_REQUIRE_RESOLVED: "1"
+        run: python bin/check_review_threads.py
+
+      # A red run from before the last reply stays red in the PR's check rollup even after a
+      # later run passes. Re-run those stale runs so the rollup shows the current verdict.
+      - name: Clear stale failed runs of this gate at the same head
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          str_head="$EVENT_HEAD_SHA"
+          if [ -z "$str_head" ]; then
+            str_head=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.head.sha')
+          fi
+          [ -n "$str_head" ] || { echo "::error::could not resolve head SHA for PR ${PR_NUMBER}"; exit 1; }
+          HEAD_SHA="$str_head" bash bin/rerun_stale_gate_runs.sh
