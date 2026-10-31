@@ -11,9 +11,9 @@ Three measured facts drive the declarations here:
   `DT_RECEB` / `LINK_DOC` — uppercase and abbreviated, the `cad_cia_aberta.csv` style — while every
   satellite uses `CNPJ_Companhia` / `Data_Referencia` / `Versao` / `ID_Documento` /
   `Nome_Empresarial`. Writing the ten from one template silently breaks the index.
-- ⚠️ **`departamento_acionistas` is header-only** (0 rows in 2025), so its `tuple_cnpj_cols` is
-  **empty**: the CNPJ check requires a *present* valid value, and a legitimately empty artifact
-  would otherwise raise. Same failure class as the CRI header-only members.
+- ⚠️ **`departamento_acionistas` is header-only** (0 rows in 2025) yet still declares
+  `CNPJ_Companhia` (#320): the CNPJ check passes an empty column since #317, and the column is the
+  company key (META "CNPJ da companhia", `varchar(18)`, the member's only CNPJ/CPF column).
 - ⚠️ **CPF columns stay out of `tuple_cnpj_cols`.** `dri.CPF_Responsavel` holds 1,003 CPFs and 4
   CNPJs, `auditor.CPF_Responsavel_Tecnico` 49 CPFs, and `auditor.CPF_CNPJ_Auditor` is a
   by-name-mixed column (all CNPJ in 2025, but a CPF year would break a CNPJ check). They are
@@ -110,7 +110,7 @@ FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS = FileContract(
 		"Fax",
 		"Email",
 	),
-	(),
+	("CNPJ_Companhia",),
 )
 
 FCA_CIA_ABERTA_DRI = FileContract(

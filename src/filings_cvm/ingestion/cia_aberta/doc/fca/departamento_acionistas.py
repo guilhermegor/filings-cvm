@@ -2,9 +2,9 @@
 
 The shareholder-relations department's contact and address.
 
-⚠️ **Header-only in 2025** (0 data rows). Its contract therefore declares **no** CNPJ column: the
-CNPJ check requires a *present* valid value, so a legitimately empty artifact would otherwise raise
-``ContractError``. Same failure class as the CRI header-only members.
+⚠️ **Header-only in 2025** (0 data rows). Its contract declares **no** CNPJ column: before #317
+the CNPJ check failed an empty column, so declaring one raised ``ContractError`` on a legitimately
+empty artifact. The check now passes an empty column, so the empty tuple is no longer load-bearing.
 
 Download/unzip/parse is inherited from the private `_BaseFcaReader`; this module only declares
 which member it reads and how it is typed.
