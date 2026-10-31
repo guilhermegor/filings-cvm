@@ -38,6 +38,11 @@ from filings_cvm._internal.config.schemas.cda import (
 	CdaTitAgroCredPriv,
 	CdaTitPub,
 )
+from filings_cvm._internal.config.schemas.extrato import (
+	ExtratoDocument,
+	ExtratoHeader,
+	ExtratoRow,
+)
 from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Cotista,
 	InfFundo157Document,
@@ -152,6 +157,7 @@ from filings_cvm.submission.cadastro_ativos import (
 from filings_cvm.submission.cda import (
 	Cda,
 )
+from filings_cvm.submission.extrato import Extrato
 from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
@@ -213,6 +219,10 @@ __all__ = [
 	"DevSacado",
 	"Dicred",
 	"DocumentHeader",
+	"Extrato",
+	"ExtratoDocument",
+	"ExtratoHeader",
+	"ExtratoRow",
 	"Garantia",
 	"InfFundo157",
 	"InfFundo157Cotista",

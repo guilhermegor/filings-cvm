@@ -127,6 +127,10 @@ from filings_cvm._internal.config.contracts.dfp_cia_aberta import (
 	DFP_CIA_ABERTA_DVA_IND,
 	DFP_CIA_ABERTA_PARECER,
 )
+from filings_cvm._internal.config.contracts.entrega_fi import (
+	ENTREGA_FI,
+	ENTREGA_FI_DIARIO,
+)
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
 from filings_cvm._internal.config.contracts.extrato_fi import (
@@ -335,6 +339,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_DFIN_CRI,
 	META_DFIN_FII,
 	META_DFP_CIA_ABERTA,
+	META_ENTREGA_FI,
 	META_EVENTUAL_FI,
 	META_EXTRATO_FI,
 	META_FCA_CIA_ABERTA,
@@ -469,6 +474,8 @@ __all__ = [
 	"DFP_CIA_ABERTA_DVA_CON",
 	"DFP_CIA_ABERTA_DVA_IND",
 	"DFP_CIA_ABERTA_PARECER",
+	"ENTREGA_FI",
+	"ENTREGA_FI_DIARIO",
 	"EVENTUAL_FI",
 	"EXAMPLE_SOURCE",
 	"EXTRATO_FI",
@@ -652,6 +659,7 @@ __all__ = [
 	"META_DFIN_CRI",
 	"META_DFIN_FII",
 	"META_DFP_CIA_ABERTA",
+	"META_ENTREGA_FI",
 	"META_EVENTUAL_FI",
 	"META_EXTRATO_FI",
 	"META_FCA_CIA_ABERTA",

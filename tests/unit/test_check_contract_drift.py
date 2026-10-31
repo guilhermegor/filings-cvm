@@ -534,6 +534,8 @@ def test_closed_series_readers_are_probed_at_their_last_published_month() -> Non
 		ComplFiInfReader,
 		ComplFiPrestReader,
 		ComplFiReader,
+		ExtratoFiPre2020Reader,
+		PerfilMensalPre175Reader,
 	)
 
 	for cls_reader in (
@@ -542,12 +544,35 @@ def test_closed_series_readers_are_probed_at_their_last_published_month() -> Non
 		ComplFiInfCotstReader,
 		ComplFiPrestReader,
 		BalanceteFiPre202311Reader,
+		PerfilMensalPre175Reader,
+		ExtratoFiPre2020Reader,
 	):
 		tuple_dates = ccd._CLOSED_SERIES_PROBES[cls_reader.__name__]
 		for date_ref in tuple_dates:
 			cls_reader(date_ref=date_ref)
 		with pytest.raises(ValueError):
 			cls_reader(date_ref=ccd._probe_dates()[0])
+
+
+def test_every_dated_reader_constructs_with_the_first_date_the_drift_job_passes() -> None:
+	"""The drift job builds each reader outside its try, so a refused date skips its header.
+
+	``check_real_header`` always constructs with the first probe date, and a ``ValueError`` there
+	escapes before any read — the header is never compared and nothing turns red (#321). Sweeping
+	every public reader means a future closed-series reader missing from
+	``_CLOSED_SERIES_PROBES`` fails here instead of falling into that gap silently.
+	"""
+	list_refused: list[str] = []
+	for str_name, cls_reader in iter_public_readers().items():
+		if "date_ref" not in inspect.signature(cls_reader.__init__).parameters:
+			continue
+		date_first = ccd._CLOSED_SERIES_PROBES.get(str_name, ccd._probe_dates())[0]
+		try:
+			cls_reader(date_ref=date_first, retry_policy=ccd._DRIFT_RETRY_POLICY)
+		except ValueError as cls_exc:
+			list_refused.append(f"{str_name} @ {date_first}: {cls_exc}")
+
+	assert list_refused == []
 
 
 def test_check_real_header_uses_the_closed_series_probe_date() -> None:
