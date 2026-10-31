@@ -2,7 +2,7 @@
 
 Como instalar a biblioteca e gerar o seu primeiro arquivo XML compatível com a CVM.
 
-> **Veja também:** [Referência da API](api.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Mensal INR](submission/inr_mensal.md)
+> **Veja também:** [Referência da API](api.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Lâmina V3](submission/lamina.md), [Informe Mensal INR](submission/inr_mensal.md)
 
 ---
 
