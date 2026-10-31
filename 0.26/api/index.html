@@ -524,6 +524,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submission/cadastro_ativos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cadastro de Ativos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2232,6 +2260,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cadastroativos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroAtivos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CadastroAtivos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportdoc-output_pathnone-str-none_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export(doc, output_path=None) -&gt; str | None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#infmensalfidc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2244,7 +2300,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#exportdoc-output_pathnone-str-none_3" class="md-nav__link">
+  <a href="#exportdoc-output_pathnone-str-none_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         export(doc, output_path=None) -&gt; str | None
@@ -4186,6 +4242,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cadastroativos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CadastroAtivos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CadastroAtivos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportdoc-output_pathnone-str-none_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export(doc, output_path=None) -&gt; str | None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#infmensalfidc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4198,7 +4282,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#exportdoc-output_pathnone-str-none_3" class="md-nav__link">
+  <a href="#exportdoc-output_pathnone-str-none_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         export(doc, output_path=None) -&gt; str | None
@@ -6107,10 +6191,39 @@ codificação levanta <code>ValueError</code> e <strong>não trunca</strong> um 
 <code>CdaPosFim</code>, <code>CdaAtivoExt</code>, <code>CdaEmitter</code>, <code>CdaBankEmitter</code>, <code>CdaPosFixIndex</code>, <code>CdaRiskRating</code>.
 Campos, escalas e regras em <a href="../submission/cda/">CDA V4</a>.</p>
 <hr />
+<h3 id="cadastroativos"><code>CadastroAtivos</code><a class="headerlink" href="#cadastroativos" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.submission.CadastroAtivos</code></p>
+<p>Serializa um <code>CadastroAtivosDocument</code> validado para XML compatível com a CVM (Atualização do
+Cadastro de Ativos, sem namespace, <code>COD_DOC=2</code>).</p>
+<h4 id="exportdoc-output_pathnone-str-none_3"><code>export(doc, output_path=None) -&gt; str | None</code><a class="headerlink" href="#exportdoc-output_pathnone-str-none_3" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>doc</code></td>
+<td><code>CadastroAtivosDocument</code></td>
+<td>Documento totalmente validado (até 1000 linhas).</td>
+</tr>
+<tr>
+<td><code>output_path</code></td>
+<td><code>str \| None</code></td>
+<td>Se informado, grava o arquivo em <code>windows-1252</code> e retorna <code>None</code>. Caso contrário, retorna a <code>str</code> XML.</td>
+</tr>
+</tbody>
+</table>
+<p>Modelos de entrada, em <code>filings_cvm.submission</code>: <code>CadastroAtivosDocument</code>, <code>CadastroAtivosHeader</code>,
+<code>CadastroAtivosRow</code>. Campos e regras em <a href="../submission/cadastro_ativos/">Cadastro de Ativos</a>.</p>
+<hr />
 <h3 id="infmensalfidc"><code>InfMensalFidc</code><a class="headerlink" href="#infmensalfidc" title="Permanent link">&para;</a></h3>
 <p><code>filings_cvm.submission.InfMensalFidc</code></p>
 <p>Serializa um documento validado para XML compatível com a CVM (Informe Mensal FIDC, ICVM 576, a partir de 2019-11-01). Schema em <code>InfMensalFidcDocument</code> (<code>InfMensalFidcHeader</code> + <code>InfMensalFidcInform</code>).</p>
-<h4 id="exportdoc-output_pathnone-str-none_3"><code>export(doc, output_path=None) -&gt; str | None</code><a class="headerlink" href="#exportdoc-output_pathnone-str-none_3" title="Permanent link">&para;</a></h4>
+<h4 id="exportdoc-output_pathnone-str-none_4"><code>export(doc, output_path=None) -&gt; str | None</code><a class="headerlink" href="#exportdoc-output_pathnone-str-none_4" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
