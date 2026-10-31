@@ -36,6 +36,8 @@ não desta documentação:
   — envio (`submission/perfil_mensal.py`).
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp))
   — envio (`submission/informe_diario.py`).
+- ✅ **Balancete — COFI 4010** ([`PadraoCOFI.aspx`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoCOFI.aspx), largura fixa, não XML)
+  — envio (`submission/balancete.py`).
 
 Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
 Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
