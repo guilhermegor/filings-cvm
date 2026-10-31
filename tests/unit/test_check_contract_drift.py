@@ -493,13 +493,20 @@ def test_reader_to_meta_is_the_exact_inverse_of_the_registry() -> None:
 def test_closed_series_readers_are_probed_at_their_last_published_month() -> None:
 	"""Every closed-series probe date must construct; rolling dates would raise ValueError."""
 	from filings_cvm.ingestion.fi import (
+		BalanceteFiPre202311Reader,
 		ComplFiInfCotstReader,
 		ComplFiInfReader,
 		ComplFiPrestReader,
 		ComplFiReader,
 	)
 
-	for cls_reader in (ComplFiReader, ComplFiInfReader, ComplFiInfCotstReader, ComplFiPrestReader):
+	for cls_reader in (
+		ComplFiReader,
+		ComplFiInfReader,
+		ComplFiInfCotstReader,
+		ComplFiPrestReader,
+		BalanceteFiPre202311Reader,
+	):
 		tuple_dates = ccd._CLOSED_SERIES_PROBES[cls_reader.__name__]
 		for date_ref in tuple_dates:
 			cls_reader(date_ref=date_ref)
