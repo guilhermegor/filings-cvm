@@ -71,8 +71,8 @@ passaria, porque os testes afirmam o contract que foi escrito.
   `CNPJ_Agencia_Classificadora`) — publicadas (logo no contract), mas fora de `tuple_cnpj_cols`.
 - **`carteira_modificacao` e `responsavel` são header-only em 2025** (zero linhas — uma modificação
   e o responsável são registrados só em circunstâncias específicas). Um membro sem linhas não tem
-  CNPJ a validar, então esses dois declaram `tuple_cnpj_cols` vazio — do contrário um arquivo
-  legitimamente vazio falharia o contract.
+  CNPJ a validar, então esses dois declaram `tuple_cnpj_cols` vazio. Antes do #317 isso evitava
+  que um arquivo legitimamente vazio falhasse o contract; desde o #317 uma coluna vazia passa.
 - **`geral.Outras_Contigencias_Relevantes`** preserva a grafia da CVM **verbatim** (o CRI mantém o
   bloco de contingências que o CRA derruba).
 

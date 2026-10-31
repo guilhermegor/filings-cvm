@@ -50,12 +50,10 @@ por teste** nas duas direções.
 ## ⚠️ `departamento_acionistas` é header-only
 
 Em 2025 esse membro vem com **cabeçalho e nenhuma linha**. Por isso seu contract declara
-**nenhuma coluna de CNPJ**: o check de CNPJ exige um valor **presente** e válido, então num quadro
-vazio ele falharia com `ContractError`.
-
-Provado por mutação: acrescentando `("CNPJ_Companhia",)` ao contract, a leitura do membro vazio
-levanta `Column 'CNPJ_Companhia' … holds no valid CNPJ`. É a mesma classe de falha dos membros
-header-only do CRI — desta vez pega no grounding, não em produção.
+**nenhuma coluna de CNPJ**. Antes do #317 o check de CNPJ falhava numa coluna vazia, então
+declarar `("CNPJ_Companhia",)` levantava `holds no valid CNPJ` na leitura do membro vazio (provado
+por mutação). Desde o #317 uma coluna sem valor presente passa, então a tupla vazia deixou de ser
+load-bearing.
 
 ---
 
