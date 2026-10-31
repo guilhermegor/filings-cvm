@@ -270,7 +270,7 @@ class _FixedFee(ExtratoBlock):
 
 	@staticmethod
 	def _check_amount(kind: str | None, amount: Decimal | None) -> None:
-		"""Require a fixed R$ amount to carry at most two decimal places.
+		"""Bound a fee by its kind: a percentage stays within 100, an R$ amount takes 2 places.
 
 		Parameters
 		----------
@@ -282,9 +282,13 @@ class _FixedFee(ExtratoBlock):
 		Raises
 		------
 		ValueError
-			If the kind is R$ and the amount has more than two decimal places.
+			If a percentage fee exceeds 100, or an R$ fee has more than two decimal places.
 		"""
-		if kind == "2" and amount is not None and amount != amount.quantize(Decimal("0.01")):
+		if amount is None:
+			return
+		if kind == "1" and amount > _PERCENT_MAX:
+			raise ValueError("a percentage fee must not exceed 100")
+		if kind == "2" and amount != amount.quantize(Decimal("0.01")):
 			raise ValueError("an R$ fee takes at most two decimal places")
 
 

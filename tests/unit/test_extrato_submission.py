@@ -54,7 +54,7 @@ ROW_TAGS = [
 ]
 BLOCK_TAGS = {
 	"FORMA_CONDOMINIO": ["TIPO_CONDOMINIO", "ABERTA_NEG_MER_ORGAN", "LISTA_MERC_BLOQUEIO"],
-	"PRAZO": ["TIPO_PRAZO", "DETERMINADO_DETALHAMENTO"],
+	"PRAZO": ["TIPO_PRAZO", "DETALHAMENTO_PRAZO"],
 	"FUNDO_ANBIMA": ["ANBIMA", "COD_CLASSIFICACAO"],
 	"FUNDO_INVERT_COTAS": ["TIPO_FUNDO_INVERT", "TIPO_FUNDO"],
 	"VALOR_COTA": ["ATUALIZADO_DIARIAMENTE", "PRAZO_ATUALIZACAO"],
@@ -76,7 +76,6 @@ BLOCK_TAGS = {
 	"ATIV_EXTER": ["INVEST_EXTERIOR", "PR_MAX_APLIC_ATIV_EXTER"],
 	"FUNDO_ATIVOS": ["ADQUIRA_CREDITO_PRIVADO", "LIMITE_MAXIMO"],
 }
-BLOCK_TAGS["PRAZO"] = ["TIPO_PRAZO", "DETALHAMENTO_PRAZO"]
 TIPO_EMISSOR_BASES = [
 	"INSTITUICOES_FINANCEIRAS",
 	"COMPANHIAS_ABERTAS",
@@ -355,6 +354,18 @@ def test_impossible_or_malformed_dates_rejected(date: str) -> None:
 				"tp_vl_fixo_tx_ingresso": "2",
 				"vl_fixo_tx_ingresso": "1.005",
 			},
+		),
+		(
+			"tx_ingresso",
+			{
+				"cobra_tx_ingresso": "S",
+				"tp_vl_fixo_tx_ingresso": "1",
+				"vl_fixo_tx_ingresso": "100.0001",
+			},
+		),
+		(
+			"tx_saida",
+			{"cobra_tx_saida": "S", "tp_vl_fixo_tx_ingresso": "1", "vl_fixo_tx_saida": "150"},
 		),
 		(
 			"tx_saida",
