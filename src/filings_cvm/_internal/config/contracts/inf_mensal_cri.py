@@ -40,8 +40,9 @@ fixtures.
 4. **``carteira_modificacao`` and ``responsavel`` are header-only in 2025** (zero data rows — a
    modification event and the responsible officer are filed only in specific circumstances). A
    member with no rows has no CNPJ to validate, so ``CNPJ_Emissora`` is deliberately left out of
-   *their* ``tuple_cnpj_cols`` (it stays a required column). Keeping it there would raise
-   ``ContractError`` on a legitimately empty member — the whole-member version of finding 3.
+   *their* ``tuple_cnpj_cols`` (it stays a required column). Before #317 keeping it there raised
+   ``ContractError`` on a legitimately empty member; the check now passes an empty column, so the
+   exclusion is no longer load-bearing.
 
 **Deviation from "one contract per file" — deliberate**, exactly as for ``inf_mensal_cra.py`` /
 ``inf_mensal_ots.py`` / ``inf_mensal_fidc.py``. These 11 are the members of a **single input
