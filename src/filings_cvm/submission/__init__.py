@@ -99,6 +99,11 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_portabilidade import (
+	InformePortabilidadeDocument,
+	PortabilidadeHeader,
+	PortabilidadeInform,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -145,6 +150,7 @@ from filings_cvm.submission.inf_mensal_fidc import (
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
+from filings_cvm.submission.informe_portabilidade import InformePortabilidade
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
@@ -205,6 +211,8 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformePortabilidade",
+	"InformePortabilidadeDocument",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
@@ -248,6 +256,8 @@ __all__ = [
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
+	"PortabilidadeHeader",
+	"PortabilidadeInform",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"QtVl",

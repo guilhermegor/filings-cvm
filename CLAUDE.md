@@ -737,7 +737,10 @@ Sob `CIA_ABERTA/CAD/`:
 
 **Escriturador de Valores Mobiliários**
 - ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)
-- ⬜ Informe de Portabilidade (`PadraoXMLInfoPortabilidade.asp`)
+- Informe de Portabilidade — ✅ **submission** (`PadraoXMLInfoPortabilidade.asp`, COD_DOC 478) —
+  `submission/informe_portabilidade.py` (`InformePortabilidade`); schema
+  `_internal/config/schemas/informe_portabilidade.py`. Sem decimais: as 6 quantidades são `int`
+  estrito ≥ 0; `DT_EVENT` assumido `MM/AAAA` (a página não declara o formato)
 
 ## Layout
 
