@@ -78,7 +78,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   validadores em `_internal/utils/xml_fields.py`. A página não tem decimais e não diz o formato de
   `DT_FIM` (adotado `DD/MM/AAAA`) nem a cardinalidade de `COTST` (≥1); ver
   `docs/submission/inf_fundo_157.md`. Nenhum validador da CVM foi executado.
-- ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
+- Informe Sintético — ✅ **submission**, 4 tipos (não são versões; um writer por tipo, sobre o serializador privado `submission/_informe_sintetico_xml.py`) — FCCE (`PadraoXMLSintFCCE.asp`, COD_DOC 5) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`, 7) · FIC-FITVM (`PadraoXMLSintFIC.asp`, 8) · FICE/FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`, 9) — `submission/informe_sintetico_{fcce,fitvm,fic,outros}.py` (`InformeSintetico{Fcce,Fitvm,Fic,Outros}`); schema `_internal/config/schemas/informe_sintetico.py`. Valores em R$ mil são inteiros; só `VL_QUOTA_ULT_DIA_MES` é decimal (escala 2 por política — a página não diz); CNPJ sai sem zeros à esquerda, como a página manda
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ✅ **submission V4** (`PadraoXMLCDANetV4.aspx`) — `submission/cda.py` (`Cda`); schema `_internal/config/schemas/cda.py` · ⬜ V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
