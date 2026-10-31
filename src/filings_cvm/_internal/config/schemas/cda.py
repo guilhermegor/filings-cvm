@@ -41,10 +41,12 @@ from filings_cvm._internal.utils.typing import type_checker
 
 # ``fullmatch`` + ``[0-9]``: ``$`` would accept a trailing newline and ``\d`` non-ASCII digits.
 _DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
-_COMPT_RE = re.compile(r"(0[1-9]|1[0-2])/[0-9]{4}")
+_COMPT_RE = re.compile(r"(0[1-9]|1[0-2])/(?!0000)[0-9]{4}")
 _SWAP_RE = re.compile(r"SWP[A-Z0-9]{3}")
 # C0 controls other than tab/LF/CR are not legal XML 1.0 characters.
 _XML_ILLEGAL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+# Codes and names are single-line tokens: tab/LF/CR would reach the XML verbatim.
+_LINE_BREAK_RE = re.compile(r"[\t\n\r]")
 
 _MAX_INT_15 = Decimal(10) ** 15
 _MAX_INT_21 = Decimal(10) ** 21
@@ -77,7 +79,7 @@ def _reject_float(value: object) -> object:
 
 @type_checker
 def _check_text(value: str) -> str:
-	"""Require text the file can carry: non-empty, windows-1252, legal XML characters.
+	"""Require text the file can carry: non-blank, single-line, windows-1252, legal XML characters.
 
 	Parameters
 	----------
@@ -95,8 +97,10 @@ def _check_text(value: str) -> str:
 		If empty, not encodable in windows-1252 (the file's declared encoding), or holding a
 		character XML 1.0 forbids.
 	"""
-	if not value:
-		raise ValueError("text must not be empty")
+	if not value.strip():
+		raise ValueError("text must not be empty or blank")
+	if _LINE_BREAK_RE.search(value):
+		raise ValueError("text must not hold a tab or line break")
 	try:
 		value.encode("windows-1252")
 	except UnicodeEncodeError as exc:

@@ -142,6 +142,7 @@ class Cda(SubmissionWriter[CdaDocument]):
 			Value to render.
 		"""
 		if isinstance(value, Decimal):
+			value = abs(value) if value == 0 else value  # truncation can leave -0.00
 			places = _PLACES.get(tag)
 			text = (f"{value:f}" if places is None else f"{value:.{places}f}").replace(".", ",")
 		elif tag in _ID_TAGS:

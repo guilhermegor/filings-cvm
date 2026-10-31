@@ -44,9 +44,9 @@ e `TIT_PRE_FIX_TAXA_CONTR` 3 + 6. Passe `str`/`Decimal`, nunca `float`.
   na saída.
 
 - Datas `DD/MM/AAAA` precisam existir no calendário (`31/02/2024` é recusada), em todos os campos de
-  data. Textos livres e códigos não podem ser vazios, devem caber em `windows-1252` e não podem
+  data. Textos livres e códigos não podem ser vazios, em branco, nem conter tabulação ou quebra de linha, devem caber em `windows-1252` e não podem
   conter caracteres de controle proibidos em XML; a validação recusa antes de gravar, e o arquivo
-  só é aberto depois de o conteúdo estar codificado, então uma falha nunca apaga um envio anterior.
+  só é aberto depois de o conteúdo estar codificado, então uma falha de codificação nunca apaga um envio anterior (disco cheio no meio da gravação não é coberto).
 - Quantidades de vendas/aquisições são não negativas; `NEGOC` vazio é recusado; `ATIVO_EXT` só
   existe em `INV_EXT`. No `SWAP`, `MERC_POS_FIM` fica dentro de `POS_FIM` (`CdaSwapPosFim`), como na
   página.

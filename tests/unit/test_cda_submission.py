@@ -477,3 +477,34 @@ def test_empty_or_control_code_rejected(code: str) -> None:
 		CdaTitPub(cod_selic=code, dt_venc="01/01/2030", aplic=_pos(147))
 	with pytest.raises(ValidationError):
 		CdaCotas(cod_subclasse=code, aplic=_pos())
+
+
+@pytest.mark.parametrize("text", ["   ", "1\n", "A\tB", "x\r"])
+def test_blank_or_multiline_text_rejected(text: str) -> None:
+	"""Blank text and tab/line breaks never reach the XML."""
+	with pytest.raises(ValidationError):
+		CdaTitPub(cod_selic=text, dt_venc="01/01/2030", aplic=_pos(147))
+	with pytest.raises(ValidationError):
+		CdaEmitter(tp_pf_pj_emis="PJ", nr_pf_pj_emis=VALID_CNPJ, nm_emis=text)
+
+
+def test_compt_year_zero_rejected() -> None:
+	"""DT_COMPT 01/0000 is not a real month."""
+	with pytest.raises(ValidationError):
+		CdaHeader(dt_compt="01/0000", dt_gerac_arq="05/04/2024")
+
+
+def test_export_never_writes_negative_zero() -> None:
+	"""Truncating a small negative must not emit -0,00."""
+	node = ET.Element("N")
+	value = CdaPosFim(qtde_pos_fim="1", merc_pos_fim="-0.001").merc_pos_fim
+	Cda._leaf(node, "MERC_POS_FIM", value)
+	assert node[0].text == "0,00"
+
+
+def test_export_writes_cp1252_accents_to_file(tmp_path: object) -> None:
+	"""Accented text lands in the file as windows-1252 bytes."""
+	doc = _doc(cotas=[CdaCotas(cod_subclasse="Açúcar", aplic=_pos())])
+	out = tmp_path / "cda.xml"
+	Cda().export(doc, str(out))
+	assert "Açúcar".encode("windows-1252") in out.read_bytes()
