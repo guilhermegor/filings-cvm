@@ -13,6 +13,7 @@ complexity 1 bin/sweep_stale_branches.py
 complexity 3 src/filings_cvm/_internal/config/schemas/_fields.py
 complexity 2 src/filings_cvm/_internal/config/schemas/cadastro_ativos.py
 complexity 8 src/filings_cvm/_internal/config/schemas/cda.py
+complexity 4 src/filings_cvm/_internal/config/schemas/extrato.py
 complexity 3 src/filings_cvm/_internal/config/schemas/inf_mensal_fidc.py
 complexity 2 src/filings_cvm/_internal/config/schemas/lamina.py
 complexity 2 src/filings_cvm/_internal/utils/br_identifiers.py
@@ -32,6 +33,7 @@ complexity 2 src/filings_cvm/ingestion/fi/doc/cda/cda.py
 complexity 1 src/filings_cvm/ingestion/fi/doc/informe_diario/informe_diario.py
 complexity 2 src/filings_cvm/submission/cadastro_ativos.py
 complexity 4 src/filings_cvm/submission/cda.py
+complexity 2 src/filings_cvm/submission/extrato.py
 complexity 1 src/filings_cvm/submission/inf_fundo_157.py
 complexity 3 src/filings_cvm/submission/inf_mensal_fidc.py
 complexity 2 src/filings_cvm/submission/informe_diario.py
@@ -50,7 +52,7 @@ complexity 2 tests/unit/test_cadastro_fi_ingestion.py
 complexity 2 tests/unit/test_cda_ingestion.py
 complexity 5 tests/unit/test_cgvn_cia_aberta_ingestion.py
 complexity 1 tests/unit/test_check_backlog_ledger.py
-complexity 8 tests/unit/test_check_contract_drift.py
+complexity 9 tests/unit/test_check_contract_drift.py
 complexity 1 tests/unit/test_check_docs_sections.py
 complexity 1 tests/unit/test_check_portal_completeness.py
 complexity 3 tests/unit/test_compl_fi_ingestion.py
@@ -59,8 +61,10 @@ complexity 4 tests/unit/test_coord_oferta_ingestion.py
 complexity 5 tests/unit/test_crowdfunding_ingestion.py
 complexity 1 tests/unit/test_dfin_fii_ingestion.py
 complexity 7 tests/unit/test_dfp_cia_aberta_ingestion.py
+complexity 2 tests/unit/test_entrega_fi_ingestion.py
 complexity 2 tests/unit/test_eventual_fi_ingestion.py
 complexity 2 tests/unit/test_extrato_fi_ingestion.py
+complexity 3 tests/unit/test_extrato_submission.py
 complexity 10 tests/unit/test_fca_cia_aberta_ingestion.py
 complexity 3 tests/unit/test_fie_ingestion.py
 complexity 10 tests/unit/test_fre_cia_aberta_ingestion.py
@@ -127,8 +131,10 @@ one-assert 10 tests/unit/test_crowdfunding_ingestion.py
 one-assert 5 tests/unit/test_dfin_fii_ingestion.py
 one-assert 13 tests/unit/test_dfp_cia_aberta_ingestion.py
 one-assert 3 tests/unit/test_dtypes.py
+one-assert 5 tests/unit/test_entrega_fi_ingestion.py
 one-assert 10 tests/unit/test_eventual_fi_ingestion.py
 one-assert 14 tests/unit/test_extrato_fi_ingestion.py
+one-assert 10 tests/unit/test_extrato_submission.py
 one-assert 10 tests/unit/test_fca_cia_aberta_ingestion.py
 one-assert 4 tests/unit/test_fie_ingestion.py
 one-assert 28 tests/unit/test_fre_cia_aberta_ingestion.py
@@ -175,5 +181,5 @@ one-assert 10 tests/unit/test_sweep_stale_branches.py
 one-assert 4 tests/unit/test_tabular_reader.py
 one-assert 8 tests/unit/test_vlmo_cia_aberta_ingestion.py
 all-exports 1 src/filings_cvm/_internal/config/ports/__init__.py
-all-exports 149 src/filings_cvm/_internal/config/schemas/__init__.py
+all-exports 182 src/filings_cvm/_internal/config/schemas/__init__.py
 all-exports 1 src/filings_cvm/ingestion/__init__.py
