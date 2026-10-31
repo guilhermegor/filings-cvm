@@ -370,6 +370,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 		"InfMensalFidcTabVReader",
 		"InfMensalFidcTabVIReader",
 		"InfMensalFidcTabVIIReader",
+		"InfMensalFidcTabVIIIReader",
 		"InfMensalFidcTabIXReader",
 		"InfMensalFidcTabXReader",
 		"InfMensalFidcTabX1Reader",
