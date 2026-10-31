@@ -41,11 +41,15 @@ import sys
 from typing import TYPE_CHECKING, Any
 import urllib.request
 
+from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
+from filings_cvm._internal.config.contracts.balancete_fi import (
+	BALANCETE_FI,
+	BALANCETE_FI_PRE202311,
+)
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
 from filings_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
-from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
@@ -105,6 +109,8 @@ _META_NAME_MAX_LEN = 50
 # class directly. Keyed by class name, resolved through the portal-root packages.
 _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"AtoDeclrReader": ATO_DECLR,
+	"BalanceteFiPre202311Reader": BALANCETE_FI_PRE202311,
+	"BalanceteFiReader": BALANCETE_FI,
 	"BalanceteFieReader": BALANCETE_FIE,
 	"BalancoFieReader": BALANCO_FIE,
 	"CadastroAdmFiiReader": CAD_ADM_FII,
@@ -270,6 +276,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaAgenteFiducReader": ("AgenteFiducPfReader", "AgenteFiducPjReader"),
 	"MetaAuditorReader": ("AuditorPfReader", "AuditorPjReader"),
+	"MetaBalanceteFiReader": ("BalanceteFiReader", "BalanceteFiPre202311Reader"),
 	"MetaBalanceteFieReader": ("BalanceteFieReader",),
 	"MetaBalancoFieReader": ("BalancoFieReader",),
 	"MetaCadEmissorCepacReader": ("CadastroEmissorCepacReader",),
@@ -296,6 +303,12 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaCadastroFiReader": ("CadastroFiReader",),
 	"MetaCdaReader": ("CdaReader",),
+	"MetaComplFiReader": (
+		"ComplFiReader",
+		"ComplFiInfReader",
+		"ComplFiInfCotstReader",
+		"ComplFiPrestReader",
+	),
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
@@ -430,6 +443,8 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 # contract was never in the META's scope. Without it the job reports the same explained line every
 # week forever, and a recurring known-false finding is how a report stops being read.
 _META_UNDESCRIBED_READERS: dict[str, str] = {
+	# BALANCETE META lists the 6-column fund/class header only; no CNPJ_FUNDO field.
+	"BalanceteFiPre202311Reader": "META describes the 202311-onward schema only",
 	# CVM publishes one META for PERFIL_MENSAL and it describes the post-RCVM 175 header only —
 	# all 107 of its fields, and no CNPJ_FUNDO at all. The pre-175 contract is pinned to its own
 	# published header instead, so the META can neither confirm nor refute that one.
@@ -638,6 +653,18 @@ _PROBE_OFFSETS_DAYS = (0, 31, 62, 93, 365, 730, 1095)
 _DRIFT_RETRY_POLICY: RetryPolicy = RetryPolicy(int_max_attempts=1)
 
 
+# Closed series: CVM stopped publishing, and the reader refuses any other month with a
+# ``ValueError`` at construction. The rolling probe dates would all be refused, so probe the last
+# published month instead.
+_CLOSED_SERIES_PROBES: dict[str, tuple[date, ...]] = {
+	"ComplFiReader": (date(2019, 4, 1),),
+	"ComplFiInfReader": (date(2019, 4, 1),),
+	"ComplFiInfCotstReader": (date(2019, 4, 1),),
+	"ComplFiPrestReader": (date(2019, 4, 1),),
+	"BalanceteFiPre202311Reader": (date(2023, 10, 1),),
+}
+
+
 def _probe_dates() -> tuple[date, ...]:
 	"""Candidate reference dates to try, newest first."""
 	dt_today = date.today()
@@ -666,7 +693,9 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 	"""
 	cls_contract = contract_of(cls_reader)
 	bool_dated = "date_ref" in inspect.signature(cls_reader.__init__).parameters
-	list_dates: tuple[date | None, ...] = _probe_dates() if bool_dated else (None,)
+	list_dates: tuple[date | None, ...] = (
+		_CLOSED_SERIES_PROBES.get(cls_reader.__name__, _probe_dates()) if bool_dated else (None,)
+	)
 
 	for date_ref in list_dates:
 		cls_instance = (

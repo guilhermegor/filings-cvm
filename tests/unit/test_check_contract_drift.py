@@ -421,3 +421,44 @@ def test_reader_to_meta_is_the_exact_inverse_of_the_registry() -> None:
 	}
 
 	assert dict_expected == ccd._READER_TO_META
+
+
+def test_closed_series_readers_are_probed_at_their_last_published_month() -> None:
+	"""Every closed-series probe date must construct; rolling dates would raise ValueError."""
+	from filings_cvm.ingestion.fi import (
+		BalanceteFiPre202311Reader,
+		ComplFiInfCotstReader,
+		ComplFiInfReader,
+		ComplFiPrestReader,
+		ComplFiReader,
+	)
+
+	for cls_reader in (
+		ComplFiReader,
+		ComplFiInfReader,
+		ComplFiInfCotstReader,
+		ComplFiPrestReader,
+		BalanceteFiPre202311Reader,
+	):
+		tuple_dates = ccd._CLOSED_SERIES_PROBES[cls_reader.__name__]
+		for date_ref in tuple_dates:
+			cls_reader(date_ref=date_ref)
+		with pytest.raises(ValueError):
+			cls_reader(date_ref=ccd._probe_dates()[0])
+
+
+def test_check_real_header_uses_the_closed_series_probe_date() -> None:
+	"""A closed-series reader is built with its override date, not a rolling one."""
+	list_seen: list[object] = []
+	df_read = pd.DataFrame(columns=["A", "B", *FileContract.PROVENANCE_COLUMNS])
+	cls_reader = _fake_reader(_CONTRACT, frame=df_read, dated=True, name="ComplFiReader")
+	cls_init = cls_reader.__init__
+
+	def _spy(self: object, date_ref: object = None, retry_policy: object = None) -> None:
+		list_seen.append(date_ref)
+		cls_init(self, date_ref, retry_policy)
+
+	cls_reader.__init__ = _spy
+
+	assert ccd.check_real_header(cls_reader) == []
+	assert list_seen == [ccd._CLOSED_SERIES_PROBES["ComplFiReader"][0]]

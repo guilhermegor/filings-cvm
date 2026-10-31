@@ -38,6 +38,11 @@ from filings_cvm._internal.config.schemas.cda import (
 	CdaTitAgroCredPriv,
 	CdaTitPub,
 )
+from filings_cvm._internal.config.schemas.inf_fundo_157 import (
+	InfFundo157Cotista,
+	InfFundo157Document,
+	InfFundo157Header,
+)
 from filings_cvm._internal.config.schemas.inf_mensal_fidc import (
 	Alienacao,
 	Amort,
@@ -104,6 +109,28 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.lamina import (
+	LaminaAntesInic2,
+	LaminaCarencia,
+	LaminaCompCarteira,
+	LaminaConversao,
+	LaminaDespesas,
+	LaminaDocument,
+	LaminaHeader,
+	LaminaInform,
+	LaminaInformExemploComp,
+	LaminaInforTabRentAnual,
+	LaminaListaCompCarteira,
+	LaminaListaTabRentAnual,
+	LaminaListaTabRentMensal,
+	LaminaTabRentAnual,
+	LaminaTabRentMensal,
+	LaminaTabSimulDespesas,
+	LaminaTabVarDesemp,
+	LaminaTaxaAdministracao,
+	LaminaTaxaEntrada,
+	LaminaTaxaSaida,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -125,12 +152,14 @@ from filings_cvm.submission.cadastro_ativos import (
 from filings_cvm.submission.cda import (
 	Cda,
 )
+from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
+from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
@@ -185,6 +214,10 @@ __all__ = [
 	"Dicred",
 	"DocumentHeader",
 	"Garantia",
+	"InfFundo157",
+	"InfFundo157Cotista",
+	"InfFundo157Document",
+	"InfFundo157Header",
 	"InfMensalFidc",
 	"InfMensalFidcDocument",
 	"InfMensalFidcHeader",
@@ -194,6 +227,27 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"Lamina",
+	"LaminaAntesInic2",
+	"LaminaCarencia",
+	"LaminaCompCarteira",
+	"LaminaConversao",
+	"LaminaDespesas",
+	"LaminaDocument",
+	"LaminaHeader",
+	"LaminaInforTabRentAnual",
+	"LaminaInform",
+	"LaminaInformExemploComp",
+	"LaminaListaCompCarteira",
+	"LaminaListaTabRentAnual",
+	"LaminaListaTabRentMensal",
+	"LaminaTabRentAnual",
+	"LaminaTabRentMensal",
+	"LaminaTabSimulDespesas",
+	"LaminaTabVarDesemp",
+	"LaminaTaxaAdministracao",
+	"LaminaTaxaEntrada",
+	"LaminaTaxaSaida",
 	"Liquidez",
 	"ListaCedent",
 	"ListaCedentCredExiste",

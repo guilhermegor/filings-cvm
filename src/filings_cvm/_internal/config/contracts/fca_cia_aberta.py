@@ -12,8 +12,8 @@ Three measured facts drive the declarations here:
   satellite uses `CNPJ_Companhia` / `Data_Referencia` / `Versao` / `ID_Documento` /
   `Nome_Empresarial`. Writing the ten from one template silently breaks the index.
 - ⚠️ **`departamento_acionistas` is header-only** (0 rows in 2025), so its `tuple_cnpj_cols` is
-  **empty**: the CNPJ check requires a *present* valid value, and a legitimately empty artifact
-  would otherwise raise. Same failure class as the CRI header-only members.
+  **empty**. Before #317 the CNPJ check failed an empty column, so declaring one raised on a
+  legitimately empty artifact; it now passes, so the empty tuple is no longer load-bearing.
 - ⚠️ **CPF columns stay out of `tuple_cnpj_cols`.** `dri.CPF_Responsavel` holds 1,003 CPFs and 4
   CNPJs, `auditor.CPF_Responsavel_Tecnico` 49 CPFs, and `auditor.CPF_CNPJ_Auditor` is a
   by-name-mixed column (all CNPJ in 2025, but a CPF year would break a CNPJ check). They are
