@@ -361,7 +361,11 @@ XML de envio para o registro). Sob `AUDITOR/CAD/`:
   `date_ref`** (molde do `CadastroFiReader`). O membro `pf` **não tem CPF** (identifica por
   `CD_CVM`+nome); `pj.CNPJ` chega mascarado. **Inaugura o portal root `auditor/` e a primeira fatia
   da Wave 3 do #41** (snapshots CAD de prestadores de serviço)
-- ⬜ **submission** Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`)
+- ✅ **submission** Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`) — `submission/informe_anual_auditor.py`
+  (`InformeAnualAuditor`); schema `_internal/config/schemas/informe_anual_auditor.py`, validadores em
+  `_internal/utils/xml_fields*.py`. Namespace `urn:audtanual`, `COD_DOC=23`. ⚠️ PF x PJ são regras do
+  modelo (PF: 1 endereço, sem `LISTA_RESP`/`QT_SOCIOS`). Nenhum validador da CVM foi executado; ver
+  `docs/submission/informe_anual_auditor.md`.
 
 **Agentes Fiduciários** — portal root `agente_fiduc/`; **open-data only** (a CVM não publica padrão
 XML de envio). Não há submission. Sob `AGENTE_FIDUC/CAD/`:
