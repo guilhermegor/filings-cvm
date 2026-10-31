@@ -1,8 +1,10 @@
 """Unit tests for the atomic output helper and the writers' use of it."""
 
 import inspect
+import os
 from pathlib import Path
 import re
+import stat
 
 import pytest
 
@@ -84,6 +86,33 @@ def test_atomic_write_bytes_temp_file_is_in_destination_directory(
 	monkeypatch.setattr(atomic_write.os, "replace", _spy)
 	atomic_write_bytes(tmp_path / "out.xml", b"x")
 	assert list_src[0].parent == tmp_path
+
+
+def test_atomic_write_bytes_uses_umask_default_mode(tmp_path: Path) -> None:
+	"""The file gets open()'s default permissions, not mkstemp's 0600."""
+	path_out = tmp_path / "out.xml"
+	umask = os.umask(0o022)
+	try:
+		atomic_write_bytes(path_out, b"x")
+	finally:
+		os.umask(umask)
+	assert stat.S_IMODE(path_out.stat().st_mode) == 0o644
+
+
+def test_atomic_write_bytes_fsyncs_the_directory(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""The rename is made durable by an fsync on the parent directory."""
+	list_fd: list[int] = []
+	fn_fsync = atomic_write.os.fsync
+
+	def _spy(fd: int) -> None:
+		list_fd.append(fd)
+		fn_fsync(fd)
+
+	monkeypatch.setattr(atomic_write.os, "fsync", _spy)
+	atomic_write_bytes(tmp_path / "out.xml", b"x")
+	assert len(list_fd) == 2
 
 
 def test_writer_discovery_finds_every_writer_module() -> None:

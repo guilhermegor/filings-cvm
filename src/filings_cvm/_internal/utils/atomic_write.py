@@ -43,8 +43,30 @@ def atomic_write_bytes(path: str | Path, payload: bytes) -> None:
 			file_tmp.write(payload)
 			file_tmp.flush()
 			os.fsync(file_tmp.fileno())
+		os.chmod(str_tmp, _default_mode())
 		os.replace(str_tmp, path_dest)
 	except BaseException:
 		with contextlib.suppress(FileNotFoundError):
 			os.unlink(str_tmp)
 		raise
+	_fsync_dir(path_dest.parent)
+
+
+@type_checker
+def _default_mode() -> int:
+	"""Return the permission bits a plain ``open(..., "wb")`` would create."""
+	umask = os.umask(0)
+	os.umask(umask)
+	return 0o666 & ~umask
+
+
+@type_checker
+def _fsync_dir(path_dir: Path) -> None:
+	"""Fsync the directory so the rename survives a crash (POSIX; no-op elsewhere)."""
+	if os.name != "posix":
+		return
+	fd = os.open(path_dir, os.O_RDONLY)
+	try:
+		os.fsync(fd)
+	finally:
+		os.close(fd)
