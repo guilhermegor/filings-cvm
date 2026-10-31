@@ -10,7 +10,8 @@ before the series is refused before downloading.
 
 The two competency dates are coerced to pure `date`; everything else, including the
 millisecond `Data_Hora_Entrega` and the `ID_Documento`, stays exact source text. Pass `path_raw`
-to keep the raw `.zip` (and the extracted CSVs) for a bronze layer.
+to keep the raw `.zip` (and the one extracted CSV) for a bronze layer. Only this reader's
+member is extracted, so the small index never unpacks the ~178 MB daily CSV beside it.
 """
 
 from __future__ import annotations
@@ -29,7 +30,7 @@ from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenan
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
 from filings_cvm._internal.utils.retry import LogEmitter, RetryPolicy
 from filings_cvm._internal.utils.tabular_reader import read_table
-from filings_cvm._internal.utils.zip_extractor import extract_all, find_member
+from filings_cvm._internal.utils.zip_extractor import extract_members, find_member
 
 
 _BASE_URL = "https://dados.cvm.gov.br/dados/FI/DOC/ENTREGA/DADOS/fi_entrega_documento_{ym}.zip"
@@ -80,7 +81,7 @@ class _BaseEntregaReader(IngestionReader):
 			while still open.
 		path_raw : pathlib.Path, optional
 			Directory in which to persist the raw ``fi_entrega_documento_AAAAMM.zip`` and its
-			extracted CSVs. Created if absent. When ``None`` the artifact is discarded after the
+			extracted CSV. Created if absent. When ``None`` the artifact is discarded after the
 			read.
 		retry_policy : RetryPolicy, optional
 			Retry/backoff schedule; defaults to this reader's :attr:`_RETRY_POLICY`.
@@ -144,9 +145,10 @@ class _BaseEntregaReader(IngestionReader):
 				retry_policy=self._retry_policy,
 			)
 			str_content_hash = hash_artifact(path_zip)
+			str_member = f"fi_entrega_documento{self._MEMBER_INFIX}_{str_ym}.csv"
 			path_csv = find_member(
-				extract_all(path_zip, path_dir),
-				f"fi_entrega_documento{self._MEMBER_INFIX}_{str_ym}.csv",
+				extract_members(path_zip, path_dir, [str_member]),
+				str_member,
 			)
 			df_ = read_table(
 				path_csv,
