@@ -75,7 +75,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
-- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
+- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ✅ **submission V4** (`PadraoXMLCDANetV4.aspx`) — `submission/cda.py` (`Cda`); schema `_internal/config/schemas/cda.py` · ⬜ V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
@@ -84,7 +84,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
   `_internal/config/contracts/inf_mensal_fidc.py`. Inaugura o portal root `fidc/` (irmão de `fi/`)
-  · ⬜ **submission** até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`) · a partir de 2019-11-01 (`PadraoXMLMensalFIDC576.asp`)
+  · **submission** — ⬜ até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`, descontinuado) · ✅ a partir de
+  2019-11-01 (`PadraoXMLMensalFIDC576.asp`) — `submission/inf_mensal_fidc.py` (`InfMensalFidc`);
+  schema `_internal/config/schemas/inf_mensal_fidc.py`
 - Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
   snapshot `cad_fi.csv` — `ingestion/fi/cad/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
