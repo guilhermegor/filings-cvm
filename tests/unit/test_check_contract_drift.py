@@ -309,6 +309,33 @@ def test_check_meta_partial_still_flags_a_missing_required_column(
 	assert "'B'" in list_problems[0]
 
 
+def test_check_meta_ignores_the_fields_of_a_meta_only_section(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A META section describing a member CVM does not ship contributes no field (issue #115)."""
+	df_meta = pd.DataFrame({"section": ["s", "s", "ghost"], "field": ["A", "B", "Z"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	assert ccd.check_meta(cls_meta, (cls_member,)) == []
+
+
+def test_check_meta_still_flags_a_new_field_in_a_described_section(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""Excluding a META-only section must not mute a field CVM adds to a real member's section."""
+	df_meta = pd.DataFrame({"section": ["s", "s", "s", "ghost"], "field": ["A", "B", "C", "Z"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	list_problems = ccd.check_meta(cls_meta, (cls_member,))
+
+	assert len(list_problems) == 1
+	assert "'C'" in list_problems[0]
+
+
 def test_check_real_header_suppresses_extra_for_a_partial_dataset(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -399,6 +426,46 @@ def test_every_meta_undescribed_reader_is_a_registered_member() -> None:
 	set_members = {name for names in ccd._META_MEMBERS.values() for name in names}
 
 	assert set(ccd._META_UNDESCRIBED_READERS) <= set_members
+
+
+def test_every_meta_only_section_key_is_a_real_meta_reader() -> None:
+	"""Each ``_META_ONLY_SECTIONS`` key is a registered META reader (a typo can't hide here)."""
+	assert set(ccd._META_ONLY_SECTIONS) <= set(ccd._META_MEMBERS)
+
+
+def test_meta_only_sections_never_name_an_implemented_member() -> None:
+	"""A section we read must never be excluded — that would mute its META oracle in silence.
+
+	Holds for the datasets whose readers carry a ``_MEMBER_STEM`` equal to their META section
+	(FRE, measured in issue #115); a stem colliding with an excluded section is a wiring error.
+	"""
+	dict_readers = iter_public_readers()
+	for str_meta, frozenset_sections in ccd._META_ONLY_SECTIONS.items():
+		set_stems = {
+			getattr(dict_readers[str_name], "_MEMBER_STEM", None)
+			for str_name in ccd._META_MEMBERS[str_meta]
+		}
+		assert not (frozenset_sections & set_stems), str_meta
+
+
+def test_fre_members_absent_from_the_fre_meta_are_declared_undescribed() -> None:
+	"""The 8 FRE members the published META has no section for are excluded from its oracle.
+
+	Measured on the live META (issue #115): 50 sections, none for the PCD / empregado_local /
+	empregado_posicao members — their real headers match the contracts byte for byte.
+	"""
+	set_expected = {
+		"FreCiaAbertaAdministradorPcdReader",
+		"FreCiaAbertaEmpregadoPcdReader",
+		"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader",
+		"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader",
+		"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader",
+		"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader",
+		"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader",
+		"FreCiaAbertaEmpregadoPosicaoLocalReader",
+	}
+
+	assert set_expected <= set(ccd._META_UNDESCRIBED_READERS)
 
 
 def test_a_meta_undescribed_reader_still_has_its_own_contract() -> None:

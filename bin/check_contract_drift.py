@@ -41,11 +41,11 @@ import sys
 from typing import TYPE_CHECKING, Any
 import urllib.request
 
+from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
 from filings_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
-from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
@@ -435,6 +435,8 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 # omits", this one suppresses "contract column the META omits" — and only for a reader whose
 # contract was never in the META's scope. Without it the job reports the same explained line every
 # week forever, and a recurring known-false finding is how a report stops being read.
+_FRE_NO_SECTION = "FRE META has no section for this member"
+
 _META_UNDESCRIBED_READERS: dict[str, str] = {
 	# CVM publishes one META for PERFIL_MENSAL and it describes the post-RCVM 175 header only —
 	# all 107 of its fields, and no CNPJ_FUNDO at all. The pre-175 contract is pinned to its own
@@ -443,6 +445,55 @@ _META_UNDESCRIBED_READERS: dict[str, str] = {
 	# Same shape, different cause; the EXTRATO META lists the 117-column header only, so its
 	# 116-column pre-2020 contract has no field to reconcile against.
 	"ExtratoFiPre2020Reader": "META describes the 2020-onward schema only",
+	# Eight of the 36 FRE data members have no section at all in its 50-section META, which
+	# predates the PCD, empregado_local and empregado_posicao split. Their real headers match the
+	# contracts exactly, as measured on the 2025 archive in issue #115.
+	"FreCiaAbertaAdministradorPcdReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPcdReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoLocalReader": _FRE_NO_SECTION,
+}
+
+# META sections describing a member CVM **does not ship** in the data archive — keyed by META
+# reader, valued by the verbatim ``section`` names. Their fields are dropped before reconciling,
+# so they are not reported as "META declares field X" every week. This is the reverse of
+# ``_META_UNDESCRIBED_READERS`` (a data member the META omits); a section listed here was checked
+# absent from the published archive, so it is not an unimplemented member (that would be real
+# signal and must stay reported). Measured in issue #115 against the 2025 archives.
+_META_ONLY_SECTIONS: dict[str, frozenset[str]] = {
+	# The FRE META has 50 sections for a 36-member archive, and these 22 have no CSV in it.
+	"MetaFreCiaAbertaReader": frozenset(
+		{
+			"fre_cia_aberta_ativo_imobilizado",
+			"fre_cia_aberta_ativo_intangivel",
+			"fre_cia_aberta_auditor_responsavel",
+			"fre_cia_aberta_capital_social_aumento",
+			"fre_cia_aberta_capital_social_aumento_classe_acao",
+			"fre_cia_aberta_capital_social_desdobramento",
+			"fre_cia_aberta_capital_social_desdobramento_classe_acao",
+			"fre_cia_aberta_capital_social_reducao",
+			"fre_cia_aberta_capital_social_reducao_classe_acao",
+			"fre_cia_aberta_direito_acao",
+			"fre_cia_aberta_empregado_declaracao_genero",
+			"fre_cia_aberta_empregado_declaracao_raca",
+			"fre_cia_aberta_grupo_economico_reestruturacao",
+			"fre_cia_aberta_historico_emissor",
+			"fre_cia_aberta_participacao_sociedade_valorizacao_acao",
+			"fre_cia_aberta_plano_recompra",
+			"fre_cia_aberta_plano_recompra_classe_acao",
+			"fre_cia_aberta_politica_negociacao",
+			"fre_cia_aberta_politica_negociacao_cargo",
+			"fre_cia_aberta_valor_mobiliario_tesouraria_movimentacao",
+			"fre_cia_aberta_valor_mobiliario_tesouraria_ultimo_exercicio",
+			"fre_cia_aberta_volume_valor_mobiliario",
+		}
+	),
+	# 13 META sections for a 12-member archive; inf_anual_fii_2025.zip has no such CSV.
+	"MetaInfAnualFiiReader": frozenset({"representante_cotista_fundo"}),
 }
 
 _PARTIAL_DATASETS: dict[str, str] = {
@@ -740,6 +791,8 @@ def check_meta(
 		df_meta = cls_meta(retry_policy=_DRIFT_RETRY_POLICY).read(int_timeout_s=int_timeout_s)
 	except OSError:
 		return []  # META unavailable (transient) — not drift
+	frozenset_meta_only = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	df_meta = df_meta[~df_meta["section"].isin(frozenset_meta_only)]
 	frozenset_fields = frozenset(df_meta["field"].astype(str))
 
 	list_cols: list[str] = []
