@@ -10,6 +10,19 @@ and serialise them through a single import:
     from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
 """
 
+from filings_cvm._internal.config.schemas.informe_anual_auditor import (
+	AffiliatedEntity,
+	AuditedEntity,
+	AuditorAddress,
+	AuditorAnnualBilling,
+	AuditorHeader,
+	AuditorIdentity,
+	AuditorRepresentative,
+	AuditorStaff,
+	AuditorTraining,
+	InformeAnualAuditorDocument,
+	TrainingParticipant,
+)
 from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
@@ -31,13 +44,25 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm.submission.informe_anual_auditor import InformeAnualAuditor
 from filings_cvm.submission.informe_diario import InformeDiario
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
 __all__ = [
+	"AffiliatedEntity",
+	"AuditedEntity",
+	"AuditorAddress",
+	"AuditorAnnualBilling",
+	"AuditorHeader",
+	"AuditorIdentity",
+	"AuditorRepresentative",
+	"AuditorStaff",
+	"AuditorTraining",
 	"ClientCount",
 	"DocumentHeader",
+	"InformeAnualAuditor",
+	"InformeAnualAuditorDocument",
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
@@ -53,6 +78,7 @@ __all__ = [
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"SignificantShareholder",
+	"TrainingParticipant",
 	"VarOutros",
 	"VarPercValCota",
 ]
