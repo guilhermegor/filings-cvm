@@ -20,6 +20,7 @@ import zipfile
 import pytest
 
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.tabular_reader import ContractError
 from filings_cvm.ingestion.securit import (
 	InfMensalCriAtivoPassivoReader,
 	InfMensalCriCarteiraModificacaoReader,
@@ -193,19 +194,38 @@ def test_cri_has_creditos_not_direitos_creditorios() -> None:
 	}
 
 
-@pytest.mark.parametrize(
-	"cls",
-	(InfMensalCriCarteiraModificacaoReader, InfMensalCriResponsavelReader),
-	ids=lambda c: c.__name__,
+HEADER_ONLY_READERS: tuple[type[IngestionReader], ...] = (
+	InfMensalCriCarteiraModificacaoReader,
+	InfMensalCriResponsavelReader,
 )
+
+
+@pytest.mark.parametrize("cls", ALL_READERS, ids=lambda c: c.__name__)
+def test_every_member_declares_cnpj_emissora_as_its_cnpj_column(
+	cls: type[IngestionReader],
+) -> None:
+	"""All 11 members validate ``CNPJ_Emissora``, header-only ones included (#320).
+
+	``carteira_modificacao`` and ``responsavel`` once declared ``()`` only because the pre-#317
+	check failed an empty column. ``CNPJ_Emissora`` is the issuer key (META ``varchar(18)``) and
+	the only CNPJ/CPF-named column in either member, so it holds only CNPJs.
+
+	Parameters
+	----------
+	cls : type[IngestionReader]
+		The reader under test.
+	"""
+	assert cls._CONTRACT.tuple_cnpj_cols == ("CNPJ_Emissora",)  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("cls", HEADER_ONLY_READERS, ids=lambda c: c.__name__)
 def test_header_only_member_reads_without_a_cnpj_error(
 	cls: type[IngestionReader], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-	"""A structurally sparse member (header, no rows) must read clean, not raise ContractError.
+	"""A header-only member reads clean even with ``CNPJ_Emissora`` declared.
 
-	``carteira_modificacao`` and ``responsavel`` are header-only in the real 2025 file, so
-	``CNPJ_Emissora`` is excluded from *their* ``tuple_cnpj_cols``, asserted against a header-only
-	archive. Before #317 declaring it failed this legitimately empty member; it now passes.
+	``carteira_modificacao`` and ``responsavel`` are header-only in the real 2025 file; since #317
+	an empty CNPJ column passes the check, so declaring it does not break the empty artifact.
 
 	Parameters
 	----------
@@ -214,7 +234,6 @@ def test_header_only_member_reads_without_a_cnpj_error(
 	monkeypatch : pytest.MonkeyPatch
 		Fixture used to replace the download boundary.
 	"""
-	assert cls._CONTRACT.tuple_cnpj_cols == ()  # type: ignore[attr-defined]
 	list_cols = list(cls._CONTRACT.tuple_required)  # type: ignore[attr-defined]
 	dict_members = _all_members()
 	dict_members[_member_name(cls)] = ";".join(list_cols) + "\n"  # header, no data row
@@ -224,6 +243,50 @@ def test_header_only_member_reads_without_a_cnpj_error(
 
 	assert len(df_) == 0
 	assert list(df_.columns) == list(cls._CONTRACT.output_columns)  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("cls", HEADER_ONLY_READERS, ids=lambda c: c.__name__)
+def test_header_only_member_accepts_a_valid_cnpj(
+	cls: type[IngestionReader], monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""The day CVM publishes rows, a valid issuer CNPJ reads through.
+
+	Parameters
+	----------
+	cls : type[IngestionReader]
+		The reader under test.
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	_patch_download(monkeypatch, _zip_bytes(_all_members()))
+
+	df_ = cls(date_ref=REF).read()
+
+	assert df_["CNPJ_Emissora"].iloc[0] == VALID_CNPJ
+
+
+@pytest.mark.parametrize("cls", HEADER_ONLY_READERS, ids=lambda c: c.__name__)
+def test_header_only_member_rejects_a_column_with_no_valid_cnpj(
+	cls: type[IngestionReader], monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Non-empty ``CNPJ_Emissora`` values with no valid CNPJ raise ``ContractError``.
+
+	Parameters
+	----------
+	cls : type[IngestionReader]
+		The reader under test.
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	list_cols = list(cls._CONTRACT.tuple_required)  # type: ignore[attr-defined]
+	list_row = [_value_for(cls, c) for c in list_cols]
+	list_row[list_cols.index("CNPJ_Emissora")] = "11.222.333/0001-80"  # wrong check digit
+	dict_members = _all_members()
+	dict_members[_member_name(cls)] = ";".join(list_cols) + "\n" + ";".join(list_row) + "\n"
+	_patch_download(monkeypatch, _zip_bytes(dict_members))
+
+	with pytest.raises(ContractError, match="CNPJ_Emissora"):
+		cls(date_ref=REF).read()
 
 
 @pytest.mark.parametrize("cls", ALL_READERS, ids=lambda c: c.__name__)
