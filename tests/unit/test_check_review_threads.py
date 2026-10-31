@@ -1016,6 +1016,35 @@ def test_an_unknown_head_date_is_not_evidence() -> None:
 	)
 
 
+def _pr_head(str_committed: str, *list_suites: str) -> dict:
+	"""Return a ``pullRequest`` node whose head carries a commit date and check suites."""
+	list_nodes = [{"createdAt": s} for s in list_suites]
+	dict_commit = {"committedDate": str_committed, "checkSuites": {"nodes": list_nodes}}
+	return {"commits": {"nodes": [{"commit": dict_commit}]}}
+
+
+@pytest.mark.parametrize(
+	("dict_pr", "str_expected"),
+	[
+		# committed 18:06, pushed 18:09, a review-event suite at 18:23 (#312): push time wins
+		(
+			_pr_head("2026-10-31T18:06:44Z", "2026-10-31T18:23:17Z", "2026-10-31T18:09:49Z"),
+			"2026-10-31T18:09:49Z",
+		),
+		# a forward-dated committedDate is stricter than the push, so it is kept
+		(_pr_head("2026-11-01T00:00:00Z", "2026-10-31T18:09:49Z"), "2026-11-01T00:00:00Z"),
+		# without any server-side timestamp the date is unknown and the gate fails closed
+		(_pr_head("2026-10-31T18:06:44Z"), ""),
+		({"commits": {"nodes": []}}, ""),
+	],
+)
+def test_head_date_is_the_push_not_the_client_set_commit_date(
+	dict_pr: dict, str_expected: str
+) -> None:
+	"""A commit made before a reviewer's notice and pushed after it is not vouched for by it."""
+	assert _load_gate()._head_committed_date(dict_pr) == str_expected
+
+
 def test_a_superseded_completion_does_not_satisfy_the_gate() -> None:
 	"""Only the NEWEST roster notice counts — a stale completion outlives what it described.
 
@@ -3582,27 +3611,17 @@ def test_find_missing_review_problem_returns_the_carried_commit_explicitly() -> 
 
 
 _INT_SHORTEST_JOB_MINUTES = 10
-_LIST_WORKFLOWS = (
-	".github/workflows/review_threads.yml",
-	"templates/ts-common/.github/workflows/review-threads.yml",
-	"templates/python-common/.github/workflows/review_threads.yaml",
-)
+_PATH_WORKFLOW = Path(__file__).resolve().parents[2] / ".github/workflows/review_threads.yaml"
 
 
-_LIST_ROOTS = list(Path(__file__).resolve().parents[4:5])
-
-
-@pytest.mark.skipif(
-	not _LIST_ROOTS or not (_LIST_ROOTS[0] / "templates").is_dir(),
-	reason="workflows are not shipped in a generated project",
-)
 def test_pinned_job_minutes_do_not_exceed_any_workflow() -> None:
 	"""A workflow shortened below the pinned cap fails here instead of timing out in CI.
 
 	A missing workflow raises ``FileNotFoundError``, so the test cannot pass by finding none.
 	"""
-	list_texts = [(_LIST_ROOTS[0] / str_rel).read_text("utf-8") for str_rel in _LIST_WORKFLOWS]
-	list_minutes = [int(m) for t in list_texts for m in re.findall(r"timeout-minutes:\s*(\d+)", t)]
+	list_minutes = [
+		int(m) for m in re.findall(r"timeout-minutes:\s*(\d+)", _PATH_WORKFLOW.read_text("utf-8"))
+	]
 	assert min(list_minutes) >= _INT_SHORTEST_JOB_MINUTES
 
 

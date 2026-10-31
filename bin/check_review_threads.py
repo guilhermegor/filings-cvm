@@ -140,7 +140,9 @@ query($owner:String!, $repo:String!, $number:Int!, $rc:String, $tc:String, $cc:S
         pageInfo { hasNextPage endCursor }
         nodes { author { login __typename } commit { oid } state body submittedAt }
       }
-      commits(last:1) { nodes { commit { committedDate } } }
+      commits(last:1) {
+        nodes { commit { committedDate checkSuites(first:100) { nodes { createdAt } } } }
+      }
       allCommits: commits(first:100) {
         pageInfo { hasNextPage }
         nodes { commit { message author { email } signature { isValid wasSignedByGitHub } } }
@@ -895,7 +897,7 @@ def reviewer_declared_completion(
 	set_roster : set of str
 		Already-normalised logins that can submit a review.
 	str_head_date : str, optional
-		ISO-8601 ``committedDate`` of the head commit. A notice created BEFORE it describes
+		ISO-8601 time the head reached GitHub. A notice created BEFORE it describes
 			superseded code and is not evidence. Empty means unknown, and unknown fails closed.
 
 	Returns
@@ -1045,7 +1047,7 @@ def ladder_marker_declared(
 		Lower-cased markers from :func:`load_comment_markers`; matched at the start of the body
 			only, so a quotation on a later line is not a review.
 	str_head_date : str, optional
-		ISO-8601 ``committedDate`` of the head commit; empty fails closed.
+		ISO-8601 time the head reached GitHub; empty fails closed.
 	str_head_oid : str, optional
 		The head commit SHA. The ladder writes ``Reviewed head: <sha>`` on the second line
 			of its comment, which must name this SHA; empty fails closed.
@@ -1176,7 +1178,7 @@ def check_missing_review(  # noqa: PLR0913
 	str_pr_author : str, optional
 		Login of the PR author; a roster member's own PR is exempt.
 	str_head_date : str, optional
-		ISO-8601 ``committedDate`` of the head commit, so a completion notice can be pinned to
+		ISO-8601 time the head reached GitHub, so a completion notice can be pinned to
 			the code it described. ⚠️ Empty fails CLOSED: unknown is not evidence.
 	str_head_oid : str, keyword-only
 		The PR's ``headRefOid``. ⚠️ Deliberately has NO default, like ``posts:`` on a roster
@@ -1821,9 +1823,21 @@ def _print_thread_verdict(
 
 
 def _head_committed_date(dict_pr: dict) -> str:
-	"""Return the head commit's ``committedDate``, or ``""`` when the query did not carry it."""
+	"""Return when the head reached GitHub, or ``""`` (fail closed) when that is unknown.
+
+	``committedDate`` is client-set: a commit made before a reviewer's notice and pushed after it
+	would let that notice vouch for code it never saw. The EARLIEST check suite on the head is
+	created server-side at push (measured on #312: commit 18:06:44, suites from 18:09:49); the
+	newest is not, since review events add suites later. The later of the two is returned.
+	"""
 	dict_commit = ((dict_pr.get("commits", {}).get("nodes") or [{}])[0].get("commit")) or {}
-	return dict_commit.get("committedDate") or ""
+	str_committed = dict_commit.get("committedDate") or ""
+	list_suites = [
+		d.get("createdAt") or "" for d in (dict_commit.get("checkSuites") or {}).get("nodes") or []
+	]
+	if not str_committed or not list_suites or not all(list_suites):
+		return ""
+	return max(str_committed, min(list_suites))
 
 
 def _unanswered_bodies(dict_pr: dict, list_notices: list[dict], set_roster: set[str]) -> list[str]:
