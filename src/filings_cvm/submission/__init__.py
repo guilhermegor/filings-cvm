@@ -16,6 +16,15 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_quadrimestral import (
+	ClasseCotas,
+	CotistCategory,
+	InformeQuadrimestralDocument,
+	InformeQuadrimestralHeader,
+	InformeQuadrimestralInform,
+	ListaClasseCotas,
+	ListaCotstCateg,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -32,16 +41,25 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarPercValCota,
 )
 from filings_cvm.submission.informe_diario import InformeDiario
+from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
 __all__ = [
+	"ClasseCotas",
 	"ClientCount",
+	"CotistCategory",
 	"DocumentHeader",
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformeQuadrimestral",
+	"InformeQuadrimestralDocument",
+	"InformeQuadrimestralHeader",
+	"InformeQuadrimestralInform",
+	"ListaClasseCotas",
+	"ListaCotstCateg",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"OtcOperation",

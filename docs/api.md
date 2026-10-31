@@ -22,7 +22,7 @@ from filings_cvm import RetryPolicy
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
 
@@ -75,6 +75,26 @@ InformeDiario().export(doc, output_path="informe.xml")     # grava arquivo, reto
 O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `PerfilMensal`.
 
 ---
+
+### `InformeQuadrimestral`
+
+`filings_cvm.submission.InformeQuadrimestral`
+
+Serializa um `InformeQuadrimestralDocument` validado para XML compatível com a CVM (Informe
+Quadrimestral V2, namespace `urn:inftrim`). Detalhes em
+[Informe Quadrimestral](submission/informe_quadrimestral.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InformeQuadrimestralDocument` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava em `windows-1252` e retorna `None`; o texto é codificado antes de abrir o arquivo. Caso contrário, retorna a `str` XML. |
+
+Modelos de schema (Pydantic): `InformeQuadrimestralDocument` (`DOC_ARQ`),
+`InformeQuadrimestralHeader` (`CAB_INFORM`), `InformeQuadrimestralInform` (`INFORM`),
+`ListaCotstCateg`, `CotistCategory` (`COTST_CATEG`), `ListaClasseCotas`, `ClasseCotas`
+(`CLASSE_COTAS`).
 
 ## Leitor (ingestion)
 
