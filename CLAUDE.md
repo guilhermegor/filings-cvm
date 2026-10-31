@@ -711,7 +711,7 @@ Sob `CIA_ABERTA/CAD/`:
   DFP/ITR **neste mesmo root**
 
 **Investidores Não Residentes**
-- ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
+- Informe Mensal de Investidor não Residente — ✅ **submission** (`PadraoXMLInfoMensalINR.asp`) — `submission/inr_mensal.py` (`InrMensal`); schema `_internal/config/schemas/inr_mensal.py`; validators `_internal/utils/inr_mensal_fields.py`. Valores inteiros (a página diz "numérico e inteiro" apesar de pedir vírgula decimal); `COD_DOC` 477; `VL_NOCION_APLIC` só para a Tabela A 15–24
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
 
 **Mercados de Negociação**

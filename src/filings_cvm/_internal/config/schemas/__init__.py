@@ -6,6 +6,21 @@ standard. Ships in the wheel under ``_internal``; the public API is curated by t
 ``submission``/``ingestion`` packages, which re-export the names consumers need.
 """
 
+from filings_cvm._internal.config.schemas.inr_mensal import (
+	Aplicacoes,
+	EntradaSaida,
+	InrMensalDocument,
+	InrMensalHeader,
+	MovRecursos,
+	Participante,
+	RecursosEnvMesmoInvest,
+	RecursosEnvOutroInvest,
+	RecursosMesmoInvest,
+	RecursosOutroInvest,
+	RecursosRecebMesmoInvest,
+	RecursosRecebOutroInvest,
+	TransfRecursos,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -24,17 +39,30 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 
 
 __all__ = [
+	"Aplicacoes",
 	"ClientCount",
 	"DocumentHeader",
+	"EntradaSaida",
+	"InrMensalDocument",
+	"InrMensalHeader",
+	"MovRecursos",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"OtcOperation",
+	"Participante",
 	"PatrimonyDistribution",
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
+	"RecursosEnvMesmoInvest",
+	"RecursosEnvOutroInvest",
+	"RecursosMesmoInvest",
+	"RecursosOutroInvest",
+	"RecursosRecebMesmoInvest",
+	"RecursosRecebOutroInvest",
+	"TransfRecursos",
 	"VarOutros",
 	"VarPercValCota",
 ]

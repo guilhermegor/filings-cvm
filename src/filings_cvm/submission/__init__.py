@@ -16,6 +16,21 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.inr_mensal import (
+	Aplicacoes,
+	EntradaSaida,
+	InrMensalDocument,
+	InrMensalHeader,
+	MovRecursos,
+	Participante,
+	RecursosEnvMesmoInvest,
+	RecursosEnvOutroInvest,
+	RecursosMesmoInvest,
+	RecursosOutroInvest,
+	RecursosRecebMesmoInvest,
+	RecursosRecebOutroInvest,
+	TransfRecursos,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -32,19 +47,27 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarPercValCota,
 )
 from filings_cvm.submission.informe_diario import InformeDiario
+from filings_cvm.submission.inr_mensal import InrMensal
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
 __all__ = [
+	"Aplicacoes",
 	"ClientCount",
 	"DocumentHeader",
+	"EntradaSaida",
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InrMensal",
+	"InrMensalDocument",
+	"InrMensalHeader",
+	"MovRecursos",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"OtcOperation",
+	"Participante",
 	"PatrimonyDistribution",
 	"PerfilMensal",
 	"PerfilMensalDocument",
@@ -52,7 +75,14 @@ __all__ = [
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
+	"RecursosEnvMesmoInvest",
+	"RecursosEnvOutroInvest",
+	"RecursosMesmoInvest",
+	"RecursosOutroInvest",
+	"RecursosRecebMesmoInvest",
+	"RecursosRecebOutroInvest",
 	"SignificantShareholder",
+	"TransfRecursos",
 	"VarOutros",
 	"VarPercValCota",
 ]
