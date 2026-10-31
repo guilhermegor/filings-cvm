@@ -509,6 +509,30 @@ def test_an_absent_roster_makes_the_gate_a_no_op(tmp_path: Path) -> None:
 	assert cls_gate.load_roster(tmp_path) == {}
 
 
+def test_an_absent_roster_is_absent_even_when_a_hook_exports_git_dir(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Inside a git hook ``GIT_DIR`` outranks ``-C``; the lookup must not follow it.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest throwaway dir: a repo holding the roster on ``origin/main``, and an unrelated dir.
+	monkeypatch : pytest.MonkeyPatch
+		Sets the ``GIT_DIR`` a pre-commit hook would export.
+	"""
+	path_repo = tmp_path / "repo"
+	path_repo.mkdir()
+	_git(path_repo, "init", "-q")
+	_commit(path_repo, ".review-bots.yaml", _STR_OTHER_ROSTER)
+	_git(path_repo, "update-ref", "refs/remotes/origin/main", "HEAD")
+	path_other = tmp_path / "other"
+	path_other.mkdir()
+	monkeypatch.setenv("GIT_DIR", str(path_repo / ".git"))
+
+	assert _load_gate().load_roster(path_other) == {}
+
+
 _STR_OTHER_ROSTER = "reviewers:\n  - login: some-other-reviewer[bot]\n    posts: threads\n"
 
 
