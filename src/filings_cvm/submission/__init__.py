@@ -16,6 +16,11 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_portabilidade import (
+	InformePortabilidadeDocument,
+	PortabilidadeHeader,
+	PortabilidadeInform,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -32,6 +37,7 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarPercValCota,
 )
 from filings_cvm.submission.informe_diario import InformeDiario
+from filings_cvm.submission.informe_portabilidade import InformePortabilidade
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
@@ -42,6 +48,8 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformePortabilidade",
+	"InformePortabilidadeDocument",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"OtcOperation",
@@ -50,6 +58,8 @@ __all__ = [
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
+	"PortabilidadeHeader",
+	"PortabilidadeInform",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"SignificantShareholder",
