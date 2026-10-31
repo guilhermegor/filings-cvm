@@ -151,6 +151,24 @@ Modelos públicos: `LaminaDocument`, `LaminaHeader`, `LaminaInform` e os blocos
 `LaminaInformExemploComp`, `LaminaTabSimulDespesas`). Limites e decisões: veja
 [Lâmina V3](submission/lamina.md).
 
+### `LaminaV2`
+
+`filings_cvm.submission.LaminaV2`
+
+Serializa um `LaminaV2Document` para o padrão Lâmina de Fundos V2 (`VERSAO=2.0`, sem
+`COD_SUBCLASSE`, `CNPJ_FUNDO` obrigatório). Mesma assinatura de `Lamina`:
+`export(doc, output_path=None) -> str | None`. Modelos: `LaminaV2Document`, `LaminaV2Header`,
+`LaminaV2Inform`; os blocos são os de V3. Veja [Lâmina V2](submission/lamina_v2.md).
+
+### `LaminaV2`
+
+`filings_cvm.submission.LaminaV2`
+
+Serializa um `LaminaV2Document` para o padrão Lâmina de Fundos V2 (`VERSAO=2.0`, sem `COD_SUBCLASSE`,
+`CNPJ_FUNDO` obrigatório). Mesma assinatura `export(doc, output_path=None) -> str | None` de
+`Lamina`; modelos `LaminaV2Document`, `LaminaV2Header`, `LaminaV2Inform`; os blocos são os de V3.
+Veja [Lâmina V2](submission/lamina_v2.md).
+
 ### `Cda`
 
 `filings_cvm.submission.Cda`
