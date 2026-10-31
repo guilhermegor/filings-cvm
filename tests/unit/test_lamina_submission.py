@@ -362,7 +362,9 @@ def test_several_informs_are_written_in_order() -> None:
 		),
 	],
 )
-def test_flat_block_xml(name: str, expected: list[tuple[str, str]]) -> None:
+def test_flat_block_of_full_inform_emits_tags_in_sample_order(
+	name: str, expected: list[tuple[str, str]]
+) -> None:
 	"""Each flat block of a fully populated INFORM emits its tags in sample order."""
 	assert _pairs(_block(_doc(_full_inform()), name)) == expected
 
@@ -382,7 +384,9 @@ def test_flat_block_xml(name: str, expected: list[tuple[str, str]]) -> None:
 		),
 	],
 )
-def test_management_fee_block_xml(fee: dict[str, str], expected: list[tuple[str, str]]) -> None:
+def test_management_fee_block_per_fee_type_emits_only_its_rate_tags(
+	fee: dict[str, str], expected: list[tuple[str, str]]
+) -> None:
 	"""INFOR_TX_ADM: a fixed fee writes TX_ADM; a variable fee writes TX_MIN/TX_MAX instead."""
 	assert _pairs(_block(_doc(_inform(infor_tx_adm=fee)), "INFOR_TX_ADM")) == expected
 
