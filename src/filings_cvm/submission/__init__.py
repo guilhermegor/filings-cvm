@@ -38,6 +38,14 @@ from filings_cvm._internal.config.schemas.cda import (
 	CdaTitAgroCredPriv,
 	CdaTitPub,
 )
+from filings_cvm._internal.config.schemas.cda_v3 import (
+	CdaV3Cotas,
+	CdaV3DepPrazoTitIf,
+	CdaV3Document,
+	CdaV3Header,
+	CdaV3Inform,
+	CdaV3InvExt,
+)
 from filings_cvm._internal.config.schemas.extrato import (
 	ExtratoDocument,
 	ExtratoHeader,
@@ -166,6 +174,7 @@ from filings_cvm.submission.cadastro_ativos import (
 from filings_cvm.submission.cda import (
 	Cda,
 )
+from filings_cvm.submission.cda_v3 import CdaV3
 from filings_cvm.submission.extrato import Extrato
 from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
@@ -215,6 +224,13 @@ __all__ = [
 	"CdaSwapPosFim",
 	"CdaTitAgroCredPriv",
 	"CdaTitPub",
+	"CdaV3",
+	"CdaV3Cotas",
+	"CdaV3DepPrazoTitIf",
+	"CdaV3Document",
+	"CdaV3Header",
+	"CdaV3Inform",
+	"CdaV3InvExt",
 	"Cedent",
 	"CedentCredExiste",
 	"ClasseCotas",
