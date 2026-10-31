@@ -67,3 +67,17 @@ It is now gated: `tests/unit/test_meta_readers.py` derives the roster and the co
 from `filings_cvm.__all__`, so a missing row or a stale number **fails the suite**.
 Do not fix such a failure by editing the test — the code is the truth, the page
 follows it. (#155)
+
+## Structure gate and language (#70)
+
+`bin/check_docs_sections.py` (pre-commit `check-docs-sections` + CI step) checks the
+skeleton, never the prose: the six canonical pages (`index, usage, api, faq,
+contributing, changelog`) exist and are in the `nav:`; every published page is in the
+`nav:`; each family (`docs/ingestion/*.md`) carries `Descrição`, `Tipagem`, `Política
+de retry`, `Exemplos`. It keys on file **slugs** and configured section labels, never
+on nav **titles** (`Início`, `Uso`... are localized presentation).
+
+Pages that predate the section rule sit on `LEGACY_NONCOMPLIANT` in the script. A new
+page must comply; a listed page that becomes compliant FAILS until you remove it, so
+the list only shrinks. Prose language is single-sourced in `mkdocs.yml`
+`theme.language` (`pt-BR`).

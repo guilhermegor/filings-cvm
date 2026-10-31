@@ -124,6 +124,20 @@ jobs:
         # url/updated_at/source_key/... columns. Explicit CI step (gate parity with pre-commit).
         run: poetry run python bin/check_provenance.py
 
+      - name: Run Schema-Model Enforcement
+        if: runner.os == 'Linux'
+        # Mirrors the `check-schemas` pre-commit hook: every class in a
+        # _internal/config/schemas/ module must derive from pydantic BaseModel (or be a
+        # domain Enum). Explicit CI step (gate parity with pre-commit).
+        run: poetry run python bin/check_schemas.py
+
+      - name: Run Docs-Structure Gate
+        if: runner.os == 'Linux'
+        # Mirrors the `check-docs-sections` pre-commit hook: canonical pages exist and are in
+        # the nav, every published page is in the nav, and each docs family carries its
+        # required sections (legacy offenders allowlisted). Explicit step (gate parity).
+        run: poetry run python bin/check_docs_sections.py
+
       - name: Run Binary-Float Dtype Ban
         if: runner.os == 'Linux'
         # Mirrors the `check-dtypes` pre-commit hook: no src/ module may declare a binary float

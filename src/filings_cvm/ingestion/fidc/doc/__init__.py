@@ -36,7 +36,6 @@ __all__ = [
 	"InfMensalFidcTabVIIReader",
 	"InfMensalFidcTabVIReader",
 	"InfMensalFidcTabVReader",
-	"InfMensalFidcTabX11Reader",
 	"InfMensalFidcTabX1Reader",
 	"InfMensalFidcTabX2Reader",
 	"InfMensalFidcTabX3Reader",
@@ -44,6 +43,7 @@ __all__ = [
 	"InfMensalFidcTabX5Reader",
 	"InfMensalFidcTabX6Reader",
 	"InfMensalFidcTabX7Reader",
+	"InfMensalFidcTabX11Reader",
 	"InfMensalFidcTabXReader",
 	"MetaInfMensalFidcReader",
 ]
