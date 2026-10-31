@@ -10,7 +10,7 @@ root package **is** the public surface for its own readers::
     from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader
     from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
 
-The 22 roots are re-exported here as packages, so ``from filings_cvm.ingestion import cia_aberta``
+The 23 roots are re-exported here as packages, so ``from filings_cvm.ingestion import cia_aberta``
 works too. **Individual readers are not re-exported** — neither here nor at the top level. The
 portal's own division is the grouping the data already has, and a single flat namespace would put
 200+ names in one undivided wall that every new reader widens. See the changelog's migration note.
@@ -21,6 +21,7 @@ from filings_cvm.ingestion import (
 	adm_fii,
 	agente_auton,
 	agente_fiduc,
+	ato_declr,
 	auditor,
 	cia_aberta,
 	cia_estrang,
@@ -47,6 +48,7 @@ __all__ = [
 	"adm_fii",
 	"agente_auton",
 	"agente_fiduc",
+	"ato_declr",
 	"auditor",
 	"cia_aberta",
 	"cia_estrang",
