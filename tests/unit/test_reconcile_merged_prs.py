@@ -11,7 +11,9 @@ targets, and only a merged PR is ever acted on.
 
 from datetime import datetime, timezone
 import importlib.util
+import io
 from pathlib import Path
+import urllib.error
 
 import pytest
 
@@ -88,3 +90,116 @@ def test_recently_merged_numbers_boundary_is_inclusive() -> None:
 	dt_now = datetime(2026, 7, 15, 0, 0, tzinfo=timezone.utc)
 	list_prs = [{"number": 9, "merged_at": "2026-07-08T00:00:00Z"}]  # exactly 7 days
 	assert reconcile.recently_merged_numbers(list_prs, dt_now, 7) == [9]
+
+
+def _http_error(int_code: int, bytes_body: bytes) -> urllib.error.HTTPError:
+	return urllib.error.HTTPError("u", int_code, "x", None, io.BytesIO(bytes_body))  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+	("int_code", "bytes_body", "bool_expected"),
+	[
+		(404, b"", True),
+		(422, b'{"message":"Reference does not exist"}', True),
+		(422, b'{"message":"Cannot delete this branch: ruleset"}', False),
+		(500, b"", False),
+	],
+)
+def test_already_gone_counts_a_422_only_when_the_ref_is_missing(
+	int_code: int, bytes_body: bytes, bool_expected: bool
+) -> None:
+	"""A ruleset refusal is also a 422, so only the missing-ref body counts as gone."""
+	assert reconcile._already_gone(_http_error(int_code, bytes_body)) is bool_expected
+
+
+def test_delete_branch_reraises_a_ruleset_422(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""A 422 that is not 'Reference does not exist' is a real failure, not a no-op."""
+
+	def _boom(*_args: object, **_kwargs: object) -> None:
+		raise _http_error(422, b'{"message":"ruleset"}')
+
+	monkeypatch.setattr(reconcile, "_api", _boom)
+	with pytest.raises(urllib.error.HTTPError):
+		reconcile._delete_branch("api", "feat/x")
+
+
+def _graphql_data() -> dict:
+	return {
+		"repository": {
+			"defaultBranchRef": {"name": "main"},
+			"pullRequest": {**_pr(ref="feat/parent"), "closingIssuesReferences": {"nodes": []}},
+		}
+	}
+
+
+def test_open_pr_bases_collects_every_base(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The set holds the base ref of each open PR."""
+	list_open = [{"base": {"ref": "feat/a"}}, {"base": {"ref": "main"}}]
+	monkeypatch.setattr(reconcile, "_api", lambda *_a, **_k: list_open)
+	assert reconcile._open_pr_bases("api") == {"feat/a", "main"}
+
+
+def test_open_pr_bases_reads_past_a_full_page(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""A full page means more may follow, so a base on page two still counts."""
+	list_urls: list[str] = []
+
+	def _fake_api(_str_method: str, str_url: str) -> list[dict]:
+		list_urls.append(str_url)
+		if str_url.endswith("page=1"):
+			return [{"base": {"ref": "main"}}] * 100
+		return [{"base": {"ref": "feat/late"}}]
+
+	monkeypatch.setattr(reconcile, "_api", _fake_api)
+	assert reconcile._open_pr_bases("api") == {"main", "feat/late"}
+	assert [str_url[-6:] for str_url in list_urls] == ["page=1", "page=2"]
+
+
+def test_reconcile_pr_keeps_a_branch_that_is_the_base_of_an_open_pr(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""Deleting the base of an open PR would close it, so no DELETE is sent."""
+	list_calls: list[str] = []
+	monkeypatch.setattr(
+		reconcile, "_api", lambda str_method, *_a, **_k: list_calls.append(str_method)
+	)
+	monkeypatch.setattr(reconcile, "_graphql", lambda *_a, **_k: _graphql_data())
+	_, str_branch = reconcile.reconcile_pr("api", "o", "n", 1, {"feat/parent"})
+	assert str_branch is None
+	assert "DELETE" not in list_calls
+
+
+def test_main_aborts_before_any_delete_when_the_open_pr_read_fails(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""Without the open-PR list no deletion is safe: the run ends before touching anything."""
+	list_calls: list[str] = []
+
+	def _api(str_method: str, *_a: object, **_k: object) -> object:
+		list_calls.append(str_method)
+		raise OSError("boom")
+
+	monkeypatch.setattr(reconcile, "_api", _api)
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/n")
+	monkeypatch.setenv("PR_NUMBER", "1")
+	with pytest.raises(OSError, match="boom"):
+		reconcile.main()
+	assert list_calls == ["GET"]
+
+
+def test_main_sweep_exits_nonzero_when_a_delete_is_refused(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A ruleset 422 on DELETE fails the sweep instead of being logged as 'already gone'."""
+
+	def _api(str_method: str, str_url: str, *_a: object, **_k: object) -> object:
+		if str_method == "DELETE":
+			raise _http_error(422, b'{"message":"ruleset"}')
+		if "state=open" in str_url:
+			return []
+		return [{"number": 7, "merged_at": "2999-01-01T00:00:00Z"}]
+
+	monkeypatch.setattr(reconcile, "_api", _api)
+	monkeypatch.setattr(reconcile, "_graphql", lambda *_a, **_k: _graphql_data())
+	monkeypatch.setenv("GITHUB_REPOSITORY", "o/n")
+	monkeypatch.delenv("PR_NUMBER", raising=False)
+	assert reconcile.main() == 1
