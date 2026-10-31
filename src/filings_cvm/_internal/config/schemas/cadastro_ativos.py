@@ -14,18 +14,25 @@ alteration (the page calls them "opcional para remoção de ativo"). The page st
 
 from __future__ import annotations
 
-from datetime import datetime
 import re
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, Field, field_validator, model_validator
+from pydantic import (
+	AfterValidator,
+	BaseModel,
+	Field,
+	StrictInt,
+	field_validator,
+	model_validator,
+)
 
 from filings_cvm._internal.config.schemas._fields import validated_cnpj
 from filings_cvm._internal.utils.typing import type_checker
+from filings_cvm._internal.utils.xml_fields import check_br_date, check_cnpj_shape
 
 
-# ``fullmatch`` + ``[0-9]``: ``$`` would accept a trailing newline, ``\d`` non-ASCII digits.
-_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
+# The page also allows an unmasked CNPJ with its leading zeros omitted ("Ex.: 100").
+_CNPJ_ZERO_STRIPPED_RE = re.compile(r"[0-9]{1,13}")
 # C0 controls other than tab/LF/CR are not legal XML 1.0; tab/LF/CR are banned in tokens here.
 _BAD_CHAR_RE = re.compile(r"[\x00-\x1f]")
 
@@ -66,32 +73,29 @@ def _check_text(value: str) -> str:
 
 
 @type_checker
-def _check_date(value: str) -> str:
-	"""Require a real calendar date written ``DD/MM/AAAA``.
+def _validated_cnpj_input(value: str) -> str:
+	"""Check a CNPJ's written shape, then its check digits, returning it bare.
+
+	Shape runs first because the library's unmasking drops every non-alphanumeric character,
+	so a stray space, newline or ``.0`` tail would otherwise be silently repaired.
 
 	Parameters
 	----------
 	value : str
-		Candidate date.
+		Masked, bare, or bare with leading zeros omitted.
 
 	Returns
 	-------
 	str
-		The same value.
-
-	Raises
-	------
-	ValueError
-		If the format is wrong or the date does not exist.
+		Bare 14-character CNPJ.
 	"""
-	if not _DATE_BR_RE.fullmatch(value):
-		raise ValueError("date must follow DD/MM/AAAA format")
-	datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
-	return value
+	if not _CNPJ_ZERO_STRIPPED_RE.fullmatch(value):
+		check_cnpj_shape(value)
+	return validated_cnpj(value)
 
 
 Text = Annotated[str, AfterValidator(_check_text)]
-DateBr = Annotated[str, AfterValidator(_check_date)]
+DateBr = Annotated[str, AfterValidator(check_br_date)]
 
 
 class CadastroAtivosHeader(BaseModel):
@@ -116,7 +120,7 @@ class CadastroAtivosHeader(BaseModel):
 		str
 			Bare CNPJ.
 		"""
-		return validated_cnpj(v)
+		return _validated_cnpj_input(v)
 
 
 class CadastroAtivosRow(BaseModel):
@@ -125,9 +129,9 @@ class CadastroAtivosRow(BaseModel):
 	acao: Literal["I", "A", "R"]
 	cd_ativ: Text
 	ds_ativ: Text | None = None
-	tp_ativ: int
+	tp_ativ: StrictInt
 	cnpj_emp_emissora: str | None = None
-	tp_emp_emissora: int | None = None
+	tp_emp_emissora: StrictInt | None = None
 	nm_emp_emissora: Text | None = None
 	ds_isin: Text | None = None
 	dt_inicio_vigen: DateBr
@@ -198,7 +202,7 @@ class CadastroAtivosRow(BaseModel):
 		Optional[str]
 			Bare CNPJ.
 		"""
-		return None if v is None else validated_cnpj(v)
+		return None if v is None else _validated_cnpj_input(v)
 
 	@model_validator(mode="after")
 	def _check_required_for_acao(self) -> CadastroAtivosRow:

@@ -116,6 +116,14 @@ def test_inclusion_and_alteration_require_descriptive_fields(acao: str, missing:
 		{"cnpj_emp_emissora": "11222333000182"},
 		{"cd_ativ": " "},
 		{"ds_ativ": "a\nb"},
+		{"tp_ativ": True},
+		{"tp_ativ": 2.0},
+		{"tp_emp_emissora": False},
+		{"dt_inicio_vigen": "01/01/0001"},
+		{"cnpj_emp_emissora": " 11.222.333/0001-81"},
+		{"cnpj_emp_emissora": "11222333000181\n"},
+		{"cnpj_emp_emissora": "11222333000181.0"},
+		{"cnpj_emp_emissora": "11-222-333-0001-81"},
 	],
 )
 def test_invalid_row_values_rejected(kw: dict[str, object]) -> None:
@@ -128,6 +136,11 @@ def test_invalid_row_values_rejected(kw: dict[str, object]) -> None:
 def test_table1_codes_accepted(code: int) -> None:
 	"""Listed Table 1 codes pass."""
 	assert _row(tp_ativ=code).tp_ativ == code
+
+
+def test_cnpj_with_leading_zeros_omitted_is_accepted() -> None:
+	"""The page allows an unmasked CNPJ without its leading zeros ("Ex.: 100")."""
+	assert _row(cnpj_emp_emissora="191").cnpj_emp_emissora == "00000000000191"
 
 
 def test_row_cap_is_1000() -> None:
