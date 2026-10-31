@@ -296,6 +296,12 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaCadastroFiReader": ("CadastroFiReader",),
 	"MetaCdaReader": ("CdaReader",),
+	"MetaComplFiReader": (
+		"ComplFiReader",
+		"ComplFiInfReader",
+		"ComplFiInfCotstReader",
+		"ComplFiPrestReader",
+	),
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
@@ -638,6 +644,17 @@ _PROBE_OFFSETS_DAYS = (0, 31, 62, 93, 365, 730, 1095)
 _DRIFT_RETRY_POLICY: RetryPolicy = RetryPolicy(int_max_attempts=1)
 
 
+# Closed series: CVM stopped publishing, and the reader refuses any other month with a
+# ``ValueError`` at construction. The rolling probe dates would all be refused, so probe the last
+# published month instead.
+_CLOSED_SERIES_PROBES: dict[str, tuple[date, ...]] = {
+	"ComplFiReader": (date(2019, 4, 1),),
+	"ComplFiInfReader": (date(2019, 4, 1),),
+	"ComplFiInfCotstReader": (date(2019, 4, 1),),
+	"ComplFiPrestReader": (date(2019, 4, 1),),
+}
+
+
 def _probe_dates() -> tuple[date, ...]:
 	"""Candidate reference dates to try, newest first."""
 	dt_today = date.today()
@@ -666,7 +683,9 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 	"""
 	cls_contract = contract_of(cls_reader)
 	bool_dated = "date_ref" in inspect.signature(cls_reader.__init__).parameters
-	list_dates: tuple[date | None, ...] = _probe_dates() if bool_dated else (None,)
+	list_dates: tuple[date | None, ...] = (
+		_CLOSED_SERIES_PROBES.get(cls_reader.__name__, _probe_dates()) if bool_dated else (None,)
+	)
 
 	for date_ref in list_dates:
 		cls_instance = (
