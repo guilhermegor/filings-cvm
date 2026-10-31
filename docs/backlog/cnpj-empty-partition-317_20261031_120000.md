@@ -23,6 +23,9 @@ Measured over the whole series (201801–201904): the column holds sentinels
 16 months (201808). So `ComplFiReader` raises on 15 of 16 partitions on `main`, and the
 `compl_fi.py` docstring ("well-formed otherwise") is wrong.
 
-- [ ] Follow-up (outside this branch's surface): drop `CNPJ_AG_RISCO` from
-  `COMPL_FI.tuple_cnpj_cols`, fix the docstring, and update
-  `tests/unit/test_compl_fi_ingestion.py:109`, whose expectation the data disproves.
+- [x] Coordinator extended the surface and decided to fix it here: `CNPJ_AG_RISCO` dropped
+  from `COMPL_FI.tuple_cnpj_cols`, docstring and `docs/ingestion/compl_fi.md` corrected,
+  `test_compl_fi_ingestion.py` expectation changed (data disproves it) plus a placeholder-only
+  test (red under the old contract). Live: `ComplFiReader` 2019-04 reads 200 rows.
+
+Completed — kept as a record.

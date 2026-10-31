@@ -14,7 +14,7 @@ import pandas as pd
 import pytest
 
 from filings_cvm._internal.config.contracts import EXAMPLE_SOURCE
-from filings_cvm._internal.config.contracts.compl_fi import COMPL_FI
+from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.dfp_cia_aberta import (
 	DFP_CIA_ABERTA_DFC_MD_CON,
 	DFP_CIA_ABERTA_DFC_MD_IND,
@@ -156,27 +156,28 @@ def test_cnpj_check_passes_a_header_only_partition(cls_contract: FileContract) -
 def test_cnpj_check_passes_a_column_with_no_non_empty_value(empty_value: object) -> None:
 	"""A declared CNPJ column whose every cell is empty passes the check (#317).
 
-	``COMPL_FI.CNPJ_AG_RISCO`` is only the vehicle: a second CNPJ column beside a valid
-	``CNPJ_FUNDO``, so the frame isolates the all-empty column.
+	``CAD_CIA_ESTRANG.CNPJ_AUDITOR`` is only the vehicle: a second CNPJ column beside a valid
+	``CNPJ``, so the frame isolates the all-empty column.
 
 	Parameters
 	----------
 	empty_value : object
 		How an empty cell arrives: NaN from a default read, or blank text.
 	"""
-	df_ = pd.DataFrame(dict.fromkeys(COMPL_FI.tuple_required, "x"), index=[0, 1])
-	df_["CNPJ_FUNDO"] = VALID_CNPJ
-	df_["CNPJ_AG_RISCO"] = empty_value
+	df_ = pd.DataFrame(dict.fromkeys(CAD_CIA_ESTRANG.tuple_required, "x"), index=[0, 1])
+	df_["CNPJ"] = VALID_CNPJ
+	df_["CNPJ_AUDITOR"] = empty_value
 
-	assert find_contract_problems(df_, COMPL_FI) == []
+	assert find_contract_problems(df_, CAD_CIA_ESTRANG) == []
 
 
 def test_cnpj_check_still_fails_non_empty_values_with_no_valid_cnpj() -> None:
 	"""Present values none of which is a valid CNPJ still fail: that is the check's purpose."""
-	df_ = pd.DataFrame(dict.fromkeys(COMPL_FI.tuple_required, "x"), index=[0, 1])
-	df_["CNPJ_FUNDO"] = VALID_CNPJ
-	df_["CNPJ_AG_RISCO"] = [np.nan, "not-a-cnpj"]
+	df_ = pd.DataFrame(dict.fromkeys(CAD_CIA_ESTRANG.tuple_required, "x"), index=[0, 1])
+	df_["CNPJ"] = VALID_CNPJ
+	df_["CNPJ_AUDITOR"] = [np.nan, "00.000.000/0000-00"]
 
-	assert find_contract_problems(df_, COMPL_FI) == [
-		"Column 'CNPJ_AG_RISCO' in 'Complemento FI' holds no valid CNPJ (unexpected data type)"
+	assert find_contract_problems(df_, CAD_CIA_ESTRANG) == [
+		"Column 'CNPJ_AUDITOR' in 'Cadastro de Companhias Estrangeiras' holds no valid CNPJ "
+		"(unexpected data type)"
 	]

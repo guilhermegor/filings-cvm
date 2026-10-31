@@ -37,8 +37,12 @@ fora de `201801`–`201904` levanta `ValueError` antes de qualquer download; o p
 Só `DT_COMPTC` vira `datetime.date` (ISO, 100% preenchida). **Todo o resto é texto exato**, vazio
 volta vazio (textos de política chegam a ~4.000 caracteres e várias colunas são parcialmente vazias).
 
-- `CNPJ_FUNDO` é coluna de CNPJ nos 4 membros (100% bem formada); `CNPJ_AG_RISCO` (agência de
-  rating, só em `compl_fi`) também, vazia em 188 linhas. Nenhuma coluna guarda CPF.
+- `CNPJ_FUNDO` é coluna de CNPJ nos 4 membros (100% bem formada). Nenhuma coluna guarda CPF.
+- ⚠️ `CNPJ_AG_RISCO` (agência de rating, só em `compl_fi`) **volta como publicado e NÃO é
+  validado como CNPJ**: em toda a série (201801–201904) só guarda placeholders
+  (`00.000.000/0000-00`, `99.999.999/0001-99`, `11.111.111/1111-11`) ou vazio, com **um único**
+  CNPJ válido (em 201808). Declará-la coluna de CNPJ fazia o reader levantar `ContractError` em
+  15 dos 16 meses (#317).
 - `TP_FUNDO`: `FI`, `FAPI`, `FIIM`, `FMP-FGTS`, `FMP-FGTS CL` — grafia da CVM preservada.
 - Contratos gerados dos headers publicados e pinados a `tests/fixtures/compl_fi/*_header.csv`.
 

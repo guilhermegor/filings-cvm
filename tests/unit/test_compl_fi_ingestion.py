@@ -105,10 +105,31 @@ def test_contract_matches_the_published_header(
 
 
 def test_cnpj_columns_are_only_the_pure_cnpj_ones() -> None:
-	"""The rating agency CNPJ is declared only in the main member; no CPF column exists."""
-	assert COMPL_FI.tuple_cnpj_cols == ("CNPJ_FUNDO", "CNPJ_AG_RISCO")
-	for contract in (COMPL_FI_INF, COMPL_FI_INF_COTST, COMPL_FI_PREST):
+	"""Only ``CNPJ_FUNDO`` is a CNPJ column; ``CNPJ_AG_RISCO`` is placeholder-only (#317).
+
+	Measured over 201801-201904, ``CNPJ_AG_RISCO`` holds one valid CNPJ in 16 months.
+	"""
+	for contract in (COMPL_FI, COMPL_FI_INF, COMPL_FI_INF_COTST, COMPL_FI_PREST):
 		assert contract.tuple_cnpj_cols == ("CNPJ_FUNDO",)
+
+
+def test_a_placeholder_only_rating_agency_cnpj_partition_reads(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""The 2019-04 shape (every ``CNPJ_AG_RISCO`` a placeholder) reads, returned as published."""
+	list_cols = COMPL_FI.tuple_required
+	row_full = _row(list_cols)
+	list_rows = [
+		[(str_ph if c == "CNPJ_AG_RISCO" else v) for c, v in zip(list_cols, row_full, strict=True)]
+		for str_ph in ("00.000.000/0000-00", "11.111.111/1111-11")
+	]
+	dict_members = _all_members()
+	dict_members["compl_fi_201806.csv"] = _csv(list_cols, list_rows)
+	_patch_download(monkeypatch, dict_members)
+
+	df_ = ComplFiReader(REF).read()
+
+	assert df_["CNPJ_AG_RISCO"].tolist() == ["00.000.000/0000-00", "11.111.111/1111-11"]
 
 
 # ---- month window --------------------------------------------------------------------------

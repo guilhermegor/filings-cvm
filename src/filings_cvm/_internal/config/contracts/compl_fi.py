@@ -19,9 +19,12 @@ member                       cols   content
 ``compl_fi_prest``               5  service provider description and name
 ===========================  =====  ==========================================================
 
-Only ``DT_COMPTC`` is a date. ``CNPJ_FUNDO`` is 100% well-formed in every member. ``compl_fi`` has
-a **second** CNPJ column, ``CNPJ_AG_RISCO`` (the rating agency), empty in ~1.6% of rows and
-well-formed otherwise. No column holds a CPF. Every other column is exact source text.
+Only ``DT_COMPTC`` is a date. ``CNPJ_FUNDO`` is 100% well-formed in every member and is the only
+CNPJ column. ⚠️ ``compl_fi.CNPJ_AG_RISCO`` (the rating agency) is **not** one: measured over all
+16 months it holds only placeholders (``00.000.000/0000-00``, ``99.999.999/0001-99``,
+``11.111.111/1111-11``) or blanks, with a single valid CNPJ in ``201808``. Declaring it raised
+``ContractError`` on 15 of 16 partitions (#317), so it is returned as published, unvalidated. No
+column holds a CPF. Every other column is exact source text.
 """
 
 from __future__ import annotations
@@ -55,7 +58,7 @@ COMPL_FI = FileContract(
 		"INF_AUTORREGULACAO_ANBIMA",
 		"OUTRO_INF",
 	),
-	("CNPJ_FUNDO", "CNPJ_AG_RISCO"),
+	("CNPJ_FUNDO",),
 )
 
 COMPL_FI_INF = FileContract(
