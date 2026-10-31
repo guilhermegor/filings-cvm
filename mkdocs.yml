@@ -10,6 +10,7 @@ nav:
       - Perfil Mensal: submission/perfil_mensal.md
       - Informe Diário: submission/informe_diario.md
       - Informe Mensal FIDC: submission/inf_mensal_fidc.md
+      - CDA: submission/cda.md
   - Leitura (← CVM):
       - Visão geral: ingestion/index.md
       - Informe Diário FIF: ingestion/informe_diario.md
@@ -36,6 +37,7 @@ nav:
       - Informe Mensal CRI (Securitização): ingestion/inf_mensal_cri.md
       - Cadastro de Auditores (AUDITOR): ingestion/auditor.md
       - Cadastro de Agentes Fiduciários (AGENTE_FIDUC): ingestion/agente_fiduc.md
+      - Atos Declaratórios (ATO_DECLR): ingestion/ato_declr.md
       - Cadastro de Agentes Autônomos (AGENTE_AUTON): ingestion/agente_auton.md
       - Cadastro de Repres. de Inv. Não Residentes (INVNR): ingestion/invnr.md
       - Cadastro de Intermediários (INTERMED): ingestion/intermed.md

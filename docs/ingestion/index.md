@@ -18,8 +18,8 @@ from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
 from filings_cvm.ingestion.fi import InformeDiarioReader
 ```
 
-São **22 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `auditor`, `cia_aberta`,
-`cia_estrang`, `cia_incent`, `consultor_vlmob`, `coord_oferta`, `crowdfunding`, `emissor_cepac`,
+São **23 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `ato_declr`, `auditor`,
+`cia_aberta`, `cia_estrang`, `cia_incent`, `consultor_vlmob`, `coord_oferta`, `crowdfunding`, `emissor_cepac`,
 `fi`, `fiagro`, `fidc`, `fie`, `fii`, `fip`, `intermed`, `invnr`, `oferta`, `securit`.
 
 > ⚠️ **Mudança incompatível na 0.26.0.** `from filings_cvm import <Leitor>` e
@@ -178,6 +178,10 @@ São **22 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `audit
   `MOTIVO_CANCEL` é texto, não data); chaveado por `CNPJ` (mascarado), **sem coluna de CPF**.
   Molde do [Cadastro FI](cadastro_fi.md) / Emissor CEPAC. **Oitava e última fatia da Wave 3 do #41 —
   encerra a Wave 3**.
+
+- **[Atos Declaratórios (ATO_DECLR)](ato_declr.md)** — **1 reader** `AtoDeclrReader` sobre o
+  `ato_declr.csv` (**CSV solto**, 7 colunas). **Snapshot** de URL fixa, **sem `date_ref`**.
+  `CNPJ_CPF` mistura CNPJ, CPF e vazio (fora de `tuple_cnpj_cols`). Inaugura o root `ato_declr/`.
 
 - **[Cadastro de Companhias Estrangeiras (CIA_ESTRANG)](cia_estrang.md)** — **1 reader**
   `CadastroCiaEstrangReader` sobre o `cad_cia_estrang.csv` (**CSV solto**, não ZIP; **49 colunas**).
