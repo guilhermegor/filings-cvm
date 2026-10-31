@@ -164,6 +164,28 @@ def run_guard(list_cmd: list) -> tuple:
 	return cls_proc.returncode, cls_proc.stdout + cls_proc.stderr
 
 
+def report_problems(str_guard: str, str_output: str, list_problems: list) -> None:
+	"""Print the guard's findings for the files that moved, then each baseline problem.
+
+	Parameters
+	----------
+	str_guard : str
+		The guard being judged.
+	str_output : str
+		The guard's combined stdout/stderr.
+	list_problems : list of str
+		The messages from :func:`ratchet_problems`.
+	"""
+	set_bad = {s.split(":", 1)[0] for s in list_problems}
+	for str_line in RE_ANSI.sub("", str_output).splitlines():
+		match = RE_FINDING.match(str_line)
+		if match and match.group("path").removeprefix("./") in set_bad:
+			print(str_line)
+	print(f"\n❌ {str_guard}: the per-file baseline in {PATH_BASELINE.name} moved:")
+	for str_problem in list_problems:
+		print(f"  {str_problem}")
+
+
 def main(list_argv: list) -> int:
 	"""Run a guard and judge its findings against the baseline.
 
@@ -202,14 +224,7 @@ def main(list_argv: list) -> int:
 			f"across {len(counter)} file(s); nothing new."
 		)
 		return 0
-	set_bad = {s.split(":", 1)[0] for s in list_problems}
-	for str_line in RE_ANSI.sub("", str_output).splitlines():
-		match = RE_FINDING.match(str_line)
-		if match and match.group("path").removeprefix("./") in set_bad:
-			print(str_line)
-	print(f"\n❌ {str_guard}: the per-file baseline in {PATH_BASELINE.name} moved:")
-	for str_problem in list_problems:
-		print(f"  {str_problem}")
+	report_problems(str_guard, str_output, list_problems)
 	return 1
 
 

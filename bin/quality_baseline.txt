@@ -9,9 +9,9 @@ function-length 1 tests/unit/test_perfil_mensal_submission.py
 dead-code 1 src/filings_cvm/_internal/utils/http_downloader.py
 complexity 1 bin/check_docs_sections.py
 complexity 1 bin/check_docstrings.py
-complexity 1 bin/quality_ratchet.py
 complexity 1 bin/sweep_stale_branches.py
 complexity 3 src/filings_cvm/_internal/config/schemas/_fields.py
+complexity 2 src/filings_cvm/_internal/config/schemas/cadastro_ativos.py
 complexity 8 src/filings_cvm/_internal/config/schemas/cda.py
 complexity 3 src/filings_cvm/_internal/config/schemas/inf_mensal_fidc.py
 complexity 2 src/filings_cvm/_internal/config/schemas/lamina.py
@@ -30,6 +30,7 @@ complexity 5 src/filings_cvm/_internal/utils/zip_extractor.py
 complexity 1 src/filings_cvm/ingestion/_base_meta_reader.py
 complexity 2 src/filings_cvm/ingestion/fi/doc/cda/cda.py
 complexity 1 src/filings_cvm/ingestion/fi/doc/informe_diario/informe_diario.py
+complexity 2 src/filings_cvm/submission/cadastro_ativos.py
 complexity 4 src/filings_cvm/submission/cda.py
 complexity 1 src/filings_cvm/submission/inf_fundo_157.py
 complexity 3 src/filings_cvm/submission/inf_mensal_fidc.py
@@ -98,9 +99,6 @@ complexity 2 tests/unit/test_retry.py
 complexity 4 tests/unit/test_securit_cepac_flat_ingestion.py
 complexity 15 tests/unit/test_sweep_stale_branches.py
 complexity 5 tests/unit/test_vlmo_cia_aberta_ingestion.py
-all-exports 1 src/filings_cvm/_internal/config/ports/__init__.py
-all-exports 142 src/filings_cvm/_internal/config/schemas/__init__.py
-all-exports 1 src/filings_cvm/ingestion/__init__.py
 one-assert 9 tests/unit/test_adm_cart_ingestion.py
 one-assert 6 tests/unit/test_agente_auton_ingestion.py
 one-assert 6 tests/unit/test_agente_fiduc_ingestion.py
@@ -108,6 +106,7 @@ one-assert 3 tests/unit/test_ato_declr_ingestion.py
 one-assert 6 tests/unit/test_auditor_ingestion.py
 one-assert 8 tests/unit/test_balancete_fi_ingestion.py
 one-assert 5 tests/unit/test_cad_fi_hist_ingestion.py
+one-assert 3 tests/unit/test_cadastro_ativos_submission.py
 one-assert 8 tests/unit/test_cadastro_fi_ingestion.py
 one-assert 7 tests/unit/test_cda_ingestion.py
 one-assert 18 tests/unit/test_cda_submission.py
@@ -175,3 +174,6 @@ one-assert 3 tests/unit/test_securit_cepac_flat_ingestion.py
 one-assert 10 tests/unit/test_sweep_stale_branches.py
 one-assert 4 tests/unit/test_tabular_reader.py
 one-assert 8 tests/unit/test_vlmo_cia_aberta_ingestion.py
+all-exports 1 src/filings_cvm/_internal/config/ports/__init__.py
+all-exports 149 src/filings_cvm/_internal/config/schemas/__init__.py
+all-exports 1 src/filings_cvm/ingestion/__init__.py
