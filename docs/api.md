@@ -382,6 +382,17 @@ df_ = EventualFiReader(date_ref=date(2025, 6, 15)).read()
 print(df_[["CNPJ_FUNDO_CLASSE", "TP_DOC", "DT_COMPTC", "LINK_ARQ"]].head())
 ```
 
+### `BalanceteFiReader` · `BalanceteFiPre202311Reader`
+
+`filings_cvm.ingestion.fi.BalanceteFiReader` · `filings_cvm.ingestion.fi.BalanceteFiPre202311Reader`
+
+Leem `balancete_fi_AAAAMM.zip` (`FI/DOC/BALANCETE`) — o **balancete mensal** do fundo/classe, uma
+linha por conta. **ZIP de 1 membro**, **particionado por mês** (série `201501`→); 6 colunas /
+2.191.291 linhas em 2026-09. **Dois schemas, corte medido em `202311`** (5 colunas com
+`CNPJ_FUNDO` antes; `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE` depois). Pedir o mês do outro regime
+levanta `ValueError` nomeando o irmão. `VL_SALDO_BALCTE` fica texto exato. Página completa em
+[Balancete FI](ingestion/balancete_fi.md).
+
 ### `ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
 
 `filings_cvm.ingestion.fi.ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
@@ -1956,7 +1967,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (50 readers)
+### `Meta*Reader` (51 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1970,7 +1981,8 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader` · `MetaComplFiReader`
+`MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader` · `MetaComplFiReader` ·
+`MetaBalanceteFiReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

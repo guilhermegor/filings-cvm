@@ -20,6 +20,7 @@ nav:
       - Lâmina carteira FIF: ingestion/lamina_carteira.md
       - Lâmina FIF: ingestion/lamina.md
       - Eventual FI: ingestion/eventual_fi.md
+      - Balancete FI: ingestion/balancete_fi.md
       - Complemento FI: ingestion/compl_fi.md
       - Perfil Mensal FI: ingestion/perfil_mensal_fi.md
       - Extrato FI: ingestion/extrato_fi.md
