@@ -17,6 +17,10 @@ delete the example once your own contracts exist.
 from __future__ import annotations
 
 from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
+from filings_cvm._internal.config.contracts.balancete_fi import (
+	BALANCETE_FI,
+	BALANCETE_FI_PRE202311,
+)
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_cart import (
@@ -93,6 +97,12 @@ from filings_cvm._internal.config.contracts.cia_aberta_recompra_acoes import (
 	CIA_ABERTA_RECOMPRA_ACOES_INTERMEDIARIOS,
 	CIA_ABERTA_RECOMPRA_ACOES_QUANTIDADES,
 )
+from filings_cvm._internal.config.contracts.compl_fi import (
+	COMPL_FI,
+	COMPL_FI_INF,
+	COMPL_FI_INF_COTST,
+	COMPL_FI_PREST,
+)
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
@@ -116,6 +126,10 @@ from filings_cvm._internal.config.contracts.dfp_cia_aberta import (
 	DFP_CIA_ABERTA_DVA_CON,
 	DFP_CIA_ABERTA_DVA_IND,
 	DFP_CIA_ABERTA_PARECER,
+)
+from filings_cvm._internal.config.contracts.entrega_fi import (
+	ENTREGA_FI,
+	ENTREGA_FI_DIARIO,
 )
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.example_source import EXAMPLE_SOURCE
@@ -224,6 +238,7 @@ from filings_cvm._internal.config.contracts.inf_mensal_fidc import (
 	INF_MENSAL_FIDC_TAB_V,
 	INF_MENSAL_FIDC_TAB_VI,
 	INF_MENSAL_FIDC_TAB_VII,
+	INF_MENSAL_FIDC_TAB_VIII,
 	INF_MENSAL_FIDC_TAB_X,
 	INF_MENSAL_FIDC_TAB_X_1,
 	INF_MENSAL_FIDC_TAB_X_1_1,
@@ -297,6 +312,7 @@ from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
 from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
 from filings_cvm._internal.config.contracts.meta import (
 	META_ATO_DECLR,
+	META_BALANCETE_FI,
 	META_BALANCETE_FIE,
 	META_BALANCO_FIE,
 	META_CAD_ADM_CART,
@@ -319,10 +335,12 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_CGVN_CIA_ABERTA,
 	META_CIA_ABERTA_RECOMPRA_ACOES,
 	META_COLUMNS,
+	META_COMPL_FI,
 	META_DFIN_CRA,
 	META_DFIN_CRI,
 	META_DFIN_FII,
 	META_DFP_CIA_ABERTA,
+	META_ENTREGA_FI,
 	META_EVENTUAL_FI,
 	META_EXTRATO_FI,
 	META_FCA_CIA_ABERTA,
@@ -371,7 +389,9 @@ from filings_cvm._internal.utils.tabular_reader import (
 
 __all__ = [
 	"ATO_DECLR",
+	"BALANCETE_FI",
 	"BALANCETE_FIE",
+	"BALANCETE_FI_PRE202311",
 	"BALANCO_FIE",
 	"CAD_ADM_CART_DIRETOR",
 	"CAD_ADM_CART_PF",
@@ -429,6 +449,10 @@ __all__ = [
 	"CIA_ABERTA_RECOMPRA_ACOES",
 	"CIA_ABERTA_RECOMPRA_ACOES_INTERMEDIARIOS",
 	"CIA_ABERTA_RECOMPRA_ACOES_QUANTIDADES",
+	"COMPL_FI",
+	"COMPL_FI_INF",
+	"COMPL_FI_INF_COTST",
+	"COMPL_FI_PREST",
 	"DFIN_CRA",
 	"DFIN_CRI",
 	"DFIN_FII",
@@ -451,6 +475,8 @@ __all__ = [
 	"DFP_CIA_ABERTA_DVA_CON",
 	"DFP_CIA_ABERTA_DVA_IND",
 	"DFP_CIA_ABERTA_PARECER",
+	"ENTREGA_FI",
+	"ENTREGA_FI_DIARIO",
 	"EVENTUAL_FI",
 	"EXAMPLE_SOURCE",
 	"EXTRATO_FI",
@@ -544,6 +570,7 @@ __all__ = [
 	"INF_MENSAL_FIDC_TAB_V",
 	"INF_MENSAL_FIDC_TAB_VI",
 	"INF_MENSAL_FIDC_TAB_VII",
+	"INF_MENSAL_FIDC_TAB_VIII",
 	"INF_MENSAL_FIDC_TAB_X",
 	"INF_MENSAL_FIDC_TAB_X_1",
 	"INF_MENSAL_FIDC_TAB_X_1_1",
@@ -606,6 +633,7 @@ __all__ = [
 	"LAMINA_FIF",
 	"MEDIDAS_MES_FIE",
 	"META_ATO_DECLR",
+	"META_BALANCETE_FI",
 	"META_BALANCETE_FIE",
 	"META_BALANCO_FIE",
 	"META_CAD_ADM_CART",
@@ -628,10 +656,12 @@ __all__ = [
 	"META_CGVN_CIA_ABERTA",
 	"META_CIA_ABERTA_RECOMPRA_ACOES",
 	"META_COLUMNS",
+	"META_COMPL_FI",
 	"META_DFIN_CRA",
 	"META_DFIN_CRI",
 	"META_DFIN_FII",
 	"META_DFP_CIA_ABERTA",
+	"META_ENTREGA_FI",
 	"META_EVENTUAL_FI",
 	"META_EXTRATO_FI",
 	"META_FCA_CIA_ABERTA",

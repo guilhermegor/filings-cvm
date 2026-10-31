@@ -1,14 +1,14 @@
 """Data contracts for the CVM open-data *Informe Mensal FIDC* CSVs (ingestion).
 
-``inf_mensal_fidc_AAAAMM.zip`` ships **17 members** — the tables of the FIDC monthly report
+``inf_mensal_fidc_AAAAMM.zip`` ships **18 members** — the tables of the FIDC monthly report
 (``FIDC/DOC/INF_MENSAL``): Tabelas I–X plus X's sub-tables (X.1, X.1.1, X.2 … X.7). Every
 member shares the same four-column key prefix — ``TP_FUNDO_CLASSE``, ``CNPJ_FUNDO_CLASSE``,
 ``DENOM_SOCIAL``, ``DT_COMPTC`` — then carries its own table-specific columns. Verified against
 the real archive (``202506``): each column list and order below is exactly as published.
 
 **Deviation from "one contract per file" — deliberate**, exactly as for ``cad_fi_hist.py``.
-These 17 are the members of a **single input artifact** (one monthly ZIP, one dataset page) and
-a **uniform family** (same key prefix, differing only by which table each carries), so 17
+These 18 are the members of a **single input artifact** (one monthly ZIP, one dataset page) and
+a **uniform family** (same key prefix, differing only by which table each carries), so 18
 one-constant modules would be pure sprawl. They live together here, one constant each,
 re-exported individually from ``contracts/__init__``. ``CNPJ_FUNDO_CLASSE`` is the CNPJ column of
 every member; a subclass reader pairs each constant with its date column (``DT_COMPTC``).
@@ -334,6 +334,22 @@ INF_MENSAL_FIDC_TAB_VII = FileContract(
 		"TAB_VII_D_1_QT_RECOMPRA",
 		"TAB_VII_D_2_VL_RECOMPRA",
 		"TAB_VII_D_3_VL_CONTAB_RECOMPRA",
+	),
+	("CNPJ_FUNDO_CLASSE",),
+)
+# Tabela VIII is long, not wide: one row per fund × ``SEQUENCIAL`` (1–25 in 202506), with a single
+# ``VALOR`` (META: numeric(20,2)). CVM's META leaves both descriptions blank. Pinned to
+# ``tests/fixtures/inf_mensal_fidc/inf_mensal_fidc_tab_VIII_header.csv``.
+INF_MENSAL_FIDC_TAB_VIII = FileContract(
+	"Informe Mensal FIDC — tabela VIII",
+	"inf_mensal_fidc_tab_viii",
+	(
+		"TP_FUNDO_CLASSE",
+		"CNPJ_FUNDO_CLASSE",
+		"DENOM_SOCIAL",
+		"DT_COMPTC",
+		"SEQUENCIAL",
+		"VALOR",
 	),
 	("CNPJ_FUNDO_CLASSE",),
 )
