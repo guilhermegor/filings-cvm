@@ -127,6 +127,28 @@ from filings_cvm._internal.config.schemas.inr_semestral import (
 	InrTitPub,
 	InrTransfRecursos,
 )
+from filings_cvm._internal.config.schemas.lamina import (
+	LaminaAntesInic2,
+	LaminaCarencia,
+	LaminaCompCarteira,
+	LaminaConversao,
+	LaminaDespesas,
+	LaminaDocument,
+	LaminaHeader,
+	LaminaInform,
+	LaminaInformExemploComp,
+	LaminaInforTabRentAnual,
+	LaminaListaCompCarteira,
+	LaminaListaTabRentAnual,
+	LaminaListaTabRentMensal,
+	LaminaTabRentAnual,
+	LaminaTabRentMensal,
+	LaminaTabSimulDespesas,
+	LaminaTabVarDesemp,
+	LaminaTaxaAdministracao,
+	LaminaTaxaEntrada,
+	LaminaTaxaSaida,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -153,6 +175,7 @@ from filings_cvm.submission.informe_diario import (
 )
 from filings_cvm.submission.inr_semestral_parte1 import InrSemestralParte1
 from filings_cvm.submission.inr_semestral_parte2 import InrSemestralParte2
+from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
@@ -240,6 +263,27 @@ __all__ = [
 	"InrTitAgroCredPriv",
 	"InrTitPub",
 	"InrTransfRecursos",
+	"Lamina",
+	"LaminaAntesInic2",
+	"LaminaCarencia",
+	"LaminaCompCarteira",
+	"LaminaConversao",
+	"LaminaDespesas",
+	"LaminaDocument",
+	"LaminaHeader",
+	"LaminaInforTabRentAnual",
+	"LaminaInform",
+	"LaminaInformExemploComp",
+	"LaminaListaCompCarteira",
+	"LaminaListaTabRentAnual",
+	"LaminaListaTabRentMensal",
+	"LaminaTabRentAnual",
+	"LaminaTabRentMensal",
+	"LaminaTabSimulDespesas",
+	"LaminaTabVarDesemp",
+	"LaminaTaxaAdministracao",
+	"LaminaTaxaEntrada",
+	"LaminaTaxaSaida",
 	"Liquidez",
 	"ListaCedent",
 	"ListaCedentCredExiste",
