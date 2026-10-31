@@ -33,6 +33,12 @@ from filings_cvm._internal.config.schemas.cda import (
 	CdaTitAgroCredPriv,
 	CdaTitPub,
 )
+from filings_cvm._internal.config.schemas.far import (
+	FarDocument,
+	FarFund,
+	FarHeader,
+	FarMovement,
+)
 from filings_cvm._internal.config.schemas.inf_mensal_fidc import (
 	Alienacao,
 	Amort,
@@ -139,6 +145,7 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 from filings_cvm.submission.cda import (
 	Cda,
 )
+from filings_cvm.submission.far import Far
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
@@ -195,6 +202,11 @@ __all__ = [
 	"DevSacado",
 	"Dicred",
 	"DocumentHeader",
+	"Far",
+	"FarDocument",
+	"FarFund",
+	"FarHeader",
+	"FarMovement",
 	"Garantia",
 	"InfMensalFidc",
 	"InfMensalFidcDocument",
