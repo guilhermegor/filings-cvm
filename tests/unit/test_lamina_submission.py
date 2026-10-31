@@ -307,69 +307,84 @@ def test_several_informs_are_written_in_order() -> None:
 # --- one test per nested block ------------------------------------------------------------
 
 
-def test_carencia_block_xml() -> None:
-	"""CARENCIA: DIAS_CAR then COND_CAR."""
-	assert _pairs(_block(_doc(_full_inform()), "CARENCIA")) == [
-		("DIAS_CAR", "30"),
-		("COND_CAR", "Sem resgate"),
-	]
+@pytest.mark.parametrize(
+	("name", "expected"),
+	[
+		("CARENCIA", [("DIAS_CAR", "30"), ("COND_CAR", "Sem resgate")]),
+		(
+			"CONVERSAO",
+			[("ABERT_FECH", "A"), ("DIA_APLIC", "1"), ("ABERT_FECH_C", "F"), ("DIA_RESG", "2")],
+		),
+		("INFOR_TX_ENTR", [("TX_ENTR", "0,5000"), ("COND_ENTR", "Sobre a aplicacao")]),
+		(
+			"INFOR_TX_SAIDA",
+			[("DIAS_SAIDA", "10"), ("TX_SAIDA", "1,0000"), ("COND_SAIDA", "Antes de 10 dias")],
+		),
+		(
+			"INFOR_DESPESAS",
+			[
+				("DESPESAS", "0,7500"),
+				("INIC_PERIODO", "01/01/2024"),
+				("FIM_PERIODO", "31/12/2024"),
+				("END_ELET_ADM", "www.adm.com.br"),
+			],
+		),
+		(
+			"TAB_VAR_DESEMP",
+			[
+				("VAR_DESEMP", "5,0000"),
+				("FORMULA_RENTAB", "Indice mais spread"),
+				("CENARIO_GATILHO", "Pior, medio e bom"),
+				("ESCLAREC", "Explicacao"),
+			],
+		),
+		(
+			"INFORM_EXEMPLO_COMP",
+			[
+				("ANO_ANT", "2023"),
+				("ANO_EMISS", "2024"),
+				("VALOR_RESG", "1000,00"),
+				("IMPOSTOS", "15,55"),
+				("VALOR_ING", "1,00"),
+				("VALOR_SAIDA", "2,00"),
+				("AJUSTE_PERFOR", "-3,00"),
+				("VALOR_DESPESAS", "12,30"),
+			],
+		),
+		(
+			"TAB_SIMUL_DESPESAS",
+			[
+				("DESP_PREV3", "30,00"),
+				("DESP_PREV5", "50,00"),
+				("RETOR_BRUT3", "-4,50"),
+				("RETOR_BRUT5", "60,00"),
+			],
+		),
+	],
+)
+def test_flat_block_xml(name: str, expected: list[tuple[str, str]]) -> None:
+	"""Each flat block of a fully populated INFORM emits its tags in sample order."""
+	assert _pairs(_block(_doc(_full_inform()), name)) == expected
 
 
-def test_conversao_block_xml() -> None:
-	"""CONVERSAO: the four conversion rules in sample order."""
-	assert _pairs(_block(_doc(_full_inform()), "CONVERSAO")) == [
-		("ABERT_FECH", "A"),
-		("DIA_APLIC", "1"),
-		("ABERT_FECH_C", "F"),
-		("DIA_RESG", "2"),
-	]
-
-
-def test_fixed_management_fee_block_xml() -> None:
-	"""INFOR_TX_ADM for a fixed fee: type, TX_ADM, and the optional note."""
-	fee = {"tipo_tx_adm": "F", "tx_adm": "1.5", "esclarec": "Ao ano"}
-	assert _pairs(_block(_doc(_inform(infor_tx_adm=fee)), "INFOR_TX_ADM")) == [
-		("TIPO_TX_ADM", "F"),
-		("TX_ADM", "1,5000"),
-		("ESCLAREC", "Ao ano"),
-	]
-
-
-def test_variable_management_fee_block_xml() -> None:
-	"""INFOR_TX_ADM for a variable fee: type, TX_MIN, TX_MAX and no TX_ADM."""
-	fee = {"tipo_tx_adm": "V", "tx_min": "0.5", "tx_max": "2"}
-	assert _pairs(_block(_doc(_inform(infor_tx_adm=fee)), "INFOR_TX_ADM")) == [
-		("TIPO_TX_ADM", "V"),
-		("TX_MIN", "0,5000"),
-		("TX_MAX", "2,0000"),
-	]
-
-
-def test_entry_fee_block_xml() -> None:
-	"""INFOR_TX_ENTR: TX_ENTR then COND_ENTR."""
-	assert _pairs(_block(_doc(_full_inform()), "INFOR_TX_ENTR")) == [
-		("TX_ENTR", "0,5000"),
-		("COND_ENTR", "Sobre a aplicacao"),
-	]
-
-
-def test_exit_fee_block_xml() -> None:
-	"""INFOR_TX_SAIDA: DIAS_SAIDA, TX_SAIDA, COND_SAIDA."""
-	assert _pairs(_block(_doc(_full_inform()), "INFOR_TX_SAIDA")) == [
-		("DIAS_SAIDA", "10"),
-		("TX_SAIDA", "1,0000"),
-		("COND_SAIDA", "Antes de 10 dias"),
-	]
-
-
-def test_expenses_block_xml() -> None:
-	"""INFOR_DESPESAS: percentage, period bounds, administrator address."""
-	assert _pairs(_block(_doc(_full_inform()), "INFOR_DESPESAS")) == [
-		("DESPESAS", "0,7500"),
-		("INIC_PERIODO", "01/01/2024"),
-		("FIM_PERIODO", "31/12/2024"),
-		("END_ELET_ADM", "www.adm.com.br"),
-	]
+@pytest.mark.parametrize(
+	("fee", "expected"),
+	[
+		pytest.param(
+			{"tipo_tx_adm": "F", "tx_adm": "1.5", "esclarec": "Ao ano"},
+			[("TIPO_TX_ADM", "F"), ("TX_ADM", "1,5000"), ("ESCLAREC", "Ao ano")],
+			id="fixed",
+		),
+		pytest.param(
+			{"tipo_tx_adm": "V", "tx_min": "0.5", "tx_max": "2"},
+			[("TIPO_TX_ADM", "V"), ("TX_MIN", "0,5000"), ("TX_MAX", "2,0000")],
+			id="variable",
+		),
+	],
+)
+def test_management_fee_block_xml(fee: dict[str, str], expected: list[tuple[str, str]]) -> None:
+	"""INFOR_TX_ADM: a fixed fee writes TX_ADM; a variable fee writes TX_MIN/TX_MAX instead."""
+	assert _pairs(_block(_doc(_inform(infor_tx_adm=fee)), "INFOR_TX_ADM")) == expected
 
 
 def test_portfolio_block_xml() -> None:
@@ -426,40 +441,6 @@ def test_monthly_return_table_xml() -> None:
 			("COMENTARIOS", "Janeiro"),
 		],
 		[("MES", "12"), ("RENT_MENS", "-0,1000")],
-	]
-
-
-def test_performance_variation_block_xml() -> None:
-	"""TAB_VAR_DESEMP: variation, formula, scenario, note."""
-	assert _pairs(_block(_doc(_full_inform()), "TAB_VAR_DESEMP")) == [
-		("VAR_DESEMP", "5,0000"),
-		("FORMULA_RENTAB", "Indice mais spread"),
-		("CENARIO_GATILHO", "Pior, medio e bom"),
-		("ESCLAREC", "Explicacao"),
-	]
-
-
-def test_cost_example_block_xml() -> None:
-	"""INFORM_EXEMPLO_COMP: years and the six money values, optional ones included."""
-	assert _pairs(_block(_doc(_full_inform()), "INFORM_EXEMPLO_COMP")) == [
-		("ANO_ANT", "2023"),
-		("ANO_EMISS", "2024"),
-		("VALOR_RESG", "1000,00"),
-		("IMPOSTOS", "15,55"),
-		("VALOR_ING", "1,00"),
-		("VALOR_SAIDA", "2,00"),
-		("AJUSTE_PERFOR", "-3,00"),
-		("VALOR_DESPESAS", "12,30"),
-	]
-
-
-def test_expense_simulation_block_xml() -> None:
-	"""TAB_SIMUL_DESPESAS: the four projections."""
-	assert _pairs(_block(_doc(_full_inform()), "TAB_SIMUL_DESPESAS")) == [
-		("DESP_PREV3", "30,00"),
-		("DESP_PREV5", "50,00"),
-		("RETOR_BRUT3", "-4,50"),
-		("RETOR_BRUT5", "60,00"),
 	]
 
 
@@ -858,27 +839,40 @@ def test_a_file_holds_between_one_and_seventy_informs() -> None:
 		_doc()
 
 
-def test_header_constants_are_fixed() -> None:
+@pytest.mark.parametrize(
+	"bad", [{"cod_doc": 1}, {"cod_doc": 25}, {"cod_doc": "24"}, {"versao": "4.0"}]
+)
+def test_header_constants_are_fixed(bad: dict[str, object]) -> None:
 	"""COD_DOC is 24 and VERSAO is 3.0; other values are refused."""
-	for bad in ({"cod_doc": 1}, {"cod_doc": 25}, {"cod_doc": "24"}, {"versao": "4.0"}):
-		with pytest.raises(ValidationError):
-			_doc(_inform(), **bad)
+	with pytest.raises(ValidationError):
+		_doc(_inform(), **bad)
 
 
-def test_fixed_fee_takes_only_tx_adm() -> None:
-	"""A fixed fee needs TX_ADM and forbids TX_MIN/TX_MAX."""
-	_rejects(infor_tx_adm={"tipo_tx_adm": "F"})
-	_rejects(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "1", "tx_min": "1"})
-	_rejects(infor_tx_adm={"tipo_tx_adm": "F", "tx_adm": "1", "tx_max": "1"})
+@pytest.mark.parametrize(
+	"fee",
+	[
+		pytest.param({"tipo_tx_adm": "F"}, id="fixed-without-tx_adm"),
+		pytest.param({"tipo_tx_adm": "F", "tx_adm": "1", "tx_min": "1"}, id="fixed-with-tx_min"),
+		pytest.param({"tipo_tx_adm": "F", "tx_adm": "1", "tx_max": "1"}, id="fixed-with-tx_max"),
+		pytest.param({"tipo_tx_adm": "V"}, id="variable-without-bounds"),
+		pytest.param({"tipo_tx_adm": "V", "tx_min": "1"}, id="variable-without-tx_max"),
+		pytest.param({"tipo_tx_adm": "V", "tx_max": "1"}, id="variable-without-tx_min"),
+		pytest.param(
+			{"tipo_tx_adm": "V", "tx_min": "1", "tx_max": "2", "tx_adm": "1"},
+			id="variable-with-tx_adm",
+		),
+		pytest.param(
+			{"tipo_tx_adm": "V", "tx_min": "2", "tx_max": "1"}, id="variable-min-above-max"
+		),
+	],
+)
+def test_management_fee_rejects_fields_inconsistent_with_its_type(fee: dict[str, str]) -> None:
+	"""A fixed fee takes only TX_ADM; a variable fee takes TX_MIN <= TX_MAX and no TX_ADM."""
+	_rejects(infor_tx_adm=fee)
 
 
-def test_variable_fee_takes_min_and_max_in_order() -> None:
-	"""A variable fee needs both bounds, forbids TX_ADM, and min must not exceed max."""
-	_rejects(infor_tx_adm={"tipo_tx_adm": "V"})
-	_rejects(infor_tx_adm={"tipo_tx_adm": "V", "tx_min": "1"})
-	_rejects(infor_tx_adm={"tipo_tx_adm": "V", "tx_max": "1"})
-	_rejects(infor_tx_adm={"tipo_tx_adm": "V", "tx_min": "1", "tx_max": "2", "tx_adm": "1"})
-	_rejects(infor_tx_adm={"tipo_tx_adm": "V", "tx_min": "2", "tx_max": "1"})
+def test_variable_fee_accepts_equal_bounds() -> None:
+	"""TX_MIN equal to TX_MAX is a valid variable fee."""
 	_doc(_inform(infor_tx_adm={"tipo_tx_adm": "V", "tx_min": "1", "tx_max": "1"}))
 
 
