@@ -57,6 +57,8 @@ META_CDA_FI = _meta_contract("cda_fi", "META — CDA FI")
 META_LAMINA_FI = _meta_contract("lamina_fi", "META — Lâmina FI")
 META_ENTREGA_FI = _meta_contract("entrega_fi", "META — Entrega FI")
 META_EVENTUAL_FI = _meta_contract("eventual_fi", "META — Eventual FI")
+META_BALANCETE_FI = _meta_contract("balancete_fi", "META — Balancete FI")
+META_COMPL_FI = _meta_contract("compl_fi", "META — Complemento FI")
 META_PERFIL_MENSAL_FI = _meta_contract("perfil_mensal_fi", "META — Perfil Mensal FI")
 META_EXTRATO_FI = _meta_contract("extrato_fi", "META — Extrato FI")
 META_CAD_FI = _meta_contract("cad_fi", "META — Cadastro FI")
@@ -94,6 +96,7 @@ META_CAD_ADM_CART = _meta_contract("cad_adm_cart", "META — Cadastro Administra
 META_CAD_CONSULTOR_VLMOB = _meta_contract(
 	"cad_consultor_vlmob", "META — Cadastro Consultor de Valores Mobiliários"
 )
+META_ATO_DECLR = _meta_contract("ato_declr", "META — Atos Declaratórios")
 META_CAD_ADM_FII = _meta_contract("cad_adm_fii", "META — Cadastro Administrador de FII")
 META_CAD_CIA_ESTRANG = _meta_contract("cad_cia_estrang", "META — Cadastro Companhia Estrangeira")
 META_CAD_CIA_INCENT = _meta_contract("cad_cia_incent", "META — Cadastro Companhia Incentivada")
