@@ -5,7 +5,7 @@ serializador é reexportado no topo de `filings_cvm`:
 
 | o que | importe de |
 |---|---|
-| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **22 roots** do portal |
+| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **23 roots** do portal |
 | um **serializador** (submission) | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
@@ -1226,6 +1226,23 @@ df_ = CadastroAdmFiiReader().read()
 
 ---
 
+### `AtoDeclrReader` (1 reader)
+
+`filings_cvm.ingestion.ato_declr`
+
+A lista dos **atos declaratórios** que suspendem a intermediação irregular (`ATO_DECLR/INTERMED`,
+`ato_declr.csv`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `ato_declr/`.
+`CNPJ_CPF` mistura CNPJ, CPF e vazio (fora de `tuple_cnpj_cols`). Duas colunas de data viram `date`;
+o resto é texto exato. Página completa em [Atos Declaratórios](ingestion/ato_declr.md).
+
+```python
+from filings_cvm.ingestion.ato_declr import AtoDeclrReader
+
+df_ = AtoDeclrReader().read()
+```
+
+---
+
 ### `CadastroCiaEstrangReader` (1 reader)
 
 `filings_cvm.ingestion.cia_estrang`
@@ -1847,7 +1864,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader`
+`MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
