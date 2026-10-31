@@ -272,7 +272,7 @@ def test_informe_without_any_sacado_is_rejected() -> None:
 	def mutate(data: dict[str, Any]) -> None:
 		data["lista_inform"]["inform"]["lista_dev_sacados"]["dev_sacados"] = []
 
-	with pytest.raises(ValidationError):
+	with pytest.raises(ValidationError, match=r"(?s)dev_sacados.*at least 1 item"):
 		_doc(mutate)
 
 
@@ -282,13 +282,13 @@ def test_informe_without_senior_series_is_rejected() -> None:
 	def mutate(data: dict[str, Any]) -> None:
 		data["lista_inform"]["outras_inform"]["rent_mes"]["rent_classe_senior"] = []
 
-	with pytest.raises(ValidationError):
+	with pytest.raises(ValidationError, match=r"(?s)rent_classe_senior.*at least 1 item"):
 		_doc(mutate)
 
 
 def test_unknown_tag_is_rejected() -> None:
 	"""Blocks forbid extra fields, so a misspelt tag cannot be silently dropped."""
-	with pytest.raises(ValidationError):
+	with pytest.raises(ValidationError, match=r"(?s)vl_patrim_liquido.*Extra inputs"):
 		_doc(lambda d: d["lista_inform"]["patrliq"].update(vl_patrim_liquido="1"))
 
 
