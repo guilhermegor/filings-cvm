@@ -72,7 +72,11 @@ class InfFundo157Cotista(InfFundo157Block):
 
 
 class InfFundo157Document(InfFundo157Block):
-	"""DOC_ARQ — the whole file: the fund block and its shareholders (``LISTA_COTSTS``)."""
+	"""DOC_ARQ — the whole file: the fund block and its shareholders (``LISTA_COTSTS``).
+
+	``cotistas`` is a tuple, not a list: ``frozen`` blocks reassignment but not in-place
+	mutation, so a list could be emptied after validation, behind ``min_length``.
+	"""
 
 	header: InfFundo157Header
-	cotistas: Annotated[list[InfFundo157Cotista], Field(min_length=1)]
+	cotistas: Annotated[tuple[InfFundo157Cotista, ...], Field(min_length=1)]

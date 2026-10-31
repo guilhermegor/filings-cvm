@@ -25,8 +25,10 @@ da CVM. Os modelos são imutáveis e recusam campos desconhecidos. O namespace �
 ## Tipagem
 
 A página **não tem nenhum campo decimal**. Datas são parseadas (`31/02` é recusada, ano ≥ 1900);
-CNPJ e CPF têm o formato checado (`[0-9]`, sem espaços ou quebra de linha) antes do dígito
-verificador; o CNPJ é gravado sem máscara. `NOME` é não vazio, até 200 caracteres, sem caracteres de
+o formato é checado antes do dígito verificador, sem espaços ou quebra de linha: o CPF são
+exatamente 11 dígitos `[0-9]`; o CNPJ aceita `[0-9A-Z]` nas 12 primeiras posições (CNPJ
+alfanumérico de 2026) e dígitos verificadores numéricos, com ou sem máscara, e é gravado sem
+máscara. `NOME` é não vazio, até 200 caracteres, sem caracteres de
 controle e codificável em `windows-1252`.
 
 ### O que a página não diz (decisões deste repositório)

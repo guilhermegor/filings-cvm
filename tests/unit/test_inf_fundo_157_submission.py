@@ -126,8 +126,8 @@ def test_failed_export_keeps_existing_file(tmp_path: Path) -> None:
 		{"cod_doc": 56},
 	],
 )
-def test_header_rejects(overrides: dict[str, object]) -> None:
-	"""Header rejects."""
+def test_header_invalid_field_raises_validation_error(overrides: dict[str, object]) -> None:
+	"""A header with one malformed or unknown field raises ValidationError."""
 	with pytest.raises(ValidationError):
 		InfFundo157Header.model_validate(_header(**overrides))
 
@@ -151,8 +151,8 @@ def test_header_rejects(overrides: dict[str, object]) -> None:
 		{"unknown": "x"},
 	],
 )
-def test_cotista_rejects(overrides: dict[str, object]) -> None:
-	"""Cotista rejects."""
+def test_cotista_invalid_field_raises_validation_error(overrides: dict[str, object]) -> None:
+	"""A cotista with one malformed or unknown field raises ValidationError."""
 	with pytest.raises(ValidationError):
 		InfFundo157Cotista.model_validate(_cotista(**overrides))
 
@@ -172,3 +172,10 @@ def test_document_requires_at_least_one_cotista() -> None:
 	"""Document requires at least one cotista."""
 	with pytest.raises(ValidationError):
 		InfFundo157Document.model_validate({"header": _header(), "cotistas": []})
+
+
+def test_document_cotistas_cannot_be_emptied_after_validation() -> None:
+	"""The validated cotistas collection is immutable, so min_length cannot be bypassed."""
+	doc = InfFundo157Document.model_validate({"header": _header(), "cotistas": [_cotista()]})
+	assert isinstance(doc.cotistas, tuple)
+	assert not hasattr(doc.cotistas, "clear")
