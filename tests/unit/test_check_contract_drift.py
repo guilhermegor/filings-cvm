@@ -236,6 +236,37 @@ def test_check_real_header_tolerates_an_unpublished_period() -> None:
 	assert ccd.check_real_header(cls_reader) == []
 
 
+def _series_reader(refused: set[int], read_error: Exception) -> type:
+	"""Build a dated reader whose constructor refuses the listed offsets (0 = first probe date)."""
+	list_seen: list[object] = []
+
+	def __init__(self: object, date_ref: object = None, retry_policy: object = None) -> None:
+		list_seen.append(date_ref)
+		if len(list_seen) - 1 in refused:
+			raise ValueError(f"{date_ref} is before the series start")
+
+	def read(self: object, int_timeout_s: int = 60) -> pd.DataFrame:
+		raise read_error
+
+	return type("_Series", (), {"_CONTRACT": _CONTRACT, "__init__": __init__, "read": read})
+
+
+def test_check_real_header_skips_a_date_the_reader_refuses_like_a_404() -> None:
+	"""A constructor refusing the oldest date while the rest 404 is 'no artifact', not an error."""
+	int_last = len(ccd._probe_dates()) - 1
+	cls_reader = _series_reader({int_last}, OSError("404"))
+
+	assert ccd.check_real_header(cls_reader) == []
+
+
+def test_check_real_header_raises_when_the_reader_refuses_every_date() -> None:
+	"""A reader refusing every probe date is a misconfiguration and must still surface."""
+	cls_reader = _series_reader(set(range(len(ccd._probe_dates()))), OSError("404"))
+
+	with pytest.raises(ValueError, match="series start"):
+		ccd.check_real_header(cls_reader)
+
+
 def test_check_meta_reconciles_the_union_of_member_columns() -> None:
 	"""META fields are compared against the union of every member contract's columns."""
 	df_meta = pd.DataFrame({"section": ["s"], "field": ["A"]})  # META omits B
