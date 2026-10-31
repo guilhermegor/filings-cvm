@@ -76,7 +76,11 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
-- ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
+- Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`) — ✅ **submission**
+  — `submission/far.py` (`Far`); schema `_internal/config/schemas/far.py` (`FarDocument`);
+  validadores em `_internal/utils/xml_fields.py`. Decimais de 10 casas **ditos pela página**;
+  Tabela A (29 códigos, todos obrigatórios, colunas "N" **omitidas** — a página se contradiz aqui);
+  ver `docs/submission/far.md`. Nenhum validador da CVM foi executado
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
 - ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)

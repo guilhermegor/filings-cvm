@@ -6,6 +6,12 @@ standard. Ships in the wheel under ``_internal``; the public API is curated by t
 ``submission``/``ingestion`` packages, which re-export the names consumers need.
 """
 
+from filings_cvm._internal.config.schemas.far import (
+	FarDocument,
+	FarFund,
+	FarHeader,
+	FarMovement,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -26,6 +32,10 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 __all__ = [
 	"ClientCount",
 	"DocumentHeader",
+	"FarDocument",
+	"FarFund",
+	"FarHeader",
+	"FarMovement",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"OtcOperation",
