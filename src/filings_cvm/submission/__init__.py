@@ -16,6 +16,28 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.lamina import (
+	LaminaAntesInic2,
+	LaminaCarencia,
+	LaminaCompCarteira,
+	LaminaConversao,
+	LaminaDespesas,
+	LaminaDocument,
+	LaminaHeader,
+	LaminaInform,
+	LaminaInformExemploComp,
+	LaminaInforTabRentAnual,
+	LaminaListaCompCarteira,
+	LaminaListaTabRentAnual,
+	LaminaListaTabRentMensal,
+	LaminaTabRentAnual,
+	LaminaTabRentMensal,
+	LaminaTabSimulDespesas,
+	LaminaTabVarDesemp,
+	LaminaTaxaAdministracao,
+	LaminaTaxaEntrada,
+	LaminaTaxaSaida,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -32,6 +54,7 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarPercValCota,
 )
 from filings_cvm.submission.informe_diario import InformeDiario
+from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
@@ -42,6 +65,27 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"Lamina",
+	"LaminaAntesInic2",
+	"LaminaCarencia",
+	"LaminaCompCarteira",
+	"LaminaConversao",
+	"LaminaDespesas",
+	"LaminaDocument",
+	"LaminaHeader",
+	"LaminaInforTabRentAnual",
+	"LaminaInform",
+	"LaminaInformExemploComp",
+	"LaminaListaCompCarteira",
+	"LaminaListaTabRentAnual",
+	"LaminaListaTabRentMensal",
+	"LaminaTabRentAnual",
+	"LaminaTabRentMensal",
+	"LaminaTabSimulDespesas",
+	"LaminaTabVarDesemp",
+	"LaminaTaxaAdministracao",
+	"LaminaTaxaEntrada",
+	"LaminaTaxaSaida",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"OtcOperation",
