@@ -172,11 +172,19 @@ def _roster_exists_on_default_branch(path_root: pathlib.Path) -> bool:
 			clone, no remote) returns ``False``, so an unresolvable state never
 			invents a violation.
 	"""
+	# Inside a git hook GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE outrank ``-C`` and would resolve
+	# ``path_root`` to the repository being committed, so they are dropped for this lookup.
+	dict_env = {
+		str_key: str_value
+		for str_key, str_value in os.environ.items()
+		if str_key not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE")
+	}
 	for str_ref in ("origin/HEAD", "origin/main", "origin/master"):
 		cls_run = subprocess.run(  # noqa: S603
 			["git", "-C", str(path_root), "cat-file", "-e", f"{str_ref}:{_ROSTER_FILE}"],  # noqa: S607
 			capture_output=True,
 			check=False,
+			env=dict_env,
 		)
 		if cls_run.returncode == 0:
 			return True
