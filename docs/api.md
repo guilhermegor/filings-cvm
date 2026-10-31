@@ -5,7 +5,7 @@ serializador é reexportado no topo de `filings_cvm`:
 
 | o que | importe de |
 |---|---|
-| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **22 roots** do portal |
+| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **23 roots** do portal |
 | um **serializador** (submission) | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
@@ -22,7 +22,7 @@ from filings_cvm import RetryPolicy
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
 
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Balanço](submission/balanco.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Balanço](submission/balanco.md), [Informe Diário](submission/informe_diario.md), [Lâmina V3](submission/lamina.md), [CDA V4](submission/cda.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
 
@@ -73,6 +73,82 @@ InformeDiario().export(doc, output_path="informe.xml")     # grava arquivo, reto
 ```
 
 O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `PerfilMensal`.
+
+### `Lamina`
+
+`filings_cvm.submission.Lamina`
+
+Serializa um documento validado para XML compatível com a CVM (padrão Lâmina de Fundos V3).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `LaminaDocument` | Documento totalmente validado (`header` + 1 a 70 `informs`). |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+O texto é codificado e checado como XML bem formado **antes** de abrir o destino: uma falha de
+codificação levanta `ValueError` e **não trunca** um arquivo já existente. `COD_DOC=24` e
+`VERSAO=3.0` são fixos no `LaminaHeader`; não há parâmetro `versao`.
+
+```python
+from filings_cvm.submission import Lamina
+
+xml = Lamina().export(doc)                          # retorna str
+Lamina().export(doc, output_path="lamina.xml")      # grava arquivo, retorna None
+```
+
+Modelos públicos: `LaminaDocument`, `LaminaHeader`, `LaminaInform` e os blocos
+(`LaminaCarencia`, `LaminaConversao`, `LaminaTaxaAdministracao`, `LaminaTaxaEntrada`,
+`LaminaTaxaSaida`, `LaminaDespesas`, `LaminaListaCompCarteira`, `LaminaCompCarteira`,
+`LaminaInforTabRentAnual`, `LaminaAntesInic2`, `LaminaListaTabRentAnual`, `LaminaTabRentAnual`,
+`LaminaListaTabRentMensal`, `LaminaTabRentMensal`, `LaminaTabVarDesemp`,
+`LaminaInformExemploComp`, `LaminaTabSimulDespesas`). Limites e decisões: veja
+[Lâmina V3](submission/lamina.md).
+
+### `Cda`
+
+`filings_cvm.submission.Cda`
+
+Serializa um `CdaDocument` validado para XML compatível com a CVM (padrão CDA V4, namespace
+`urn:cda`, `COD_DOC=3`, `VERSAO=4.0`).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `CdaDocument` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+Modelos de entrada, todos em `filings_cvm.submission`: `CdaDocument`, `CdaHeader`, `CdaInform`,
+`CdaTitPub`, `CdaCotas`, `CdaSwap`, `CdaSwapAplic`, `CdaSwapPosFim`, `CdaDemaisCodif`,
+`CdaDepPrazoTitIf`, `CdaTitAgroCredPriv`, `CdaInvExt`, `CdaDemaisNCodif`, `CdaAplic`, `CdaNegoc`,
+`CdaPosFim`, `CdaAtivoExt`, `CdaEmitter`, `CdaBankEmitter`, `CdaPosFixIndex`, `CdaRiskRating`.
+Campos, escalas e regras em [CDA V4](submission/cda.md).
+
+---
+
+### `InfMensalFidc`
+
+`filings_cvm.submission.InfMensalFidc`
+
+Serializa um documento validado para XML compatível com a CVM (Informe Mensal FIDC, ICVM 576, a partir de 2019-11-01). Schema em `InfMensalFidcDocument` (`InfMensalFidcHeader` + `InfMensalFidcInform`).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InfMensalFidcDocument` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+```python
+from filings_cvm.submission import InfMensalFidc
+
+xml = InfMensalFidc().export(doc)                            # retorna str
+InfMensalFidc().export(doc, output_path="fidc.xml")          # grava arquivo, retorna None
+```
+
+Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
 
 ### `Balanco`
 
@@ -1240,6 +1316,23 @@ df_ = CadastroAdmFiiReader().read()
 
 ---
 
+### `AtoDeclrReader` (1 reader)
+
+`filings_cvm.ingestion.ato_declr`
+
+A lista dos **atos declaratórios** que suspendem a intermediação irregular (`ATO_DECLR/INTERMED`,
+`ato_declr.csv`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `ato_declr/`.
+`CNPJ_CPF` mistura CNPJ, CPF e vazio (fora de `tuple_cnpj_cols`). Duas colunas de data viram `date`;
+o resto é texto exato. Página completa em [Atos Declaratórios](ingestion/ato_declr.md).
+
+```python
+from filings_cvm.ingestion.ato_declr import AtoDeclrReader
+
+df_ = AtoDeclrReader().read()
+```
+
+---
+
 ### `CadastroCiaEstrangReader` (1 reader)
 
 `filings_cvm.ingestion.cia_estrang`
@@ -1847,7 +1940,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (46 readers)
+### `Meta*Reader` (49 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1861,7 +1954,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader`
+`MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
