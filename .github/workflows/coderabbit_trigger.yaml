@@ -1,0 +1,79 @@
+name: CodeRabbit Trigger
+
+# Asks CodeRabbit for a review when a PR opens, reopens, or leaves draft. Imported from the
+# BlueprintX python-common scaffold (#296).
+#
+# Why this exists although `.coderabbit.yaml` sets `auto_review.enabled: true`: CodeRabbit DECLINES
+# automatic reviews on a repository with fewer than 10 stars, and that threshold is not
+# configurable. Measured here on #291 — its first CodeRabbit comment is the refusal notice
+# "This repository does not receive automatic reviews because it has fewer than 10 stars".
+#
+# Why a user PAT and not `GITHUB_TOKEN`: CodeRabbit ignores bot-authored comments, so a request
+# posted as `github-actions[bot]` is silently dropped (measured upstream on blueprintx#210). The job
+# FAILS rather than skips when the PAT is missing — a skip would be the same silent no-op this
+# workflow exists to remove.
+#
+# No `synchronize`: `auto_incremental_review` covers later pushes once a review has started, and
+# re-asking on every push would spend the reviewer's rate limit.
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: coderabbit-trigger-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  trigger:
+    name: Ask CodeRabbit for a review
+    # A fork PR gets no secrets, so the request could never be posted — skip instead of going red.
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: The trigger PAT must exist and be well-formed
+        env:
+          GH_PAT_REVIEW_TRIGGER: ${{ secrets.GH_PAT_REVIEW_TRIGGER }}
+        run: |
+          if [ -z "$GH_PAT_REVIEW_TRIGGER" ]; then
+            echo "::error::GH_PAT_REVIEW_TRIGGER is not set, so no review can be requested." >&2
+            echo "GITHUB_TOKEN cannot substitute: CodeRabbit ignores bot-authored comments." >&2
+            echo "Set a user PAT with Pull requests: write —" >&2
+            echo "  gh secret set GH_PAT_REVIEW_TRIGGER --repo $GITHUB_REPOSITORY --body '<pat>'" >&2
+            exit 1
+          fi
+
+          case "$GH_PAT_REVIEW_TRIGGER" in
+          github_pat_*) echo "token class: fine-grained (github_pat_)" ;;
+          ghp_*) echo "token class: classic PAT (ghp_)" ;;
+          gho_*) echo "token class: OAuth (gho_) — a gh-CLI login token, not a PAT" ;;
+          ghs_*) echo "token class: installation/app (ghs_) — cannot act as a user" ;;
+          *) echo "::warning::token class: UNRECOGNISED prefix — is this a token at all?" ;;
+          esac
+
+          if printf '%s' "$GH_PAT_REVIEW_TRIGGER" | grep -qE '[[:space:]]'; then
+            echo "::error::the stored secret contains whitespace (likely a trailing newline)." >&2
+            echo "That 401s exactly like a bad token. Re-store it with --body, never a redirect:" >&2
+            echo "  gh secret set GH_PAT_REVIEW_TRIGGER --repo $GITHUB_REPOSITORY --body '<pat>'" >&2
+            exit 1
+          fi
+          echo "no whitespace in the stored value."
+
+      - name: The PAT must authenticate as a user
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REVIEW_TRIGGER }}
+        run: gh api user --jq '"authenticates as \(.login) [\(.type)]"'
+
+      - name: Request the review
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REVIEW_TRIGGER }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            -f body='@coderabbitai review' \
+            --jq '"requested by \(.user.login) [\(.user.type)]"'
