@@ -96,6 +96,30 @@ Campos, escalas e regras em [CDA V4](submission/cda.md).
 
 ---
 
+### `InfMensalFidc`
+
+`filings_cvm.submission.InfMensalFidc`
+
+Serializa um documento validado para XML compatível com a CVM (Informe Mensal FIDC, ICVM 576, a partir de 2019-11-01). Schema em `InfMensalFidcDocument` (`InfMensalFidcHeader` + `InfMensalFidcInform`).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InfMensalFidcDocument` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+```python
+from filings_cvm.submission import InfMensalFidc
+
+xml = InfMensalFidc().export(doc)                            # retorna str
+InfMensalFidc().export(doc, output_path="fidc.xml")          # grava arquivo, retorna None
+```
+
+Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
+
+---
+
 ## Leitor (ingestion)
 
 ### `InformeDiarioReader`
