@@ -180,7 +180,7 @@ def test_main_keeps_merged_branch_that_is_the_base_of_an_open_pr(
 
 
 def test_main_keeps_branch_merged_into_a_non_default_base(
-	monkeypatch: pytest.MonkeyPatch,
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
 	"""A PR merged into a feature branch never reached the default branch: no DELETE."""
 	list_calls: list[str] = []
@@ -190,6 +190,9 @@ def test_main_keeps_branch_merged_into_a_non_default_base(
 	monkeypatch.setattr(mod, "_api", _fake_api(list_calls, dict_prs))
 	assert mod.main() == 0
 	assert list_calls == []
+	str_out = capsys.readouterr().out
+	assert "1 with PR lookup" in str_out
+	assert "0 stale" in str_out
 
 
 def test_list_branches_skips_protected_branches(monkeypatch: pytest.MonkeyPatch) -> None:
