@@ -10,6 +10,11 @@ and serialise them through a single import:
     from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
 """
 
+from filings_cvm._internal.config.schemas.inf_fundo_157 import (
+	InfFundo157Cotista,
+	InfFundo157Document,
+	InfFundo157Header,
+)
 from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
@@ -31,6 +36,7 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.informe_diario import InformeDiario
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
@@ -38,6 +44,10 @@ from filings_cvm.submission.perfil_mensal import PerfilMensal
 __all__ = [
 	"ClientCount",
 	"DocumentHeader",
+	"InfFundo157",
+	"InfFundo157Cotista",
+	"InfFundo157Document",
+	"InfFundo157Header",
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
