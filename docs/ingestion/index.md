@@ -50,7 +50,7 @@ São **24 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `ato_d
 - **[CAD/FI histórico](cad_fi_hist.md)** — 19 readers `CadastroFiHist*Reader`: o **log de
   alterações** de cada atributo mutável do cadastro legado (situação, denominação, taxas, gestor,
   …), um por membro de `cad_fi_hist.zip`.
-- **[Informe Mensal FIDC](inf_mensal_fidc.md)** — 17 readers `InfMensalFidcTab*Reader`: as tabelas
+- **[Informe Mensal FIDC](inf_mensal_fidc.md)** — 18 readers `InfMensalFidcTab*Reader`: as tabelas
   do informe mensal dos FIDC (`inf_mensal_fidc_AAAAMM.zip`, Tabelas I–X + sub-tabelas de X), um por
   membro. Inaugura o *portal root* `fidc/`. Cada reader declara a sua **política de retry por
   tabela** (`_RETRY_POLICY`).

@@ -1,15 +1,15 @@
 """Shared base for the CVM *Informe Mensal FIDC* (INF_MENSAL) ingestion readers.
 
-``inf_mensal_fidc_AAAAMM.zip`` (dataset ``FIDC/DOC/INF_MENSAL``) ships **17 members** — the
+``inf_mensal_fidc_AAAAMM.zip`` (dataset ``FIDC/DOC/INF_MENSAL``) ships **18 members** — the
 tables of the FIDC monthly report: Tabelas I–X plus X's sub-tables (X.1, X.1.1, X.2 … X.7).
 Every member shares the four-column key prefix (``TP_FUNDO_CLASSE``, ``CNPJ_FUNDO_CLASSE``,
-``DENOM_SOCIAL``, ``DT_COMPTC``) then carries its own table-specific columns. The 17 are a
+``DENOM_SOCIAL``, ``DT_COMPTC``) then carries its own table-specific columns. The 18 are a
 **uniform family** — same monthly artifact, same key, same one date column — differing only in
 which table each carries.
 
-Rather than repeat the download → unzip → select-member → read logic in each of the 17 public
+Rather than repeat the download → unzip → select-member → read logic in each of the 18 public
 readers, that logic lives here once. This is a **private** base (leading underscore, its own
-file): consumers import the 17 concrete ``InfMensalFidcTab*Reader`` adapters, never this class.
+file): consumers import the 18 concrete ``InfMensalFidcTab*Reader`` adapters, never this class.
 Each concrete reader is a thin subclass that sets three class attributes — the member's stem
 (``_MEMBER_STEM``), its :class:`FileContract`, and a human ``_LABEL`` — and inherits everything
 else. The single date column ``DT_COMPTC`` is shared by every member, so it lives here as
@@ -17,7 +17,7 @@ else. The single date column ``DT_COMPTC`` is shared by every member, so it live
 
 Unlike the CAD snapshots, this dump is **monthly-partitioned**: the reader takes a ``date_ref``
 whose year and month pick the ``inf_mensal_fidc_AAAAMM.zip`` and, inside it, the
-``…_AAAAMM.csv`` member. All 17 readers download the *same* monthly archive, so a ``path_raw``
+``…_AAAAMM.csv`` member. All 18 readers download the *same* monthly archive, so a ``path_raw``
 written by any one serves the others. No grain is asserted: the sub-tables (X.1, X.2, …) are
 naturally long — many rows per fund, one per série/subclasse.
 """
@@ -42,11 +42,11 @@ from filings_cvm._internal.utils.zip_extractor import extract_all, find_member
 
 
 # CVM open-data monthly dump; ``{ym}`` is the reference month formatted ``AAAAMM``. Shared by all
-# 17 readers — the same archive holds every member.
+# 18 readers — the same archive holds every member.
 _BASE_URL = "https://dados.cvm.gov.br/dados/FIDC/DOC/INF_MENSAL/DADOS/inf_mensal_fidc_{ym}.zip"
 
 # Reader-owned default retry/backoff for the FIDC monthly dump, declared here as one source of
-# truth and assigned by each of the 17 readers as its ``_RETRY_POLICY`` class attribute. CVM's
+# truth and assigned by each of the 18 readers as its ``_RETRY_POLICY`` class attribute. CVM's
 # open-data portal throttles under load, so the default is patient — 5 attempts on a capped
 # exponential schedule (~2, 4, 8, 10 s). It is a **per-reader override point**: a table needing
 # more (or less) patience sets a different policy on its own class, and a caller can still override
@@ -59,7 +59,7 @@ _DEFAULT_RETRY_POLICY: RetryPolicy = RetryPolicy(
 
 
 class _BaseInfMensalFidcReader(IngestionReader):
-	"""Private base for the 17 Informe Mensal FIDC table readers.
+	"""Private base for the 18 Informe Mensal FIDC table readers.
 
 	A concrete reader sets :attr:`_MEMBER_STEM`, :attr:`_CONTRACT` and :attr:`_LABEL`;
 	everything else — the shared download/unzip/parse and the one ``DT_COMPTC`` date column —

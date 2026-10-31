@@ -378,6 +378,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 		"InfMensalFidcTabVReader",
 		"InfMensalFidcTabVIReader",
 		"InfMensalFidcTabVIIReader",
+		"InfMensalFidcTabVIIIReader",
 		"InfMensalFidcTabIXReader",
 		"InfMensalFidcTabXReader",
 		"InfMensalFidcTabX1Reader",
@@ -762,17 +763,24 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 		_CLOSED_SERIES_PROBES.get(cls_reader.__name__, _probe_dates()) if bool_dated else (None,)
 	)
 
+	cls_refused: ValueError | None = None
+	int_unpublished = 0
 	for date_ref in list_dates:
-		cls_instance = (
-			cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
-			if bool_dated
-			else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
-		)
+		try:
+			cls_instance = (
+				cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
+				if bool_dated
+				else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
+			)
+		except ValueError as cls_exc:
+			cls_refused = cls_exc  # date outside the reader's series — same as a 404, try the next
+			continue
 		try:
 			df_read = cls_instance.read(int_timeout_s=int_timeout_s)
 		except ContractError as cls_exc:
 			return [f"{cls_contract.str_name}: read failed its contract — {cls_exc}"]
 		except OSError:
+			int_unpublished += 1
 			continue  # period not published (or transient) — try an older one
 		bool_report_extra = _READER_TO_META.get(cls_reader.__name__) not in _PARTIAL_DATASETS
 		return real_header_drift(
@@ -781,6 +789,8 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 			real_columns(df_read),
 			bool_report_extra=bool_report_extra,
 		)
+	if cls_refused is not None and not int_unpublished:
+		raise cls_refused  # every date refused: a real misconfiguration, let the sweep report it
 	return []  # no probed period available — not drift
 
 

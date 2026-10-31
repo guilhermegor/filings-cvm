@@ -21,7 +21,7 @@ from filings_cvm import RetryPolicy
 > **portal root** que é dono do leitor — o mesmo agrupamento que a
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
 
@@ -215,6 +215,26 @@ InfMensalFidc().export(doc, output_path="fidc.xml")          # grava arquivo, re
 Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
 
 ---
+
+### `InformeQuadrimestral`
+
+`filings_cvm.submission.InformeQuadrimestral`
+
+Serializa um `InformeQuadrimestralDocument` validado para XML compatível com a CVM (Informe
+Quadrimestral V2, namespace `urn:inftrim`). Detalhes em
+[Informe Quadrimestral](submission/informe_quadrimestral.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InformeQuadrimestralDocument` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava em `windows-1252` e retorna `None`; o texto é codificado antes de abrir o arquivo. Caso contrário, retorna a `str` XML. |
+
+Modelos de schema (Pydantic): `InformeQuadrimestralDocument` (`DOC_ARQ`),
+`InformeQuadrimestralHeader` (`CAB_INFORM`), `InformeQuadrimestralInform` (`INFORM`),
+`ListaCotstCateg`, `CotistCategory` (`COTST_CATEG`), `ListaClasseCotas`, `ClasseCotas`
+(`CLASSE_COTAS`).
 
 ## Leitor (ingestion)
 
@@ -682,23 +702,23 @@ sit = CadastroFiHistSitReader().read()
 janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]   # DT_INI_SIT / DT_FIM_SIT
 ```
 
-### `InfMensalFidcTab*Reader` (17 readers)
+### `InfMensalFidcTab*Reader` (18 readers)
 
-`filings_cvm.ingestion.InfMensalFidcTab{I,II,III,IV,V,VI,VII,IX,X,X1,X11,X2,X3,X4,X5,X6,X7}Reader`
+`filings_cvm.ingestion.InfMensalFidcTab{I,II,III,IV,V,VI,VII,VIII,IX,X,X1,X11,X2,X3,X4,X5,X6,X7}Reader`
 
-Os 17 membros de `inf_mensal_fidc_AAAAMM.zip` — as tabelas do **Informe Mensal FIDC** (Tabelas I–X
+Os 18 membros de `inf_mensal_fidc_AAAAMM.zip` — as tabelas do **Informe Mensal FIDC** (Tabelas I–X
 mais as sub-tabelas de X), um reader por membro. Inaugura o *portal root* `fidc/`. Página completa:
 [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md).
 
 Todos têm a mesma assinatura, **com `date_ref`** (dump particionado por mês), e baixam o **mesmo**
 ZIP mensal:
 
-#### `InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 16)
+#### `InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 17)
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência seleciona o dump `AAAAMM`. Padrão: hoje. |
-| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 17 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 18 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
 | `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por tabela** — veja a página. |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 

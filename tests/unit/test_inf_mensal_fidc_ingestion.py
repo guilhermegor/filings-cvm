@@ -1,7 +1,7 @@
-"""Unit tests for the 17 Informe Mensal FIDC table readers.
+"""Unit tests for the 18 Informe Mensal FIDC table readers.
 
 One parameterized module covers the whole uniform family: a single in-memory fixture ZIP holds
-all 17 members for one reference month, and each reader is asserted to select **its own** member
+all 18 members for one reference month, and each reader is asserted to select **its own** member
 (columns match its contract, not a sibling's), coerce ``DT_COMPTC``, and honour the shared base
 behaviour (monthly ``date_ref``, ``path_raw`` persistence, contract validation). Mock the single
 I/O boundary (``download_file``); no network.
@@ -23,6 +23,7 @@ from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabIReader,
 	InfMensalFidcTabIVReader,
 	InfMensalFidcTabIXReader,
+	InfMensalFidcTabVIIIReader,
 	InfMensalFidcTabVIIReader,
 	InfMensalFidcTabVIReader,
 	InfMensalFidcTabVReader,
@@ -48,8 +49,11 @@ VALID_CNPJ = "11.222.333/0001-81"
 REF = date(2025, 6, 1)
 YM = "202506"
 
+# Verbatim header bytes CVM publishes (ISO-8859-1, CRLF kept) — the non-tautological oracle.
+PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "inf_mensal_fidc"
+
 # The whole family. Introspection off the class attributes keeps this list from re-stating the
-# 17 members/contracts that the readers already declare.
+# 18 members/contracts that the readers already declare.
 ALL_READERS: tuple[type[IngestionReader], ...] = (
 	InfMensalFidcTabIReader,
 	InfMensalFidcTabIIReader,
@@ -58,6 +62,7 @@ ALL_READERS: tuple[type[IngestionReader], ...] = (
 	InfMensalFidcTabVReader,
 	InfMensalFidcTabVIReader,
 	InfMensalFidcTabVIIReader,
+	InfMensalFidcTabVIIIReader,
 	InfMensalFidcTabIXReader,
 	InfMensalFidcTabXReader,
 	InfMensalFidcTabX1Reader,
@@ -96,7 +101,7 @@ def _member_csv(cls: type[IngestionReader]) -> str:
 
 
 def _all_members() -> dict[str, str]:
-	"""Build the full 17-member fixture archive, one valid row each."""
+	"""Build the full 18-member fixture archive, one valid row each."""
 	return {_member_name(cls): _member_csv(cls) for cls in ALL_READERS}
 
 
@@ -129,7 +134,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 def test_read_selects_its_own_member_with_all_columns(
 	cls: type[IngestionReader], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-	"""Each reader returns exactly its member's columns from the shared 17-member archive.
+	"""Each reader returns exactly its member's columns from the shared 18-member archive.
 
 	Parameters
 	----------
@@ -238,9 +243,9 @@ def test_read_raises_value_error_when_member_absent(monkeypatch: pytest.MonkeyPa
 def test_read_persists_whole_archive_when_path_raw_is_given(
 	monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-	"""With ``path_raw`` set, the ZIP and all 17 members survive a single reader's read.
+	"""With ``path_raw`` set, the ZIP and all 18 members survive a single reader's read.
 
-	The whole archive is kept, so the other 16 readers replay the same bytes.
+	The whole archive is kept, so the other 17 readers replay the same bytes.
 
 	Parameters
 	----------
@@ -323,3 +328,42 @@ def test_per_instance_retry_policy_overrides_module_default() -> None:
 	cls_reader = InfMensalFidcTabIReader(date_ref=REF, retry_policy=custom)
 
 	assert cls_reader._retry_policy is custom
+
+
+def test_tab_viii_contract_matches_the_published_header() -> None:
+	"""Tabela VIII's contract equals the header CVM publishes — the anti-tautology oracle.
+
+	Every other test builds its input from ``tuple_required``; this one alone compares the
+	contract against bytes we did not write (``inf_mensal_fidc_tab_VIII_header.csv``).
+	"""
+	str_line = (
+		(PATH_FIXTURES / "inf_mensal_fidc_tab_VIII_header.csv").read_bytes().decode("ISO-8859-1")
+	)
+
+	assert InfMensalFidcTabVIIIReader._CONTRACT.tuple_required == tuple(
+		str_line.strip().split(";")
+	)
+
+
+def test_tab_viii_keeps_valor_and_sequencial_as_exact_source_text(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""``VALOR`` (numeric(20,2)) and ``SEQUENCIAL`` stay exact text, never float or int.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to replace the download boundary.
+	"""
+	dict_members = _all_members()
+	cls = InfMensalFidcTabVIIIReader
+	str_header = ";".join(cls._CONTRACT.tuple_required)
+	dict_members[_member_name(cls)] = (
+		f"{str_header}\nClasse;{VALID_CNPJ};FIDC X;2025-06-30;07;1984223115.42\n"
+	)
+	_patch_download(monkeypatch, _zip_bytes(dict_members))
+
+	df_ = cls(date_ref=REF).read()
+
+	assert df_["VALOR"].iloc[0] == "1984223115.42"
+	assert df_["SEQUENCIAL"].iloc[0] == "07"
