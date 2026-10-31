@@ -10,6 +10,11 @@ and serialise them through a single import:
     from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
 """
 
+from filings_cvm._internal.config.schemas.cadastro_ativos import (
+	CadastroAtivosDocument,
+	CadastroAtivosHeader,
+	CadastroAtivosRow,
+)
 from filings_cvm._internal.config.schemas.cda import (
 	CdaAplic,
 	CdaAtivoExt,
@@ -32,6 +37,16 @@ from filings_cvm._internal.config.schemas.cda import (
 	CdaSwapPosFim,
 	CdaTitAgroCredPriv,
 	CdaTitPub,
+)
+from filings_cvm._internal.config.schemas.extrato import (
+	ExtratoDocument,
+	ExtratoHeader,
+	ExtratoRow,
+)
+from filings_cvm._internal.config.schemas.inf_fundo_157 import (
+	InfFundo157Cotista,
+	InfFundo157Document,
+	InfFundo157Header,
 )
 from filings_cvm._internal.config.schemas.inf_mensal_fidc import (
 	Alienacao,
@@ -107,6 +122,15 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_quadrimestral import (
+	ClasseCotas,
+	CotistCategory,
+	InformeQuadrimestralDocument,
+	InformeQuadrimestralHeader,
+	InformeQuadrimestralInform,
+	ListaClasseCotas,
+	ListaCotstCateg,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -144,9 +168,14 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm.submission.cadastro_ativos import (
+	CadastroAtivos,
+)
 from filings_cvm.submission.cda import (
 	Cda,
 )
+from filings_cvm.submission.extrato import Extrato
+from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
@@ -154,6 +183,7 @@ from filings_cvm.submission.informe_art12_res33 import InformeArt12Res33
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
+from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
@@ -165,6 +195,10 @@ __all__ = [
 	"Amort",
 	"Amortizacao",
 	"AplicAtivo",
+	"CadastroAtivos",
+	"CadastroAtivosDocument",
+	"CadastroAtivosHeader",
+	"CadastroAtivosRow",
 	"CaptMes",
 	"CaptaResgaAmorti",
 	"CartSegmt",
@@ -192,10 +226,12 @@ __all__ = [
 	"CdaTitPub",
 	"Cedent",
 	"CedentCredExiste",
+	"ClasseCotas",
 	"ClasseCotistas",
 	"ClientCount",
 	"CompmtDicred",
 	"CotasMovimento",
+	"CotistCategory",
 	"CotistasPorTipo",
 	"CredExiste",
 	"DescSerieClasse",
@@ -204,7 +240,15 @@ __all__ = [
 	"DevSacado",
 	"Dicred",
 	"DocumentHeader",
+	"Extrato",
+	"ExtratoDocument",
+	"ExtratoHeader",
+	"ExtratoRow",
 	"Garantia",
+	"InfFundo157",
+	"InfFundo157Cotista",
+	"InfFundo157Document",
+	"InfFundo157Header",
 	"InfMensalFidc",
 	"InfMensalFidcDocument",
 	"InfMensalFidcHeader",
@@ -215,6 +259,10 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformeQuadrimestral",
+	"InformeQuadrimestralDocument",
+	"InformeQuadrimestralHeader",
+	"InformeQuadrimestralInform",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
@@ -239,6 +287,8 @@ __all__ = [
 	"Liquidez",
 	"ListaCedent",
 	"ListaCedentCredExiste",
+	"ListaClasseCotas",
+	"ListaCotstCateg",
 	"ListaDevSacados",
 	"MercDerivativo",
 	"NegocDicredMes",

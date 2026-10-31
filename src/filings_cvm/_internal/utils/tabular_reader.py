@@ -62,7 +62,9 @@ class FileContract(metaclass=TypeChecker):
 	tuple_required : tuple of str
 		Columns that must be present.
 	tuple_cnpj_cols : tuple of str
-		Columns that must hold at least one valid CNPJ (coercible-type check).
+		Columns whose non-empty values must include at least one valid CNPJ (coercible-type
+		check). A column with no non-empty value — zero rows, or every cell blank — passes:
+		CVM ships header-only members and all-empty columns in some partitions.
 
 	Attributes
 	----------
@@ -297,7 +299,7 @@ def find_contract_problems(df_input: pd.DataFrame, cls_contract: FileContract) -
 	Returns
 	-------
 	list of str
-		Missing required columns and CNPJ columns holding no valid CNPJ.
+		Missing required columns, and CNPJ columns whose non-empty values hold no valid CNPJ.
 	"""
 	list_problems: list[str] = []
 	for str_col in cls_contract.tuple_required:
@@ -308,7 +310,12 @@ def find_contract_problems(df_input: pd.DataFrame, cls_contract: FileContract) -
 	for str_col in cls_contract.tuple_cnpj_cols:
 		if str_col not in df_input.columns:
 			continue
-		series_valid = df_input[str_col].astype(str).map(lambda v: is_valid_cnpj(unmask_cnpj(v)))
+		series_present = df_input[str_col].dropna().astype(str).str.strip()
+		series_present = series_present[series_present != ""]
+		# A header-only partition or an all-empty column leaves nothing to check, so it passes.
+		if series_present.empty:
+			continue
+		series_valid = series_present.map(lambda v: is_valid_cnpj(unmask_cnpj(v)))
 		if not bool(series_valid.any()):
 			list_problems.append(
 				f"Column '{str_col}' in '{cls_contract.str_name}' holds no valid CNPJ "

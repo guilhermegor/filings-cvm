@@ -1,0 +1,50 @@
+name: Review Retry
+
+# Re-asks for a review on the oldest open PR whose reviewer answered "rate limited". Imported from
+# the BlueprintX scaffold (#296); the reasoning is in `bin/retry_rate_limited_review.py`.
+#
+# Why a SCHEDULE (the `.github/CLAUDE.md` policy asks for the reason): a rate limit clears on its
+# own after a few minutes, and no GitHub event fires when it does. Only a clock can notice that
+# the window has passed. Upstream, 18 of 19 rate-limited PRs were reviewed after a re-ask. The
+# job only ever POSTS a review request: it cannot pass a gate or merge anything, and it exits 0
+# even when it cannot act.
+#
+# Posts with the `GH_PAT_REVIEW_TRIGGER` user PAT, never `GITHUB_TOKEN`: CodeRabbit ignores
+# bot-authored comments (see `coderabbit_trigger.yaml`).
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes, UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: review-retry-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    name: Re-ask a rate-limited reviewer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set Up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install --quiet "pyyaml==6.0.3"
+
+      - name: Re-request a review where the reviewer was rate limited
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_REVIEW_TRIGGER }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python bin/retry_rate_limited_review.py

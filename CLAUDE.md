@@ -73,14 +73,18 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 
 **Fundos**
 - Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
-- ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
+- Informe de Fundo 157 — ✅ **submission** (`PadraoXMLInf157.asp`) — `submission/inf_fundo_157.py`
+  (`InfFundo157`); schema `_internal/config/schemas/inf_fundo_157.py` (`InfFundo157Document`),
+  validadores em `_internal/utils/xml_fields.py`. A página não tem decimais e não diz o formato de
+  `DT_FIM` (adotado `DD/MM/AAAA`) nem a cardinalidade de `COTST` (≥1); ver
+  `docs/submission/inf_fundo_157.md`. Nenhum validador da CVM foi executado.
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ✅ **submission V4** (`PadraoXMLCDANetV4.aspx`) — `submission/cda.py` (`Cda`); schema `_internal/config/schemas/cda.py` · ⬜ V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
-- ⬜ Informe Quadrimestral V2 (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) · Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
-- Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **17
+- Informe Quadrimestral (FIP) — ✅ **submission V2** (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) — `submission/informe_quadrimestral.py` (`InformeQuadrimestral`); schema `_internal/config/schemas/informe_quadrimestral.py`; validadores em `_internal/utils/xml_fields.py` · ⬜ Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
+- Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **18
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
   `_internal/config/contracts/inf_mensal_fidc.py`. Inaugura o portal root `fidc/` (irmão de `fi/`)
@@ -210,8 +214,8 @@ only** (a CVM não publica padrão XML de envio). Não há `SECURIT/CAD`. Encerr
   é da fonte, provada pelo header pinado). Contracts **gerados do header** e **pinados** a
   `tests/fixtures/inf_mensal_cri/*_header.csv`. Armadilhas honradas: `cedente_devedor.CNPJ` pode ser
   CPF (fora de `tuple_cnpj_cols`), `Indice_Subordinacao_Data_Base` e `Data_LTV` (varchar no META) NÃO
-  são datas, `carteira_modificacao`/`responsavel` são **header-only** em 2025 → `tuple_cnpj_cols`
-  vazio (senão um arquivo legitimamente vazio falharia). **Com este, o root `securit/` está completo
+  são datas, `carteira_modificacao`/`responsavel` são **header-only** em 2025 e mesmo assim
+  declaram `CNPJ_Emissora` (#320 — desde o #317 uma coluna vazia passa). **Com este, o root `securit/` está completo
   (4/4) e a Wave 2 do #41 encerra**
 
 **Emissor de CEPAC (EMISSOR_CEPAC)** — portal root `emissor_cepac/`; **open-data only**. Publica só
@@ -222,15 +226,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **49 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **52 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (49 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (52 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (20) ou `.zip` multi-membro (29); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (22) ou `.zip` multi-membro (30); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`49 = 20 .txt + 29 .zip`, e 49 contracts — o 50º nome
+⚠️ **Estes números são MEDIDOS do código** (`52 = 22 .txt + 30 .zip`, e 52 contracts — o 53º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
 parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
@@ -268,6 +272,18 @@ números do mesmo parágrafo discordavam.
   tags — usado o do exemplo) e a tag da linha mensal (`MES` × `MES_RENT` — usada `MES`); ver
   `docs/submission/lamina.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
 
+**Complemento de Fundos (FI/DOC/COMPL)** — **open-data only** (sem padrão XML de envio):
+- Complemento FI — ✅ **ingestion** `compl_fi_AAAAMM.zip` (**ZIP de 4 membros**: `compl_fi` 20 cols,
+  `compl_fi_inf` 6, `compl_fi_inf_cotst` 7, `compl_fi_prest` 5; **mensal**, série **FECHADA**
+  `201801`–`201904`, 16 arquivos) — `ingestion/fi/doc/compl/*` (`ComplFiReader`, `ComplFiInfReader`,
+  `ComplFiInfCotstReader`, `ComplFiPrestReader`, base privada `_base_compl_reader.py`); contracts
+  `_internal/config/contracts/compl_fi.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/compl_fi/*_header.csv`. Headers **idênticos nos 16 meses** (medido) ⇒ um contract
+  por membro, **sem corte de schema**. Membro escolhido por nome exato (`compl_fi` é prefixo dos
+  outros). `date_ref` fora da janela levanta `ValueError` antes do download; padrão = último mês.
+  Só `DT_COMPTC` é data; `CNPJ_FUNDO` (4 membros) e `CNPJ_AG_RISCO` (`compl_fi`) são CNPJ; sem CPF.
+  ISO-8859-1, aspas literais. META = `meta_compl_fi_txt.zip` (infixo `_txt`, 4 membros)
+
 **Documentos Eventuais (FI/DOC/EVENTUAL)** — **open-data only** (a CVM não publica padrão XML de
 envio; é o registro do que foi entregue, não um informe):
 - Documentos Eventuais — ✅ **ingestion** `eventual_fi_AAAA.csv` (**CSV solto**, não ZIP, 11 cols,
@@ -285,6 +301,29 @@ envio; é o registro do que foi entregue, não um informe):
   apaga zero à esquerda em silêncio). ⚠️ **4 colunas parcialmente vazias** (`ID_SUBCLASSE` 96,8%,
   `RESULTADO_AUDITORIA` 83,5%, `ID_DOC` 75,6%, `NM_ARQ` 24,4%) — dependem do tipo de documento;
   vazio volta vazio. ⚠️ META é **`.txt` solto** (as outras 3 grafias dão 404)
+
+**Entrega de Documentos (FI/DOC/ENTREGA)** — **open-data only** (índice do que foi entregue, não o documento):
+- Entrega FI — ✅ **ingestion** `fi_entrega_documento_AAAAMM.zip` (**ZIP de 2 membros**, **mensal**, série
+  `202501`→`202610`, 22 meses medidos) — `ingestion/fi/doc/entrega/*` (`EntregaFiReader` membro
+  `fi_entrega_documento_AAAAMM.csv`, todos os tipos, 103k linhas em 202609; `EntregaFiDiarioReader` membro
+  `..._diario_AAAAMM.csv`, só `DIÁRIO FUNDOS`, 1,42M linhas / 178 MB; base privada `_base_entrega_reader.py`);
+  contracts `_internal/config/contracts/entrega_fi.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/entrega_fi/*_header.csv`. ⚠️ **Sem corte de schema** — o MESMO header de 11 colunas
+  nos 2 membros nos 22 meses (por isso não há `Pre*`), mas 2 contracts/readers/`source_key`. Só as 2
+  `Data_*_Competencia` são data; `Data_Hora_Entrega` (datetime com ms), `ID_Documento` e `ID_Subclasse`
+  (~95-99% vazia) ficam texto. `CNPJ_Fundo_Classe` (14 dígitos sem máscara, 100% preenchido) é a única
+  coluna de CNPJ; sem PII. META `meta_fi_entrega_documento.txt` (prefixo `fi_`), `.txt` solto, 11 campos
+
+**Balancete de Fundos (FI/DOC/BALANCETE)** — **open-data only** (sem padrão XML de envio):
+- Balancete FI — ✅ **ingestion** `balancete_fi_AAAAMM.zip` (**ZIP de 1 membro**, **mensal**, série
+  `201501`→, até 153 MB de CSV / 2,19M linhas em 202609) — `ingestion/fi/doc/balancete/*`
+  (`BalanceteFiReader`, `BalanceteFiPre202311Reader`, base privada `_base_balancete_reader.py`);
+  contracts `_internal/config/contracts/balancete_fi.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/balancete_fi/*_header.csv`. ⚠️ **Dois schemas, corte MEDIDO em `202311`** (5 cols
+  `CNPJ_FUNDO` → 6 cols `TP_FUNDO_CLASSE`+`CNPJ_FUNDO_CLASSE`) — **um mês antes** do Perfil Mensal
+  (`202312`), então o corte não se herda do vizinho nem se nomeia pela RCVM 175. `VL_SALDO_BALCTE`
+  (`numeric(23,2)`, com negativos) e `CD_CONTA_BALCTE` ficam texto exato; só `DT_COMPTC` é data.
+  META `.txt` solto descreve só o regime novo (`_META_UNDESCRIBED_READERS`)
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
 - ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
@@ -338,7 +377,11 @@ envio; é o registro do que foi entregue, não um informe):
   **zero linhas ragged** nos 3 artefatos. META = `meta_extrato_fi.txt` (`.txt` solto, único do
   `META/`), **117 campos = o header atual exatamente** ⇒ **não é oráculo do contrato pré-2020**
   (registrado em `_META_UNDESCRIBED_READERS`)
-- ⬜ **submission** Extrato — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+- ✅ **submission** Extrato — **V3** (`PadraoXMLInfExtratoV3.asp`) — `submission/extrato.py` (`Extrato`); schema
+  `_internal/config/schemas/extrato.py` (`ExtratoDocument`), validadores em `_internal/utils/xml_fields.py`.
+  ⚠️ A página **se contradiz** (exemplo × lista de tags: namespace `urn:extr`×`urn:perf`, `CNPJ_FDO`×`CNPJ_FUNDO`,
+  tag `TP_VL_FIXO_TX_INGRESSO` reutilizada em `TX_SAIDA`); seguido o exemplo; escalas não ditas são política do repo
+  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
@@ -593,8 +636,8 @@ Sob `CIA_ABERTA/CAD/`:
   `DT_RECEB`/`DENOM_CIA`/`ID_DOC` (estilo `cad_cia_aberta.csv`) contra `CNPJ_Companhia`/
   `Data_Referencia`/`ID_Documento` nos 9; gerar de um molde só quebra o índice **em silêncio**
   (anti-cópia pinada nas 2 direções). ⚠️ **`departamento_acionistas` é HEADER-ONLY (0 linhas)** →
-  `tuple_cnpj_cols=()`, senão um artefato legitimamente vazio levanta `ContractError` (provado por
-  mutação; classe de falha do CRI). ⚠️ **PRIMEIROS CPF DO ROOT (LGPD):** `dri.CPF_Responsavel`
+  ainda declara `CNPJ_Companhia` (#320 — desde o #317 uma coluna vazia passa, então o `()` que
+  evitava o `ContractError` no artefato vazio caiu). ⚠️ **PRIMEIROS CPF DO ROOT (LGPD):** `dri.CPF_Responsavel`
   (1.003 CPF + 4 CNPJ), `auditor.CPF_Responsavel_Tecnico`, e `auditor.CPF_CNPJ_Auditor` (misto por
   definição — todo CNPJ em 2025, mas um ano com CPF quebraria um check) → **fora de
   `tuple_cnpj_cols`**, fixtures **header-only**. `escriturador` é o único com **2** CNPJ cols de
@@ -733,7 +776,7 @@ Sob `CIA_ABERTA/CAD/`:
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
 
 **Mercados de Negociação**
-- ⬜ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`)
+- ✅ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`) — `submission/cadastro_ativos.py` (`CadastroAtivos`); schema `_internal/config/schemas/cadastro_ativos.py`
 
 **Escriturador de Valores Mobiliários**
 - ✅ **submission** Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`) — `submission/informe_art12_res33.py`
@@ -755,7 +798,7 @@ src/filings_cvm/
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
                            #   23 ROOT PACKAGES, never the readers
-        _base_meta_reader.py   # PRIVATE base for the 42 Meta*Reader (shared across every root)
+        _base_meta_reader.py   # PRIVATE base for the 52 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:
@@ -763,15 +806,18 @@ src/filings_cvm/
                            #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira),
+                           #       entrega/ (ZIP mensal de 2 membros, mesmo header, 2 readers; sem corte de schema)
+                           #       compl/ (ZIP mensal de 4 membros, série fechada 201801-201904; 1 contract por membro, sem corte),
                            #       eventual/ (índice de documentos eventuais, CSV solto anual),
                            #       perfil_mensal/ (CSV solto MENSAL, 2 readers = 2 regimes RCVM 175
                            #         + base privada; 106 cols até 202311, 107 de 202312)
                            #       extrato/ (DOIS artefatos: anual 2015-2026 + snapshot de URL fixa;
                            #         3 readers, corte 116->117 cols em 2020 que NAO e RCVM 175;
                            #         o snapshot e o unico reader com CHAVE UNICA)
+                           #       balancete/ (ZIP mensal de 1 membro; 2 readers, corte 5->6 cols em 202311 MEDIDO)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
-        fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
+        fidc/              #   FIDC/ — inf_mensal/ (18 table readers + private base)
         fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
@@ -796,7 +842,7 @@ src/filings_cvm/
         cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto)
                            #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
-                           #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
+                           #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only mas declara CNPJ_Companhia (#320); CPF em dri/auditor; META sem prefixo meta_)
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
                            #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; COMPLETO em 4 fatias temáticas — 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF), 3 (diversidade, 11, AGREGADOS), 4 (remuneração/val. mob./transações, 10) = 36/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada e Documento_Parte_Relacionada guardam CNPJ+CPF e ficam de fora; membros de diversidade são AGREGADOS, não PII; participacao_sociedade tem 2 CNPJ cols com 792 placeholders 00000000000000)
                            #     doc/dfp/ — DFP (dfp_cia_aberta_AAAA.zip, 19 membros/~1,17M linhas, anual; INVERTE a armadilha: 16 membros colapsam em 3 listas IDÊNTICAS, e por isso um swap con/ind era invisível — fechado por teste de identidade do membro; VL_CONTA com 10 casas E escala em ESCALA_MOEDA; todos usam CNPJ_CIA; META com infixo _txt)
