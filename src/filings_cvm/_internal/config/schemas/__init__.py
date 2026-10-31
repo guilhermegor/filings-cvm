@@ -6,6 +6,11 @@ standard. Ships in the wheel under ``_internal``; the public API is curated by t
 ``submission``/``ingestion`` packages, which re-export the names consumers need.
 """
 
+from filings_cvm._internal.config.schemas.extrato import (
+	ExtratoDocument,
+	ExtratoHeader,
+	ExtratoRow,
+)
 from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Cotista,
 	InfFundo157Document,
@@ -53,6 +58,9 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 __all__ = [
 	"ClientCount",
 	"DocumentHeader",
+	"ExtratoDocument",
+	"ExtratoHeader",
+	"ExtratoRow",
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
