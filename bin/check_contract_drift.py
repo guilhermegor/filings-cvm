@@ -37,9 +37,13 @@ from datetime import date, timedelta
 import inspect
 import json
 import os
+from pathlib import Path
+import re
 import sys
+import tempfile
 from typing import TYPE_CHECKING, Any
 import urllib.request
+import zipfile
 
 from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.balancete_fi import (
@@ -442,6 +446,8 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 # omits", this one suppresses "contract column the META omits" — and only for a reader whose
 # contract was never in the META's scope. Without it the job reports the same explained line every
 # week forever, and a recurring known-false finding is how a report stops being read.
+_FRE_NO_SECTION = "FRE META has no section for this member"
+
 _META_UNDESCRIBED_READERS: dict[str, str] = {
 	# BALANCETE META lists the 6-column fund/class header only; no CNPJ_FUNDO field.
 	"BalanceteFiPre202311Reader": "META describes the 202311-onward schema only",
@@ -452,6 +458,55 @@ _META_UNDESCRIBED_READERS: dict[str, str] = {
 	# Same shape, different cause; the EXTRATO META lists the 117-column header only, so its
 	# 116-column pre-2020 contract has no field to reconcile against.
 	"ExtratoFiPre2020Reader": "META describes the 2020-onward schema only",
+	# Eight of the 36 FRE data members have no section at all in its 50-section META, which
+	# predates the PCD, empregado_local and empregado_posicao split. Their real headers match the
+	# contracts exactly, as measured on the 2025 archive in issue #115.
+	"FreCiaAbertaAdministradorPcdReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPcdReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoLocalReader": _FRE_NO_SECTION,
+}
+
+# META sections describing a member CVM **does not ship** in the data archive — keyed by META
+# reader, valued by the verbatim ``section`` names. Their fields are dropped before reconciling,
+# so they are not reported as "META declares field X" every week. This is the reverse of
+# ``_META_UNDESCRIBED_READERS`` (a data member the META omits); a section listed here was checked
+# absent from the published archive, so it is not an unimplemented member (that would be real
+# signal and must stay reported). Measured in issue #115 against the 2025 archives.
+_META_ONLY_SECTIONS: dict[str, frozenset[str]] = {
+	# The FRE META has 50 sections for a 36-member archive, and these 22 have no CSV in it.
+	"MetaFreCiaAbertaReader": frozenset(
+		{
+			"fre_cia_aberta_ativo_imobilizado",
+			"fre_cia_aberta_ativo_intangivel",
+			"fre_cia_aberta_auditor_responsavel",
+			"fre_cia_aberta_capital_social_aumento",
+			"fre_cia_aberta_capital_social_aumento_classe_acao",
+			"fre_cia_aberta_capital_social_desdobramento",
+			"fre_cia_aberta_capital_social_desdobramento_classe_acao",
+			"fre_cia_aberta_capital_social_reducao",
+			"fre_cia_aberta_capital_social_reducao_classe_acao",
+			"fre_cia_aberta_direito_acao",
+			"fre_cia_aberta_empregado_declaracao_genero",
+			"fre_cia_aberta_empregado_declaracao_raca",
+			"fre_cia_aberta_grupo_economico_reestruturacao",
+			"fre_cia_aberta_historico_emissor",
+			"fre_cia_aberta_participacao_sociedade_valorizacao_acao",
+			"fre_cia_aberta_plano_recompra",
+			"fre_cia_aberta_plano_recompra_classe_acao",
+			"fre_cia_aberta_politica_negociacao",
+			"fre_cia_aberta_politica_negociacao_cargo",
+			"fre_cia_aberta_valor_mobiliario_tesouraria_movimentacao",
+			"fre_cia_aberta_valor_mobiliario_tesouraria_ultimo_exercicio",
+			"fre_cia_aberta_volume_valor_mobiliario",
+		}
+	),
+	# 13 META sections for a 12-member archive; inf_anual_fii_2025.zip has no such CSV.
+	"MetaInfAnualFiiReader": frozenset({"representante_cotista_fundo"}),
 }
 
 _PARTIAL_DATASETS: dict[str, str] = {
@@ -750,6 +805,17 @@ def check_meta(
 		df_meta = cls_meta(retry_policy=_DRIFT_RETRY_POLICY).read(int_timeout_s=int_timeout_s)
 	except OSError:
 		return []  # META unavailable (transient) — not drift
+	frozenset_meta_only = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	list_shipped: list[str] = []
+	if frozenset_meta_only:
+		frozenset_shipped = archived_meta_only_sections(cls_meta, tuple_members, int_timeout_s)
+		list_shipped = [
+			f"{str_label}: META-only section '{str_section}' now ships a CSV in the archive — "
+			"drop it from _META_ONLY_SECTIONS"
+			for str_section in sorted(frozenset_shipped)
+		]
+		frozenset_meta_only -= frozenset_shipped
+	df_meta = df_meta[~df_meta["section"].isin(frozenset_meta_only)]
 	frozenset_fields = frozenset(df_meta["field"].astype(str))
 
 	list_cols: list[str] = []
@@ -762,9 +828,96 @@ def check_meta(
 				set_seen.add(str_col)
 				list_cols.append(str_col)
 	bool_report_extra = cls_meta.__name__ not in _PARTIAL_DATASETS
-	return meta_name_drift(
+	return list_shipped + meta_name_drift(
 		str_label, tuple(list_cols), frozenset_fields, bool_report_extra=bool_report_extra
 	)
+
+
+# A data member's period suffix: ``_2025`` (yearly) or ``_202506`` (monthly).
+_RE_PERIOD_SUFFIX = re.compile(r"_\d{4}(\d{2})?$")
+
+
+def sections_of_members(
+	cls_meta: type[BaseMetaReader], tuple_names: tuple[str, ...]
+) -> frozenset[str]:
+	"""Label data-archive member filenames the way the META labels its sections.
+
+	``fre_cia_aberta_auditor_2025.csv`` drops its period suffix and goes through the META reader's
+	own ``_section_of``, so it compares with ``_META_ONLY_SECTIONS`` whatever prefix that META
+	keeps or strips.
+
+	Parameters
+	----------
+	cls_meta : type[BaseMetaReader]
+		The dataset's META reader.
+	tuple_names : tuple of str
+		Member filenames of the data archive.
+
+	Returns
+	-------
+	frozenset of str
+		The members' section labels.
+	"""
+	reader_meta = cls_meta()
+	return frozenset(
+		reader_meta._section_of(f"meta_{_RE_PERIOD_SUFFIX.sub('', Path(str_name).stem)}.txt")
+		for str_name in tuple_names
+	)
+
+
+def archived_meta_only_sections(
+	cls_meta: type[BaseMetaReader],
+	tuple_members: tuple[type[IngestionReader], ...],
+	int_timeout_s: int = 60,
+) -> frozenset[str]:
+	"""Return the ``_META_ONLY_SECTIONS`` entries whose CSV the recent data archives ship.
+
+	An exempted section that gains a real member must reach the report, not stay muted. One member
+	reader downloads the archive into a scratch ``path_raw``; its member list is all that is read.
+	When no probed period is reachable, nothing is returned and the exemption stands this week.
+
+	Parameters
+	----------
+	cls_meta : type[BaseMetaReader]
+		The dataset's META reader.
+	tuple_members : tuple of type[IngestionReader]
+		The dataset's member readers; the first one fetches the archive.
+	int_timeout_s : int, optional
+		Socket timeout forwarded to ``read``, by default 60.
+
+	Returns
+	-------
+	frozenset of str
+		Exempted sections now present in the archive.
+	"""
+	frozenset_exempt = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	cls_reader = tuple_members[0]
+	# The current year's archive is published incrementally, and the 2026 INF_ANUAL_FII one held
+	# only 10 of its 12 members in Oct 2026, so it is unioned with the last complete year.
+	# ponytail - dedupes by year, which fits the two yearly archives exempted today; a monthly
+	# dataset added here would need a per-period key.
+	set_years: set[int] = set()
+	set_names: set[str] = set()
+	for date_ref in _probe_dates():
+		if date_ref.year in set_years:
+			continue
+		with tempfile.TemporaryDirectory() as str_tmp:
+			path_tmp = Path(str_tmp)
+			try:
+				cls_reader(
+					date_ref=date_ref, path_raw=path_tmp, retry_policy=_DRIFT_RETRY_POLICY
+				).read(int_timeout_s=int_timeout_s)
+			except ContractError:
+				pass  # the archive landed; a member's own drift is check_real_header's to report
+			except OSError:
+				continue  # period not published (or transient) — try an older one
+			for path_zip in path_tmp.glob("*.zip"):
+				with zipfile.ZipFile(path_zip) as zip_archive:
+					set_names.update(zip_archive.namelist())
+		set_years.add(date_ref.year)
+		if len(set_years) == 2:
+			break
+	return frozenset_exempt & sections_of_members(cls_meta, tuple(set_names))
 
 
 def collect_drift(int_timeout_s: int = 60) -> list[str]:
