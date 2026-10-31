@@ -139,6 +139,13 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-schemas
+        name: schema modules hold only pydantic models
+        entry: bash bin/poetry_exec.sh run python bin/check_schemas.py
+        language: system
+        types:
+          - python
+
       - id: check-docs-sections
         name: docs skeleton, nav registration and family sections
         entry: bash bin/poetry_exec.sh run python bin/check_docs_sections.py
