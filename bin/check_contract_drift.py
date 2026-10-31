@@ -41,6 +41,7 @@ import sys
 from typing import TYPE_CHECKING, Any
 import urllib.request
 
+from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.balancete_fi import (
 	BALANCETE_FI,
 	BALANCETE_FI_PRE202311,
@@ -107,6 +108,7 @@ _META_NAME_MAX_LEN = 50
 # every reader's contract; the multi-member readers expose ``_CONTRACT`` and are read from the
 # class directly. Keyed by class name, resolved through the portal-root packages.
 _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
+	"AtoDeclrReader": ATO_DECLR,
 	"BalanceteFiPre202311Reader": BALANCETE_FI_PRE202311,
 	"BalanceteFiReader": BALANCETE_FI,
 	"BalanceteFieReader": BALANCETE_FIE,
@@ -143,6 +145,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 # names — see the module docstring (the cad_fi / cad_fi_hist / registro traps). Keyed by class
 # name; both sides resolve through the portal-root packages.
 _META_MEMBERS: dict[str, tuple[str, ...]] = {
+	"MetaAtoDeclrReader": ("AtoDeclrReader",),
 	"MetaCadAdmFiiReader": ("CadastroAdmFiiReader",),
 	"MetaCadCiaEstrangReader": ("CadastroCiaEstrangReader",),
 	"MetaCadCiaAbertaReader": ("CadastroCiaAbertaReader",),

@@ -16,6 +16,7 @@ delete the example once your own contracts exist.
 
 from __future__ import annotations
 
+from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.balancete_fi import (
 	BALANCETE_FI,
 	BALANCETE_FI_PRE202311,
@@ -299,6 +300,7 @@ from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CA
 from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
 from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
 from filings_cvm._internal.config.contracts.meta import (
+	META_ATO_DECLR,
 	META_BALANCETE_FI,
 	META_BALANCETE_FIE,
 	META_BALANCO_FIE,
@@ -373,6 +375,7 @@ from filings_cvm._internal.utils.tabular_reader import (
 
 
 __all__ = [
+	"ATO_DECLR",
 	"BALANCETE_FI",
 	"BALANCETE_FIE",
 	"BALANCETE_FI_PRE202311",
@@ -609,6 +612,7 @@ __all__ = [
 	"LAMINA_CARTEIRA_FIF",
 	"LAMINA_FIF",
 	"MEDIDAS_MES_FIE",
+	"META_ATO_DECLR",
 	"META_BALANCETE_FI",
 	"META_BALANCETE_FIE",
 	"META_BALANCO_FIE",

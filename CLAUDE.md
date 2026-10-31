@@ -75,7 +75,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ⬜ V3 (`PadraoXMLInfoDiarioNetV3.asp`) · V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - ⬜ Informe de Fundo 157 (`PadraoXMLInf157.asp`)
 - ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
-- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ⬜ **submission** V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`) · V4 (`PadraoXMLCDANetV4.aspx`)
+- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ✅ **submission V4** (`PadraoXMLCDANetV4.aspx`) — `submission/cda.py` (`Cda`); schema `_internal/config/schemas/cda.py` · ⬜ V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`)
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
@@ -84,7 +84,9 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
   `_internal/config/contracts/inf_mensal_fidc.py`. Inaugura o portal root `fidc/` (irmão de `fi/`)
-  · ⬜ **submission** até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`) · a partir de 2019-11-01 (`PadraoXMLMensalFIDC576.asp`)
+  · **submission** — ⬜ até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`, descontinuado) · ✅ a partir de
+  2019-11-01 (`PadraoXMLMensalFIDC576.asp`) — `submission/inf_mensal_fidc.py` (`InfMensalFidc`);
+  schema `_internal/config/schemas/inf_mensal_fidc.py`
 - Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
   snapshot `cad_fi.csv` — `ingestion/fi/cad/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
@@ -220,15 +222,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **49 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **50 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (49 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (50 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (20) ou `.zip` multi-membro (29); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (21) ou `.zip` multi-membro (29); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`49 = 20 .txt + 29 .zip`, e 49 contracts — o 50º nome
+⚠️ **Estes números são MEDIDOS do código** (`50 = 21 .txt + 29 .zip`, e 50 contracts — o 51º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
 parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
@@ -258,7 +260,13 @@ números do mesmo parágrafo discordavam.
   ✅ **ingestion** lâmina proper (`lamina_fi_*`, 78 colunas) — `ingestion/fi/doc/lamina/lamina.py`
   (`LaminaReader`); contract `_internal/config/contracts/lamina_fif.py` ·
   ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP) ·
-  ⬜ **submission** V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
+  ✅ **submission** **V3** (`PadraoXMLLaminaV3.asp`) — `submission/lamina.py` (`Lamina`); schema
+  `_internal/config/schemas/lamina.py` (`LaminaDocument`, 20 blocos), validadores em
+  `_internal/utils/xml_fields.py`. ⚠️ A página **não diz a escala de nenhum decimal** (tudo "float"),
+  então as escalas são **política do repo, não número da CVM** (dinheiro 2, percentuais 4, truncado), e
+  ela **se contradiz** em 2 pontos: namespace (`urn:lamina` no exemplo × `urn:infdiario` na lista de
+  tags — usado o do exemplo) e a tag da linha mensal (`MES` × `MES_RENT` — usada `MES`); ver
+  `docs/submission/lamina.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
 
 **Documentos Eventuais (FI/DOC/EVENTUAL)** — **open-data only** (a CVM não publica padrão XML de
 envio; é o registro do que foi entregue, não um informe):
@@ -445,6 +453,16 @@ de envio). Sob `ADM_FII/CAD/`:
   (`DT_REG`/`DT_CANCEL`/`DT_INI_SIT`; `MOTIVO_CANCEL` é TEXTO, não data); chaveado por `CNPJ`
   (mascarado), **sem coluna de CPF**. `CEP`/`DDD`/`TEL` `numeric` no META mas `str`; usa `DDD` (não
   `DDD_TEL`). **Oitava e última fatia da Wave 3 do #41 — ENCERRA A WAVE 3 (8/8)**
+
+**Atos Declaratórios** — portal root `ato_declr/`; **open-data only**. Sob `ATO_DECLR/INTERMED/`
+(único dataset do root, medido na listagem):
+- Atos Declaratórios — ✅ **ingestion** `ato_declr.csv` (**CSV solto**, 7 cols, 914 linhas, ISO-8859-1,
+  `;`) — `ingestion/ato_declr/intermed/ato_declr.py` (`AtoDeclrReader`); contract
+  `_internal/config/contracts/ato_declr.py`, **gerado do header e pinado** a
+  `tests/fixtures/ato_declr/ato_declr_header.csv`. **Snapshot** de URL fixa, **sem `date_ref`**.
+  2 colunas de data ISO. ⚠️ **`CNPJ_CPF` mistura CNPJ, CPF e vazio** (e 1 CNPJ sem máscara) →
+  `tuple_cnpj_cols=()`; `Denominacao` tem nomes de PF → fixture só com header. META `.txt` solto.
+  Inaugura o root `ato_declr/` (não confundir com `intermed/`)
 
 **Companhias Estrangeiras** — portal root `cia_estrang/`; **open-data only** (a CVM não publica
 padrão XML de envio). Sob `CIA_ESTRANG/CAD/`:
@@ -742,7 +760,7 @@ src/filings_cvm/
                            #   `from filings_cvm.submission import InformeDiario`
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
-                           #   22 ROOT PACKAGES, never the readers
+                           #   23 ROOT PACKAGES, never the readers
         _base_meta_reader.py   # PRIVATE base for the 42 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
@@ -768,6 +786,7 @@ src/filings_cvm/
         securit/           #   SECURIT/ — COMPLETO: doc/{dfin_cra,dfin_cri} (flat) + inf_mensal_ots/ (8)
                            #     + inf_mensal_cra/ (8) + inf_mensal_cri/ (11); contracts pinned to real headers
         emissor_cepac/     #   EMISSOR_CEPAC/ — cad/cadastro (snapshot, no date_ref)
+        ato_declr/         #   ATO_DECLR/ — intermed/ato_declr (ato_declr.csv, CSV solto, 7 cols, snapshot, no date_ref; CNPJ_CPF misto → sem CNPJ cols)
         auditor/           #   AUDITOR/ — cad/{auditor_pf,auditor_pj} (snapshot ZIP, 2 membros, no date_ref)
         agente_fiduc/      #   AGENTE_FIDUC/ — cad/{agente_fiduc_pf,agente_fiduc_pj} (snapshot ZIP, 2 membros, no date_ref)
         agente_auton/      #   AGENTE_AUTON/ — cad/{agente_auton_pf,agente_auton_pj} (snapshot ZIP, 2 membros, no date_ref)
@@ -813,7 +832,7 @@ neither section:
 
 | what | import from |
 |---|---|
-| an ingestion reader | `filings_cvm.ingestion.<portal_root>` (22 roots) |
+| an ingestion reader | `filings_cvm.ingestion.<portal_root>` (23 roots) |
 | a submission writer | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
