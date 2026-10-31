@@ -210,6 +210,54 @@ def _graphql(str_query: str, dict_vars: dict) -> dict:
 	return dict_resp["data"]
 
 
+def _open_pr_bases(str_api: str) -> set[str]:
+	"""Return the base branches of every open PR.
+
+	Deleting a branch that an open PR targets makes GitHub close that PR. Not caught by the
+	caller: without this set no deletion is safe, so a failed read ends the run before anything
+	is deleted.
+
+	Parameters
+	----------
+	str_api : str
+		The ``.../repos/{owner}/{name}`` API base.
+
+	Returns
+	-------
+	set of str
+		Branch names that an open PR targets.
+	"""
+	set_bases: set[str] = set()
+	int_page = 1
+	while True:
+		list_page = _api("GET", f"{str_api}/pulls?state=open&per_page=100&page={int_page}")
+		set_bases.update(dict_pr["base"]["ref"] for dict_pr in list_page)
+		if len(list_page) < 100:  # noqa: PLR2004
+			return set_bases
+		int_page += 1
+
+
+def _already_gone(cls_exc: urllib.error.HTTPError) -> bool:
+	"""Return whether a failed DELETE means the ref no longer exists.
+
+	GitHub answers 422 both for a missing ref and for a refusal such as a ruleset, so a 422
+	counts only when its body names the missing ref. Anything else is a real failure.
+
+	Parameters
+	----------
+	cls_exc : urllib.error.HTTPError
+		The error raised by the DELETE.
+
+	Returns
+	-------
+	bool
+		``True`` for a 404, or a 422 saying ``Reference does not exist``.
+	"""
+	if cls_exc.code == 422:  # noqa: PLR2004
+		return b"Reference does not exist" in cls_exc.read()
+	return cls_exc.code == 404  # noqa: PLR2004
+
+
 def _delete_branch(str_api: str, str_branch: str) -> None:
 	"""Delete a branch ref, treating an already-gone branch as success.
 
@@ -223,13 +271,13 @@ def _delete_branch(str_api: str, str_branch: str) -> None:
 	try:
 		_api("DELETE", f"{str_api}/git/refs/heads/{str_branch}")
 	except urllib.error.HTTPError as cls_exc:
-		if cls_exc.code not in (404, 422):
+		if not _already_gone(cls_exc):
 			raise
 		print(f"branch {str_branch} already gone ({cls_exc.code})", file=sys.stderr)
 
 
 def reconcile_pr(
-	str_api: str, str_owner: str, str_name: str, int_pr: int
+	str_api: str, str_owner: str, str_name: str, int_pr: int, set_bases: set[str]
 ) -> tuple[list[int], str | None]:
 	"""Close a merged PR's still-open linked issues and delete its head branch.
 
@@ -244,6 +292,8 @@ def reconcile_pr(
 		Repository owner and name (for the GraphQL query).
 	int_pr : int
 		The pull request number.
+	set_bases : set of str
+		Base branches of open PRs; such a branch is kept, since deleting it closes that PR.
 
 	Returns
 	-------
@@ -267,6 +317,9 @@ def reconcile_pr(
 		list_closed.append(int_num)
 
 	str_branch = branch_to_delete(dict_pr, dict_repo["defaultBranchRef"]["name"])
+	if str_branch in set_bases:
+		print(f"branch {str_branch} kept: base of an open PR")
+		str_branch = None
 	if str_branch is not None:
 		_delete_branch(str_api, str_branch)
 	return list_closed, str_branch
@@ -282,15 +335,18 @@ def main() -> int:
 	Returns
 	-------
 	int
-		Process exit code (0 unless the single-PR event path itself raises).
+		``1`` if any sweep reconcile failed, else ``0`` (the event path raises instead).
 	"""
 	str_repo = os.environ["GITHUB_REPOSITORY"]
 	str_owner, str_name = str_repo.split("/", 1)
 	str_api = f"{_GH_API}/repos/{str_repo}"
+	set_bases = _open_pr_bases(str_api)
 
 	str_pr = os.environ.get("PR_NUMBER", "").strip()
 	if str_pr:
-		list_closed, str_branch = reconcile_pr(str_api, str_owner, str_name, int(str_pr))
+		list_closed, str_branch = reconcile_pr(
+			str_api, str_owner, str_name, int(str_pr), set_bases
+		)
 		print(f"pr={str_pr} closed_issues={list_closed} deleted_branch={str_branch}")
 		return 0
 
@@ -300,16 +356,20 @@ def main() -> int:
 		f"{str_api}/pulls?state=closed&sort=updated&direction=desc&per_page={_SWEEP_PER_PAGE}",
 	)
 	list_numbers = recently_merged_numbers(list_prs, datetime.now(timezone.utc), int_days)
+	int_failed = 0
 	for int_num in list_numbers:
 		try:
-			list_closed, str_branch = reconcile_pr(str_api, str_owner, str_name, int_num)
+			list_closed, str_branch = reconcile_pr(
+				str_api, str_owner, str_name, int_num, set_bases
+			)
 		except (urllib.error.HTTPError, urllib.error.URLError, OSError) as cls_exc:
+			int_failed += 1
 			print(f"pr={int_num} reconcile failed (skipped): {cls_exc}", file=sys.stderr)
 			continue
 		if list_closed or str_branch is not None:
 			print(f"pr={int_num} closed_issues={list_closed} deleted_branch={str_branch}")
 	print(f"swept {len(list_numbers)} merged PR(s) from the last {int_days} day(s)")
-	return 0
+	return 1 if int_failed else 0
 
 
 if __name__ == "__main__":
