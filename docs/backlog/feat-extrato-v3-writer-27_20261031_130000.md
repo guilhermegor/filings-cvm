@@ -6,8 +6,8 @@ Branch `feat/extrato-v3-writer-27`. Spec: `PadraoXMLInfExtratoV3.asp` (fetched 2
 - [x] Schema `_internal/config/schemas/extrato.py` (models only; validators in `_internal/utils/xml_fields.py`).
 - [x] Writer `submission/extrato.py` (`Extrato`, encodes to bytes before touching the target file, 1 MB cap).
 - [x] Names registered in `submission/__init__.py` and `schemas/__init__.py` (sorted `__all__`).
-- [ ] Unit tests: XML of every block, every rule below, failed export leaves target intact.
-- [ ] `docs/submission/extrato.md`, `mkdocs.yml` nav, `docs/api.md`, `CLAUDE.md` catalog.
+- [x] Unit tests: XML of every block, every rule below, failed export leaves target intact.
+- [x] `docs/submission/extrato.md`, `mkdocs.yml` nav, `docs/api.md`, `CLAUDE.md` catalog.
 - [ ] PR (`Closes #27`).
 
 ## What the page leaves unsettled (stated on the docs page and in the PR)

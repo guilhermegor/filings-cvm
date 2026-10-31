@@ -260,7 +260,13 @@ números do mesmo parágrafo discordavam.
   ✅ **ingestion** lâmina proper (`lamina_fi_*`, 78 colunas) — `ingestion/fi/doc/lamina/lamina.py`
   (`LaminaReader`); contract `_internal/config/contracts/lamina_fif.py` ·
   ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP) ·
-  ⬜ **submission** V3 (`PadraoXMLLaminaV3.asp`) · V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
+  ✅ **submission** **V3** (`PadraoXMLLaminaV3.asp`) — `submission/lamina.py` (`Lamina`); schema
+  `_internal/config/schemas/lamina.py` (`LaminaDocument`, 20 blocos), validadores em
+  `_internal/utils/xml_fields.py`. ⚠️ A página **não diz a escala de nenhum decimal** (tudo "float"),
+  então as escalas são **política do repo, não número da CVM** (dinheiro 2, percentuais 4, truncado), e
+  ela **se contradiz** em 2 pontos: namespace (`urn:lamina` no exemplo × `urn:infdiario` na lista de
+  tags — usado o do exemplo) e a tag da linha mensal (`MES` × `MES_RENT` — usada `MES`); ver
+  `docs/submission/lamina.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
 
 **Documentos Eventuais (FI/DOC/EVENTUAL)** — **open-data only** (a CVM não publica padrão XML de
 envio; é o registro do que foi entregue, não um informe):
@@ -332,7 +338,11 @@ envio; é o registro do que foi entregue, não um informe):
   **zero linhas ragged** nos 3 artefatos. META = `meta_extrato_fi.txt` (`.txt` solto, único do
   `META/`), **117 campos = o header atual exatamente** ⇒ **não é oráculo do contrato pré-2020**
   (registrado em `_META_UNDESCRIBED_READERS`)
-- ⬜ **submission** Extrato — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+- ✅ **submission** Extrato — **V3** (`PadraoXMLInfExtratoV3.asp`) — `submission/extrato.py` (`Extrato`); schema
+  `_internal/config/schemas/extrato.py` (`ExtratoDocument`), validadores em `_internal/utils/xml_fields.py`.
+  ⚠️ A página **se contradiz** (exemplo × lista de tags: namespace `urn:extr`×`urn:perf`, `CNPJ_FDO`×`CNPJ_FUNDO`,
+  tag `TP_VL_FIXO_TX_INGRESSO` reutilizada em `TX_SAIDA`); seguido o exemplo; escalas não ditas são política do repo
+  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
