@@ -149,6 +149,25 @@ Campos, escalas e regras em [CDA V4](submission/cda.md).
 
 ---
 
+### `CadastroAtivos`
+
+`filings_cvm.submission.CadastroAtivos`
+
+Serializa um `CadastroAtivosDocument` validado para XML compatível com a CVM (Atualização do
+Cadastro de Ativos, sem namespace, `COD_DOC=2`).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `CadastroAtivosDocument` | Documento totalmente validado (até 1000 linhas). |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+Modelos de entrada, em `filings_cvm.submission`: `CadastroAtivosDocument`, `CadastroAtivosHeader`,
+`CadastroAtivosRow`. Campos e regras em [Cadastro de Ativos](submission/cadastro_ativos.md).
+
+---
+
 ### `InfMensalFidc`
 
 `filings_cvm.submission.InfMensalFidc`
