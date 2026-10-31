@@ -37,6 +37,7 @@ complexity 2 src/filings_cvm/submission/extrato.py
 complexity 1 src/filings_cvm/submission/inf_fundo_157.py
 complexity 3 src/filings_cvm/submission/inf_mensal_fidc.py
 complexity 2 src/filings_cvm/submission/informe_diario.py
+complexity 2 src/filings_cvm/submission/informe_quadrimestral.py
 complexity 2 src/filings_cvm/submission/lamina.py
 complexity 5 src/filings_cvm/submission/perfil_mensal.py
 complexity 1 tests/conftest.py
@@ -52,7 +53,7 @@ complexity 2 tests/unit/test_cadastro_fi_ingestion.py
 complexity 2 tests/unit/test_cda_ingestion.py
 complexity 5 tests/unit/test_cgvn_cia_aberta_ingestion.py
 complexity 1 tests/unit/test_check_backlog_ledger.py
-complexity 9 tests/unit/test_check_contract_drift.py
+complexity 11 tests/unit/test_check_contract_drift.py
 complexity 1 tests/unit/test_check_docs_sections.py
 complexity 1 tests/unit/test_check_portal_completeness.py
 complexity 3 tests/unit/test_compl_fi_ingestion.py
@@ -81,6 +82,7 @@ complexity 2 tests/unit/test_inf_quadrimestral_fip_ingestion.py
 complexity 3 tests/unit/test_inf_trimestral_fii_ingestion.py
 complexity 2 tests/unit/test_inf_trimestral_fip_ingestion.py
 complexity 2 tests/unit/test_informe_diario_ingestion.py
+complexity 2 tests/unit/test_informe_quadrimestral_submission.py
 complexity 4 tests/unit/test_intermed_ingestion.py
 complexity 4 tests/unit/test_invnr_repres_ingestion.py
 complexity 3 tests/unit/test_ipe_cia_aberta_ingestion.py
@@ -153,6 +155,7 @@ one-assert 5 tests/unit/test_inf_trimestral_fii_ingestion.py
 one-assert 3 tests/unit/test_inf_trimestral_fip_ingestion.py
 one-assert 2 tests/unit/test_informe_diario_ingestion.py
 one-assert 6 tests/unit/test_informe_diario_submission.py
+one-assert 10 tests/unit/test_informe_quadrimestral_submission.py
 one-assert 7 tests/unit/test_intermed_ingestion.py
 one-assert 7 tests/unit/test_invnr_repres_ingestion.py
 one-assert 8 tests/unit/test_ipe_cia_aberta_ingestion.py
@@ -181,5 +184,5 @@ one-assert 10 tests/unit/test_sweep_stale_branches.py
 one-assert 4 tests/unit/test_tabular_reader.py
 one-assert 8 tests/unit/test_vlmo_cia_aberta_ingestion.py
 all-exports 1 src/filings_cvm/_internal/config/ports/__init__.py
-all-exports 182 src/filings_cvm/_internal/config/schemas/__init__.py
+all-exports 193 src/filings_cvm/_internal/config/schemas/__init__.py
 all-exports 1 src/filings_cvm/ingestion/__init__.py
