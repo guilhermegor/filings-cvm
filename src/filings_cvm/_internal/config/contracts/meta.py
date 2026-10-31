@@ -55,6 +55,7 @@ def _meta_contract(str_dataset: str, str_label: str) -> FileContract:
 META_INF_DIARIO_FI = _meta_contract("inf_diario_fi", "META — Informe Diário FI")
 META_CDA_FI = _meta_contract("cda_fi", "META — CDA FI")
 META_LAMINA_FI = _meta_contract("lamina_fi", "META — Lâmina FI")
+META_ENTREGA_FI = _meta_contract("entrega_fi", "META — Entrega FI")
 META_EVENTUAL_FI = _meta_contract("eventual_fi", "META — Eventual FI")
 META_BALANCETE_FI = _meta_contract("balancete_fi", "META — Balancete FI")
 META_COMPL_FI = _meta_contract("compl_fi", "META — Complemento FI")
