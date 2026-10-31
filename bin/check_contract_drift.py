@@ -37,9 +37,13 @@ from datetime import date, timedelta
 import inspect
 import json
 import os
+from pathlib import Path
+import re
 import sys
+import tempfile
 from typing import TYPE_CHECKING, Any
 import urllib.request
+import zipfile
 
 from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.balancete_fi import (
@@ -802,6 +806,15 @@ def check_meta(
 	except OSError:
 		return []  # META unavailable (transient) — not drift
 	frozenset_meta_only = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	list_shipped: list[str] = []
+	if frozenset_meta_only:
+		frozenset_shipped = archived_meta_only_sections(cls_meta, tuple_members, int_timeout_s)
+		list_shipped = [
+			f"{str_label}: META-only section '{str_section}' now ships a CSV in the archive — "
+			"drop it from _META_ONLY_SECTIONS"
+			for str_section in sorted(frozenset_shipped)
+		]
+		frozenset_meta_only -= frozenset_shipped
 	df_meta = df_meta[~df_meta["section"].isin(frozenset_meta_only)]
 	frozenset_fields = frozenset(df_meta["field"].astype(str))
 
@@ -815,9 +828,96 @@ def check_meta(
 				set_seen.add(str_col)
 				list_cols.append(str_col)
 	bool_report_extra = cls_meta.__name__ not in _PARTIAL_DATASETS
-	return meta_name_drift(
+	return list_shipped + meta_name_drift(
 		str_label, tuple(list_cols), frozenset_fields, bool_report_extra=bool_report_extra
 	)
+
+
+# A data member's period suffix: ``_2025`` (yearly) or ``_202506`` (monthly).
+_RE_PERIOD_SUFFIX = re.compile(r"_\d{4}(\d{2})?$")
+
+
+def sections_of_members(
+	cls_meta: type[BaseMetaReader], tuple_names: tuple[str, ...]
+) -> frozenset[str]:
+	"""Label data-archive member filenames the way the META labels its sections.
+
+	``fre_cia_aberta_auditor_2025.csv`` drops its period suffix and goes through the META reader's
+	own ``_section_of``, so it compares with ``_META_ONLY_SECTIONS`` whatever prefix that META
+	keeps or strips.
+
+	Parameters
+	----------
+	cls_meta : type[BaseMetaReader]
+		The dataset's META reader.
+	tuple_names : tuple of str
+		Member filenames of the data archive.
+
+	Returns
+	-------
+	frozenset of str
+		The members' section labels.
+	"""
+	reader_meta = cls_meta()
+	return frozenset(
+		reader_meta._section_of(f"meta_{_RE_PERIOD_SUFFIX.sub('', Path(str_name).stem)}.txt")
+		for str_name in tuple_names
+	)
+
+
+def archived_meta_only_sections(
+	cls_meta: type[BaseMetaReader],
+	tuple_members: tuple[type[IngestionReader], ...],
+	int_timeout_s: int = 60,
+) -> frozenset[str]:
+	"""Return the ``_META_ONLY_SECTIONS`` entries whose CSV the recent data archives ship.
+
+	An exempted section that gains a real member must reach the report, not stay muted. One member
+	reader downloads the archive into a scratch ``path_raw``; its member list is all that is read.
+	When no probed period is reachable, nothing is returned and the exemption stands this week.
+
+	Parameters
+	----------
+	cls_meta : type[BaseMetaReader]
+		The dataset's META reader.
+	tuple_members : tuple of type[IngestionReader]
+		The dataset's member readers; the first one fetches the archive.
+	int_timeout_s : int, optional
+		Socket timeout forwarded to ``read``, by default 60.
+
+	Returns
+	-------
+	frozenset of str
+		Exempted sections now present in the archive.
+	"""
+	frozenset_exempt = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	cls_reader = tuple_members[0]
+	# The current year's archive is published incrementally, and the 2026 INF_ANUAL_FII one held
+	# only 10 of its 12 members in Oct 2026, so it is unioned with the last complete year.
+	# ponytail - dedupes by year, which fits the two yearly archives exempted today; a monthly
+	# dataset added here would need a per-period key.
+	set_years: set[int] = set()
+	set_names: set[str] = set()
+	for date_ref in _probe_dates():
+		if date_ref.year in set_years:
+			continue
+		with tempfile.TemporaryDirectory() as str_tmp:
+			path_tmp = Path(str_tmp)
+			try:
+				cls_reader(
+					date_ref=date_ref, path_raw=path_tmp, retry_policy=_DRIFT_RETRY_POLICY
+				).read(int_timeout_s=int_timeout_s)
+			except ContractError:
+				pass  # the archive landed; a member's own drift is check_real_header's to report
+			except OSError:
+				continue  # period not published (or transient) — try an older one
+			for path_zip in path_tmp.glob("*.zip"):
+				with zipfile.ZipFile(path_zip) as zip_archive:
+					set_names.update(zip_archive.namelist())
+		set_years.add(date_ref.year)
+		if len(set_years) == 2:
+			break
+	return frozenset_exempt & sections_of_members(cls_meta, tuple(set_names))
 
 
 def collect_drift(int_timeout_s: int = 60) -> list[str]:

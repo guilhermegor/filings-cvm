@@ -316,9 +316,42 @@ def test_check_meta_ignores_the_fields_of_a_meta_only_section(
 	df_meta = pd.DataFrame({"section": ["s", "s", "ghost"], "field": ["A", "B", "Z"]})
 	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
 	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	monkeypatch.setattr(ccd, "archived_meta_only_sections", lambda *_a: frozenset())
 	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
 
 	assert ccd.check_meta(cls_meta, (cls_member,)) == []
+
+
+def test_check_meta_reports_a_meta_only_section_the_archive_now_ships(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""An exempted section that gains a real CSV is reported and its fields are no longer muted."""
+	df_meta = pd.DataFrame({"section": ["s", "s", "ghost"], "field": ["A", "B", "Z"]})
+	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
+	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	monkeypatch.setattr(ccd, "archived_meta_only_sections", lambda *_a: frozenset({"ghost"}))
+	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
+
+	list_problems = ccd.check_meta(cls_meta, (cls_member,))
+
+	assert len(list_problems) == 2
+	assert "'ghost' now ships a CSV" in list_problems[0]
+	assert "'Z'" in list_problems[1]
+
+
+def test_sections_of_members_labels_real_archive_names_like_the_meta() -> None:
+	"""Real 2025 member filenames map onto the META's own labels (FRE and INF_ANUAL_FII)."""
+	dict_readers = iter_public_readers()
+	frozenset_fre = ccd.sections_of_members(
+		dict_readers["MetaFreCiaAbertaReader"],
+		("fre_cia_aberta_2025.csv", "fre_cia_aberta_auditor_2025.csv"),
+	)
+	frozenset_fii = ccd.sections_of_members(
+		dict_readers["MetaInfAnualFiiReader"], ("inf_anual_fii_representante_cotista_2025.csv",)
+	)
+
+	assert frozenset_fre == {"fre_cia_aberta", "fre_cia_aberta_auditor"}
+	assert frozenset_fii == {"representante_cotista"}
 
 
 def test_check_meta_still_flags_a_new_field_in_a_described_section(
@@ -328,6 +361,7 @@ def test_check_meta_still_flags_a_new_field_in_a_described_section(
 	df_meta = pd.DataFrame({"section": ["s", "s", "s", "ghost"], "field": ["A", "B", "C", "Z"]})
 	cls_meta = _fake_reader(_CONTRACT, frame=df_meta, name="MetaFooReader")
 	monkeypatch.setitem(ccd._META_ONLY_SECTIONS, "MetaFooReader", frozenset({"ghost"}))
+	monkeypatch.setattr(ccd, "archived_meta_only_sections", lambda *_a: frozenset())
 	cls_member = type("_Member", (), {"_CONTRACT": _CONTRACT})
 
 	list_problems = ccd.check_meta(cls_meta, (cls_member,))
