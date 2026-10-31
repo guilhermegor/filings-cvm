@@ -29,6 +29,7 @@ from filings_cvm._internal.config.schemas.cda import (
 	CdaRiskRating,
 	CdaSwap,
 	CdaSwapAplic,
+	CdaSwapPosFim,
 	CdaTitAgroCredPriv,
 	CdaTitPub,
 )
@@ -78,6 +79,7 @@ __all__ = [
 	"CdaRiskRating",
 	"CdaSwap",
 	"CdaSwapAplic",
+	"CdaSwapPosFim",
 	"CdaTitAgroCredPriv",
 	"CdaTitPub",
 	"ClientCount",

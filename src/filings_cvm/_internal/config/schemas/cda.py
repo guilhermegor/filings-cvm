@@ -17,6 +17,7 @@ application-type x asset-type relation of Table B, and the conditional blocks
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 import re
 from typing import Annotated, ClassVar, Literal
@@ -38,26 +39,118 @@ from filings_cvm._internal.config.schemas._fields import (
 from filings_cvm._internal.utils.typing import type_checker
 
 
-_DATE_BR_RE = re.compile(r"^\d{2}/\d{2}/\d{4}$")
-_COMPT_RE = re.compile(r"^(0[1-9]|1[0-2])/\d{4}$")
-_SWAP_RE = re.compile(r"^SWP[A-Z0-9]{3}$")
+# ``fullmatch`` + ``[0-9]``: ``$`` would accept a trailing newline and ``\d`` non-ASCII digits.
+_DATE_BR_RE = re.compile(r"[0-9]{2}/[0-9]{2}/[0-9]{4}")
+_COMPT_RE = re.compile(r"(0[1-9]|1[0-2])/[0-9]{4}")
+_SWAP_RE = re.compile(r"SWP[A-Z0-9]{3}")
+# C0 controls other than tab/LF/CR are not legal XML 1.0 characters.
+_XML_ILLEGAL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 _MAX_INT_15 = Decimal(10) ** 15
 _MAX_INT_21 = Decimal(10) ** 21
 _MAX_INT_3 = Decimal(10) ** 3
 
+
+@type_checker
+def _reject_float(value: object) -> object:
+	"""Refuse a binary ``float``: it would launder an already-lossy value into a ``Decimal``.
+
+	Parameters
+	----------
+	value : object
+		Raw input.
+
+	Returns
+	-------
+	object
+		The same value.
+
+	Raises
+	------
+	ValueError
+		If ``value`` is a ``float``.
+	"""
+	if isinstance(value, float):
+		raise ValueError("pass a str, int or Decimal, never a float")
+	return value
+
+
+@type_checker
+def _check_text(value: str) -> str:
+	"""Require text the file can carry: non-empty, windows-1252, legal XML characters.
+
+	Parameters
+	----------
+	value : str
+		Candidate text.
+
+	Returns
+	-------
+	str
+		The same value.
+
+	Raises
+	------
+	ValueError
+		If empty, not encodable in windows-1252 (the file's declared encoding), or holding a
+		character XML 1.0 forbids.
+	"""
+	if not value:
+		raise ValueError("text must not be empty")
+	try:
+		value.encode("windows-1252")
+	except UnicodeEncodeError as exc:
+		raise ValueError(
+			f"character {value[exc.start]!r} is not encodable in windows-1252"
+		) from exc
+	if _XML_ILLEGAL_RE.search(value):
+		raise ValueError("text holds a control character XML forbids")
+	return value
+
+
+Text = Annotated[str, AfterValidator(_check_text)]
+# ``_reject_float`` is listed last because before-validators run in reverse order.
 # Money 15.2, quantity 15.6, patrimony 21.2, rate 3.6 (page's field descriptions).
-Money = Annotated[Decimal, BeforeValidator(truncate_to_scale(2)), Field(ge=0, lt=_MAX_INT_15)]
+Money = Annotated[
+	Decimal,
+	BeforeValidator(truncate_to_scale(2)),
+	BeforeValidator(_reject_float),
+	Field(ge=0, lt=_MAX_INT_15),
+]
 SignedMoney = Annotated[
-	Decimal, BeforeValidator(truncate_to_scale(2)), Field(gt=-_MAX_INT_15, lt=_MAX_INT_15)
+	Decimal,
+	BeforeValidator(truncate_to_scale(2)),
+	BeforeValidator(_reject_float),
+	Field(gt=-_MAX_INT_15, lt=_MAX_INT_15),
 ]
 Quantity = Annotated[
-	Decimal, BeforeValidator(truncate_to_scale(6)), Field(gt=-_MAX_INT_15, lt=_MAX_INT_15)
+	Decimal,
+	BeforeValidator(truncate_to_scale(6)),
+	BeforeValidator(_reject_float),
+	Field(gt=-_MAX_INT_15, lt=_MAX_INT_15),
+]
+# Traded totals (sales/acquisitions) are non-negative, like their VL_* counterparts.
+TradedQuantity = Annotated[
+	Decimal,
+	BeforeValidator(truncate_to_scale(6)),
+	BeforeValidator(_reject_float),
+	Field(ge=0, lt=_MAX_INT_15),
 ]
 PatrimonyValue = Annotated[
-	Decimal, BeforeValidator(truncate_to_scale(2)), Field(gt=-_MAX_INT_21, lt=_MAX_INT_21)
+	Decimal,
+	BeforeValidator(truncate_to_scale(2)),
+	BeforeValidator(_reject_float),
+	Field(gt=-_MAX_INT_21, lt=_MAX_INT_21),
 ]
-Rate = Annotated[Decimal, BeforeValidator(truncate_to_scale(6)), Field(ge=0, lt=_MAX_INT_3)]
+Rate = Annotated[
+	Decimal,
+	BeforeValidator(truncate_to_scale(6)),
+	BeforeValidator(_reject_float),
+	Field(ge=0, lt=_MAX_INT_3),
+]
+# VALOR_AT_EXT: the page says only "Campo numérico (float)" — no scale, no range. Kept exact
+# (``Decimal``, written as given); finite, since NaN/Infinity are not numbers an XML can carry.
+ForeignValue = Annotated[Decimal, BeforeValidator(_reject_float), Field(allow_inf_nan=False)]
 
 # Table D (indexers), Table F (negotiation type).
 INDEXERS = frozenset(
@@ -196,7 +289,7 @@ BLOCK_APLIC_TYPES: dict[str, frozenset[int]] = {
 
 @type_checker
 def _check_br_date(value: str) -> str:
-	"""Require the DD/MM/AAAA format.
+	"""Require a real calendar date in the DD/MM/AAAA format.
 
 	Parameters
 	----------
@@ -211,10 +304,14 @@ def _check_br_date(value: str) -> str:
 	Raises
 	------
 	ValueError
-		If the format is wrong.
+		If the format is wrong or the date does not exist.
 	"""
-	if not _DATE_BR_RE.match(value):
+	if not _DATE_BR_RE.fullmatch(value):
 		raise ValueError("date must follow DD/MM/AAAA format.")
+	try:
+		datetime.strptime(value, "%d/%m/%Y")  # noqa: DTZ007  (calendar check only)
+	except ValueError as exc:
+		raise ValueError(f"{value} is not a real calendar date.") from exc
 	return value
 
 
@@ -249,7 +346,7 @@ class CdaHeader(BaseModel):
 		ValueError
 			If the format is not MM/AAAA.
 		"""
-		if not _COMPT_RE.match(v):
+		if not _COMPT_RE.fullmatch(v):
 			raise ValueError("dt_compt must follow MM/AAAA format.")
 		return v
 
@@ -258,9 +355,9 @@ class CdaNegoc(BaseModel):
 	"""NEGOC — month's trades. Quantity and value of a side must come together."""
 
 	tp_negoc: Literal[1, 2] | None = None
-	qtde_vendas_negoc: Quantity | None = None
+	qtde_vendas_negoc: TradedQuantity | None = None
 	vl_vendas_negoc: Money | None = None
-	qtde_aquis_negoc: Quantity | None = None
+	qtde_aquis_negoc: TradedQuantity | None = None
 	vl_aquis_negoc: Money | None = None
 
 	@model_validator(mode="after")
@@ -275,8 +372,10 @@ class CdaNegoc(BaseModel):
 		Raises
 		------
 		ValueError
-			If only one of the pair is filled.
+			If only one of the pair is filled, or the block is empty.
 		"""
+		if all(getattr(self, name) is None for name in type(self).model_fields):
+			raise ValueError("negoc must carry at least one field; omit the block instead")
 		if (self.qtde_vendas_negoc is None) != (self.vl_vendas_negoc is None):
 			raise ValueError("qtde_vendas_negoc and vl_vendas_negoc must be filled together")
 		if (self.qtde_aquis_negoc is None) != (self.vl_aquis_negoc is None):
@@ -294,9 +393,9 @@ class CdaPosFim(BaseModel):
 class CdaAtivoExt(BaseModel):
 	"""ATIVO_EXT — foreign asset detail (INV_EXT only)."""
 
-	desc_at_ext: str = Field(max_length=50)
+	desc_at_ext: Annotated[Text, Field(max_length=50)]
 	qtde_at_ext: int
-	valor_at_ext: Decimal
+	valor_at_ext: ForeignValue
 
 
 class CdaAplic(BaseModel):
@@ -331,9 +430,9 @@ class CdaAplic(BaseModel):
 			raise ValueError(f"empr_ligada is required for COD_TP_APLIC {code}")
 		if empr == "NA" and self.empr_ligada is not None:
 			raise ValueError(f"empr_ligada is not applicable for COD_TP_APLIC {code}")
-		neg = self.negoc or CdaNegoc()
-		self._rule(code, "vendas", vendas, neg.qtde_vendas_negoc)
-		self._rule(code, "aquisicoes", aquis, neg.qtde_aquis_negoc)
+		neg = self.negoc
+		self._rule(code, "vendas", vendas, neg.qtde_vendas_negoc if neg else None)
+		self._rule(code, "aquisicoes", aquis, neg.qtde_aquis_negoc if neg else None)
 		self._rule(code, "posicao final", qtd, self.pos_fim.qtde_pos_fim)
 
 	@staticmethod
@@ -393,9 +492,17 @@ def _check_aplic(block: str, aplic: CdaAplic, implicit: int | None, tp_ativ: int
 		code = aplic.cod_tp_aplic
 	if code not in BLOCK_APLIC_TYPES[block]:
 		raise ValueError(f"COD_TP_APLIC {code} is not allowed in {block}")
+	if aplic.ativo_ext is not None and block != "INV_EXT":
+		raise ValueError(f"ativo_ext is only valid in INV_EXT, not {block}")
 	aplic.check_table_a(code)
 	if tp_ativ is not None and tp_ativ not in _TABLE_B[code]:
 		raise ValueError(f"COD_TP_ATIV {tp_ativ} is not valid for COD_TP_APLIC {code}")
+
+
+class CdaSwapPosFim(BaseModel):
+	"""POS_FIM of a SWAP: only the market value (the page nests it in POS_FIM)."""
+
+	merc_pos_fim: SignedMoney
 
 
 class CdaSwapAplic(BaseModel):
@@ -403,7 +510,7 @@ class CdaSwapAplic(BaseModel):
 
 	cod_tp_aplic: Literal[183, 184]
 	qtde_dias_confid: int | None = Field(default=None, ge=0, le=90)
-	merc_pos_fim: SignedMoney
+	pos_fim: CdaSwapPosFim
 
 
 class CdaEmitter(BaseModel):
@@ -411,7 +518,7 @@ class CdaEmitter(BaseModel):
 
 	tp_pf_pj_emis: Literal["PF", "PJ"]
 	nr_pf_pj_emis: str
-	nm_emis: str = Field(max_length=150)
+	nm_emis: Annotated[Text, Field(max_length=150)]
 
 	@model_validator(mode="after")
 	def _doc(self) -> CdaEmitter:
@@ -430,7 +537,7 @@ class CdaBankEmitter(BaseModel):
 	"""EMIS of DEP_PRAZO_TIT_IF — CNPJ issuer."""
 
 	cnpj_emis: str
-	nm_emis: str = Field(max_length=150)
+	nm_emis: Annotated[Text, Field(max_length=150)]
 
 	@field_validator("cnpj_emis")
 	@classmethod
@@ -485,9 +592,9 @@ class CdaPosFixIndex(BaseModel):
 class CdaRiskRating(BaseModel):
 	"""CLASSIF_RISCO — issuer risk rating."""
 
-	ag_classif_risco: str = Field(max_length=200)
+	ag_classif_risco: Annotated[Text, Field(max_length=200)]
 	dt_classif_risco: BrDate
-	grau_classif_risco: str = Field(max_length=6)
+	grau_classif_risco: Annotated[Text, Field(max_length=6)]
 
 
 @type_checker
@@ -537,7 +644,7 @@ def _check_rating(flag: str, rating: object) -> None:
 class CdaTitPub(BaseModel):
 	"""TIT_PUB — SELIC public security (types 75, 147)."""
 
-	cod_selic: str
+	cod_selic: Text
 	dt_venc: BrDate
 	aplic: CdaAplic
 
@@ -558,7 +665,7 @@ class CdaCotas(BaseModel):
 	"""COTAS — fund shares (type 197); CNPJ of the class xor subclass code."""
 
 	cnpj_fdo: str | None = None
-	cod_subclasse: str | None = None
+	cod_subclasse: Text | None = None
 	aplic: CdaAplic
 
 	@model_validator(mode="after")
@@ -609,7 +716,7 @@ class CdaSwap(BaseModel):
 		ValueError
 			If malformed.
 		"""
-		if not _SWAP_RE.match(v):
+		if not _SWAP_RE.fullmatch(v):
 			raise ValueError("cod_swap must be 'SWP' followed by a 3-character Table E code")
 		return v
 
@@ -617,7 +724,7 @@ class CdaSwap(BaseModel):
 class CdaDemaisCodif(BaseModel):
 	"""DEMAIS_CODIF — other coded assets."""
 
-	cod_ativ: str
+	cod_ativ: Text
 	cod_tp_ativ: int
 	dt_ini_vigen: BrDate
 	aplic: CdaAplic
@@ -639,7 +746,7 @@ class CdaDepPrazoTitIf(BaseModel):
 	"""DEP_PRAZO_TIT_IF — time deposits and other financial-institution paper (74)."""
 
 	cod_tp_ativ: int
-	desc_ativ_vinc: str | None = None
+	desc_ativ_vinc: Text | None = None
 	emis: CdaBankEmitter
 	dt_venc: BrDate
 	st_tit_pos_fix: Literal["S", "N"]
@@ -704,11 +811,11 @@ class CdaInvExt(BaseModel):
 	cod_tp_ativ: int
 	inv_coletivo: Literal["S", "N"]
 	gest_inv_coletivo: Literal["S", "N"]
-	nm_emis: str = Field(max_length=150)
+	nm_emis: Annotated[Text, Field(max_length=150)]
 	dt_venc: BrDate | None = None
 	cod_pais: int
-	cod_bv_merc: str
-	cod_ativo_bv_merc: str
+	cod_bv_merc: Text
+	cod_ativo_bv_merc: Text
 	st_classif_risco: Literal["S", "N"]
 	classif_risco: CdaRiskRating | None = None
 	aplic: CdaAplic
@@ -731,7 +838,7 @@ class CdaDemaisNCodif(BaseModel):
 	"""DEMAIS_N_CODIF — other, uncoded assets."""
 
 	cod_tp_ativ: int
-	desc: str = Field(max_length=1000)
+	desc: Annotated[Text, Field(max_length=1000)]
 	emis: CdaEmitter
 	aplic: CdaAplic
 

@@ -87,7 +87,8 @@ class Cda(SubmissionWriter[CdaDocument]):
 			root, encoding="unicode"
 		)
 		if output_path is not None:
-			Path(output_path).write_text(xml_str, encoding="windows-1252")
+			# Bytes first, so an unencodable char cannot truncate an existing file.
+			Path(output_path).write_bytes(xml_str.encode("windows-1252"))
 			return None
 		return xml_str
 

@@ -43,6 +43,32 @@ e `TIT_PRE_FIX_TAXA_CONTR` 3 + 6. Passe `str`/`Decimal`, nunca `float`.
 - CNPJ/CPF validados por dígito verificador. Conforme a página, zeros à esquerda são omitidos
   na saída.
 
+- Datas `DD/MM/AAAA` precisam existir no calendário (`31/02/2024` é recusada), em todos os campos de
+  data. Textos livres e códigos não podem ser vazios, devem caber em `windows-1252` e não podem
+  conter caracteres de controle proibidos em XML; a validação recusa antes de gravar, e o arquivo
+  só é aberto depois de o conteúdo estar codificado, então uma falha nunca apaga um envio anterior.
+- Quantidades de vendas/aquisições são não negativas; `NEGOC` vazio é recusado; `ATIVO_EXT` só
+  existe em `INV_EXT`. No `SWAP`, `MERC_POS_FIM` fica dentro de `POS_FIM` (`CdaSwapPosFim`), como na
+  página.
+- Valores numéricos nunca aceitam `float`. `VALOR_AT_EXT` é, segundo a página, apenas "campo numérico
+  (float)", sem escala nem faixa: é mantido exato e gravado como informado (vírgula decimal), mas
+  precisa ser finito.
+
+**Limites conhecidos** (a página da CVM não decide; não são validados):
+
+- *Tabelas E* (códigos de swap), *G* (países) e *H* (bolsas/balcões) não são enumeradas: só a forma
+  `SWP` + 3 caracteres de `COD_SWAP` é checada.
+- `QTDE_DIAS_CONFID` é limitado a 90 dias; o teto de 30 dias das classes "curto prazo" e
+  "referenciado" depende da classe do fundo, que o documento não carrega.
+- `TP_NEGOC` (Tabela F: 1 ou 2) é opcional e não é cruzado com a Tabela A; a página não diz quando é
+  obrigatório.
+- `CNPJ_INSTIT_FINANC` é opcional ("caso exista coobrigação"), sem relação imposta com
+  `ST_TIT_GARANT_SEGURO`.
+- O tamanho máximo de `COD_SELIC`, `COD_ATIV`, `COD_SUBCLASSE`, `COD_BV_MERC`, `COD_ATIVO_BV_MERC` e
+  `DESC_ATIV_VINC` não é informado pela página; só se exige que não sejam vazios.
+- A página não diz se `LISTA_INFORM` ou `LISTA_ATIV` podem ir vazias; o writer as emite como
+  recebe. O teto de 15 MB do arquivo não é verificado.
+
 Os blocos `COTAS`, `DEP_PRAZO_TIT_IF` e `INV_EXT` não têm a tag `COD_TP_APLIC` no XML (o tipo é
 implícito: 197, 74 e 189), portanto `cod_tp_aplic` deve ficar vazio neles.
 
