@@ -73,6 +73,8 @@ duplicate `--cov-fail-under` literal in either place.
 |---|---|
 | `pr-gate.yaml` (`bin/pr_gate.py`) | labels, the sticky status comment, native auto-merge hand-off |
 | `coderabbit_trigger.yaml` | posts `@coderabbitai review` on opened / reopened / ready_for_review |
+| `review_threads.yaml` (`bin/check_review_threads.py`) | fails a PR with an unanswered or unresolved thread, or with no roster review of HEAD |
+| `review_retry.yaml` (`bin/retry_rate_limited_review.py`) | every 10 min, re-asks a reviewer that answered "rate limited" |
 | `reconcile-merged-prs.yaml` (`bin/reconcile_merged_prs.py`) | closes linked issues + deletes the branch of a bot-merged PR |
 
 - **`coderabbit_trigger` exists because `auto_review` does nothing here.** CodeRabbit declines
@@ -85,11 +87,22 @@ duplicate `--cov-fail-under` literal in either place.
 - **The scaffold's `pr-reconcile.yaml` / `bin/pr_reconcile.sh` were NOT imported** (#296). They
   duplicate `reconcile-merged-prs.yaml` (same triggers), and two reconcilers would race on the
   same issues and branches.
-- **The scaffold's review-threads gate is not adopted yet** (`review_threads.yaml`,
-  `review_retry.yaml`, `bin/retry_rate_limited_review.py`, `bin/rerun_stale_gate_runs.sh`).
-  All four depend on `bin/check_review_threads.py` and its `.review-bots.yaml` roster, and this
-  repo has neither. Importing the workflows without them would leave a check that is red on
-  every PR. See `docs/backlog/review-workflows-296_*.md`.
+- **The reviewer roster is data in `.review-bots.yaml`** (`coderabbitai[bot]`,
+  `guilhermegor-review-ladder[bot]`). A thread counts as answered only with a comment from a
+  login outside the roster. A bot resolving its own thread is not an answer. To add a reviewer,
+  add a row there. The gate code names no reviewer.
+- **`Review threads answered` is NOT a required check.** Whether to make it one is the owner's
+  call (ruleset). As measured on #287 and #291, it reports a review of superseded code wherever
+  the last push was never re-reviewed. Resolving a thread fires no workflow event, so after
+  resolving the last one, re-run the check.
+- **No pre-commit hook pairs with it**: the verdict needs a PR number and the GitHub API, and
+  neither exists at commit time. Its unit tests (`tests/unit/test_check_review_threads.py`) run in
+  both places through the existing unit-test hook and CI step.
+- **These workflows install a pinned `pyyaml` with plain `setup-python`, not Poetry.** That is
+  the same choice as `pr-gate.yaml`: they need only `pyyaml` and `gh`, and `review_threads` runs
+  on every review comment.
+- `review_retry` is a scheduled job because nothing fires when a rate limit clears. It only
+  ever posts a review request, and it exits 0 even when it cannot act.
 
 ## Recurrent (scheduled) workflows
 
