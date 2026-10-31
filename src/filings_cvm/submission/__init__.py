@@ -145,6 +145,11 @@ from filings_cvm._internal.config.schemas.lamina import (
 	LaminaTaxaEntrada,
 	LaminaTaxaSaida,
 )
+from filings_cvm._internal.config.schemas.lamina_v2 import (
+	LaminaV2Document,
+	LaminaV2Header,
+	LaminaV2Inform,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -176,6 +181,7 @@ from filings_cvm.submission.informe_diario import (
 )
 from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
 from filings_cvm.submission.lamina import Lamina
+from filings_cvm.submission.lamina_v2 import LaminaV2
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
@@ -274,6 +280,10 @@ __all__ = [
 	"LaminaTaxaAdministracao",
 	"LaminaTaxaEntrada",
 	"LaminaTaxaSaida",
+	"LaminaV2",
+	"LaminaV2Document",
+	"LaminaV2Header",
+	"LaminaV2Inform",
 	"Liquidez",
 	"ListaCedent",
 	"ListaCedentCredExiste",

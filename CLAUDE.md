@@ -270,7 +270,7 @@ números do mesmo parágrafo discordavam.
   então as escalas são **política do repo, não número da CVM** (dinheiro 2, percentuais 4, truncado), e
   ela **se contradiz** em 2 pontos: namespace (`urn:lamina` no exemplo × `urn:infdiario` na lista de
   tags — usado o do exemplo) e a tag da linha mensal (`MES` × `MES_RENT` — usada `MES`); ver
-  `docs/submission/lamina.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
+  `docs/submission/lamina.md`. Nenhum validador da CVM foi executado. ✅ **V2** (`PadraoXMLLaminaV2.asp`) — `submission/lamina_v2.py` (`LaminaV2`); schema `_internal/config/schemas/lamina_v2.py`, que **reaproveita os blocos de V3** (medido: mesma ordem de tags, descrições idênticas; V2 não tem `COD_SUBCLASSE`, `CNPJ_FUNDO` obrigatório, `VERSAO` 2.0) · ⬜ V1 (`PadraoXMLLamina.asp`)
 
 **Complemento de Fundos (FI/DOC/COMPL)** — **open-data only** (sem padrão XML de envio):
 - Complemento FI — ✅ **ingestion** `compl_fi_AAAAMM.zip` (**ZIP de 4 membros**: `compl_fi` 20 cols,
