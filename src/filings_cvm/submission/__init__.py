@@ -10,6 +10,28 @@ and serialise them through a single import:
     from filings_cvm.submission import PerfilMensal, PerfilMensalDocument
 """
 
+from filings_cvm._internal.config.schemas.cda import (
+	CdaAplic,
+	CdaAtivoExt,
+	CdaBankEmitter,
+	CdaCotas,
+	CdaDemaisCodif,
+	CdaDemaisNCodif,
+	CdaDepPrazoTitIf,
+	CdaDocument,
+	CdaEmitter,
+	CdaHeader,
+	CdaInform,
+	CdaInvExt,
+	CdaNegoc,
+	CdaPosFim,
+	CdaPosFixIndex,
+	CdaRiskRating,
+	CdaSwap,
+	CdaSwapAplic,
+	CdaTitAgroCredPriv,
+	CdaTitPub,
+)
 from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
@@ -31,11 +53,33 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm.submission.cda import Cda
 from filings_cvm.submission.informe_diario import InformeDiario
 from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
 __all__ = [
+	"Cda",
+	"CdaAplic",
+	"CdaAtivoExt",
+	"CdaBankEmitter",
+	"CdaCotas",
+	"CdaDemaisCodif",
+	"CdaDemaisNCodif",
+	"CdaDepPrazoTitIf",
+	"CdaDocument",
+	"CdaEmitter",
+	"CdaHeader",
+	"CdaInform",
+	"CdaInvExt",
+	"CdaNegoc",
+	"CdaPosFim",
+	"CdaPosFixIndex",
+	"CdaRiskRating",
+	"CdaSwap",
+	"CdaSwapAplic",
+	"CdaTitAgroCredPriv",
+	"CdaTitPub",
 	"ClientCount",
 	"DocumentHeader",
 	"InformeDiario",
