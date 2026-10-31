@@ -724,7 +724,7 @@ Sob `CIA_ABERTA/CAD/`:
 
 **Investidores Não Residentes**
 - ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
-- ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
+- ✅ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`) — dois arquivos enviados juntos: Parte I (`COD_DOC` 69, `PadraoXMLInfoSemestralINRParte1.asp`) e Parte II (`COD_DOC` 70, `PadraoXMLInfoSemestralINRParte2.aspx`) — `submission/inr_semestral_parte1.py` (`InrSemestralParte1`) e `submission/inr_semestral_parte2.py` (`InrSemestralParte2`); schema `_internal/config/schemas/inr_semestral.py`; tabelas de código C/D/E/G/H/A/B em `_internal/utils/inr_semestral_codes.py`
 
 **Mercados de Negociação**
 - ⬜ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`)
