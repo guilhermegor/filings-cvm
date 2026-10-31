@@ -226,15 +226,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **50 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **51 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (50 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (51 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (20) ou `.zip` multi-membro (30); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (21) ou `.zip` multi-membro (30); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`50 = 20 .txt + 30 .zip`, e 50 contracts — o 51º nome
+⚠️ **Estes números são MEDIDOS do código** (`51 = 21 .txt + 30 .zip`, e 51 contracts — o 52º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
 parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
@@ -301,6 +301,17 @@ envio; é o registro do que foi entregue, não um informe):
   apaga zero à esquerda em silêncio). ⚠️ **4 colunas parcialmente vazias** (`ID_SUBCLASSE` 96,8%,
   `RESULTADO_AUDITORIA` 83,5%, `ID_DOC` 75,6%, `NM_ARQ` 24,4%) — dependem do tipo de documento;
   vazio volta vazio. ⚠️ META é **`.txt` solto** (as outras 3 grafias dão 404)
+
+**Balancete de Fundos (FI/DOC/BALANCETE)** — **open-data only** (sem padrão XML de envio):
+- Balancete FI — ✅ **ingestion** `balancete_fi_AAAAMM.zip` (**ZIP de 1 membro**, **mensal**, série
+  `201501`→, até 153 MB de CSV / 2,19M linhas em 202609) — `ingestion/fi/doc/balancete/*`
+  (`BalanceteFiReader`, `BalanceteFiPre202311Reader`, base privada `_base_balancete_reader.py`);
+  contracts `_internal/config/contracts/balancete_fi.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/balancete_fi/*_header.csv`. ⚠️ **Dois schemas, corte MEDIDO em `202311`** (5 cols
+  `CNPJ_FUNDO` → 6 cols `TP_FUNDO_CLASSE`+`CNPJ_FUNDO_CLASSE`) — **um mês antes** do Perfil Mensal
+  (`202312`), então o corte não se herda do vizinho nem se nomeia pela RCVM 175. `VL_SALDO_BALCTE`
+  (`numeric(23,2)`, com negativos) e `CD_CONTA_BALCTE` ficam texto exato; só `DT_COMPTC` é data.
+  META `.txt` solto descreve só o regime novo (`_META_UNDESCRIBED_READERS`)
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
 - ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
@@ -749,7 +760,7 @@ Sob `CIA_ABERTA/CAD/`:
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
 
 **Mercados de Negociação**
-- ⬜ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`)
+- ✅ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`) — `submission/cadastro_ativos.py` (`CadastroAtivos`); schema `_internal/config/schemas/cadastro_ativos.py`
 
 **Escriturador de Valores Mobiliários**
 - ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)
@@ -766,7 +777,7 @@ src/filings_cvm/
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
                            #   23 ROOT PACKAGES, never the readers
-        _base_meta_reader.py   # PRIVATE base for the 50 Meta*Reader (shared across every root)
+        _base_meta_reader.py   # PRIVATE base for the 51 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:
@@ -781,6 +792,7 @@ src/filings_cvm/
                            #       extrato/ (DOIS artefatos: anual 2015-2026 + snapshot de URL fixa;
                            #         3 readers, corte 116->117 cols em 2020 que NAO e RCVM 175;
                            #         o snapshot e o unico reader com CHAVE UNICA)
+                           #       balancete/ (ZIP mensal de 1 membro; 2 readers, corte 5->6 cols em 202311 MEDIDO)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
         fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)

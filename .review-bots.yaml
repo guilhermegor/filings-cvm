@@ -1,0 +1,31 @@
+# Reviewer roster read by bin/check_review_threads.py (review_threads.yaml) and
+# bin/retry_rate_limited_review.py (review_retry.yaml). Imported from the BlueprintX
+# python-common scaffold (#296), trimmed to the reviewers that actually run on this repo.
+#
+# A thread counts as answered only when it holds a comment from a login OUTSIDE this roster.
+# A PR passes the missing-review check only when a roster member reviewed its HEAD commit.
+# Adding a reviewer starts with a row here, but review-body findings are still pinned in code
+# (_SET_HEADER_AUTHORS / _SET_LADDER_AUTHORS in bin/check_review_threads.py), as is the
+# `@coderabbitai full review` remedy text. A new body-reporting reviewer needs those too.
+reviewers:
+  - login: coderabbitai[bot]
+    posts: threads
+    note: >-
+      Resolves its own threads when it sees the fix ("Addressed in commit <sha>"), so isResolved
+      cannot be the signal. Declines automatic reviews here (fewer than 10 stars) and is asked
+      by .github/workflows/coderabbit_trigger.yaml instead.
+
+  - login: guilhermegor-review-ladder[bot]
+    posts: threads
+    note: >-
+      The fallback reviewer ladder, posting as its own GitHub App so its review is a submitted
+      review on the head commit (measured on #277, #282, #287, #291).
+
+  - kind: comment-marker
+    marker: "Fallback review — runtime:"
+    posters:
+      - guilhermegor-review-ladder[bot]
+    note: >-
+      The ladder's attribution line. It counts as a review only in a comment from a login in
+      `posters:` posted after the head commit. The author association is never consulted, so
+      the PR author cannot forge it.
