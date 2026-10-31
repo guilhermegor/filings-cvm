@@ -114,6 +114,15 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_quadrimestral import (
+	ClasseCotas,
+	CotistCategory,
+	InformeQuadrimestralDocument,
+	InformeQuadrimestralHeader,
+	InformeQuadrimestralInform,
+	ListaClasseCotas,
+	ListaCotstCateg,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -165,6 +174,7 @@ from filings_cvm.submission.inf_mensal_fidc import (
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
+from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
@@ -207,10 +217,12 @@ __all__ = [
 	"CdaTitPub",
 	"Cedent",
 	"CedentCredExiste",
+	"ClasseCotas",
 	"ClasseCotistas",
 	"ClientCount",
 	"CompmtDicred",
 	"CotasMovimento",
+	"CotistCategory",
 	"CotistasPorTipo",
 	"CredExiste",
 	"DescSerieClasse",
@@ -237,6 +249,10 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformeQuadrimestral",
+	"InformeQuadrimestralDocument",
+	"InformeQuadrimestralHeader",
+	"InformeQuadrimestralInform",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
@@ -261,6 +277,8 @@ __all__ = [
 	"Liquidez",
 	"ListaCedent",
 	"ListaCedentCredExiste",
+	"ListaClasseCotas",
+	"ListaCotstCateg",
 	"ListaDevSacados",
 	"MercDerivativo",
 	"NegocDicredMes",

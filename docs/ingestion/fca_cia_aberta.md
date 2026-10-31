@@ -49,11 +49,11 @@ por teste** nas duas direções.
 
 ## ⚠️ `departamento_acionistas` é header-only
 
-Em 2025 esse membro vem com **cabeçalho e nenhuma linha**. Por isso seu contract declara
-**nenhuma coluna de CNPJ**. Antes do #317 o check de CNPJ falhava numa coluna vazia, então
-declarar `("CNPJ_Companhia",)` levantava `holds no valid CNPJ` na leitura do membro vazio (provado
-por mutação). Desde o #317 uma coluna sem valor presente passa, então a tupla vazia deixou de ser
-load-bearing.
+Em 2025 esse membro vem com **cabeçalho e nenhuma linha** — e mesmo assim seu contract declara
+`("CNPJ_Companhia",)` (#320). Antes do #317 o check de CNPJ falhava numa coluna vazia, o que
+obrigava a uma tupla vazia; desde o #317 uma coluna sem valor presente passa. `CNPJ_Companhia` é a
+chave da companhia ("CNPJ da companhia", `varchar(18)` no META) e a única coluna de CNPJ/CPF do
+membro, então no dia em que a CVM publicar linhas um CNPJ malformado levanta `ContractError`.
 
 ---
 
