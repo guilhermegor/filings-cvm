@@ -372,6 +372,15 @@ linha por conta. **ZIP de 1 membro**, **particionado por mês** (série `201501`
 levanta `ValueError` nomeando o irmão. `VL_SALDO_BALCTE` fica texto exato. Página completa em
 [Balancete FI](ingestion/balancete_fi.md).
 
+### `ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
+
+`filings_cvm.ingestion.fi.ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
+
+Leem os 4 membros de `compl_fi_AAAAMM.zip` (`FI/DOC/COMPL`) — informações complementares dos
+fundos. **Mensal**, série **fechada** `201801`–`201904`; cabeçalhos idênticos nos 16 meses (20/6/7/5
+colunas). Só `DT_COMPTC` é data; o resto é texto exato. `date_ref` fora da janela levanta
+`ValueError`. Página completa em [Complemento FI](ingestion/compl_fi.md).
+
 ### `PerfilMensalReader` · `PerfilMensalPre175Reader`
 
 `filings_cvm.ingestion.fi.PerfilMensalReader` · `filings_cvm.ingestion.fi.PerfilMensalPre175Reader`
@@ -1937,7 +1946,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (49 readers)
+### `Meta*Reader` (50 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
@@ -1951,7 +1960,7 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader`
+`MetaAtoDeclrReader` · `MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader` · `MetaComplFiReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

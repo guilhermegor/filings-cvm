@@ -13,6 +13,13 @@ from filings_cvm.ingestion.fi.doc.balancete import (
 	MetaBalanceteFiReader,
 )
 from filings_cvm.ingestion.fi.doc.cda import CdaReader, MetaCdaReader
+from filings_cvm.ingestion.fi.doc.compl import (
+	ComplFiInfCotstReader,
+	ComplFiInfReader,
+	ComplFiPrestReader,
+	ComplFiReader,
+	MetaComplFiReader,
+)
 from filings_cvm.ingestion.fi.doc.eventual import (
 	EventualFiReader,
 	MetaEventualFiReader,
@@ -43,6 +50,10 @@ __all__ = [
 	"BalanceteFiPre202311Reader",
 	"BalanceteFiReader",
 	"CdaReader",
+	"ComplFiInfCotstReader",
+	"ComplFiInfReader",
+	"ComplFiPrestReader",
+	"ComplFiReader",
 	"EventualFiReader",
 	"ExtratoFiPre2020Reader",
 	"ExtratoFiReader",
@@ -52,6 +63,7 @@ __all__ = [
 	"LaminaReader",
 	"MetaBalanceteFiReader",
 	"MetaCdaReader",
+	"MetaComplFiReader",
 	"MetaEventualFiReader",
 	"MetaExtratoFiReader",
 	"MetaInformeDiarioReader",
