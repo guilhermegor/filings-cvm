@@ -67,6 +67,46 @@ The coverage floor is single-sourced in `.coveragerc` (`[report] fail_under`), s
 pre-commit `coverage-check` hook and the CI coverage gate share one value — never pass a
 duplicate `--cov-fail-under` literal in either place.
 
+## Review automation — one workflow per job, never two
+
+| workflow | job |
+|---|---|
+| `pr-gate.yaml` (`bin/pr_gate.py`) | labels, the sticky status comment, native auto-merge hand-off |
+| `coderabbit_trigger.yaml` | posts `@coderabbitai review` on opened / reopened / ready_for_review |
+| `review_threads.yaml` (`bin/check_review_threads.py`) | fails a PR with an unanswered or unresolved thread, or with no roster review of HEAD |
+| `review_retry.yaml` (`bin/retry_rate_limited_review.py`) | every 10 min, re-asks a reviewer that answered "rate limited" |
+| `reconcile-merged-prs.yaml` (`bin/reconcile_merged_prs.py`) | closes linked issues + deletes the branch of a bot-merged PR |
+
+- **`coderabbit_trigger` exists because `auto_review` does nothing here.** CodeRabbit declines
+  automatic reviews on a repository with fewer than 10 stars (refusal notice on #291), and
+  `.coderabbit.yaml` cannot change that. It posts with the **`GH_PAT_REVIEW_TRIGGER`** user PAT,
+  never `GITHUB_TOKEN`: CodeRabbit ignores bot-authored comments. If the secret is missing, the
+  job **fails** rather than skipping, because a skip would hide the missing review. It is not a
+  pre-commit-mirrored gate: it needs a live PR and a secret, so there is no local hook to pair it
+  with.
+- **The scaffold's `pr-reconcile.yaml` / `bin/pr_reconcile.sh` were NOT imported** (#296). They
+  duplicate `reconcile-merged-prs.yaml` (same triggers), and two reconcilers would race on the
+  same issues and branches.
+- **The reviewer roster is data in `.review-bots.yaml`** (`coderabbitai[bot]`,
+  `guilhermegor-review-ladder[bot]`). A thread counts as answered only with a comment from a
+  login outside the roster. A bot resolving its own thread is not an answer. To add a reviewer,
+  add a row there. ⚠️ A row alone is not the whole job: which review BODIES may declare
+  findings is still pinned in code (`_SET_HEADER_AUTHORS`, `_SET_LADDER_AUTHORS` in
+  `bin/check_review_threads.py`), and the gate's remedy text names `@coderabbitai full review`.
+  A new reviewer that reports findings in its review body needs those updated too.
+- **`Review threads answered` is NOT a required check.** Whether to make it one is the owner's
+  call (ruleset). As measured on #287 and #291, it reports a review of superseded code wherever
+  the last push was never re-reviewed. Resolving a thread fires no workflow event, so after
+  resolving the last one, re-run the check.
+- **No pre-commit hook pairs with it**: the verdict needs a PR number and the GitHub API, and
+  neither exists at commit time. Its unit tests (`tests/unit/test_check_review_threads.py`) run in
+  both places through the existing unit-test hook and CI step.
+- **These workflows install a pinned `pyyaml` with plain `setup-python`, not Poetry.** That is
+  the same choice as `pr-gate.yaml`: they need only `pyyaml` and `gh`, and `review_threads` runs
+  on every review comment.
+- `review_retry` is a scheduled job because nothing fires when a rate limit clears. It only
+  ever posts a review request, and it exits 0 even when it cannot act.
+
 ## Recurrent (scheduled) workflows
 
 To run a workflow on a schedule, add an `on.schedule` trigger with a cron
