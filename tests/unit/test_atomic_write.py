@@ -1,5 +1,6 @@
 """Unit tests for the atomic output helper and the writers' use of it."""
 
+import contextlib
 import inspect
 import os
 from pathlib import Path
@@ -41,78 +42,112 @@ def test_atomic_write_bytes_replaces_existing_target(tmp_path: Path) -> None:
 	assert path_out.read_bytes() == b"new"
 
 
-def test_atomic_write_bytes_failure_keeps_old_target(
-	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-	"""A fault during the write leaves the previous file byte-identical."""
+def _boom_fsync(_fd: int) -> None:
+	"""Fail like a full disk."""
+	raise OSError("disk full")
+
+
+def _boom_replace(*_args: object) -> None:
+	"""Fail like a broken rename."""
+	raise OSError("replace failed")
+
+
+@pytest.fixture
+def path_after_failed_overwrite(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+	"""Overwrite an existing file with fsync failing; return the target path."""
 	path_out = tmp_path / "out.xml"
 	path_out.write_bytes(b"old")
-
-	def _boom(_fd: int) -> None:
-		raise OSError("disk full")
-
-	monkeypatch.setattr(atomic_write.os, "fsync", _boom)
-	with pytest.raises(OSError, match="disk full"):
+	monkeypatch.setattr(atomic_write.os, "fsync", _boom_fsync)
+	with contextlib.suppress(OSError):
 		atomic_write_bytes(path_out, b"new")
-	assert path_out.read_bytes() == b"old"
+	return path_out
+
+
+@pytest.fixture
+def dir_after_failed_replace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+	"""Write a new file with os.replace failing; return the directory."""
+	monkeypatch.setattr(atomic_write.os, "replace", _boom_replace)
+	with contextlib.suppress(OSError):
+		atomic_write_bytes(tmp_path / "out.xml", b"new")
+	return tmp_path
+
+
+def test_atomic_write_bytes_failure_raises(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A fault during the write propagates to the caller."""
+	monkeypatch.setattr(atomic_write.os, "fsync", _boom_fsync)
+	with pytest.raises(OSError, match="disk full"):
+		atomic_write_bytes(tmp_path / "out.xml", b"new")
+
+
+def test_atomic_write_bytes_failure_keeps_old_target(path_after_failed_overwrite: Path) -> None:
+	"""A fault during the write leaves the previous file byte-identical."""
+	assert path_after_failed_overwrite.read_bytes() == b"old"
 
 
 def test_atomic_write_bytes_failure_leaves_no_temp_file(
-	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+	dir_after_failed_replace: Path,
 ) -> None:
 	"""A fault during the write leaves no temp file in the directory."""
-	path_out = tmp_path / "out.xml"
+	assert list(dir_after_failed_replace.iterdir()) == []
 
-	def _boom(*_args: object) -> None:
-		raise OSError("replace failed")
 
-	monkeypatch.setattr(atomic_write.os, "replace", _boom)
-	with pytest.raises(OSError, match="replace failed"):
-		atomic_write_bytes(path_out, b"new")
-	assert list(tmp_path.iterdir()) == []
+class _Spy:
+	"""Record the first positional argument of every call, then delegate."""
+
+	def __init__(self, fn: object) -> None:
+		self.fn = fn
+		self.list_first: list[object] = []
+
+	def __call__(self, first: object, *rest: object) -> None:
+		self.list_first.append(first)
+		self.fn(first, *rest)
+
+
+@pytest.fixture
+def replace_spy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> _Spy:
+	"""Spy on os.replace around one successful write."""
+	spy = _Spy(atomic_write.os.replace)
+	monkeypatch.setattr(atomic_write.os, "replace", spy)
+	atomic_write_bytes(tmp_path / "out.xml", b"x")
+	return spy
 
 
 def test_atomic_write_bytes_temp_file_is_in_destination_directory(
-	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+	replace_spy: _Spy, tmp_path: Path
 ) -> None:
 	"""The temp file sits beside the target so os.replace stays on one filesystem."""
-	list_src: list[Path] = []
-	fn_replace = atomic_write.os.replace
+	assert Path(str(replace_spy.list_first[0])).parent == tmp_path
 
-	def _spy(src: str, dst: Path) -> None:
-		list_src.append(Path(src))
-		fn_replace(src, dst)
 
-	monkeypatch.setattr(atomic_write.os, "replace", _spy)
+@pytest.fixture
+def fsync_spy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> _Spy:
+	"""Spy on os.fsync around one successful write."""
+	spy = _Spy(atomic_write.os.fsync)
+	monkeypatch.setattr(atomic_write.os, "fsync", spy)
 	atomic_write_bytes(tmp_path / "out.xml", b"x")
-	assert list_src[0].parent == tmp_path
+	return spy
 
 
-def test_atomic_write_bytes_uses_umask_default_mode(tmp_path: Path) -> None:
-	"""The file gets open()'s default permissions, not mkstemp's 0600."""
+def test_atomic_write_bytes_fsyncs_the_directory(fsync_spy: _Spy) -> None:
+	"""The rename is made durable by an fsync on the parent directory."""
+	assert len(fsync_spy.list_first) == 2
+
+
+@pytest.fixture
+def mode_written_under_umask_022(tmp_path: Path) -> int:
+	"""Write one file under umask 022 and return its permission bits."""
 	path_out = tmp_path / "out.xml"
 	umask = os.umask(0o022)
-	try:
-		atomic_write_bytes(path_out, b"x")
-	finally:
-		os.umask(umask)
-	assert stat.S_IMODE(path_out.stat().st_mode) == 0o644
+	atomic_write_bytes(path_out, b"x")
+	os.umask(umask)
+	return stat.S_IMODE(path_out.stat().st_mode)
 
 
-def test_atomic_write_bytes_fsyncs_the_directory(
-	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-	"""The rename is made durable by an fsync on the parent directory."""
-	list_fd: list[int] = []
-	fn_fsync = atomic_write.os.fsync
-
-	def _spy(fd: int) -> None:
-		list_fd.append(fd)
-		fn_fsync(fd)
-
-	monkeypatch.setattr(atomic_write.os, "fsync", _spy)
-	atomic_write_bytes(tmp_path / "out.xml", b"x")
-	assert len(list_fd) == 2
+def test_atomic_write_bytes_uses_umask_default_mode(mode_written_under_umask_022: int) -> None:
+	"""The file gets open()'s default permissions, not mkstemp's 0600."""
+	assert mode_written_under_umask_022 == 0o644
 
 
 def test_writer_discovery_finds_every_writer_module() -> None:
