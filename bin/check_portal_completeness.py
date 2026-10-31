@@ -82,6 +82,7 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"emissor_cepac-cad",  # CadastroEmissorCepacReader
 		"fi-cad",  # CadastroFiReader + Registro{Fundo,Classe,Subclasse} + CadastroFiHist*
 		"fi-doc-cda",  # CdaReader
+		"fi-doc-compl",  # ComplFi{,Inf,InfCotst,Prest}Reader
 		"fi-doc-eventual",  # EventualFiReader
 		"fi-doc-extrato",  # ExtratoFiReader + ExtratoFiPre2020Reader + ExtratoFiSnapshotReader
 		"fi-doc-inf_diario",  # InformeDiarioReader

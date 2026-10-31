@@ -285,6 +285,15 @@ df_ = EventualFiReader(date_ref=date(2025, 6, 15)).read()
 print(df_[["CNPJ_FUNDO_CLASSE", "TP_DOC", "DT_COMPTC", "LINK_ARQ"]].head())
 ```
 
+### `ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
+
+`filings_cvm.ingestion.fi.ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
+
+Leem os 4 membros de `compl_fi_AAAAMM.zip` (`FI/DOC/COMPL`) — informações complementares dos
+fundos. **Mensal**, série **fechada** `201801`–`201904`; cabeçalhos idênticos nos 16 meses (20/6/7/5
+colunas). Só `DT_COMPTC` é data; o resto é texto exato. `date_ref` fora da janela levanta
+`ValueError`. Página completa em [Complemento FI](ingestion/compl_fi.md).
+
 ### `PerfilMensalReader` · `PerfilMensalPre175Reader`
 
 `filings_cvm.ingestion.fi.PerfilMensalReader` · `filings_cvm.ingestion.fi.PerfilMensalPre175Reader`

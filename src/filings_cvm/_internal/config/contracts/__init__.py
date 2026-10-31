@@ -92,6 +92,12 @@ from filings_cvm._internal.config.contracts.cia_aberta_recompra_acoes import (
 	CIA_ABERTA_RECOMPRA_ACOES_INTERMEDIARIOS,
 	CIA_ABERTA_RECOMPRA_ACOES_QUANTIDADES,
 )
+from filings_cvm._internal.config.contracts.compl_fi import (
+	COMPL_FI,
+	COMPL_FI_INF,
+	COMPL_FI_INF_COTST,
+	COMPL_FI_PREST,
+)
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
@@ -317,6 +323,7 @@ from filings_cvm._internal.config.contracts.meta import (
 	META_CGVN_CIA_ABERTA,
 	META_CIA_ABERTA_RECOMPRA_ACOES,
 	META_COLUMNS,
+	META_COMPL_FI,
 	META_DFIN_CRA,
 	META_DFIN_CRI,
 	META_DFIN_FII,
@@ -426,6 +433,10 @@ __all__ = [
 	"CIA_ABERTA_RECOMPRA_ACOES",
 	"CIA_ABERTA_RECOMPRA_ACOES_INTERMEDIARIOS",
 	"CIA_ABERTA_RECOMPRA_ACOES_QUANTIDADES",
+	"COMPL_FI",
+	"COMPL_FI_INF",
+	"COMPL_FI_INF_COTST",
+	"COMPL_FI_PREST",
 	"DFIN_CRA",
 	"DFIN_CRI",
 	"DFIN_FII",
@@ -624,6 +635,7 @@ __all__ = [
 	"META_CGVN_CIA_ABERTA",
 	"META_CIA_ABERTA_RECOMPRA_ACOES",
 	"META_COLUMNS",
+	"META_COMPL_FI",
 	"META_DFIN_CRA",
 	"META_DFIN_CRI",
 	"META_DFIN_FII",

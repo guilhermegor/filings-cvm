@@ -293,6 +293,12 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaCadastroFiReader": ("CadastroFiReader",),
 	"MetaCdaReader": ("CdaReader",),
+	"MetaComplFiReader": (
+		"ComplFiReader",
+		"ComplFiInfReader",
+		"ComplFiInfCotstReader",
+		"ComplFiPrestReader",
+	),
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
