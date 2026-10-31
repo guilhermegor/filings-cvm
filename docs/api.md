@@ -1120,7 +1120,7 @@ de mensal (o `date_ref` seleciona o ano). **Fecha o portal root `securit/` (4/4)
 `carteira_modificacao`, `creditos` e `responsavel`. Cada contract é **gerado do header** e **pinado**
 a um fixture verbatim. `cedente_devedor.CNPJ` pode guardar CPF (não validado como CNPJ);
 `Indice_Subordinacao_Data_Base` e `Data_LTV` (varchar no META) não são datas;
-`carteira_modificacao`/`responsavel` são header-only (sem coluna de CNPJ validada).
+`carteira_modificacao`/`responsavel` são header-only em 2025 e mesmo assim validam `CNPJ_Emissora` (#320).
 
 #### `InfMensalCriGeralReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 10)
 
