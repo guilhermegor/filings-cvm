@@ -6,6 +6,11 @@ standard. Ships in the wheel under ``_internal``; the public API is curated by t
 ``submission``/``ingestion`` packages, which re-export the names consumers need.
 """
 
+from filings_cvm._internal.config.schemas.inf_fundo_157 import (
+	InfFundo157Cotista,
+	InfFundo157Document,
+	InfFundo157Header,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -48,6 +53,9 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 __all__ = [
 	"ClientCount",
 	"DocumentHeader",
+	"InfFundo157Cotista",
+	"InfFundo157Document",
+	"InfFundo157Header",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
 	"LaminaCompCarteira",
