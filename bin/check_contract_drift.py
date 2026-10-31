@@ -45,6 +45,7 @@ from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
 from filings_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
+from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
@@ -103,6 +104,7 @@ _META_NAME_MAX_LEN = 50
 # every reader's contract; the multi-member readers expose ``_CONTRACT`` and are read from the
 # class directly. Keyed by class name, resolved through the portal-root packages.
 _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
+	"AtoDeclrReader": ATO_DECLR,
 	"BalanceteFieReader": BALANCETE_FIE,
 	"BalancoFieReader": BALANCO_FIE,
 	"CadastroAdmFiiReader": CAD_ADM_FII,
@@ -137,6 +139,7 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 # names — see the module docstring (the cad_fi / cad_fi_hist / registro traps). Keyed by class
 # name; both sides resolve through the portal-root packages.
 _META_MEMBERS: dict[str, tuple[str, ...]] = {
+	"MetaAtoDeclrReader": ("AtoDeclrReader",),
 	"MetaCadAdmFiiReader": ("CadastroAdmFiiReader",),
 	"MetaCadCiaEstrangReader": ("CadastroCiaEstrangReader",),
 	"MetaCadCiaAbertaReader": ("CadastroCiaAbertaReader",),
