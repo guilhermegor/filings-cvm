@@ -203,9 +203,9 @@ def test_header_only_member_reads_without_a_cnpj_error(
 ) -> None:
 	"""A structurally sparse member (header, no rows) must read clean, not raise ContractError.
 
-	``carteira_modificacao`` and ``responsavel`` are header-only in the real 2025 file. Declaring
-	``CNPJ_Emissora`` a CNPJ column would fail this legitimately empty member (nothing to check),
-	so it is excluded from *their* ``tuple_cnpj_cols``, asserted against a header-only archive.
+	``carteira_modificacao`` and ``responsavel`` are header-only in the real 2025 file, so
+	``CNPJ_Emissora`` is excluded from *their* ``tuple_cnpj_cols``, asserted against a header-only
+	archive. Before #317 declaring it failed this legitimately empty member; it now passes.
 
 	Parameters
 	----------
