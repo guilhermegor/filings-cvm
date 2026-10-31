@@ -41,6 +41,10 @@ import sys
 from typing import TYPE_CHECKING, Any
 import urllib.request
 
+from filings_cvm._internal.config.contracts.balancete_fi import (
+	BALANCETE_FI,
+	BALANCETE_FI_PRE202311,
+)
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
@@ -103,6 +107,8 @@ _META_NAME_MAX_LEN = 50
 # every reader's contract; the multi-member readers expose ``_CONTRACT`` and are read from the
 # class directly. Keyed by class name, resolved through the portal-root packages.
 _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
+	"BalanceteFiPre202311Reader": BALANCETE_FI_PRE202311,
+	"BalanceteFiReader": BALANCETE_FI,
 	"BalanceteFieReader": BALANCETE_FIE,
 	"BalancoFieReader": BALANCO_FIE,
 	"CadastroAdmFiiReader": CAD_ADM_FII,
@@ -267,6 +273,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaAgenteFiducReader": ("AgenteFiducPfReader", "AgenteFiducPjReader"),
 	"MetaAuditorReader": ("AuditorPfReader", "AuditorPjReader"),
+	"MetaBalanceteFiReader": ("BalanceteFiReader", "BalanceteFiPre202311Reader"),
 	"MetaBalanceteFieReader": ("BalanceteFieReader",),
 	"MetaBalancoFieReader": ("BalancoFieReader",),
 	"MetaCadEmissorCepacReader": ("CadastroEmissorCepacReader",),
@@ -427,6 +434,8 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 # contract was never in the META's scope. Without it the job reports the same explained line every
 # week forever, and a recurring known-false finding is how a report stops being read.
 _META_UNDESCRIBED_READERS: dict[str, str] = {
+	# BALANCETE META lists the 6-column fund/class header only; no CNPJ_FUNDO field.
+	"BalanceteFiPre202311Reader": "META describes the 202311-onward schema only",
 	# CVM publishes one META for PERFIL_MENSAL and it describes the post-RCVM 175 header only —
 	# all 107 of its fields, and no CNPJ_FUNDO at all. The pre-175 contract is pinned to its own
 	# published header instead, so the META can neither confirm nor refute that one.

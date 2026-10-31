@@ -285,6 +285,17 @@ df_ = EventualFiReader(date_ref=date(2025, 6, 15)).read()
 print(df_[["CNPJ_FUNDO_CLASSE", "TP_DOC", "DT_COMPTC", "LINK_ARQ"]].head())
 ```
 
+### `BalanceteFiReader` · `BalanceteFiPre202311Reader`
+
+`filings_cvm.ingestion.fi.BalanceteFiReader` · `filings_cvm.ingestion.fi.BalanceteFiPre202311Reader`
+
+Leem `balancete_fi_AAAAMM.zip` (`FI/DOC/BALANCETE`) — o **balancete mensal** do fundo/classe, uma
+linha por conta. **ZIP de 1 membro**, **particionado por mês** (série `201501`→); 6 colunas /
+2.191.291 linhas em 2026-09. **Dois schemas, corte medido em `202311`** (5 colunas com
+`CNPJ_FUNDO` antes; `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE` depois). Pedir o mês do outro regime
+levanta `ValueError` nomeando o irmão. `VL_SALDO_BALCTE` fica texto exato. Página completa em
+[Balancete FI](ingestion/balancete_fi.md).
+
 ### `PerfilMensalReader` · `PerfilMensalPre175Reader`
 
 `filings_cvm.ingestion.fi.PerfilMensalReader` · `filings_cvm.ingestion.fi.PerfilMensalPre175Reader`

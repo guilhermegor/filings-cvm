@@ -56,6 +56,7 @@ META_INF_DIARIO_FI = _meta_contract("inf_diario_fi", "META — Informe Diário F
 META_CDA_FI = _meta_contract("cda_fi", "META — CDA FI")
 META_LAMINA_FI = _meta_contract("lamina_fi", "META — Lâmina FI")
 META_EVENTUAL_FI = _meta_contract("eventual_fi", "META — Eventual FI")
+META_BALANCETE_FI = _meta_contract("balancete_fi", "META — Balancete FI")
 META_PERFIL_MENSAL_FI = _meta_contract("perfil_mensal_fi", "META — Perfil Mensal FI")
 META_EXTRATO_FI = _meta_contract("extrato_fi", "META — Extrato FI")
 META_CAD_FI = _meta_contract("cad_fi", "META — Cadastro FI")

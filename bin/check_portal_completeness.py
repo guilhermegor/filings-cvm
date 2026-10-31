@@ -81,6 +81,7 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"crowdfunding-cad",  # CrowdfundingReader + Crowdfunding{AdmResp,Socios}Reader
 		"emissor_cepac-cad",  # CadastroEmissorCepacReader
 		"fi-cad",  # CadastroFiReader + Registro{Fundo,Classe,Subclasse} + CadastroFiHist*
+		"fi-doc-balancete",  # BalanceteFiReader + BalanceteFiPre202311Reader
 		"fi-doc-cda",  # CdaReader
 		"fi-doc-eventual",  # EventualFiReader
 		"fi-doc-extrato",  # ExtratoFiReader + ExtratoFiPre2020Reader + ExtratoFiSnapshotReader
