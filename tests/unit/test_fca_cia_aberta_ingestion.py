@@ -227,10 +227,10 @@ def test_cpf_columns_are_required_but_never_declared_as_cnpj_columns() -> None:
 
 
 def test_the_header_only_member_declares_no_cnpj_column() -> None:
-	"""`departamento_acionistas` ships 0 rows, so a value-presence CNPJ check cannot hold.
+	"""`departamento_acionistas` ships 0 rows, so it declares no CNPJ column.
 
-	The CNPJ check requires at least one **present** valid value; on an empty frame it would fail.
-	Declaring no CNPJ column is what lets a legitimately empty artifact read cleanly.
+	Before #317 the CNPJ check failed an empty frame, so this was what let the empty artifact read
+	cleanly. The check now passes an empty column, so the empty tuple is no longer load-bearing.
 	"""
 	assert FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_cnpj_cols == ()
 	assert "CNPJ_Companhia" in FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_required
@@ -250,8 +250,8 @@ def test_reading_the_header_only_member_returns_an_empty_frame(
 ) -> None:
 	"""The empty member reads as 0 rows with full columns — it must not raise.
 
-	This is the test that would catch the production break: a value-presence CNPJ check on an
-	empty artifact raises `ContractError`, which is why that contract declares none.
+	Before #317 a CNPJ check on an empty artifact raised `ContractError`; this pins that the empty
+	member reads cleanly either way.
 	"""
 	_patch(monkeypatch, _all_members())
 

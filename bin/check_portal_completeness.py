@@ -64,6 +64,7 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"adm_fii-cad",  # CadastroAdmFiiReader
 		"agente_auton-cad",  # AgenteAuton{Pf,Pj}Reader
 		"agente_fiduc-cad",  # AgenteFiduc{Pf,Pj}Reader
+		"ato_declr-intermed",  # AtoDeclrReader
 		"auditor-cad",  # Auditor{Pf,Pj}Reader
 		"cia_aberta-cad",  # CadastroCiaAbertaReader
 		"cia_aberta-doc-cgvn",  # CgvnCiaAberta*
@@ -81,7 +82,10 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"crowdfunding-cad",  # CrowdfundingReader + Crowdfunding{AdmResp,Socios}Reader
 		"emissor_cepac-cad",  # CadastroEmissorCepacReader
 		"fi-cad",  # CadastroFiReader + Registro{Fundo,Classe,Subclasse} + CadastroFiHist*
+		"fi-doc-balancete",  # BalanceteFiReader + BalanceteFiPre202311Reader
 		"fi-doc-cda",  # CdaReader
+		"fi-doc-entrega",  # EntregaFiReader + EntregaFiDiarioReader
+		"fi-doc-compl",  # ComplFi{,Inf,InfCotst,Prest}Reader
 		"fi-doc-eventual",  # EventualFiReader
 		"fi-doc-extrato",  # ExtratoFiReader + ExtratoFiPre2020Reader + ExtratoFiSnapshotReader
 		"fi-doc-inf_diario",  # InformeDiarioReader
