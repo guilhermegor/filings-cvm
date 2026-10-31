@@ -16,6 +16,15 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.informe_quadrimestral import (
+	ClasseCotas,
+	CotistCategory,
+	InformeQuadrimestralDocument,
+	InformeQuadrimestralHeader,
+	InformeQuadrimestralInform,
+	ListaClasseCotas,
+	ListaCotstCateg,
+)
 from filings_cvm._internal.config.schemas.inr_mensal import (
 	Aplicacoes,
 	EntradaSaida,
@@ -72,7 +81,9 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 
 __all__ = [
 	"Aplicacoes",
+	"ClasseCotas",
 	"ClientCount",
+	"CotistCategory",
 	"DocumentHeader",
 	"EntradaSaida",
 	"ExtratoDocument",
@@ -81,6 +92,9 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InformeQuadrimestralDocument",
+	"InformeQuadrimestralHeader",
+	"InformeQuadrimestralInform",
 	"InrMensalDocument",
 	"InrMensalHeader",
 	"LaminaAntesInic2",
@@ -103,6 +117,8 @@ __all__ = [
 	"LaminaTaxaAdministracao",
 	"LaminaTaxaEntrada",
 	"LaminaTaxaSaida",
+	"ListaClasseCotas",
+	"ListaCotstCateg",
 	"MovRecursos",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
