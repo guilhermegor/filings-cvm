@@ -101,6 +101,7 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 		"intermed-cad",  # IntermedReader + IntermedRespReader
 		"invnr-cad",  # InvnrRepres{Pf,Pj}Reader
 		"oferta-distrib",  # OfertaDistribuicaoReader + OfertaResolucao160Reader
+		"processo-sancionador",  # ProcessoSancionador{,Acusado}Reader
 		"securit-doc-dfin_cra",  # DfinCraReader
 		"securit-doc-dfin_cri",  # DfinCriReader
 		"securit-doc-inf_mensal_cra",  # InfMensalCra*

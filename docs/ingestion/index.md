@@ -18,9 +18,9 @@ from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
 from filings_cvm.ingestion.fi import InformeDiarioReader
 ```
 
-São **22 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `auditor`, `cia_aberta`,
+São **23 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `auditor`, `cia_aberta`,
 `cia_estrang`, `cia_incent`, `consultor_vlmob`, `coord_oferta`, `crowdfunding`, `emissor_cepac`,
-`fi`, `fiagro`, `fidc`, `fie`, `fii`, `fip`, `intermed`, `invnr`, `oferta`, `securit`.
+`fi`, `fiagro`, `fidc`, `fie`, `fii`, `fip`, `intermed`, `invnr`, `oferta`, `processo`, `securit`.
 
 > ⚠️ **Mudança incompatível na 0.26.0.** `from filings_cvm import <Leitor>` e
 > `from filings_cvm.ingestion import <Leitor>` **deixaram de funcionar** — os 216 leitores não são
@@ -222,6 +222,14 @@ São **22 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `audit
   `DD/MM/YYYY` → fica `str` (a coerção é ISO-only). ⚠️ **A META é um `.zip`** de 2 membros, com
   `section` simétricas. Contracts **gerados dos headers** e **pinados**. **Quinta fatia da Wave 4 do
   #41**; fecha a issue #14.
+
+- **[Processo Sancionador (PROCESSO/SANCIONADOR)](processo_sancionador.md)** — **2 readers**
+  `ProcessoSancionadorReader` (processos, 9 cols, 2 date cols, 581 linhas, `NUP` único) /
+  `ProcessoSancionadorAcusadoReader` (acusados, 4 cols, 1 date col, 2.070 linhas) sobre o
+  `processo_sancionador.zip`. **Snapshot** de URL fixa, **sem `date_ref`**. ⚠️ **Nenhuma coluna
+  guarda CNPJ/CPF** (`tuple_cnpj_cols` vazio nos dois, medido); `Nome_Acusado` é dado pessoal →
+  fixtures só com o header. `NUP` (17 dígitos) fica `str`; aspas são literais. ⚠️ **A META é um
+  `.zip`** de 2 membros, com `section` assimétricas. Inaugura o root `processo/`.
 
 - **[Cadastro de Companhias Abertas (CIA_ABERTA/CAD)](cia_aberta_cad.md)** — **1 reader**
   `CadastroCiaAbertaReader` sobre o `cad_cia_aberta.csv` (**CSV solto**, não ZIP; **47 cols**,

@@ -1,7 +1,7 @@
 # **META (metadados da CVM) — leitura**
 
 Leitura (← CVM) dos **META** — a *especificação que a própria CVM publica* para cada dataset do
-[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **48 no total**,
+[portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **49 no total**,
 todos sob `.../<DATASET>/META/`.
 
 > **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) · [Proveniência](index.md).
@@ -71,7 +71,7 @@ nunca derivada. Os nomes são irregulares de fato: `meta_inf_mensal_cri.zip`, ma
 
 ---
 
-## Os 48 readers
+## Os 49 readers
 
 Todos devolvem **o mesmo formato**: uma linha por campo declarado.
 
@@ -125,6 +125,7 @@ tabela alguma) — como as seis colunas de proveniência. Os **valores** seguem 
 | `COORD_OFERTA/CAD` | `MetaCoordOfertaReader` | `.zip` (2 membros) |
 | `CROWDFUNDING/CAD` | `MetaCrowdfundingReader` | `.zip` (3 membros) |
 | `OFERTA/DISTRIB` | `MetaOfertaReader` | `.zip` (2 membros) |
+| `PROCESSO/SANCIONADOR` | `MetaProcessoSancionadorReader` | `.zip` (2 membros) |
 | `CIA_ABERTA/CAD` | `MetaCadCiaAbertaReader` | `.txt` |
 | `CIA_ABERTA/DOC/IPE` | `MetaIpeCiaAbertaReader` | `.txt` |
 | `CIA_ABERTA/DOC/VLMO` | `MetaVlmoCiaAbertaReader` | `.zip` |
