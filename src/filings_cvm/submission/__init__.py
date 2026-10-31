@@ -99,6 +99,36 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_sintetico import (
+	FcceAplicacoes,
+	FcceAplicacoesPosFinal,
+	FcceHeader,
+	FcceInform,
+	FcceOutras,
+	FicAplicacoes,
+	FicAplicacoesPosFinal,
+	FicHeader,
+	FicInform,
+	FicOutras,
+	FitvmAplicacoes,
+	FitvmAplicacoesPosFinal,
+	FitvmHeader,
+	FitvmInform,
+	FitvmOutras,
+	InformeSinteticoFcceDocument,
+	InformeSinteticoFicDocument,
+	InformeSinteticoFitvmDocument,
+	InformeSinteticoOutrosDocument,
+	OutrosAplicacoes,
+	OutrosAplicacoesPosFinal,
+	OutrosHeader,
+	OutrosInform,
+	OutrosOutras,
+	SinteticoContrFuturo,
+	SinteticoDebt,
+	SinteticoMercATermo,
+	SinteticoMercOpcao,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -142,13 +172,13 @@ from filings_cvm.submission.cda import (
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
-from filings_cvm.submission.informe_diario import (
-	InformeDiario,
-)
+from filings_cvm.submission.informe_diario import InformeDiario
+from filings_cvm.submission.informe_sintetico_fcce import InformeSinteticoFcce
+from filings_cvm.submission.informe_sintetico_fic import InformeSinteticoFic
+from filings_cvm.submission.informe_sintetico_fitvm import InformeSinteticoFitvm
+from filings_cvm.submission.informe_sintetico_outros import InformeSinteticoOutros
 from filings_cvm.submission.lamina import Lamina
-from filings_cvm.submission.perfil_mensal import (
-	PerfilMensal,
-)
+from filings_cvm.submission.perfil_mensal import PerfilMensal
 
 
 __all__ = [
@@ -195,6 +225,21 @@ __all__ = [
 	"DevSacado",
 	"Dicred",
 	"DocumentHeader",
+	"FcceAplicacoes",
+	"FcceAplicacoesPosFinal",
+	"FcceHeader",
+	"FcceInform",
+	"FcceOutras",
+	"FicAplicacoes",
+	"FicAplicacoesPosFinal",
+	"FicHeader",
+	"FicInform",
+	"FicOutras",
+	"FitvmAplicacoes",
+	"FitvmAplicacoesPosFinal",
+	"FitvmHeader",
+	"FitvmInform",
+	"FitvmOutras",
 	"Garantia",
 	"InfMensalFidc",
 	"InfMensalFidcDocument",
@@ -205,6 +250,14 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformeSinteticoFcce",
+	"InformeSinteticoFcceDocument",
+	"InformeSinteticoFic",
+	"InformeSinteticoFicDocument",
+	"InformeSinteticoFitvm",
+	"InformeSinteticoFitvmDocument",
+	"InformeSinteticoOutros",
+	"InformeSinteticoOutrosDocument",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
@@ -238,7 +291,12 @@ __all__ = [
 	"NumCotistasDesc",
 	"OtcOperation",
 	"OutrasInform",
+	"OutrosAplicacoes",
+	"OutrosAplicacoesPosFinal",
 	"OutrosAtivos",
+	"OutrosHeader",
+	"OutrosInform",
+	"OutrosOutras",
 	"Passiv",
 	"PassivPosicoes",
 	"PassivValores",
@@ -262,6 +320,10 @@ __all__ = [
 	"SegmtSetorPublic",
 	"SerieClasse",
 	"SignificantShareholder",
+	"SinteticoContrFuturo",
+	"SinteticoDebt",
+	"SinteticoMercATermo",
+	"SinteticoMercOpcao",
 	"Taxa",
 	"TaxaAquis",
 	"TaxaAtivRf",

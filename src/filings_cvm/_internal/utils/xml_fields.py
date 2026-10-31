@@ -9,7 +9,7 @@ Every check uses ``re.fullmatch`` with ``[0-9]`` — a ``$`` anchor accepts a tr
 ``\d`` accepts non-ASCII digits, and both would let a malformed value reach the XML.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date, datetime
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 import re
@@ -267,3 +267,24 @@ def strict_decimal(places: int) -> Callable[[object], Decimal]:
 		return abs(truncated) if truncated == 0 else truncated
 
 	return _coerce
+
+
+@type_checker
+def require_unique_funds(cnpjs: Sequence[str]) -> None:
+	"""Reject a file that reports the same fund twice.
+
+	Parameters
+	----------
+	cnpjs : Sequence[str]
+		The ``CNPJ_FUNDO`` of each ``ROW_INFORME``.
+
+	Raises
+	------
+	ValueError
+		If a CNPJ repeats.
+	"""
+	seen: set[str] = set()
+	for cnpj in cnpjs:
+		if cnpj in seen:
+			raise ValueError(f"fund {cnpj} appears in more than one ROW_INFORME")
+		seen.add(cnpj)
