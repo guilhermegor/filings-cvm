@@ -146,6 +146,12 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
      - Any technical debt created
 
 3. **Code Review**:
+   - CodeRabbit is asked for a review automatically when the PR opens, reopens or leaves
+     draft (`.github/workflows/coderabbit_trigger.yaml`). It will not review on its own here,
+     because the repository has fewer than 10 stars. To ask again by hand, comment
+     `@coderabbitai review`.
+   - `PR Quality Gate` (`pr-gate.yaml`) labels the PR and keeps one status comment up to date.
+     After the merge, `Reconcile Merged PRs` closes the linked issues and deletes the branch.
    - Expect constructive feedback
    - Address all review comments
    - Update documentation as needed

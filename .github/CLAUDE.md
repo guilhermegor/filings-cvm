@@ -67,6 +67,30 @@ The coverage floor is single-sourced in `.coveragerc` (`[report] fail_under`), s
 pre-commit `coverage-check` hook and the CI coverage gate share one value — never pass a
 duplicate `--cov-fail-under` literal in either place.
 
+## Review automation — one workflow per job, never two
+
+| workflow | job |
+|---|---|
+| `pr-gate.yaml` (`bin/pr_gate.py`) | labels, the sticky status comment, native auto-merge hand-off |
+| `coderabbit_trigger.yaml` | posts `@coderabbitai review` on opened / reopened / ready_for_review |
+| `reconcile-merged-prs.yaml` (`bin/reconcile_merged_prs.py`) | closes linked issues + deletes the branch of a bot-merged PR |
+
+- **`coderabbit_trigger` exists because `auto_review` does nothing here.** CodeRabbit declines
+  automatic reviews on a repository with fewer than 10 stars (refusal notice on #291), and
+  `.coderabbit.yaml` cannot change that. It posts with the **`GH_PAT_REVIEW_TRIGGER`** user PAT,
+  never `GITHUB_TOKEN`: CodeRabbit ignores bot-authored comments. If the secret is missing, the
+  job **fails** rather than skipping, because a skip would hide the missing review. It is not a
+  pre-commit-mirrored gate: it needs a live PR and a secret, so there is no local hook to pair it
+  with.
+- **The scaffold's `pr-reconcile.yaml` / `bin/pr_reconcile.sh` were NOT imported** (#296). They
+  duplicate `reconcile-merged-prs.yaml` (same triggers), and two reconcilers would race on the
+  same issues and branches.
+- **The scaffold's review-threads gate is not adopted yet** (`review_threads.yaml`,
+  `review_retry.yaml`, `bin/retry_rate_limited_review.py`, `bin/rerun_stale_gate_runs.sh`).
+  All four depend on `bin/check_review_threads.py` and its `.review-bots.yaml` roster, and this
+  repo has neither. Importing the workflows without them would leave a check that is red on
+  every PR. See `docs/backlog/review-workflows-296_*.md`.
+
 ## Recurrent (scheduled) workflows
 
 To run a workflow on a schedule, add an `on.schedule` trigger with a cron
