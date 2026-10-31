@@ -56,12 +56,15 @@ jobs:
           *) echo "::warning::token class: UNRECOGNISED prefix — is this a token at all?" ;;
           esac
 
-          if printf '%s' "$GH_PAT_REVIEW_TRIGGER" | grep -qE '[[:space:]]'; then
+          # A `case` glob, not `grep`: grep reads lines, so a bare trailing newline never matches.
+          case "$GH_PAT_REVIEW_TRIGGER" in
+          *[[:space:]]*)
             echo "::error::the stored secret contains whitespace (likely a trailing newline)." >&2
             echo "That 401s exactly like a bad token. Re-store it with --body, never a redirect:" >&2
             echo "  gh secret set GH_PAT_REVIEW_TRIGGER --repo $GITHUB_REPOSITORY --body '<pat>'" >&2
             exit 1
-          fi
+            ;;
+          esac
           echo "no whitespace in the stored value."
 
       - name: The PAT must authenticate as a user
