@@ -753,6 +753,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ingestion/balancete_fi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Balancete FI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ingestion/compl_fi/" class="md-nav__link">
         
   
@@ -2440,6 +2468,17 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#balancetefireader-balancetefipre202311reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BalanceteFiReader · BalanceteFiPre202311Reader
+      
+    </span>
+  </a>
   
 </li>
         
@@ -4383,6 +4422,17 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#balancetefireader-balancetefipre202311reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BalanceteFiReader · BalanceteFiPre202311Reader
+      
+    </span>
+  </a>
   
 </li>
         
@@ -6418,6 +6468,14 @@ vazio, sem placeholder. <strong>Nenhuma chave única é afirmada.</strong></p>
 </span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">df_</span> <span class="o">=</span> <span class="n">EventualFiReader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 </span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">df_</span><span class="p">[[</span><span class="s2">&quot;CNPJ_FUNDO_CLASSE&quot;</span><span class="p">,</span> <span class="s2">&quot;TP_DOC&quot;</span><span class="p">,</span> <span class="s2">&quot;DT_COMPTC&quot;</span><span class="p">,</span> <span class="s2">&quot;LINK_ARQ&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </span></code></pre></div>
+<h3 id="balancetefireader-balancetefipre202311reader"><code>BalanceteFiReader</code> · <code>BalanceteFiPre202311Reader</code><a class="headerlink" href="#balancetefireader-balancetefipre202311reader" title="Permanent link">&para;</a></h3>
+<p><code>filings_cvm.ingestion.fi.BalanceteFiReader</code> · <code>filings_cvm.ingestion.fi.BalanceteFiPre202311Reader</code></p>
+<p>Leem <code>balancete_fi_AAAAMM.zip</code> (<code>FI/DOC/BALANCETE</code>) — o <strong>balancete mensal</strong> do fundo/classe, uma
+linha por conta. <strong>ZIP de 1 membro</strong>, <strong>particionado por mês</strong> (série <code>201501</code>→); 6 colunas /
+2.191.291 linhas em 2026-09. <strong>Dois schemas, corte medido em <code>202311</code></strong> (5 colunas com
+<code>CNPJ_FUNDO</code> antes; <code>TP_FUNDO_CLASSE</code> + <code>CNPJ_FUNDO_CLASSE</code> depois). Pedir o mês do outro regime
+levanta <code>ValueError</code> nomeando o irmão. <code>VL_SALDO_BALCTE</code> fica texto exato. Página completa em
+<a href="../ingestion/balancete_fi/">Balancete FI</a>.</p>
 <h3 id="complfireader-complfiinfreader-complfiinfcotstreader-complfiprestreader"><code>ComplFiReader</code> · <code>ComplFiInfReader</code> · <code>ComplFiInfCotstReader</code> · <code>ComplFiPrestReader</code><a class="headerlink" href="#complfireader-complfiinfreader-complfiinfcotstreader-complfiprestreader" title="Permanent link">&para;</a></h3>
 <p><code>filings_cvm.ingestion.fi.ComplFiReader</code> · <code>ComplFiInfReader</code> · <code>ComplFiInfCotstReader</code> · <code>ComplFiPrestReader</code></p>
 <p>Leem os 4 membros de <code>compl_fi_AAAAMM.zip</code> (<code>FI/DOC/COMPL</code>) — informações complementares dos
@@ -8468,7 +8526,7 @@ Duas colunas chegam <strong>inteiramente vazias</strong> em 2025 (<code>auditor.
 </span><span id="__span-47-9"><a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a><span class="c1"># df_acionistas[[&quot;CNPJ_Companhia&quot;, &quot;Acionista&quot;, &quot;Percentual_Total_Acoes_Circulacao&quot;]]</span>
 </span></code></pre></div>
 <hr />
-<h3 id="metareader-50-readers"><code>Meta*Reader</code> (50 readers)<a class="headerlink" href="#metareader-50-readers" title="Permanent link">&para;</a></h3>
+<h3 id="metareader-51-readers"><code>Meta*Reader</code> (51 readers)<a class="headerlink" href="#metareader-51-readers" title="Permanent link">&para;</a></h3>
 <p>Os <strong>META</strong> — a spec que a própria CVM publica para cada dataset (<code>.../&lt;DATASET&gt;/META/</code>). Um reader
 por dataset; página completa em <a href="../ingestion/meta/">META (metadados da CVM)</a>.</p>
 <p><code>MetaInformeDiarioReader</code> · <code>MetaCdaReader</code> · <code>MetaLaminaReader</code> · <code>MetaCadastroFiReader</code> ·
@@ -8480,7 +8538,8 @@ por dataset; página completa em <a href="../ingestion/meta/">META (metadados da
 <code>MetaInfMensalCriReader</code> · <code>MetaCadEmissorCepacReader</code> · <code>MetaAuditorReader</code> · <code>MetaAgenteFiducReader</code>
 · <code>MetaAgenteAutonReader</code> · <code>MetaInvnrRepresReader</code> · <code>MetaIntermedReader</code> · <code>MetaAdmCartReader</code> ·
 <code>MetaConsultorVlmobReader</code> · <code>MetaCadAdmFiiReader</code> · <code>MetaCadCiaEstrangReader</code> ·
-<code>MetaAtoDeclrReader</code> · <code>MetaCadCiaIncentReader</code> · <code>MetaCoordOfertaReader</code> · <code>MetaCrowdfundingReader</code> · <code>MetaOfertaReader</code> · <code>MetaComplFiReader</code></p>
+<code>MetaAtoDeclrReader</code> · <code>MetaCadCiaIncentReader</code> · <code>MetaCoordOfertaReader</code> · <code>MetaCrowdfundingReader</code> · <code>MetaOfertaReader</code> · <code>MetaComplFiReader</code> ·
+<code>MetaBalanceteFiReader</code></p>
 <h4 id="__init__path_rawnone-retry_policynone-cls_loggernone_14"><code>__init__(path_raw=None, retry_policy=None, cls_logger=None)</code><a class="headerlink" href="#__init__path_rawnone-retry_policynone-cls_loggernone_14" title="Permanent link">&para;</a></h4>
 <p><strong>Sem <code>date_ref</code></strong> — o META fica numa URL fixa que a CVM sobrescreve no lugar (o precedente do
 <code>CadastroFiReader</code>), então um <code>path_raw</code> gravado é o <strong>único</strong> registro do que a spec dizia naquele

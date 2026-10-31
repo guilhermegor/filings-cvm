@@ -755,6 +755,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../balancete_fi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Balancete FI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../compl_fi/" class="md-nav__link">
         
   
@@ -2024,10 +2052,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-50-readers" class="md-nav__link">
+  <a href="#os-51-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 50 readers
+        Os 51 readers
       
     </span>
   </a>
@@ -2324,10 +2352,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#os-50-readers" class="md-nav__link">
+  <a href="#os-51-readers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Os 50 readers
+        Os 51 readers
       
     </span>
   </a>
@@ -2378,7 +2406,7 @@
 
 <h1 id="meta-metadados-da-cvm-leitura"><strong>META (metadados da CVM) — leitura</strong><a class="headerlink" href="#meta-metadados-da-cvm-leitura" title="Permanent link">&para;</a></h1>
 <p>Leitura (← CVM) dos <strong>META</strong> — a <em>especificação que a própria CVM publica</em> para cada dataset do
-<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>50 no total</strong>,
+<a href="https://dados.cvm.gov.br/dados/">portal de dados abertos</a>. Um reader por dataset, <strong>51 no total</strong>,
 todos sob <code>.../&lt;DATASET&gt;/META/</code>.</p>
 <blockquote>
 <p><strong>Veja também:</strong> <a href="../../api/">Referência da API</a> · <a href="../../usage/">Uso</a> · <a href="../">Proveniência</a>.</p>
@@ -2468,7 +2496,7 @@ do <strong>hist</strong> para quem pediu <code>cad_fi</code>. Por isso <strong>c
 nunca derivada. Os nomes são irregulares de fato: <code>meta_inf_mensal_cri.zip</code>, mas
 <code>meta_cda_fi_txt.zip</code> / <code>meta_lamina_fi_txt.zip</code> / <code>meta_inf_mensal_fidc_txt.zip</code> (infixo <code>_txt</code>).</p>
 <hr />
-<h2 id="os-50-readers">Os 50 readers<a class="headerlink" href="#os-50-readers" title="Permanent link">&para;</a></h2>
+<h2 id="os-51-readers">Os 51 readers<a class="headerlink" href="#os-51-readers" title="Permanent link">&para;</a></h2>
 <p>Todos devolvem <strong>o mesmo formato</strong>: uma linha por campo declarado.</p>
 <table>
 <thead>
@@ -2507,6 +2535,11 @@ tabela alguma) — como as seis colunas de proveniência. Os <strong>valores</st
 <td><code>FI/DOC/INF_DIARIO</code></td>
 <td><code>MetaInformeDiarioReader</code></td>
 <td><code>.txt</code></td>
+</tr>
+<tr>
+<td><code>FI/DOC/BALANCETE</code></td>
+<td><code>MetaBalanceteFiReader</code></td>
+<td><code>.txt</code> (6 campos — só o schema de 202311 em diante)</td>
 </tr>
 <tr>
 <td><code>FI/DOC/CDA</code></td>
