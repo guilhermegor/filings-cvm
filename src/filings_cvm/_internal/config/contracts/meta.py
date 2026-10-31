@@ -101,6 +101,7 @@ META_CAD_CROWDFUNDING = _meta_contract(
 	"cad_crowdfunding", "META — Cadastro Plataforma de Crowdfunding"
 )
 META_OFERTA_DISTRIBUICAO = _meta_contract("oferta_distribuicao", "META — Oferta de Distribuição")
+META_PROCESSO_SANCIONADOR = _meta_contract("processo_sancionador", "META — Processo Sancionador")
 META_CAD_CIA_ABERTA = _meta_contract("cad_cia_aberta", "META — Cadastro Companhia Aberta")
 META_IPE_CIA_ABERTA = _meta_contract("ipe_cia_aberta", "META — IPE Companhia Aberta")
 META_VLMO_CIA_ABERTA = _meta_contract("vlmo_cia_aberta", "META — VLMO Companhia Aberta")

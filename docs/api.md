@@ -5,7 +5,7 @@ serializador é reexportado no topo de `filings_cvm`:
 
 | o que | importe de |
 |---|---|
-| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **22 roots** do portal |
+| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **23 roots** do portal |
 | um **serializador** (submission) | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
@@ -1402,6 +1402,40 @@ df_ = OfertaDistribuicaoReader().read()
 
 ---
 
+### `ProcessoSancionadorReader` · `ProcessoSancionadorAcusadoReader` (2 readers)
+
+`filings_cvm.ingestion.processo`
+
+Os **processos administrativos sancionadores** da CVM e seus acusados (`PROCESSO/SANCIONADOR`,
+`processo_sancionador.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
+`processo/`. Página completa em [Processo Sancionador](ingestion/processo_sancionador.md).
+
+- `ProcessoSancionadorReader` — `processo_sancionador.csv`, um processo por `NUP` (9 colunas, 2 date
+  cols: `Data_Abertura`, `Data_Ultima_Movimentacao`; 581 linhas).
+- `ProcessoSancionadorAcusadoReader` — `processo_sancionador_acusado.csv`, um acusado por processo
+  (4 colunas, 1 date col: `Data_Situacao`; 2.070 linhas). Dado pessoal (`Nome_Acusado`), sem
+  CPF/CNPJ.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `processo_sancionador.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+As colunas `Data_*` viram `date`; o restante fica texto exato (o `NUP` de 17 dígitos é identificador,
+nunca número). Nenhuma coluna de CNPJ é validada — o dataset não publica documentos. Levanta
+`OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm.ingestion.processo import ProcessoSancionadorReader
+
+df_ = ProcessoSancionadorReader().read()
+# df_[["NUP", "Data_Abertura", "Fase_Atual", "Local_Atual"]]
+```
+
+---
+
 ### `CadastroCiaAbertaReader` (1 reader)
 
 `filings_cvm.ingestion.cia_aberta`
@@ -1847,7 +1881,8 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaInfMensalCriReader` · `MetaCadEmissorCepacReader` · `MetaAuditorReader` · `MetaAgenteFiducReader`
 · `MetaAgenteAutonReader` · `MetaInvnrRepresReader` · `MetaIntermedReader` · `MetaAdmCartReader` ·
 `MetaConsultorVlmobReader` · `MetaCadAdmFiiReader` · `MetaCadCiaEstrangReader` ·
-`MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader`
+`MetaCadCiaIncentReader` · `MetaCoordOfertaReader` · `MetaCrowdfundingReader` · `MetaOfertaReader` ·
+`MetaProcessoSancionadorReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 

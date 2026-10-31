@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **48 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **49 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (48 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (49 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (19) ou `.zip` multi-membro (29); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (19) ou `.zip` multi-membro (30); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`48 = 19 .txt + 29 .zip`, e 48 contracts — o 49º nome
+⚠️ **Estes números são MEDIDOS do código** (`49 = 19 .txt + 30 .zip`, e 49 contracts — o 50º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
 parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
@@ -513,6 +513,22 @@ não publica padrão XML de envio). Sob `OFERTA/DISTRIB/`:
   voltam **simétricas** (`distribuicao`/`resolucao_160`, `_MEMBER_STEM='oferta'`), diferente do
   INTERMED/COORD_OFERTA. **Quinta fatia da Wave 4 do #41; fecha a issue #14**
 
+**Processo Sancionador** — portal root `processo/`; **open-data only** (a CVM não publica padrão XML
+de envio). Sob `PROCESSO/SANCIONADOR/`:
+- Processo Sancionador — ✅ **ingestion** `processo_sancionador.zip` (**2 membros**: processos 9 cols/581
+  linhas + acusados 4 cols/2.070 linhas) — `ingestion/processo/sancionador/{processo_sancionador,
+  processo_sancionador_acusado}.py` (`ProcessoSancionadorReader`, `ProcessoSancionadorAcusadoReader`,
+  base privada `_base_processo_sancionador_reader.py`); contracts
+  `_internal/config/contracts/processo_sancionador.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/processo_sancionador/*_header.csv` (só o header: `Nome_Acusado` é dado pessoal).
+  **Snapshot** de URL fixa, **sem `date_ref`**; ISO-8859-1, `;`, CRLF. **Inaugura o root `processo/`.**
+  ⚠️ **Os 2 membros não são `pf`/`pj`** — ligados só pelo `NUP` (17 dígitos, `str`; único nos processos,
+  repetido nos acusados). ⚠️ **NENHUMA coluna guarda CNPJ/CPF** ⇒ `tuple_cnpj_cols=()` nos dois, decisão
+  MEDIDA (o nome é pessoa, o documento não é publicado). Aspas são dados literais (`QUOTE_NONE`; aparecem
+  na `Ementa`). 2 date cols nos processos (`Data_Abertura`, `Data_Ultima_Movimentacao`), 1 nos acusados
+  (`Data_Situacao`), todas ISO; `Ementa` ~35% vazia. META = `meta_processo_sancionador.zip` (2 membros,
+  `section` assimétricas `processo_sancionador`/`acusado`)
+
 **Companhias Abertas** — portal root `cia_aberta/` ✅ **COMPLETO**; **open-data only** (a CVM não
 publica padrão XML de envio). ⚠️ **É o maior root do portal** — três sub-roots, todos implementados:
 `CAD` (o cadastro), `DOC/{CGVN,DFP,FCA,FRE,IPE,ITR,VLMO}` (**7/7**) e `EVENTOS/RECOMPRA_ACOES`
@@ -731,8 +747,8 @@ src/filings_cvm/
                            #   `from filings_cvm.submission import InformeDiario`
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
-                           #   22 ROOT PACKAGES, never the readers
-        _base_meta_reader.py   # PRIVATE base for the 42 Meta*Reader (shared across every root)
+                           #   23 ROOT PACKAGES, never the readers
+        _base_meta_reader.py   # PRIVATE base for the 49 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:
@@ -769,6 +785,7 @@ src/filings_cvm/
         coord_oferta/      #   COORD_OFERTA/ — cad/{coord_oferta,coord_oferta_resp} (snapshot ZIP, 2 membros NÃO-pf/pj, no date_ref; META é .zip)
         crowdfunding/      #   CROWDFUNDING/ — cad/{crowdfunding,crowdfunding_adm_resp,crowdfunding_socios} (snapshot ZIP, 3 membros, no date_ref; 2 satélites sem data; META é .zip)
         oferta/            #   OFERTA/ — distrib/{oferta_distribuicao,oferta_resolucao_160} (snapshot ZIP, 2 membros por regime, no date_ref; NÃO registro+satélite; META é .zip simétrica) — fecha #14
+        processo/          #   PROCESSO/ — sancionador/{processo_sancionador,processo_sancionador_acusado} (snapshot ZIP, 2 membros ligados por NUP, no date_ref; sem coluna de CNPJ/CPF → tuple_cnpj_cols=(); META é .zip assimétrica)
         cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto)
                            #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
@@ -801,7 +818,7 @@ neither section:
 
 | what | import from |
 |---|---|
-| an ingestion reader | `filings_cvm.ingestion.<portal_root>` (22 roots) |
+| an ingestion reader | `filings_cvm.ingestion.<portal_root>` (23 roots) |
 | a submission writer | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
