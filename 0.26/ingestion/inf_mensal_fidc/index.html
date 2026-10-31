@@ -1213,10 +1213,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-17" class="md-nav__link">
+  <a href="#persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-18" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Persistir o dump bruto (camada bronze) uma vez para os 17
+        Persistir o dump bruto (camada bronze) uma vez para os 18
       
     </span>
   </a>
@@ -2505,10 +2505,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-17" class="md-nav__link">
+  <a href="#persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-18" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Persistir o dump bruto (camada bronze) uma vez para os 17
+        Persistir o dump bruto (camada bronze) uma vez para os 18
       
     </span>
   </a>
@@ -2549,7 +2549,7 @@ Inaugura o <em>portal root</em> <code>fidc/</code> da biblioteca (irmão de <cod
 </blockquote>
 <hr />
 <h2 id="descricao">Descrição<a class="headerlink" href="#descricao" title="Permanent link">&para;</a></h2>
-<p><code>inf_mensal_fidc_AAAAMM.zip</code> traz <strong>17 membros</strong> — as tabelas do informe mensal (Tabelas I–X mais
+<p><code>inf_mensal_fidc_AAAAMM.zip</code> traz <strong>18 membros</strong> — as tabelas do informe mensal (Tabelas I–X mais
 as sub-tabelas de X). Cada membro compartilha o mesmo prefixo-chave de quatro colunas —
 <code>TP_FUNDO_CLASSE</code>, <code>CNPJ_FUNDO_CLASSE</code>, <code>DENOM_SOCIAL</code>, <code>DT_COMPTC</code> — e então carrega as colunas
 específicas da sua tabela. Cada membro tem o seu reader:</p>
@@ -2596,6 +2596,11 @@ específicas da sua tabela. Cada membro tem o seu reader:</p>
 <td><code>InfMensalFidcTabVIIReader</code></td>
 <td><code>inf_mensal_fidc_tab_VII</code></td>
 <td>VII — direitos creditórios por origem</td>
+</tr>
+<tr>
+<td><code>InfMensalFidcTabVIIIReader</code></td>
+<td><code>inf_mensal_fidc_tab_VIII</code></td>
+<td>VIII — valores numerados (<code>SEQUENCIAL</code> × <code>VALOR</code>, longa)</td>
 </tr>
 <tr>
 <td><code>InfMensalFidcTabIXReader</code></td>
@@ -2649,22 +2654,27 @@ específicas da sua tabela. Cada membro tem o seu reader:</p>
 </tr>
 </tbody>
 </table>
-<p>Os 17 baixam o <strong>mesmo</strong> ZIP mensal, então um <code>path_raw</code> gravado por qualquer um serve aos outros.
+<p>Os 18 baixam o <strong>mesmo</strong> ZIP mensal, então um <code>path_raw</code> gravado por qualquer um serve aos outros.
 O dump é <strong>particionado por mês</strong> (<code>AAAAMM</code>): os readers aceitam <code>date_ref</code> (qualquer dia do mês de
 referência seleciona o dump e, dentro dele, o membro <code>…_AAAAMM.csv</code>). As sub-tabelas (X.1, X.2, …)
-são naturalmente <strong>longas</strong> — muitas linhas por fundo, uma por série/subclasse —, então nenhum
+e a tabela VIII são naturalmente <strong>longas</strong> — muitas linhas por fundo, uma por série/subclasse —, então nenhum
 reader declara granularidade única.</p>
 <h3 id="tipagem">Tipagem<a class="headerlink" href="#tipagem" title="Permanent link">&para;</a></h3>
 <p>Toda coluna é texto (<code>str</code>) exceto <code>DT_COMPTC</code>, convertida para <code>date</code> puro. Colunas monetárias
 (<code>VL</code>), de quantidade (<code>QT</code>), de contagem (<code>NR</code>) e de percentual (<code>PR</code>) mantêm o <strong>texto exato da
 CVM</strong> — <strong>nunca <code>float</code></strong> —, para que um consumidor converta para <code>Decimal</code> no ponto em que calcula.
 O mapa de tipos é derivado do contrato, então os dois não podem divergir.</p>
+<p>A <strong>tabela VIII</strong> tem só 6 colunas: o prefixo-chave mais <code>SEQUENCIAL</code> (1 a 25 em 202506) e
+<code>VALOR</code> (<code>numeric(20,2)</code> na META), uma linha por fundo × <code>SEQUENCIAL</code> — 39.984 linhas em 202506.
+A META da CVM deixa a descrição das duas em branco, então o reader não afirma o que o valor
+mede. <code>VALOR</code> e <code>SEQUENCIAL</code> ficam <strong>texto exato</strong>. A tabela sempre esteve no ZIP (do <code>HIST</code> de
+2013 até 202609); a contagem antiga de 17 membros estava errada, não desatualizada.</p>
 <hr />
 <h2 id="politica-de-retry-paciencia-por-tabela">Política de retry — paciência por tabela<a class="headerlink" href="#politica-de-retry-paciencia-por-tabela" title="Permanent link">&para;</a></h2>
 <p>Todo reader aceita um <code>retry_policy: RetryPolicy | None = None</code> no construtor, repassado ao <em>seam</em>
 de download como a sua agenda de novas tentativas / <em>backoff</em>. Cada reader <strong>declara a sua própria
 paciência</strong> por meio do atributo de classe <code>_RETRY_POLICY</code>, então a política fica <strong>junto da
-tabela</strong> e é ajustável <strong>por tabela</strong> — sem tocar na base nem nos outros 16 readers.</p>
+tabela</strong> e é ajustável <strong>por tabela</strong> — sem tocar na base nem nos outros 17 readers.</p>
 <p>A resolução é em duas camadas:</p>
 <ol>
 <li><strong>Argumento <code>retry_policy</code> no construtor</strong> — se informado, vence para <em>aquela instância</em>.</li>
@@ -2719,12 +2729,12 @@ explícito.</p>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">cotistas</span> <span class="o">=</span> <span class="n">InfMensalFidcTabX1Reader</span><span class="p">(</span><span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># muitas linhas por fundo — uma por TAB_X_CLASSE_SERIE / ID_SUBCLASSE.</span>
 </span></code></pre></div>
-<h3 id="persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-17">Persistir o dump bruto (camada <em>bronze</em>) uma vez para os 17<a class="headerlink" href="#persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-17" title="Permanent link">&para;</a></h3>
+<h3 id="persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-18">Persistir o dump bruto (camada <em>bronze</em>) uma vez para os 18<a class="headerlink" href="#persistir-o-dump-bruto-camada-bronze-uma-vez-para-os-18" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion.fidc</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalFidcTabIReader</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Um download; o ZIP e os 17 CSVs ficam em disco para os outros readers.</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Um download; o ZIP e os 18 CSVs ficam em disco para os outros readers.</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">InfMensalFidcTabIReader</span><span class="p">(</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">date_ref</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">path_raw</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/bronze/cvm/inf_mensal_fidc/202506&quot;</span><span class="p">),</span>
