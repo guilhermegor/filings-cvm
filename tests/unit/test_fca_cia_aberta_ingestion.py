@@ -6,7 +6,7 @@ assertions across all ten, with dedicated tests for the three traps this dataset
 1. the **index member uses a different naming convention** from its own nine satellites, so a
    one-template implementation would silently break it;
 2. **`departamento_acionistas` is header-only** in 2025, so it must read as an empty frame rather
-   than raising — its contract declares no CNPJ column for exactly that reason;
+   than raising — while still declaring `CNPJ_Companhia`, since an empty column passes (#317);
 3. the **CPF columns** (`dri.CPF_Responsavel`, `auditor.CPF_Responsavel_Tecnico`, and the mixed
    `auditor.CPF_CNPJ_Auditor`) are required columns but **never** CNPJ columns.
 
@@ -226,18 +226,41 @@ def test_cpf_columns_are_required_but_never_declared_as_cnpj_columns() -> None:
 	assert FCA_CIA_ABERTA_AUDITOR.tuple_cnpj_cols == ("CNPJ_Companhia",)
 
 
-def test_the_header_only_member_declares_no_cnpj_column() -> None:
-	"""`departamento_acionistas` ships 0 rows, so it declares no CNPJ column.
+def test_the_header_only_member_declares_its_cnpj_column() -> None:
+	"""`departamento_acionistas` ships 0 rows yet still validates `CNPJ_Companhia` (#320).
 
-	Before #317 the CNPJ check failed an empty frame, so this was what let the empty artifact read
-	cleanly. The check now passes an empty column, so the empty tuple is no longer load-bearing.
+	It once declared `()` only because the pre-#317 check failed an empty column. `CNPJ_Companhia`
+	is the company key (META: "CNPJ da companhia", `varchar(18)`) and the member's only CNPJ/CPF
+	column, so it holds only CNPJs — and every member now declares one.
 	"""
-	assert FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_cnpj_cols == ()
-	assert "CNPJ_Companhia" in FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_required
-	# Every other member does declare one.
+	assert FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_cnpj_cols == ("CNPJ_Companhia",)
 	for case in CASES:
-		if case.str_stem != STEM_EMPTY:
-			assert case.cls_contract.tuple_cnpj_cols, case.str_stem
+		assert case.cls_contract.tuple_cnpj_cols, case.str_stem
+
+
+def test_the_header_only_member_accepts_a_valid_cnpj(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""The day CVM publishes rows, a valid company CNPJ reads through."""
+	list_cols = list(FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_required)
+	str_csv = _csv_text(list_cols, [_row(FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS)])
+	_patch(monkeypatch, _all_members({f"{STEM_EMPTY}_2025.csv": str_csv}))
+
+	df_ = FcaCiaAbertaDepartamentoAcionistasReader(date_ref=DATE_REF).read()
+
+	assert df_["CNPJ_Companhia"].iloc[0] == VALID_CNPJ
+
+
+def test_the_header_only_member_rejects_a_column_with_no_valid_cnpj(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""Non-empty `CNPJ_Companhia` values with no valid CNPJ raise `ContractError`."""
+	list_cols = list(FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS.tuple_required)
+	list_row = _row(FCA_CIA_ABERTA_DEPARTAMENTO_ACIONISTAS)
+	list_row[list_cols.index("CNPJ_Companhia")] = "11.222.333/0001-80"  # wrong check digit
+	str_csv = _csv_text(list_cols, [list_row])
+	_patch(monkeypatch, _all_members({f"{STEM_EMPTY}_2025.csv": str_csv}))
+
+	with pytest.raises(ContractError, match="CNPJ_Companhia"):
+		FcaCiaAbertaDepartamentoAcionistasReader(date_ref=DATE_REF).read()
 
 
 def test_escriturador_declares_both_of_its_cnpj_columns() -> None:
@@ -251,7 +274,7 @@ def test_reading_the_header_only_member_returns_an_empty_frame(
 	"""The empty member reads as 0 rows with full columns — it must not raise.
 
 	Before #317 a CNPJ check on an empty artifact raised `ContractError`; this pins that the empty
-	member reads cleanly either way.
+	member reads cleanly with `CNPJ_Companhia` declared.
 	"""
 	_patch(monkeypatch, _all_members())
 

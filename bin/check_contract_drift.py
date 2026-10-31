@@ -62,6 +62,7 @@ from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
+from filings_cvm._internal.config.contracts.entrega_fi import ENTREGA_FI, ENTREGA_FI_DIARIO
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.extrato_fi import (
 	EXTRATO_FI,
@@ -127,6 +128,8 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"DfinCraReader": DFIN_CRA,
 	"DfinCriReader": DFIN_CRI,
 	"DfinFiiReader": DFIN_FII,
+	"EntregaFiDiarioReader": ENTREGA_FI_DIARIO,
+	"EntregaFiReader": ENTREGA_FI,
 	"EventualFiReader": EVENTUAL_FI,
 	"ExtratoFiPre2020Reader": EXTRATO_FI_PRE2020,
 	"ExtratoFiReader": EXTRATO_FI,
@@ -316,6 +319,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
+	"MetaEntregaFiReader": ("EntregaFiReader", "EntregaFiDiarioReader"),
 	"MetaEventualFiReader": ("EventualFiReader",),
 	# One META for the dataset; it describes the 117-column header, so it covers the current
 	# reader and the snapshot; the pre-2020 contract is out of its scope, as noted further down.
@@ -718,6 +722,8 @@ _CLOSED_SERIES_PROBES: dict[str, tuple[date, ...]] = {
 	"ComplFiInfCotstReader": (date(2019, 4, 1),),
 	"ComplFiPrestReader": (date(2019, 4, 1),),
 	"BalanceteFiPre202311Reader": (date(2023, 10, 1),),
+	"PerfilMensalPre175Reader": (date(2023, 11, 1),),
+	"ExtratoFiPre2020Reader": (date(2019, 1, 1),),
 }
 
 
@@ -753,17 +759,24 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 		_CLOSED_SERIES_PROBES.get(cls_reader.__name__, _probe_dates()) if bool_dated else (None,)
 	)
 
+	cls_refused: ValueError | None = None
+	int_unpublished = 0
 	for date_ref in list_dates:
-		cls_instance = (
-			cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
-			if bool_dated
-			else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
-		)
+		try:
+			cls_instance = (
+				cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
+				if bool_dated
+				else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
+			)
+		except ValueError as cls_exc:
+			cls_refused = cls_exc  # date outside the reader's series — same as a 404, try the next
+			continue
 		try:
 			df_read = cls_instance.read(int_timeout_s=int_timeout_s)
 		except ContractError as cls_exc:
 			return [f"{cls_contract.str_name}: read failed its contract — {cls_exc}"]
 		except OSError:
+			int_unpublished += 1
 			continue  # period not published (or transient) — try an older one
 		bool_report_extra = _READER_TO_META.get(cls_reader.__name__) not in _PARTIAL_DATASETS
 		return real_header_drift(
@@ -772,6 +785,8 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 			real_columns(df_read),
 			bool_report_extra=bool_report_extra,
 		)
+	if cls_refused is not None and not int_unpublished:
+		raise cls_refused  # every date refused: a real misconfiguration, let the sweep report it
 	return []  # no probed period available — not drift
 
 

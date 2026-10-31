@@ -236,6 +236,37 @@ def test_check_real_header_tolerates_an_unpublished_period() -> None:
 	assert ccd.check_real_header(cls_reader) == []
 
 
+def _series_reader(refused: set[int], read_error: Exception) -> type:
+	"""Build a dated reader whose constructor refuses the listed offsets (0 = first probe date)."""
+	list_seen: list[object] = []
+
+	def __init__(self: object, date_ref: object = None, retry_policy: object = None) -> None:
+		list_seen.append(date_ref)
+		if len(list_seen) - 1 in refused:
+			raise ValueError(f"{date_ref} is before the series start")
+
+	def read(self: object, int_timeout_s: int = 60) -> pd.DataFrame:
+		raise read_error
+
+	return type("_Series", (), {"_CONTRACT": _CONTRACT, "__init__": __init__, "read": read})
+
+
+def test_check_real_header_skips_a_date_the_reader_refuses_like_a_404() -> None:
+	"""A constructor refusing the oldest date while the rest 404 is 'no artifact', not an error."""
+	int_last = len(ccd._probe_dates()) - 1
+	cls_reader = _series_reader({int_last}, OSError("404"))
+
+	assert ccd.check_real_header(cls_reader) == []
+
+
+def test_check_real_header_raises_when_the_reader_refuses_every_date() -> None:
+	"""A reader refusing every probe date is a misconfiguration and must still surface."""
+	cls_reader = _series_reader(set(range(len(ccd._probe_dates()))), OSError("404"))
+
+	with pytest.raises(ValueError, match="series start"):
+		ccd.check_real_header(cls_reader)
+
+
 def test_check_meta_reconciles_the_union_of_member_columns() -> None:
 	"""META fields are compared against the union of every member contract's columns."""
 	df_meta = pd.DataFrame({"section": ["s"], "field": ["A"]})  # META omits B
@@ -534,6 +565,8 @@ def test_closed_series_readers_are_probed_at_their_last_published_month() -> Non
 		ComplFiInfReader,
 		ComplFiPrestReader,
 		ComplFiReader,
+		ExtratoFiPre2020Reader,
+		PerfilMensalPre175Reader,
 	)
 
 	for cls_reader in (
@@ -542,12 +575,35 @@ def test_closed_series_readers_are_probed_at_their_last_published_month() -> Non
 		ComplFiInfCotstReader,
 		ComplFiPrestReader,
 		BalanceteFiPre202311Reader,
+		PerfilMensalPre175Reader,
+		ExtratoFiPre2020Reader,
 	):
 		tuple_dates = ccd._CLOSED_SERIES_PROBES[cls_reader.__name__]
 		for date_ref in tuple_dates:
 			cls_reader(date_ref=date_ref)
 		with pytest.raises(ValueError):
 			cls_reader(date_ref=ccd._probe_dates()[0])
+
+
+def test_every_dated_reader_constructs_with_the_first_date_the_drift_job_passes() -> None:
+	"""The drift job builds each reader outside its try, so a refused date skips its header.
+
+	``check_real_header`` always constructs with the first probe date, and a ``ValueError`` there
+	escapes before any read — the header is never compared and nothing turns red (#321). Sweeping
+	every public reader means a future closed-series reader missing from
+	``_CLOSED_SERIES_PROBES`` fails here instead of falling into that gap silently.
+	"""
+	list_refused: list[str] = []
+	for str_name, cls_reader in iter_public_readers().items():
+		if "date_ref" not in inspect.signature(cls_reader.__init__).parameters:
+			continue
+		date_first = ccd._CLOSED_SERIES_PROBES.get(str_name, ccd._probe_dates())[0]
+		try:
+			cls_reader(date_ref=date_first, retry_policy=ccd._DRIFT_RETRY_POLICY)
+		except ValueError as cls_exc:
+			list_refused.append(f"{str_name} @ {date_first}: {cls_exc}")
+
+	assert list_refused == []
 
 
 def test_check_real_header_uses_the_closed_series_probe_date() -> None:

@@ -20,6 +20,11 @@ from filings_cvm.ingestion.fi.doc.compl import (
 	ComplFiReader,
 	MetaComplFiReader,
 )
+from filings_cvm.ingestion.fi.doc.entrega import (
+	EntregaFiDiarioReader,
+	EntregaFiReader,
+	MetaEntregaFiReader,
+)
 from filings_cvm.ingestion.fi.doc.eventual import (
 	EventualFiReader,
 	MetaEventualFiReader,
@@ -54,6 +59,8 @@ __all__ = [
 	"ComplFiInfReader",
 	"ComplFiPrestReader",
 	"ComplFiReader",
+	"EntregaFiDiarioReader",
+	"EntregaFiReader",
 	"EventualFiReader",
 	"ExtratoFiPre2020Reader",
 	"ExtratoFiReader",
@@ -64,6 +71,7 @@ __all__ = [
 	"MetaBalanceteFiReader",
 	"MetaCdaReader",
 	"MetaComplFiReader",
+	"MetaEntregaFiReader",
 	"MetaEventualFiReader",
 	"MetaExtratoFiReader",
 	"MetaInformeDiarioReader",
