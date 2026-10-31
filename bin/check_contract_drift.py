@@ -717,6 +717,8 @@ _CLOSED_SERIES_PROBES: dict[str, tuple[date, ...]] = {
 	"ComplFiInfCotstReader": (date(2019, 4, 1),),
 	"ComplFiPrestReader": (date(2019, 4, 1),),
 	"BalanceteFiPre202311Reader": (date(2023, 10, 1),),
+	"PerfilMensalPre175Reader": (date(2023, 11, 1),),
+	"ExtratoFiPre2020Reader": (date(2019, 1, 1),),
 }
 
 
