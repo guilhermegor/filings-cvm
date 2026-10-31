@@ -83,6 +83,7 @@ select = [
     "PD",  # pandas-vet - checks for common pandas issues
     "D",   # pydocstring - this enables all docstring checks
     "TID", # flake8-tidy-imports - enables the banned-api gate below
+    "RUF022",  # unsorted-dunder-all - keeps every __all__ sorted
 ]
 ignore = [
     "D206",  # docstring should be indented with spaces, not tabs
