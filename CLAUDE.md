@@ -214,8 +214,8 @@ only** (a CVM não publica padrão XML de envio). Não há `SECURIT/CAD`. Encerr
   é da fonte, provada pelo header pinado). Contracts **gerados do header** e **pinados** a
   `tests/fixtures/inf_mensal_cri/*_header.csv`. Armadilhas honradas: `cedente_devedor.CNPJ` pode ser
   CPF (fora de `tuple_cnpj_cols`), `Indice_Subordinacao_Data_Base` e `Data_LTV` (varchar no META) NÃO
-  são datas, `carteira_modificacao`/`responsavel` são **header-only** em 2025 → `tuple_cnpj_cols`
-  vazio (antes do #317 um arquivo legitimamente vazio falharia; hoje passa). **Com este, o root `securit/` está completo
+  são datas, `carteira_modificacao`/`responsavel` são **header-only** em 2025 e mesmo assim
+  declaram `CNPJ_Emissora` (#320 — desde o #317 uma coluna vazia passa). **Com este, o root `securit/` está completo
   (4/4) e a Wave 2 do #41 encerra**
 
 **Emissor de CEPAC (EMISSOR_CEPAC)** — portal root `emissor_cepac/`; **open-data only**. Publica só
@@ -636,8 +636,8 @@ Sob `CIA_ABERTA/CAD/`:
   `DT_RECEB`/`DENOM_CIA`/`ID_DOC` (estilo `cad_cia_aberta.csv`) contra `CNPJ_Companhia`/
   `Data_Referencia`/`ID_Documento` nos 9; gerar de um molde só quebra o índice **em silêncio**
   (anti-cópia pinada nas 2 direções). ⚠️ **`departamento_acionistas` é HEADER-ONLY (0 linhas)** →
-  `tuple_cnpj_cols=()` (antes do #317 um artefato legitimamente vazio levantava `ContractError`;
-  hoje uma coluna vazia passa). ⚠️ **PRIMEIROS CPF DO ROOT (LGPD):** `dri.CPF_Responsavel`
+  ainda declara `CNPJ_Companhia` (#320 — desde o #317 uma coluna vazia passa, então o `()` que
+  evitava o `ContractError` no artefato vazio caiu). ⚠️ **PRIMEIROS CPF DO ROOT (LGPD):** `dri.CPF_Responsavel`
   (1.003 CPF + 4 CNPJ), `auditor.CPF_Responsavel_Tecnico`, e `auditor.CPF_CNPJ_Auditor` (misto por
   definição — todo CNPJ em 2025, mas um ano com CPF quebraria um check) → **fora de
   `tuple_cnpj_cols`**, fixtures **header-only**. `escriturador` é o único com **2** CNPJ cols de
@@ -837,7 +837,7 @@ src/filings_cvm/
         cia_aberta/        #   CIA_ABERTA/ — cad/cadastro (cad_cia_aberta.csv, CSV solto, 47 cols, snapshot, no date_ref; chave CNPJ_CIA + TP_MERC; 2 CNPJ cols; META é .txt solto)
                            #     doc/ipe/ — IPE (ipe_cia_aberta_AAAA.zip, ZIP de 1 membro, 13 cols, anual; ÍNDICE de documentos, Link_Download não seguido; CNPJ placeholder 00.000.000/0000-00 honrado; META .txt solto)
                            #     doc/vlmo/ — VLMO (vlmo_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + conteúdo 17 cols, anual; monetárias 10dp como TEXTO; Data_Movimentacao ~58% vazia; META .zip — inverso do IPE)
-                           #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only → tuple_cnpj_cols=(); CPF em dri/auditor; META sem prefixo meta_)
+                           #     doc/fca/ — FCA (fca_cia_aberta_AAAA.zip, ZIP de 10 membros, anual; o ÍNDICE usa outra convenção de nomes que os 9 satélites; departamento_acionistas é header-only mas declara CNPJ_Companhia (#320); CPF em dri/auditor; META sem prefixo meta_)
                            #     doc/cgvn/ — CGVN (cgvn_cia_aberta_AAAA.zip, ZIP de 2 membros: índice 12 cols + praticas 11 cols/19.980 linhas, anual; índice em CamelCase — FCA era a exceção; Codigo_CVM com zero à esquerda; META .zip padrão)
                            #     doc/fre/ — FRE (fre_cia_aberta_AAAA.zip, MAIOR do portal: 36 membros/~131k linhas, anual; COMPLETO em 4 fatias temáticas — 1 (índice+capital, 8), 2 (administração/pessoas, 7, TODOS os com CPF), 3 (diversidade, 11, AGREGADOS), 4 (remuneração/val. mob./transações, 10) = 36/36; índice em maiúsculas como o FCA mas NÃO como o CGVN; 6 nomes de CNPJ col, mas coluna de CNPJ é a que SÓ guarda CNPJ — Documento_Pessoa_Relacionada e Documento_Parte_Relacionada guardam CNPJ+CPF e ficam de fora; membros de diversidade são AGREGADOS, não PII; participacao_sociedade tem 2 CNPJ cols com 792 placeholders 00000000000000)
                            #     doc/dfp/ — DFP (dfp_cia_aberta_AAAA.zip, 19 membros/~1,17M linhas, anual; INVERTE a armadilha: 16 membros colapsam em 3 listas IDÊNTICAS, e por isso um swap con/ind era invisível — fechado por teste de identidade do membro; VL_CONTA com 10 casas E escala em ESCALA_MOEDA; todos usam CNPJ_CIA; META com infixo _txt)
