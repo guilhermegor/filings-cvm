@@ -20,6 +20,7 @@ _NAMESPACE = "urn:infmensal"
 _ENCODING = "windows-1252"
 _DECLARATION = f'<?xml version="1.0" encoding="{_ENCODING}"?>\n'
 _INDENT = "    "
+_MAX_BYTES = 10 * 1024 * 1024  # the page: "tamanho máximo do arquivo ... é de 10 MB"
 
 
 @type_checker
@@ -97,6 +98,8 @@ class InrMensal(SubmissionWriter[InrMensalDocument]):
 			ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
 		except (UnicodeEncodeError, ET.ParseError) as exc:
 			raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
+		if len(payload) > _MAX_BYTES:
+			raise ValueError(f"file is {len(payload)} bytes; the page allows at most 10 MB")
 		if output_path is None:
 			return xml_str
 		Path(output_path).write_bytes(payload)

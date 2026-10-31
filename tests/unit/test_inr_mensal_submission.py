@@ -308,3 +308,11 @@ def test_unknown_fields_are_rejected() -> None:
 	"""Unknown fields are rejected."""
 	with pytest.raises(ValidationError):
 		EntradaSaida(vl_entr=1, vl_saida=1, extra=1)
+
+
+def test_export_over_ten_megabytes_raises_value_error() -> None:
+	"""The page caps a file at 10 MB; an oversized document must not be emitted."""
+	apps = [Aplicacoes(cd_aplic=1, vl_mercado_aplic=1)] * 10_000
+	doc = _doc(*[_participant(f"1.1.{i}.0-1", aplicacoes=apps) for i in range(1, 13)])
+	with pytest.raises(ValueError, match="at most 10 MB"):
+		InrMensal().export(doc)
