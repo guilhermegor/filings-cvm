@@ -795,7 +795,7 @@ src/filings_cvm/
                            #       balancete/ (ZIP mensal de 1 membro; 2 readers, corte 5->6 cols em 202311 MEDIDO)
             cad/           #     FI/CAD — cadastro_fi, registro/ (fundo/classe/subclasse),
                            #       cad_fi_hist/ (19 change-log readers + private base)
-        fidc/              #   FIDC/ — inf_mensal/ (17 table readers + private base)
+        fidc/              #   FIDC/ — inf_mensal/ (18 table readers + private base)
         fii/               #   FII/ — COMPLETO: inf_mensal/ (3), dfin (1), inf_trimestral/ (16), inf_anual/ (12)
         fip/               #   FIP/ — COMPLETO: doc/ (inf_trimestral + inf_quadrimestral, 2 flat-CSV readers)
         fiagro/            #   FIAGRO/ — doc/inf_mensal/ (informe + subclasse, 2 members + private base)
