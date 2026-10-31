@@ -410,6 +410,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submission/cda/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CDA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1151,6 +1179,34 @@
     
   
     Cadastro de Agentes Fiduciários (AGENTE_FIDUC)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/ato_declr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atos Declaratórios (ATO_DECLR)
   
 
     
@@ -2164,6 +2220,8 @@ segue em <code>filings_cvm</code>.</li>
 </ul>
 <h3 id="feat">Feat<a class="headerlink" href="#feat" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>submission</strong>: add CDA V4 XML writer (#277)</li>
+<li><strong>ingestion</strong>: add the Atos Declaratorios reader (#279) (#282)</li>
 <li><strong>ingestion</strong>: FI/DOC/EXTRATO readers, 2 regimes anuais + snapshot (#210)</li>
 <li><strong>ingestion</strong>: FI/DOC/PERFIL_MENSAL readers, 2 regimes RCVM 175 (#207)</li>
 <li><strong>ingestion</strong>: RECOMPRA_ACOES readers, fecha o root cia_aberta (#201)</li>
@@ -2225,6 +2283,8 @@ segue em <code>filings_cvm</code>.</li>
 </ul>
 <h3 id="fix">Fix<a class="headerlink" href="#fix" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>ci</strong>: key the venv cache on the resolved Python patch (#286)</li>
+<li><strong>ci</strong>: keep open-PR bases and surface 422 refusals in reconciler (#276)</li>
 <li><strong>ci</strong>: unpin the release Python patch (3.12.8 absent on 26.04) (#268)</li>
 <li>correct false Copilot claim in enable_repo_rules.sh comment (#259)</li>
 <li>emit Perfil Mensal VAL_PERCENT_OUTROS with 4 decimals (#257)</li>
