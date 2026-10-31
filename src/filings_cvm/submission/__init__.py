@@ -93,6 +93,14 @@ from filings_cvm._internal.config.schemas.inf_mensal_fidc import (
 	TaxaValorMobili,
 	ValoresMob,
 )
+from filings_cvm._internal.config.schemas.informe_art12_res33 import (
+	PrestAtivo,
+	PrestDados,
+	PrestDocument,
+	PrestEmissor,
+	PrestHeader,
+	PrestInform,
+)
 from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
@@ -142,6 +150,7 @@ from filings_cvm.submission.cda import (
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
+from filings_cvm.submission.informe_art12_res33 import InformeArt12Res33
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
@@ -201,6 +210,7 @@ __all__ = [
 	"InfMensalFidcHeader",
 	"InfMensalFidcInform",
 	"InformSacados",
+	"InformeArt12Res33",
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
@@ -248,6 +258,12 @@ __all__ = [
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
+	"PrestAtivo",
+	"PrestDados",
+	"PrestDocument",
+	"PrestEmissor",
+	"PrestHeader",
+	"PrestInform",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"QtVl",
