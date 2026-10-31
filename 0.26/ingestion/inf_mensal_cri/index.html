@@ -419,6 +419,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../submission/informe_quadrimestral/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Quadrimestral
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../submission/inf_fundo_157/" class="md-nav__link">
         
   
@@ -2516,9 +2544,10 @@ passaria, porque os testes afirmam o contract que foi escrito.</p>
 <li><strong><code>geral</code> tem três colunas <code>CNPJ_*</code> 100% vazias</strong> (<code>CNPJ_Agente_Fiduciario</code>, <code>CNPJ_Custodiante</code>,
   <code>CNPJ_Agencia_Classificadora</code>) — publicadas (logo no contract), mas fora de <code>tuple_cnpj_cols</code>.</li>
 <li><strong><code>carteira_modificacao</code> e <code>responsavel</code> são header-only em 2025</strong> (zero linhas — uma modificação
-  e o responsável são registrados só em circunstâncias específicas). Um membro sem linhas não tem
-  CNPJ a validar, então esses dois declaram <code>tuple_cnpj_cols</code> vazio. Antes do #317 isso evitava
-  que um arquivo legitimamente vazio falhasse o contract; desde o #317 uma coluna vazia passa.</li>
+  e o responsável são registrados só em circunstâncias específicas). Mesmo assim os dois declaram
+  <code>CNPJ_Emissora</code> em <code>tuple_cnpj_cols</code> (#320): desde o #317 uma coluna vazia passa no check, e a
+  coluna é a chave da emissora (<code>varchar(18)</code> no META, a única de CNPJ/CPF desses membros) — no dia
+  em que a CVM publicar linhas, um CNPJ malformado falha em vez de passar sem checagem.</li>
 <li><strong><code>geral.Outras_Contigencias_Relevantes</code></strong> preserva a grafia da CVM <strong>verbatim</strong> (o CRI mantém o
   bloco de contingências que o CRA derruba).</li>
 </ul>
