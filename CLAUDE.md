@@ -772,7 +772,7 @@ Sob `CIA_ABERTA/CAD/`:
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
 
 **Mercados de Negociação**
-- ⬜ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`)
+- ✅ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`) — `submission/cadastro_ativos.py` (`CadastroAtivos`); schema `_internal/config/schemas/cadastro_ativos.py`
 
 **Escriturador de Valores Mobiliários**
 - ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)

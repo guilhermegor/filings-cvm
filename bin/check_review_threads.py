@@ -171,13 +171,9 @@ def _roster_exists_on_default_branch(path_root: pathlib.Path) -> bool:
 		``True`` only when git can prove the file exists there. Any failure (no git, shallow
 			clone, no remote) returns ``False``, so an unresolvable state never
 			invents a violation.
-
-	Notes
-	-----
-	The repo-locating ``GIT_*`` variables are dropped from the child's environment because git
-	exports them to hooks and ``GIT_DIR`` overrides ``-C``, so inside a pre-commit run the probe
-	would otherwise answer for the enclosing repository instead of ``path_root``.
 	"""
+	# Inside a git hook GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE outrank ``-C`` and would resolve
+	# ``path_root`` to the repository being committed, so they are dropped for this lookup.
 	dict_env = {
 		str_key: str_value
 		for str_key, str_value in os.environ.items()

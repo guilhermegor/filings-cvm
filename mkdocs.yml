@@ -13,6 +13,7 @@ nav:
       - Lâmina V3: submission/lamina.md
       - Informe Mensal FIDC: submission/inf_mensal_fidc.md
       - CDA: submission/cda.md
+      - Cadastro de Ativos: submission/cadastro_ativos.md
   - Leitura (← CVM):
       - Visão geral: ingestion/index.md
       - Informe Diário FIF: ingestion/informe_diario.md
