@@ -436,16 +436,18 @@ def test_every_meta_only_section_key_is_a_real_meta_reader() -> None:
 def test_meta_only_sections_never_name_an_implemented_member() -> None:
 	"""A section we read must never be excluded — that would mute its META oracle in silence.
 
-	Holds for the datasets whose readers carry a ``_MEMBER_STEM`` equal to their META section
-	(FRE, measured in issue #115); a stem colliding with an excluded section is a wiring error.
+	Each member's ``_MEMBER_STEM`` goes through the META reader's own ``_section_of``, so it is
+	compared in the META's labelling: FRE keeps the dataset prefix, INF_ANUAL_FII strips it, and
+	a raw stem comparison could never match the latter.
 	"""
 	dict_readers = iter_public_readers()
 	for str_meta, frozenset_sections in ccd._META_ONLY_SECTIONS.items():
-		set_stems = {
-			getattr(dict_readers[str_name], "_MEMBER_STEM", None)
+		reader_meta = dict_readers[str_meta]()
+		set_sections = {
+			reader_meta._section_of(f"meta_{dict_readers[str_name]._MEMBER_STEM}.txt")
 			for str_name in ccd._META_MEMBERS[str_meta]
 		}
-		assert not (frozenset_sections & set_stems), str_meta
+		assert not (frozenset_sections & set_sections), str_meta
 
 
 def test_fre_members_absent_from_the_fre_meta_are_declared_undescribed() -> None:
