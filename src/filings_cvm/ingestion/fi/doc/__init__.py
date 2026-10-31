@@ -8,6 +8,11 @@ family (`LAMINA`, nested in :mod:`filings_cvm.ingestion.fi.doc.lamina`). Re-expo
 """
 
 from filings_cvm.ingestion.fi.doc.cda import CdaReader, MetaCdaReader
+from filings_cvm.ingestion.fi.doc.entrega import (
+	EntregaFiDiarioReader,
+	EntregaFiReader,
+	MetaEntregaFiReader,
+)
 from filings_cvm.ingestion.fi.doc.eventual import (
 	EventualFiReader,
 	MetaEventualFiReader,
@@ -36,6 +41,8 @@ from filings_cvm.ingestion.fi.doc.perfil_mensal import (
 
 __all__ = [
 	"CdaReader",
+	"EntregaFiDiarioReader",
+	"EntregaFiReader",
 	"EventualFiReader",
 	"ExtratoFiPre2020Reader",
 	"ExtratoFiReader",
@@ -44,6 +51,7 @@ __all__ = [
 	"LaminaCarteiraReader",
 	"LaminaReader",
 	"MetaCdaReader",
+	"MetaEntregaFiReader",
 	"MetaEventualFiReader",
 	"MetaExtratoFiReader",
 	"MetaInformeDiarioReader",

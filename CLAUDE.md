@@ -220,15 +220,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **48 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **49 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (48 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (49 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (19) ou `.zip` multi-membro (29); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (20) ou `.zip` multi-membro (29); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`48 = 19 .txt + 29 .zip`, e 48 contracts — o 49º nome
+⚠️ **Estes números são MEDIDOS do código** (`49 = 20 .txt + 29 .zip`, e 49 contracts — o 50º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
 parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
@@ -277,6 +277,18 @@ envio; é o registro do que foi entregue, não um informe):
   apaga zero à esquerda em silêncio). ⚠️ **4 colunas parcialmente vazias** (`ID_SUBCLASSE` 96,8%,
   `RESULTADO_AUDITORIA` 83,5%, `ID_DOC` 75,6%, `NM_ARQ` 24,4%) — dependem do tipo de documento;
   vazio volta vazio. ⚠️ META é **`.txt` solto** (as outras 3 grafias dão 404)
+
+**Entrega de Documentos (FI/DOC/ENTREGA)** — **open-data only** (índice do que foi entregue, não o documento):
+- Entrega FI — ✅ **ingestion** `fi_entrega_documento_AAAAMM.zip` (**ZIP de 2 membros**, **mensal**, série
+  `202501`→`202610`, 22 meses medidos) — `ingestion/fi/doc/entrega/*` (`EntregaFiReader` membro
+  `fi_entrega_documento_AAAAMM.csv`, todos os tipos, 103k linhas em 202609; `EntregaFiDiarioReader` membro
+  `..._diario_AAAAMM.csv`, só `DIÁRIO FUNDOS`, 1,42M linhas / 178 MB; base privada `_base_entrega_reader.py`);
+  contracts `_internal/config/contracts/entrega_fi.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/entrega_fi/*_header.csv`. ⚠️ **Sem corte de schema** — o MESMO header de 11 colunas
+  nos 2 membros nos 22 meses (por isso não há `Pre*`), mas 2 contracts/readers/`source_key`. Só as 2
+  `Data_*_Competencia` são data; `Data_Hora_Entrega` (datetime com ms), `ID_Documento` e `ID_Subclasse`
+  (~95-99% vazia) ficam texto. `CNPJ_Fundo_Classe` (14 dígitos sem máscara, 100% preenchido) é a única
+  coluna de CNPJ; sem PII. META `meta_fi_entrega_documento.txt` (prefixo `fi_`), `.txt` solto, 11 campos
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
 - ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
@@ -740,6 +752,7 @@ src/filings_cvm/
                            #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira),
+                           #       entrega/ (ZIP mensal de 2 membros, mesmo header, 2 readers; sem corte de schema)
                            #       eventual/ (índice de documentos eventuais, CSV solto anual),
                            #       perfil_mensal/ (CSV solto MENSAL, 2 readers = 2 regimes RCVM 175
                            #         + base privada; 106 cols até 202311, 107 de 202312)

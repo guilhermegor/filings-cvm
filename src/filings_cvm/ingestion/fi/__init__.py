@@ -39,6 +39,8 @@ from filings_cvm.ingestion.fi.cad.registro import (
 )
 from filings_cvm.ingestion.fi.doc import (
 	CdaReader,
+	EntregaFiDiarioReader,
+	EntregaFiReader,
 	EventualFiReader,
 	ExtratoFiPre2020Reader,
 	ExtratoFiReader,
@@ -47,6 +49,7 @@ from filings_cvm.ingestion.fi.doc import (
 	LaminaCarteiraReader,
 	LaminaReader,
 	MetaCdaReader,
+	MetaEntregaFiReader,
 	MetaEventualFiReader,
 	MetaExtratoFiReader,
 	MetaInformeDiarioReader,
@@ -79,6 +82,8 @@ __all__ = [
 	"CadastroFiHistTribLprazoReader",
 	"CadastroFiReader",
 	"CdaReader",
+	"EntregaFiDiarioReader",
+	"EntregaFiReader",
 	"EventualFiReader",
 	"ExtratoFiPre2020Reader",
 	"ExtratoFiReader",
@@ -89,6 +94,7 @@ __all__ = [
 	"MetaCadFiHistReader",
 	"MetaCadastroFiReader",
 	"MetaCdaReader",
+	"MetaEntregaFiReader",
 	"MetaEventualFiReader",
 	"MetaExtratoFiReader",
 	"MetaInformeDiarioReader",
