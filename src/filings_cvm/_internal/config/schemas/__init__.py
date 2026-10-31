@@ -11,6 +11,12 @@ from filings_cvm._internal.config.schemas.extrato import (
 	ExtratoHeader,
 	ExtratoRow,
 )
+from filings_cvm._internal.config.schemas.far import (
+	FarDocument,
+	FarFund,
+	FarHeader,
+	FarMovement,
+)
 from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Cotista,
 	InfFundo157Document,
@@ -72,6 +78,10 @@ __all__ = [
 	"ExtratoDocument",
 	"ExtratoHeader",
 	"ExtratoRow",
+	"FarDocument",
+	"FarFund",
+	"FarHeader",
+	"FarMovement",
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
