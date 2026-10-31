@@ -377,7 +377,11 @@ envio; é o registro do que foi entregue, não um informe):
   **zero linhas ragged** nos 3 artefatos. META = `meta_extrato_fi.txt` (`.txt` solto, único do
   `META/`), **117 campos = o header atual exatamente** ⇒ **não é oráculo do contrato pré-2020**
   (registrado em `_META_UNDESCRIBED_READERS`)
-- ⬜ **submission** Extrato — V3 (`PadraoXMLInfExtratoV3.asp`) · V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+- ✅ **submission** Extrato — **V3** (`PadraoXMLInfExtratoV3.asp`) — `submission/extrato.py` (`Extrato`); schema
+  `_internal/config/schemas/extrato.py` (`ExtratoDocument`), validadores em `_internal/utils/xml_fields.py`.
+  ⚠️ A página **se contradiz** (exemplo × lista de tags: namespace `urn:extr`×`urn:perf`, `CNPJ_FDO`×`CNPJ_FUNDO`,
+  tag `TP_VL_FIXO_TX_INGRESSO` reutilizada em `TX_SAIDA`); seguido o exemplo; escalas não ditas são política do repo
+  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
