@@ -779,7 +779,12 @@ Sob `CIA_ABERTA/CAD/`:
 - ✅ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`) — `submission/cadastro_ativos.py` (`CadastroAtivos`); schema `_internal/config/schemas/cadastro_ativos.py`
 
 **Escriturador de Valores Mobiliários**
-- ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)
+- ✅ **submission** Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`) — `submission/informe_art12_res33.py`
+  (`InformeArt12Res33`); schema `_internal/config/schemas/informe_art12_res33.py` (`PrestDocument`, 6
+  blocos), validadores em `_internal/utils/xml_fields_art12.py`. Sem campo decimal. A página se contradiz
+  em 1 ponto: o exemplo fecha `LISTA_PREST` como `LISTA_APREST` (usada `LISTA_PREST`); códigos 42/52/65 só
+  para competência anterior a 07/2014. Ver `docs/submission/informe_art12_res33.md`. Nenhum validador da
+  CVM foi executado.
 - ⬜ Informe de Portabilidade (`PadraoXMLInfoPortabilidade.asp`)
 
 ## Layout
