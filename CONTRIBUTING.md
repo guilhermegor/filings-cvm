@@ -130,6 +130,35 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
    - Maintain test fixtures for complex scenarios
    - Recommended to use UNIT_TEST_TEMPLATE.md for AI generation of unit tests, in order to implement test-driven development best practices and follow project standards
 
+### Code- and Test-Quality Guards
+
+Each guard runs as a pre-commit hook and as a CI step (`.github/workflows/tests.yaml`):
+
+| Guard | Rule | Escape hatch |
+|---|---|---|
+| `check_function_length.py` | a function is at most 60 lines, docstring excluded | split it |
+| `check_complexity.sh` | cyclomatic complexity: tests 1, src 2, bin 8 (+ nesting depth) | `# complexity-ok: <reason>` on the `def` |
+| `check_dead_code.py` | no code vulture proves unreferenced (>=80% confidence) | delete it |
+| `check_all_exports.py` | a package `__all__` names every public member of its submodules | export it |
+| `check_one_assert.py` | one assertion site per unit test; zero fails anywhere | `# one-assert-ok: <reason>` |
+| `check_fixture_scope.py` | a non-function fixture scope needs a written reason | `# fixture-scope-ok: <reason>` |
+| `check_assertion_weakening.py` | a PR must not loosen a test silently | `test-change-ok: <reason>` in the PR body |
+| `check_gate_integrity.py` | a PR must not weaken a check silently | `gate-change-ok: <reason>` in the PR body |
+| `check_coverage_floor.py` | `.coveragerc` `omit` never swallows `ingestion/`/`submission/` code | narrow the glob |
+| `check_required_checks_sync.py` | every context in `bin/required-checks.txt` is emitted by a job running on every PR | edit both together |
+
+The first five predate much of this tree, so they run through `bin/quality_ratchet.py` against
+a per-file baseline (`bin/quality_baseline.txt`, `<guard> <count> <path>`). A **new** file is
+held to the guard in full; an existing file may not go above its count, and when a fix brings it
+**below**, the gate fails until you lower the baseline:
+
+```bash
+poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command>
+# e.g. poetry run python bin/quality_ratchet.py complexity --write-baseline bash bin/check_complexity.sh
+```
+
+`check_dead_code.py` skips when `vulture` is absent locally; CI installs it, so it always runs there.
+
 ## Pull Request Process
 
 1. **Create an Issue First**:

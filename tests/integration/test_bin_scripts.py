@@ -20,6 +20,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -288,3 +289,215 @@ def test_lint_actions_rejects_a_trigger_that_is_not_a_workflow_event(tmp_path: P
 
 	assert cls_result.returncode != 0
 	assert "unknown Webhook event" in cls_result.stdout + cls_result.stderr
+
+
+# --------------------------
+# bin/quality_ratchet.py, bin/check_required_checks_sync.py, bin/check_coverage_floor.py
+# --------------------------
+
+
+def _run_python(
+	path_script: Path, *args: str, cwd: Path | None = None
+) -> subprocess.CompletedProcess[str]:
+	"""Run a Python ``bin/`` script with this interpreter, capturing its output.
+
+	Parameters
+	----------
+	path_script : pathlib.Path
+		The script to run.
+	args : str
+		Arguments forwarded to the script.
+	cwd : pathlib.Path or None, optional
+		Working directory; defaults to the current directory.
+
+	Returns
+	-------
+	subprocess.CompletedProcess[str]
+		The finished process.
+	"""
+	return subprocess.run(  # noqa: S603 — this interpreter plus a repo script or tmp path
+		[sys.executable, str(path_script), *args],
+		capture_output=True,
+		text=True,
+		check=False,
+		cwd=str(cwd) if cwd is not None else None,
+		env=_env_without_git(),
+	)
+
+
+def _ratchet_in(tmp_path: Path, str_baseline: str) -> Path:
+	"""Copy the ratchet into ``tmp_path/bin`` beside a synthetic baseline.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch root standing in for the repository.
+	str_baseline : str
+		Content of the synthetic ``bin/quality_baseline.txt``.
+
+	Returns
+	-------
+	pathlib.Path
+		The copied ``quality_ratchet.py``.
+	"""
+	path_bin = tmp_path / "bin"
+	path_bin.mkdir()
+	(path_bin / "quality_baseline.txt").write_text(str_baseline, encoding="utf-8")
+	return Path(shutil.copy(_bin_script("quality_ratchet.py"), path_bin))
+
+
+_STR_FAKE_GUARD = (
+	"import sys; print('a.py:1: too long'); print('    b.py:2: informational'); sys.exit(1)"
+)
+
+
+@pytest.mark.parametrize(
+	("str_baseline", "int_expected_rc"),
+	[
+		("g 1 a.py\n", 0),
+		("", 1),
+		("g 2 a.py\n", 1),
+		("other 1 a.py\n", 1),
+	],
+	ids=["held-at-baseline", "new-file-is-zero", "below-baseline-must-lower", "other-guard-rows"],
+)
+def test_quality_ratchet_holds_counts_in_both_directions(
+	tmp_path: Path, str_baseline: str, int_expected_rc: int
+) -> None:
+	"""A file passes only at exactly its baseline; above fails, below fails ("lower it").
+
+	The indented ``b.py`` line is informational and must not be counted — were it counted, the
+	``held-at-baseline`` case (which baselines only ``a.py``) would fail.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch root holding the copied ratchet and its baseline.
+	str_baseline : str
+		Synthetic baseline content.
+	int_expected_rc : int
+		Expected exit code.
+	"""
+	path_ratchet = _ratchet_in(tmp_path, str_baseline)
+	cls_result = _run_python(path_ratchet, "g", sys.executable, "-c", _STR_FAKE_GUARD)
+
+	assert cls_result.returncode == int_expected_rc, cls_result.stdout
+
+
+def test_quality_ratchet_passes_through_a_guard_failure_with_no_finding(tmp_path: Path) -> None:
+	"""A guard that fails without a recognisable finding (a crash) is never baselined away.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch root holding the copied ratchet.
+	"""
+	path_ratchet = _ratchet_in(tmp_path, "")
+	cls_result = _run_python(
+		path_ratchet, "g", sys.executable, "-c", "import sys; print('boom'); sys.exit(3)"
+	)
+
+	assert (cls_result.returncode, cls_result.stdout.strip()) == (3, "boom")
+
+
+def test_quality_ratchet_write_baseline_records_counts(tmp_path: Path) -> None:
+	"""``--write-baseline`` replaces the guard's rows and keeps every other guard's rows.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch root holding the copied ratchet and its baseline.
+	"""
+	path_ratchet = _ratchet_in(tmp_path, "# header\nother 4 z.py\ng 9 a.py\n")
+	_run_python(path_ratchet, "g", "--write-baseline", sys.executable, "-c", _STR_FAKE_GUARD)
+
+	str_written = (tmp_path / "bin" / "quality_baseline.txt").read_text(encoding="utf-8")
+	assert str_written == "# header\nother 4 z.py\ng 1 a.py\n"
+
+
+_STR_WORKFLOW = (
+	"name: Tests\n"
+	"on:\n"
+	"  pull_request:\n"
+	"    branches: [main]\n"
+	"jobs:\n"
+	"  test:\n"
+	"    name: Run (${{{{ matrix.os }}}})\n"
+	"{str_if}"
+	"    runs-on: ubuntu-latest\n"
+	"    strategy:\n"
+	"      matrix:\n"
+	"        os: [ubuntu-latest, macos-latest]\n"
+	"    steps:\n"
+	"      - run: echo hi\n"
+)
+
+
+@pytest.mark.parametrize(
+	("str_if", "int_expected_rc"),
+	[("", 0), ("    if: github.event_name == 'push'\n", 1)],
+	ids=["unconditional-job-on-main-filter", "conditional-job"],
+)
+def test_required_checks_sync_needs_an_unconditional_emitter(
+	tmp_path: Path, str_if: str, int_expected_rc: int
+) -> None:
+	"""A required context passes only when a job running on every PR into main emits it.
+
+	The ``branches: [main]`` filter is deliberately present in both cases: it must not, by
+	itself, make the job conditional (the ruleset only judges PRs into ``main``).
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch root holding the synthetic workflow and required list.
+	str_if : str
+		The job's ``if:`` line, or empty for none.
+	int_expected_rc : int
+		Expected exit code.
+	"""
+	path_workflows = tmp_path / "workflows"
+	path_workflows.mkdir()
+	(path_workflows / "tests.yaml").write_text(
+		_STR_WORKFLOW.format(str_if=str_if), encoding="utf-8"
+	)
+	path_list = tmp_path / "required.txt"
+	path_list.write_text("# comment\nRun (macos-latest)\n", encoding="utf-8")
+
+	cls_result = _run_python(
+		_bin_script("check_required_checks_sync.py"),
+		"--workflows",
+		str(path_workflows),
+		"--required-list",
+		str(path_list),
+	)
+
+	assert cls_result.returncode == int_expected_rc, cls_result.stderr
+
+
+@pytest.mark.parametrize(
+	("str_omit", "int_expected_rc"),
+	[("src/*/_internal/*", 0), ("src/*", 1)],
+	ids=["internal-only", "section-swallowed"],
+)
+def test_coverage_floor_rejects_an_omit_that_swallows_a_section(
+	tmp_path: Path, str_omit: str, int_expected_rc: int
+) -> None:
+	"""An omit glob matching a function-bearing ``ingestion/`` module fails the floor.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch root standing in for the repository.
+	str_omit : str
+		The ``[run] omit`` pattern under test.
+	int_expected_rc : int
+		Expected exit code.
+	"""
+	path_section = tmp_path / "src" / "pkg" / "ingestion"
+	path_section.mkdir(parents=True)
+	(path_section / "reader.py").write_text("def read():\n    return 1\n", encoding="utf-8")
+	(tmp_path / ".coveragerc").write_text(f"[run]\nomit =\n    {str_omit}\n", encoding="utf-8")
+
+	cls_result = _run_python(_bin_script("check_coverage_floor.py"), cwd=tmp_path)
+
+	assert cls_result.returncode == int_expected_rc, cls_result.stderr
