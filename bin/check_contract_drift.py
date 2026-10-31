@@ -62,6 +62,7 @@ from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
+from filings_cvm._internal.config.contracts.entrega_fi import ENTREGA_FI, ENTREGA_FI_DIARIO
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.extrato_fi import (
 	EXTRATO_FI,
@@ -127,6 +128,8 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"DfinCraReader": DFIN_CRA,
 	"DfinCriReader": DFIN_CRI,
 	"DfinFiiReader": DFIN_FII,
+	"EntregaFiDiarioReader": ENTREGA_FI_DIARIO,
+	"EntregaFiReader": ENTREGA_FI,
 	"EventualFiReader": EVENTUAL_FI,
 	"ExtratoFiPre2020Reader": EXTRATO_FI_PRE2020,
 	"ExtratoFiReader": EXTRATO_FI,
@@ -316,6 +319,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
+	"MetaEntregaFiReader": ("EntregaFiReader", "EntregaFiDiarioReader"),
 	"MetaEventualFiReader": ("EventualFiReader",),
 	# One META for the dataset; it describes the 117-column header, so it covers the current
 	# reader and the snapshot; the pre-2020 contract is out of its scope, as noted further down.

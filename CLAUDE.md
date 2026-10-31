@@ -226,15 +226,15 @@ um cadastro:
   (municípios). Como o `cad_fi.csv`, a CVM sobrescreve no lugar → só um `path_raw` persistido guarda o
   estado. Inaugura o portal root `emissor_cepac/`
 
-**META (metadados publicados pela CVM)** — ✅ **ingestion**, **51 readers** (`Meta*Reader`), um por
+**META (metadados publicados pela CVM)** — ✅ **ingestion**, **52 readers** (`Meta*Reader`), um por
 dataset, em `ingestion/<root>/…/<dataset>/meta.py` sobre a base privada
 `ingestion/_base_meta_reader.py`; parser puro `_internal/utils/meta_parser.py`; contracts
-`_internal/config/contracts/meta.py` (51 instâncias de um factory sobre uma tupla compartilhada —
+`_internal/config/contracts/meta.py` (52 instâncias de um factory sobre uma tupla compartilhada —
 o formato do frame é **nosso** e idêntico; só o `source_key` difere, prefixado `meta_`). Doc:
 `docs/ingestion/meta.md`. Cada META é texto em blocos (`Campo:`/`Descrição`/`Tipo Dados`),
-**ISO-8859-1 + CRLF**, num `.txt` solto (21) ou `.zip` multi-membro (30); volta como **um frame
+**ISO-8859-1 + CRLF**, num `.txt` solto (22) ou `.zip` multi-membro (30); volta como **um frame
 longo** com o membro em `section`. **Sem `date_ref`** (URL fixa, a CVM sobrescreve no lugar).
-⚠️ **Estes números são MEDIDOS do código** (`51 = 21 .txt + 30 .zip`, e 51 contracts — o 52º nome
+⚠️ **Estes números são MEDIDOS do código** (`52 = 22 .txt + 30 .zip`, e 52 contracts — o 53º nome
 `META_*` em `meta.py` é o `META_COLUMNS`, a tupla compartilhada, não um contract). O gate
 `test_meta_readers.py` deriva a verdade do código e cobre **`docs/ingestion/meta.md` e ESTE
 parágrafo** (`test_claude_md_meta_counts_match_the_real_numbers`; os outros `CLAUDE.md` e o
@@ -301,6 +301,18 @@ envio; é o registro do que foi entregue, não um informe):
   apaga zero à esquerda em silêncio). ⚠️ **4 colunas parcialmente vazias** (`ID_SUBCLASSE` 96,8%,
   `RESULTADO_AUDITORIA` 83,5%, `ID_DOC` 75,6%, `NM_ARQ` 24,4%) — dependem do tipo de documento;
   vazio volta vazio. ⚠️ META é **`.txt` solto** (as outras 3 grafias dão 404)
+
+**Entrega de Documentos (FI/DOC/ENTREGA)** — **open-data only** (índice do que foi entregue, não o documento):
+- Entrega FI — ✅ **ingestion** `fi_entrega_documento_AAAAMM.zip` (**ZIP de 2 membros**, **mensal**, série
+  `202501`→`202610`, 22 meses medidos) — `ingestion/fi/doc/entrega/*` (`EntregaFiReader` membro
+  `fi_entrega_documento_AAAAMM.csv`, todos os tipos, 103k linhas em 202609; `EntregaFiDiarioReader` membro
+  `..._diario_AAAAMM.csv`, só `DIÁRIO FUNDOS`, 1,42M linhas / 178 MB; base privada `_base_entrega_reader.py`);
+  contracts `_internal/config/contracts/entrega_fi.py`, **gerados dos headers e pinados** a
+  `tests/fixtures/entrega_fi/*_header.csv`. ⚠️ **Sem corte de schema** — o MESMO header de 11 colunas
+  nos 2 membros nos 22 meses (por isso não há `Pre*`), mas 2 contracts/readers/`source_key`. Só as 2
+  `Data_*_Competencia` são data; `Data_Hora_Entrega` (datetime com ms), `ID_Documento` e `ID_Subclasse`
+  (~95-99% vazia) ficam texto. `CNPJ_Fundo_Classe` (14 dígitos sem máscara, 100% preenchido) é a única
+  coluna de CNPJ; sem PII. META `meta_fi_entrega_documento.txt` (prefixo `fi_`), `.txt` solto, 11 campos
 
 **Balancete de Fundos (FI/DOC/BALANCETE)** — **open-data only** (sem padrão XML de envio):
 - Balancete FI — ✅ **ingestion** `balancete_fi_AAAAMM.zip` (**ZIP de 1 membro**, **mensal**, série
@@ -777,7 +789,7 @@ src/filings_cvm/
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
                            #   23 ROOT PACKAGES, never the readers
-        _base_meta_reader.py   # PRIVATE base for the 51 Meta*Reader (shared across every root)
+        _base_meta_reader.py   # PRIVATE base for the 52 Meta*Reader (shared across every root)
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:
@@ -785,6 +797,7 @@ src/filings_cvm/
                            #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira),
+                           #       entrega/ (ZIP mensal de 2 membros, mesmo header, 2 readers; sem corte de schema)
                            #       compl/ (ZIP mensal de 4 membros, série fechada 201801-201904; 1 contract por membro, sem corte),
                            #       eventual/ (índice de documentos eventuais, CSV solto anual),
                            #       perfil_mensal/ (CSV solto MENSAL, 2 readers = 2 regimes RCVM 175

@@ -336,6 +336,16 @@ df_ = LaminaReader(date_ref=date(2025, 4, 15)).read()
 print(df_[["DENOM_SOCIAL", "TAXA_ADM", "VL_PATRIM_LIQ"]].head())
 ```
 
+### `EntregaFiReader` · `EntregaFiDiarioReader`
+
+`filings_cvm.ingestion.fi.EntregaFiReader` · `filings_cvm.ingestion.fi.EntregaFiDiarioReader`
+
+Leem `fi_entrega_documento_AAAAMM.zip` (`FI/DOC/ENTREGA`) — o **índice das entregas** de documentos
+dos fundos. **ZIP de 2 membros** (todos os documentos / só `DIÁRIO FUNDOS`), **mensal**, série
+`202501`→; 11 colunas idênticas nos dois. `date_ref` fora da série levanta `ValueError`. Datas de
+competência viram `date`; o resto é texto exato. Página completa em
+[Entrega FI](ingestion/entrega_fi.md).
+
 ### `EventualFiReader`
 
 `filings_cvm.ingestion.fi.EventualFiReader`
@@ -1967,7 +1977,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 
 ---
 
-### `Meta*Reader` (51 readers)
+### `Meta*Reader` (52 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
 por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
