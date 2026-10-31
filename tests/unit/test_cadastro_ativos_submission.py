@@ -152,9 +152,13 @@ def test_row_cap_is_1000() -> None:
 		_doc()
 
 
-def test_header_rejects_bad_cod_doc_and_cnpj() -> None:
-	"""COD_DOC is fixed at 2 and the venue CNPJ is check-digit validated."""
+def test_header_cod_doc_other_than_2_is_rejected() -> None:
+	"""COD_DOC is fixed at 2."""
 	with pytest.raises(ValidationError):
 		CadastroAtivosHeader(cod_doc=3, cnpj_merc=CNPJ, dt_gerac_arq="05/04/2024")
+
+
+def test_header_invalid_cnpj_merc_is_rejected() -> None:
+	"""The venue CNPJ is check-digit validated."""
 	with pytest.raises(ValidationError):
 		CadastroAtivosHeader(cnpj_merc="123", dt_gerac_arq="05/04/2024")
