@@ -175,6 +175,16 @@ poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command
      - Any technical debt created
 
 3. **Code Review**:
+   - CodeRabbit is asked for a review automatically when the PR opens, reopens or leaves
+     draft (`.github/workflows/coderabbit_trigger.yaml`). It will not review on its own here,
+     because the repository has fewer than 10 stars. To ask again by hand, comment
+     `@coderabbitai review`. If CodeRabbit answers "rate limited", `Review Retry` asks again
+     once the limit clears.
+   - `Review threads answered` (`review_threads.yaml`) stays red until every review thread has
+     a reply from you saying what changed and why, and is resolved, and a reviewer has reviewed
+     the latest commit. Resolving a thread does not re-run it, so re-run the check afterwards.
+   - `PR Quality Gate` (`pr-gate.yaml`) labels the PR and keeps one status comment up to date.
+     After the merge, `Reconcile Merged PRs` closes the linked issues and deletes the branch.
    - Expect constructive feedback
    - Address all review comments
    - Update documentation as needed

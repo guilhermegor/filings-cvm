@@ -38,6 +38,8 @@ from filings_cvm.ingestion.fi.cad.registro import (
 	RegistroSubclasseReader,
 )
 from filings_cvm.ingestion.fi.doc import (
+	BalanceteFiPre202311Reader,
+	BalanceteFiReader,
 	CdaReader,
 	ComplFiInfCotstReader,
 	ComplFiInfReader,
@@ -50,6 +52,7 @@ from filings_cvm.ingestion.fi.doc import (
 	InformeDiarioReader,
 	LaminaCarteiraReader,
 	LaminaReader,
+	MetaBalanceteFiReader,
 	MetaCdaReader,
 	MetaComplFiReader,
 	MetaEventualFiReader,
@@ -63,6 +66,8 @@ from filings_cvm.ingestion.fi.doc import (
 
 
 __all__ = [
+	"BalanceteFiPre202311Reader",
+	"BalanceteFiReader",
 	"CadastroFiHistAdminReader",
 	"CadastroFiHistAuditorReader",
 	"CadastroFiHistClasseReader",
@@ -95,6 +100,7 @@ __all__ = [
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
+	"MetaBalanceteFiReader",
 	"MetaCadFiHistReader",
 	"MetaCadastroFiReader",
 	"MetaCdaReader",
