@@ -702,23 +702,23 @@ sit = CadastroFiHistSitReader().read()
 janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]   # DT_INI_SIT / DT_FIM_SIT
 ```
 
-### `InfMensalFidcTab*Reader` (17 readers)
+### `InfMensalFidcTab*Reader` (18 readers)
 
-`filings_cvm.ingestion.InfMensalFidcTab{I,II,III,IV,V,VI,VII,IX,X,X1,X11,X2,X3,X4,X5,X6,X7}Reader`
+`filings_cvm.ingestion.InfMensalFidcTab{I,II,III,IV,V,VI,VII,VIII,IX,X,X1,X11,X2,X3,X4,X5,X6,X7}Reader`
 
-Os 17 membros de `inf_mensal_fidc_AAAAMM.zip` — as tabelas do **Informe Mensal FIDC** (Tabelas I–X
+Os 18 membros de `inf_mensal_fidc_AAAAMM.zip` — as tabelas do **Informe Mensal FIDC** (Tabelas I–X
 mais as sub-tabelas de X), um reader por membro. Inaugura o *portal root* `fidc/`. Página completa:
 [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md).
 
 Todos têm a mesma assinatura, **com `date_ref`** (dump particionado por mês), e baixam o **mesmo**
 ZIP mensal:
 
-#### `InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 16)
+#### `InfMensalFidcTabIReader(date_ref=None, path_raw=None, retry_policy=None, cls_logger=None)` (idem para os outros 17)
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `date_ref` | `datetime.date \| None` | Qualquer dia do mês de referência seleciona o dump `AAAAMM`. Padrão: hoje. |
-| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 17 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
+| `path_raw` | `pathlib.Path \| None` | Diretório onde **persistir** o ZIP e os 18 CSVs. Um `path_raw` de qualquer reader serve aos outros. |
 | `retry_policy` | `RetryPolicy \| None` | Agenda de retry/backoff do download. Se `None`, usa o `_RETRY_POLICY` do próprio reader (padrão paciente: 5 tentativas). **Ajustável por tabela** — veja a página. |
 | `cls_logger` | `LogEmitter \| None` | Emissor de log injetável. |
 
