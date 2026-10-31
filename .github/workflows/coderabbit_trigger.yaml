@@ -13,8 +13,11 @@ name: CodeRabbit Trigger
 # FAILS rather than skips when the PAT is missing — a skip would be the same silent no-op this
 # workflow exists to remove.
 #
-# No `synchronize`: `auto_incremental_review` covers later pushes once a review has started, and
-# re-asking on every push would spend the reviewer's rate limit.
+# No `synchronize`: re-asking on every push would spend the reviewer's rate limit, on the bet that
+# `auto_incremental_review` covers later pushes once a review has started. ⚠️ UNMEASURED here: no
+# PR has had a CodeRabbit review yet (#283/#287/#301/#319 hold only the stars refusal). If pushes
+# after the first review go unreviewed, the stars limit covers incremental reviews too, and
+# `synchronize` belongs in `types`.
 on:
   pull_request:
     types: [opened, reopened, ready_for_review]

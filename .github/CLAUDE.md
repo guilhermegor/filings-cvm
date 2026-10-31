@@ -90,7 +90,10 @@ duplicate `--cov-fail-under` literal in either place.
 - **The reviewer roster is data in `.review-bots.yaml`** (`coderabbitai[bot]`,
   `guilhermegor-review-ladder[bot]`). A thread counts as answered only with a comment from a
   login outside the roster. A bot resolving its own thread is not an answer. To add a reviewer,
-  add a row there. The gate code names no reviewer.
+  add a row there. ⚠️ A row alone is not the whole job: which review BODIES may declare
+  findings is still pinned in code (`_SET_HEADER_AUTHORS`, `_SET_LADDER_AUTHORS` in
+  `bin/check_review_threads.py`), and the gate's remedy text names `@coderabbitai full review`.
+  A new reviewer that reports findings in its review body needs those updated too.
 - **`Review threads answered` is NOT a required check.** Whether to make it one is the owner's
   call (ruleset). As measured on #287 and #291, it reports a review of superseded code wherever
   the last push was never re-reviewed. Resolving a thread fires no workflow event, so after

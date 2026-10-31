@@ -4,7 +4,9 @@
 #
 # A thread counts as answered only when it holds a comment from a login OUTSIDE this roster.
 # A PR passes the missing-review check only when a roster member reviewed its HEAD commit.
-# Adding a reviewer means adding a row here. No reviewer is named in the gate's code.
+# Adding a reviewer starts with a row here, but review-body findings are still pinned in code
+# (_SET_HEADER_AUTHORS / _SET_LADDER_AUTHORS in bin/check_review_threads.py), as is the
+# `@coderabbitai full review` remedy text. A new body-reporting reviewer needs those too.
 reviewers:
   - login: coderabbitai[bot]
     posts: threads
