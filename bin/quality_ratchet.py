@@ -159,7 +159,13 @@ def run_guard(list_cmd: list) -> tuple:
 		``(exit code, combined output)``.
 	"""
 	cls_proc = subprocess.run(  # noqa: S603 - argv comes from the repo's own hook/CI config
-		list_cmd, cwd=PATH_ROOT, capture_output=True, text=True, check=False
+		list_cmd,
+		cwd=PATH_ROOT,
+		capture_output=True,
+		text=True,
+		encoding="utf-8",
+		errors="replace",
+		check=False,
 	)
 	return cls_proc.returncode, cls_proc.stdout + cls_proc.stderr
 
@@ -229,4 +235,7 @@ def main(list_argv: list) -> int:
 
 
 if __name__ == "__main__":
+	# The report carries ✅/❌; a Windows console defaults to cp1252 and would crash the print
+	# (exit 1, indistinguishable from a real ratchet failure), so pin the output to UTF-8.
+	sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 	sys.exit(main(sys.argv[1:]))

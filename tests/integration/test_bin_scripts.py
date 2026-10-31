@@ -319,6 +319,8 @@ def _run_python(
 		[sys.executable, str(path_script), *args],
 		capture_output=True,
 		text=True,
+		encoding="utf-8",  # the scripts print UTF-8 glyphs; Windows defaults to cp1252
+		errors="replace",
 		check=False,
 		cwd=str(cwd) if cwd is not None else None,
 		env=_env_without_git(),
