@@ -2379,8 +2379,12 @@ fora de <code>201801</code>–<code>201904</code> levanta <code>ValueError</code
 <p>Só <code>DT_COMPTC</code> vira <code>datetime.date</code> (ISO, 100% preenchida). <strong>Todo o resto é texto exato</strong>, vazio
 volta vazio (textos de política chegam a ~4.000 caracteres e várias colunas são parcialmente vazias).</p>
 <ul>
-<li><code>CNPJ_FUNDO</code> é coluna de CNPJ nos 4 membros (100% bem formada); <code>CNPJ_AG_RISCO</code> (agência de
-  rating, só em <code>compl_fi</code>) também, vazia em 188 linhas. Nenhuma coluna guarda CPF.</li>
+<li><code>CNPJ_FUNDO</code> é coluna de CNPJ nos 4 membros (100% bem formada). Nenhuma coluna guarda CPF.</li>
+<li>⚠️ <code>CNPJ_AG_RISCO</code> (agência de rating, só em <code>compl_fi</code>) <strong>volta como publicado e NÃO é
+  validado como CNPJ</strong>: em toda a série (201801–201904) só guarda placeholders
+  (<code>00.000.000/0000-00</code>, <code>99.999.999/0001-99</code>, <code>11.111.111/1111-11</code>) ou vazio, com <strong>um único</strong>
+  CNPJ válido (em 201808). Declará-la coluna de CNPJ fazia o reader levantar <code>ContractError</code> em
+  15 dos 16 meses (#317).</li>
 <li><code>TP_FUNDO</code>: <code>FI</code>, <code>FAPI</code>, <code>FIIM</code>, <code>FMP-FGTS</code>, <code>FMP-FGTS CL</code> — grafia da CVM preservada.</li>
 <li>Contratos gerados dos headers publicados e pinados a <code>tests/fixtures/compl_fi/*_header.csv</code>.</li>
 </ul>

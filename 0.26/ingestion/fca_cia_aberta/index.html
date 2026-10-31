@@ -2476,11 +2476,10 @@ por teste</strong> nas duas direções.</p>
 <hr />
 <h2 id="departamento_acionistas-e-header-only">⚠️ <code>departamento_acionistas</code> é header-only<a class="headerlink" href="#departamento_acionistas-e-header-only" title="Permanent link">&para;</a></h2>
 <p>Em 2025 esse membro vem com <strong>cabeçalho e nenhuma linha</strong>. Por isso seu contract declara
-<strong>nenhuma coluna de CNPJ</strong>: o check de CNPJ exige um valor <strong>presente</strong> e válido, então num quadro
-vazio ele falharia com <code>ContractError</code>.</p>
-<p>Provado por mutação: acrescentando <code>("CNPJ_Companhia",)</code> ao contract, a leitura do membro vazio
-levanta <code>Column 'CNPJ_Companhia' … holds no valid CNPJ</code>. É a mesma classe de falha dos membros
-header-only do CRI — desta vez pega no grounding, não em produção.</p>
+<strong>nenhuma coluna de CNPJ</strong>. Antes do #317 o check de CNPJ falhava numa coluna vazia, então
+declarar <code>("CNPJ_Companhia",)</code> levantava <code>holds no valid CNPJ</code> na leitura do membro vazio (provado
+por mutação). Desde o #317 uma coluna sem valor presente passa, então a tupla vazia deixou de ser
+load-bearing.</p>
 <hr />
 <h2 id="dado-pessoal-lgpd">⚠️ Dado pessoal (LGPD)<a class="headerlink" href="#dado-pessoal-lgpd" title="Permanent link">&para;</a></h2>
 <p>Estes são os <strong>primeiros CPF do root <code>cia_aberta/</code></strong>:</p>
