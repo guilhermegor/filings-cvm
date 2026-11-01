@@ -158,12 +158,14 @@ def test_export_tag_order_follows_the_v3_page() -> None:
 	assert all(tag in order for tag in emitted)
 
 
-def test_export_distr_patrim_emits_all_sixteen_tags_one_decimal() -> None:
-	"""All 16 PR_* tags are emitted with one decimal and a comma separator."""
-	xml = _xml(_row(pr_pf_varj="12.34"))
+def test_export_distr_patrim_emits_all_sixteen_tags() -> None:
+	"""All 16 PR_* tags are emitted."""
+	assert _xml(_row(pr_pf_varj="12.34")).count("<PR_") == 16
 
-	assert xml.count("<PR_") == 16
-	assert "<PR_PF_VARJ>12,3</PR_PF_VARJ>" in xml
+
+def test_export_distr_patrim_uses_one_decimal_and_comma() -> None:
+	"""PR_* values carry one decimal and a comma separator."""
+	assert "<PR_PF_VARJ>12,3</PR_PF_VARJ>" in _xml(_row(pr_pf_varj="12.34"))
 
 
 def test_row_without_distr_patrim_is_rejected() -> None:
@@ -207,11 +209,17 @@ def test_v3_writer_is_not_a_v4_writer() -> None:
 
 
 def test_v3_document_header_versao_is_pinned() -> None:
-	"""A V3 document normalises the shared V4 default to 3.0 and keeps V4 untouched."""
+	"""A V3 document normalises the shared V4 default to 3.0."""
 	header = DocumentHeader(dt_compt="10/2015", dt_gerac_arq="15/11/2015")
-	doc = PerfilMensalV3Document(header=header, rows=[_row()])
 
-	assert doc.header.versao == "3.0"
+	assert PerfilMensalV3Document(header=header, rows=[_row()]).header.versao == "3.0"
+
+
+def test_v3_document_leaves_the_source_header_untouched() -> None:
+	"""Normalising the V3 header copies it; the caller's V4-default header is unchanged."""
+	header = DocumentHeader(dt_compt="10/2015", dt_gerac_arq="15/11/2015")
+	PerfilMensalV3Document(header=header, rows=[_row()])
+
 	assert header.versao == "4.0"
 
 
