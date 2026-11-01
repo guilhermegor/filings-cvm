@@ -8,7 +8,7 @@ its 16 ``PR_*`` tags) as mandatory, while V4 makes it optional for classes with
 subclasses.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	DocumentHeader,
@@ -54,6 +54,30 @@ class PerfilMensalV3Document(PerfilMensalDocument, BaseModel):
 	header: DocumentHeader
 	# The narrowed element type is deliberate, so the V4 serializer still accepts V3 documents.
 	rows: list[PerfilMensalV3Row]  # type: ignore[assignment]
+
+	@field_validator("header")
+	@classmethod
+	def _pin_header_versao(cls, v: DocumentHeader) -> DocumentHeader:
+		"""Pin the header version to 3.0, leaving the shared V4 default untouched.
+
+		Parameters
+		----------
+		v : DocumentHeader
+			Header as supplied; ``versao`` is the V4 default ``4.0`` unless set.
+
+		Returns
+		-------
+		DocumentHeader
+			A copy of the header with ``versao`` normalised to ``3.0``.
+
+		Raises
+		------
+		ValueError
+			If ``versao`` is neither ``3.0`` nor the shared ``4.0`` default.
+		"""
+		if v.versao not in {"3.0", DocumentHeader.model_fields["versao"].default}:
+			raise ValueError("a V3 document header must carry versao 3.0.")
+		return v.model_copy(update={"versao": "3.0"})
 
 
 __all__ = [

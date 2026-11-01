@@ -197,3 +197,29 @@ def test_row_invalid_cnpj_is_rejected() -> None:
 	"""A CNPJ with wrong check digits is rejected."""
 	with pytest.raises(ValidationError):
 		PerfilMensalV3Row.model_validate({**_row().model_dump(), "cnpj_fdo": "11222333000182"})
+
+
+def test_v3_writer_is_not_a_v4_writer() -> None:
+	"""The V3 writer must not masquerade as the V4 one (its export signature differs)."""
+	from filings_cvm.submission import PerfilMensal
+
+	assert not isinstance(PerfilMensalV3(), PerfilMensal)
+
+
+def test_v3_document_header_versao_is_pinned() -> None:
+	"""A V3 document normalises the shared V4 default to 3.0 and keeps V4 untouched."""
+	header = DocumentHeader(dt_compt="10/2015", dt_gerac_arq="15/11/2015")
+	doc = PerfilMensalV3Document(header=header, rows=[_row()])
+
+	assert doc.header.versao == "3.0"
+	assert header.versao == "4.0"
+
+
+def test_v3_document_header_rejects_foreign_versao() -> None:
+	"""A header claiming some other version is refused, not silently rewritten."""
+	import pytest
+
+	header = DocumentHeader(versao="9.9", dt_compt="10/2015", dt_gerac_arq="15/11/2015")
+
+	with pytest.raises(ValueError, match="versao 3.0"):
+		PerfilMensalV3Document(header=header, rows=[_row()])

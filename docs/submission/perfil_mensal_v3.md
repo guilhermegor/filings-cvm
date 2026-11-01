@@ -40,7 +40,7 @@ distribuicao = PatrimonyDistributionV3(
     **{campo: "0" for campo in PatrimonyDistributionV3.model_fields}
 )
 doc = PerfilMensalV3Document(
-    header=DocumentHeader(dt_compt="01/2015", dt_gerac_arq="15/01/2015"),
+    header=DocumentHeader(dt_compt="10/2015", dt_gerac_arq="15/11/2015"),
     rows=[
         PerfilMensalV3Row(
             cnpj_fdo="11222333000181",
