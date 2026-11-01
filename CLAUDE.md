@@ -381,7 +381,7 @@ envio; é o registro do que foi entregue, não um informe):
   `_internal/config/schemas/extrato.py` (`ExtratoDocument`), validadores em `_internal/utils/xml_fields.py`.
   ⚠️ A página **se contradiz** (exemplo × lista de tags: namespace `urn:extr`×`urn:perf`, `CNPJ_FDO`×`CNPJ_FUNDO`,
   tag `TP_VL_FIXO_TX_INGRESSO` reutilizada em `TX_SAIDA`); seguido o exemplo; escalas não ditas são política do repo
-  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ✅ **V2** (`PadraoXMLInfExtratoV2.asp`) — `submission/extrato_v2.py` (`ExtratoV2`, reusa o serializador do V3 (`_build_payload`)); schema `_internal/config/schemas/extrato_v2.py` (`ExtratoV2Document`/`ExtratoV2Header`, reusa `ExtratoRow` do V3 — medido: mesmo exemplo tag a tag, só `VERSAO` 2.0 muda) · ⬜ V1/450 (`PadraoXMLInfExtrato450.asp`)
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
