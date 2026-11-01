@@ -88,6 +88,30 @@ class CdaV3DepPrazoTitIf(CdaDepPrazoTitIf, BaseModel):
 class CdaV3InvExt(BaseModel):
 	"""INV_EXT — foreign investment (189), V3 layout (no collective-investment flags)."""
 
+	@model_validator(mode="before")
+	@classmethod
+	def _no_collective_flags(cls, data: object) -> object:
+		"""Reject the V4-only collective-investment flags (pydantic would silently drop them).
+
+		Parameters
+		----------
+		data : object
+			Raw input before field validation.
+
+		Returns
+		-------
+		object
+			The unchanged input.
+
+		Raises
+		------
+		ValueError
+			If ``inv_coletivo`` or ``gest_inv_coletivo`` is supplied.
+		"""
+		if isinstance(data, dict) and {"inv_coletivo", "gest_inv_coletivo"} & data.keys():
+			raise ValueError("inv_coletivo and gest_inv_coletivo do not exist in CDA V3")
+		return data
+
 	cod_tp_ativ: int
 	nm_emis: Annotated[Text, Field(max_length=150)]
 	dt_venc: BrDate | None = None

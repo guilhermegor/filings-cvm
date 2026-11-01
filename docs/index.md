@@ -43,7 +43,7 @@ não desta documentação:
 - ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp))
   — envio (`submission/cadastro_ativos.py`).
 
-Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
+Os demais padrões do catálogo (CDA V2, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
 Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
 
 ---

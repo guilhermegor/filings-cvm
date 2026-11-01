@@ -224,3 +224,10 @@ def test_export_writes_file_as_windows_1252(tmp_path: object) -> None:
 	path = tmp_path / "cda.xml"
 	assert CdaV3().export(_doc(), str(path)) is None
 	assert path.read_bytes().startswith(b'<?xml version="1.0" encoding="windows-1252"?>')
+
+
+def test_inv_ext_rejects_v4_collective_flags() -> None:
+	"""The V4-only INV_COLETIVO flags must raise, not be silently dropped."""
+	for field in ("inv_coletivo", "gest_inv_coletivo"):
+		with pytest.raises(ValueError, match="do not exist in CDA V3"):
+			CdaV3InvExt.model_validate({field: "S"})
