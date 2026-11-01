@@ -256,14 +256,17 @@ def marker_for(path_file: pathlib.Path) -> str:
     Returns
     -------
     str
-        ``"#"``, ``"//"`` or ``"--"``; empty when nothing here budgets this file's type.
+        ``"#"``, ``"//"``, ``"--"`` or ``"/*"`` (CSS, which has no ``//`` comment); empty when nothing here budgets this file's type.
     """
-    bool_hash_name = path_file.name in TUPLE_HASH_NAMES or path_file.name.startswith("Dockerfile")
+    bool_dockerfile = path_file.name.startswith("Dockerfile") and path_file.suffix != ".md"
+    bool_hash_name = path_file.name in TUPLE_HASH_NAMES or bool_dockerfile
     bool_hash_file = bool_hash_name or path_file.suffix in DICT_HASH_SUFFIXES
     if bool_hash_file or path_file.suffix == ".py":
         return "#"
     if path_file.suffix in DICT_DASH_SUFFIXES:
         return "--"
+    if path_file.suffix == ".css":
+        return "/*"
     if path_file.suffix in DICT_SLASH_SUFFIXES:
         return "//"
     return ""
@@ -586,6 +589,30 @@ def blocks_for(path_file: pathlib.Path, str_source: str, str_marker: str) -> lis
     return marker_blocks(str_source, str_marker, heredoc_kind(path_file))
 
 
+def read_source(path_file: pathlib.Path, str_shown: str) -> tuple:
+    """Read one file as UTF-8, turning undecodable bytes into a finding.
+
+    Parameters
+    ----------
+    path_file : pathlib.Path
+        The file to read.
+    str_shown : str
+        The path as findings print it.
+
+    Returns
+    -------
+    tuple
+        ``(text, [])`` on success; ``(None, findings)`` otherwise, where an unreadable
+        file yields none and a non-UTF-8 file yields one.
+    """
+    try:
+        return path_file.read_text(encoding="utf-8"), []
+    except OSError:
+        return None, []
+    except UnicodeDecodeError:
+        return None, [f"{str_shown}: not valid UTF-8 — its comments cannot be scanned"]
+
+
 def file_problems(path_file: pathlib.Path) -> list:
     """Return every finding for one file: long runs and decorative banners.
 
@@ -603,14 +630,12 @@ def file_problems(path_file: pathlib.Path) -> list:
     if not str_marker:
         return []
     try:
-        str_source = path_file.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError):
-        return []
-
-    try:
         str_shown = str(path_file.relative_to(PATH_ROOT))
     except ValueError:
         str_shown = str(path_file)
+    str_source, list_unread = read_source(path_file, str_shown)
+    if str_source is None:
+        return list_unread
 
     list_blocks = blocks_for(path_file, str_source, str_marker)
 
@@ -698,7 +723,13 @@ RE_HASH_TOKEN = re.compile(r"""'[^'\n]*'|"(?:\\.|[^"\\\n])*"|(?<!\S)#[^\n]*""")
 RE_SLASH_TOKEN = re.compile(
     r"""'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`[^`]*`|//[^\n]*|/\*.*?\*/""", re.DOTALL
 )
-RE_DASH_TOKEN = re.compile(r"""'(?:[^']|'')*'|"[^"]*"|--[^\n]*""")
+RE_DASH_TOKEN = re.compile(
+    r"""'(?:[^']|'')*'|"[^"]*"|--[^\n]*|/\*.*?\*/""", re.DOTALL
+)
+RE_CSS_TOKEN = re.compile(r"""'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|/\*.*?\*/""", re.DOTALL)
+RE_SHELL_HASH_TOKEN = re.compile(
+    r"""'[^'\n]*'|"(?:\\.|[^"\\\n])*"|(?<![^\s;&|(])#[^\n]*"""
+)
 RE_SHELL_TOKEN = re.compile(
     r"""(?P<quoted>'[^']*'|"(?:\\.|[^"\\])*")"""
     r"""|(?P<comment>(?<![^\s;&|()<>])\#.*)"""
@@ -709,7 +740,7 @@ RE_SHA_PIN = re.compile(r"@[0-9a-f]{40}\b")
 RE_VERSION_NOTE = re.compile(r"^\s*v?\d+(\.\d+)*\S*\s*$")
 
 
-def scan_comments(str_source: str, str_marker: str) -> list:
+def scan_comments(str_source: str, str_marker: str, str_heredoc: str = "") -> list:
     """Return every comment line in a ``#`` or ``//`` file, trailing and ``/* */`` included.
 
     Strings are skipped so a ``#`` or ``//`` inside one is not a comment. A multi-line
@@ -721,13 +752,19 @@ def scan_comments(str_source: str, str_marker: str) -> list:
         The file's text.
     str_marker : str
         ``"#"`` or ``"//"``.
+    str_heredoc : str, optional
+        ``heredoc_kind`` of the file; ``"shell"`` also accepts ``;``, ``&``, ``|`` and ``(``
+        before a ``#`` comment.
 
     Returns
     -------
     list of tuple
         ``(int_line, str_text)``, text with the marker (``#``, ``//``, ``/*``) removed.
     """
-    re_token = {"#": RE_HASH_TOKEN, "--": RE_DASH_TOKEN}.get(str_marker, RE_SLASH_TOKEN)
+    re_hash = RE_SHELL_HASH_TOKEN if str_heredoc == "shell" else RE_HASH_TOKEN
+    re_token = {"#": re_hash, "--": RE_DASH_TOKEN, "/*": RE_CSS_TOKEN}.get(
+        str_marker, RE_SLASH_TOKEN
+    )
     list_out = []
     for cls_match in re_token.finditer(str_source):
         str_found = cls_match.group()
@@ -735,7 +772,7 @@ def scan_comments(str_source: str, str_marker: str) -> list:
             continue
         int_first = str_source.count("\n", 0, cls_match.start()) + 1
         str_body = (
-            str_found[len(str_marker) :] if str_found.startswith(str_marker) else str_found[2:-2]
+            str_found[2:-2] if str_found.startswith("/*") else str_found[len(str_marker) :]
         )
         list_out.extend(
             (int_first + int_i, str_text) for int_i, str_text in enumerate(str_body.split("\n"))
@@ -766,7 +803,7 @@ def counted_comments(str_source: str, str_marker: str, str_heredoc: str = "") ->
     set_data = heredoc_lines(str_source, str_heredoc) if str_heredoc else set()
     return [
         (int_line, str_text)
-        for int_line, str_text in scan_comments(str_source, str_marker)
+        for int_line, str_text in scan_comments(str_source, str_marker, str_heredoc)
         if int_line not in set_data
         and not line_breaks_run(int_line, str_marker + str_text, str_text, tuple_allowlist)
         and not (RE_SHA_PIN.search(list_lines[int_line - 1]) and RE_VERSION_NOTE.match(str_text))
@@ -1281,11 +1318,12 @@ def run(list_argv: list) -> int:
     if list_rest is None:
         print("❌ --root needs a directory")
         return 1
+    path_base = PATH_ROOT if list_argv[:1] == ["--root"] else pathlib.Path.cwd()
     bool_write, bool_require, str_reference, list_argv = split_flags(list_rest)
 
     bool_audit = not list_argv
     list_paths = (
-        [pathlib.Path(str_name).resolve() for str_name in list_argv]
+        [(path_base / str_name).resolve() for str_name in list_argv]
         if list_argv
         else audit_paths()
     )

@@ -413,13 +413,15 @@ def _excerpt_around(str_text: str, str_word: str) -> str:
     str
         Up to ~35 characters either side of the match, whitespace collapsed.
     """
-    str_flat = " ".join(str_text.split())
-    int_at = str_flat.lower().find(str_word)
-    if int_at < 0:
-        return str_flat[:80]
-    int_from = max(0, int_at - 35)
-    str_slice = str_flat[int_from : int_at + len(str_word) + 35]
-    return f"…{str_slice}…" if int_from else f"{str_slice}…"
+    str_red = redact(str_text)
+    cls_hit = re.search(rf"\b{re.escape(str_word)}\b", str_red, re.IGNORECASE)
+    if cls_hit is None or len(str_red) != len(str_text):
+        return " ".join(str_text.split())[:80]
+    str_before = re.sub(r"\s+", " ", str_text[: cls_hit.start()])
+    str_after = re.sub(r"\s+", " ", str_text[cls_hit.end() :])
+    str_pre = str_before[-35:]
+    str_slice = f"{str_pre}{str_text[cls_hit.start() : cls_hit.end()]}{str_after[:35]}".strip()
+    return f"…{str_slice}…" if len(str_before) > len(str_pre) else f"{str_slice}…"
 
 
 def _display_path(path_file: pathlib.Path) -> str:
@@ -462,8 +464,10 @@ def file_problems(path_file: pathlib.Path) -> list:
         return []
     try:
         str_source = path_file.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError):
+    except OSError:
         return []
+    except UnicodeDecodeError:
+        return [f"❌ {_display_path(path_file)}: not valid UTF-8 — its comments cannot be scanned"]
     list_comments = (
         python_comments(str_source) if bool_python else marker_comments(str_source, str_marker)
     )

@@ -280,7 +280,17 @@ jobs:
 
       - name: Run Comment Budget Ratchet
         if: runner.os == 'Linux'
-        run: poetry run python bin/check_comment_budget.py --require-baseline
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          list_args=(--require-baseline)
+          if [ -n "$BASE_SHA" ]; then
+            git fetch --no-tags origin "$BASE_SHA"
+            if git show FETCH_HEAD:comment_budget_baseline.txt > "$RUNNER_TEMP/base_baseline.txt" 2>/dev/null; then
+              list_args+=(--compare-baseline "$RUNNER_TEMP/base_baseline.txt")
+            fi
+          fi
+          poetry run python bin/check_comment_budget.py "${list_args[@]}"
       # ---- END code- and test-quality guards (#294) ------------------------------------
 
       - name: Run Integration Tests

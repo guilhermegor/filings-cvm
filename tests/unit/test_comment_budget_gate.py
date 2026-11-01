@@ -541,7 +541,7 @@ def test_a_clean_tree_reports_the_file_count_on_success(
 	assert "✅ comment budget OK (1 file" in capsys.readouterr().out
 
 
-_PATH_REPO = Path(__file__).resolve().parents[4]
+_PATH_REPO = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture(autouse=True)
@@ -1627,8 +1627,8 @@ def test_a_toml_string_with_a_heredoc_marker_hides_nothing(tmp_path: Path) -> No
 		('echo "a <<EOF"', 2),
 		("echo 'a <<EOF'", 2),
 		("foo # see <<EOF", 3),
-		("foo;# see <<EOF", 2),
-		("foo ;# see <<EOF", 2),
+		("foo;# see <<EOF", 3),
+		("foo ;# see <<EOF", 3),
 		("x=$(( y << n ))", 2),
 		("grep x <<< y", 2),
 	],
@@ -1692,3 +1692,46 @@ def test_an_unterminated_opener_counts_its_lines(tmp_path: Path) -> None:
 		A throwaway directory pytest provides per test.
 	"""
 	assert _count(tmp_path, "s.sh", "cat <<EOF\n# one\n# two\n") == 2
+
+
+@pytest.mark.parametrize(
+	("str_name", "str_text", "int_want"),
+	[
+		("Dockerfile.md", "# Title\n", 0),
+		("a.css", "a{background:url(https://x/y.png)}\n/* c */\n", 1),
+		("a.sql", "/* c */\nselect 1;\n", 1),
+	],
+)
+def test_review_375_grammar_edges(
+	tmp_path: Path, str_name: str, str_text: str, int_want: int
+) -> None:
+	"""Should-fail witness: Markdown Dockerfile names, CSS ``//`` and SQL ``/* */``.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	str_name : str
+		File name, which picks the grammar.
+	str_text : str
+		File content.
+	int_want : int
+		The exact comment-line count.
+	"""
+	assert _count(tmp_path, str_name, str_text) == int_want
+
+
+def test_an_undecodable_file_is_a_finding(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+	"""Should-fail witness: bytes that are not UTF-8 are reported, not counted as clean.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	capsys : pytest.CaptureFixture
+		Captures the gate's report.
+	"""
+	_tree(tmp_path, "")
+	(tmp_path / "bad.js").write_bytes(b"// \xff\xfe\n")
+	int_code, str_out = _run(tmp_path, capsys, "bad.js")
+	assert (int_code, "not valid UTF-8" in str_out) == (1, True)

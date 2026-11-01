@@ -69,7 +69,6 @@ NOSONAR
 depcheck-ignore
 
 renovate:
-dependabot
 
 ponytail:
 
