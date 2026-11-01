@@ -108,6 +108,17 @@ InformeDiario().export(doc, output_path="informe.xml")     # grava arquivo, reto
 
 O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `PerfilMensal`.
 
+### `InformeDiarioV2`
+
+`filings_cvm.submission.InformeDiarioV2`
+
+Serializa um `InformeDiarioV2Document` para o XML do padrão Informe Diário V2 (`VERSAO=2.0`, 2012-07-01 a 2015-09-30).
+
+#### `export(doc, output_path=None) -> str | None`
+
+Mesma borda de I/O do `InformeDiario`. Modelos: `InformeDiarioV2Document`, `InformeDiarioV2Header`,
+`InformeDiarioV2Inform` (só `cnpj_fdo`, sem `data_prox_pl`). Veja [Informe Diário V2](submission/informe_diario_v2.md).
+
 ### `InformeDiarioV3`
 
 `filings_cvm.submission.InformeDiarioV3`

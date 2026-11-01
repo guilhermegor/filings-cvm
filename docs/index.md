@@ -38,6 +38,8 @@ não desta documentação:
   — envio (`submission/perfil_mensal_original.py`).
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp))
   — envio (`submission/informe_diario.py`).
+- ✅ **Informe Diário — V2** ([`PadraoXMLInfoDiarioNet739.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet739.asp))
+  — envio (`submission/informe_diario_v2.py`).
 - ✅ **Informe Diário — V3** ([`PadraoXMLInfoDiarioNetV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp))
   — envio (`submission/informe_diario_v3.py`).
 - ✅ **Informe Quadrimestral — V2** ([`PadraoXMLInfoTrimV2.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp))
@@ -49,7 +51,19 @@ não desta documentação:
 - ✅ **Informe Mensal de Investidor não Residente** ([`PadraoXMLInfoMensalINR.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp))
   — envio (`submission/inr_mensal.py`).
 
-Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
+- ✅ **Informe de Fundo 157** ([`PadraoXMLInf157.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInf157.asp))
+  — envio (`submission/inf_fundo_157.py`).
+- ✅ **CDA — V4** ([`PadraoXMLCDANetV4.aspx`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx))
+  — envio (`submission/cda.py`).
+- ✅ **Informe Mensal FIDC — a partir de 2019-11-01** ([`PadraoXMLMensalFIDC576.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp))
+  — envio (`submission/inf_mensal_fidc.py`).
+- ✅ **Lâmina — V3** ([`PadraoXMLLaminaV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLLaminaV3.asp))
+  — envio (`submission/lamina.py`).
+- ✅ **Extrato das Informações sobre o Fundo — V3** ([`PadraoXMLInfExtratoV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp))
+  — envio (`submission/extrato.py`).
+
+Os demais padrões do catálogo (versões anteriores dos padrões acima, Balanço, Balancete, etc.)
+estão pendentes.
 Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
 
 ---
@@ -69,7 +83,7 @@ pip install filings-cvm
 ```
 
 Continue em **[Uso](usage.md)** para o primeiro documento, ou veja cada padrão em **Envio**:
-**[Perfil Mensal](submission/perfil_mensal.md)**, **[Informe Diário](submission/informe_diario.md)**,
+**[Perfil Mensal](submission/perfil_mensal.md)**, **[Informe Diário](submission/informe_diario.md)** (e **[V2](submission/informe_diario_v2.md)**),
 **[Lâmina V3](submission/lamina.md)**, **[Cadastro de Ativos](submission/cadastro_ativos.md)** e **[Informe Mensal INR](submission/inr_mensal.md)**.
 
 ---

@@ -72,7 +72,7 @@ already-changed source.
 Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
 
 **Fundos**
-- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ✅ **submission V3** (`PadraoXMLInfoDiarioNetV3.asp`) — `submission/informe_diario_v3.py` (`InformeDiarioV3`, estende o V4; só `CNPJ_FDO`, `VERSAO` 3.0); schema `_internal/config/schemas/informe_diario_v3.py` · ⬜ V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
+- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ✅ **submission V3** (`PadraoXMLInfoDiarioNetV3.asp`) — `submission/informe_diario_v3.py` (`InformeDiarioV3`, estende o V4; só `CNPJ_FDO`, `VERSAO` 3.0); schema `_internal/config/schemas/informe_diario_v3.py` · ✅ V2 (`PadraoXMLInfoDiarioNet739.asp`) — `submission/informe_diario_v2.py` (`InformeDiarioV2`); schema `_internal/config/schemas/informe_diario_v2.py` · V1 (`PadraoXMLInfoDiarioNet.asp`)
 - Informe de Fundo 157 — ✅ **submission** (`PadraoXMLInf157.asp`) — `submission/inf_fundo_157.py`
   (`InfFundo157`); schema `_internal/config/schemas/inf_fundo_157.py` (`InfFundo157Document`),
   validadores em `_internal/utils/xml_fields.py`. A página não tem decimais e não diz o formato de

@@ -16,6 +16,11 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.informe_diario_v2 import (
+	InformeDiarioV2Document,
+	InformeDiarioV2Header,
+	InformeDiarioV2Inform,
+)
 from filings_cvm._internal.config.schemas.informe_diario_v3 import (
 	InformeDiarioV3Document,
 	InformeDiarioV3Header,
@@ -110,6 +115,9 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InformeDiarioV2Document",
+	"InformeDiarioV2Header",
+	"InformeDiarioV2Inform",
 	"InformeDiarioV3Document",
 	"InformeDiarioV3Header",
 	"InformeDiarioV3Inform",
