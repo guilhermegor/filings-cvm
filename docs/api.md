@@ -216,6 +216,26 @@ Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
 
 ---
 
+### `InfMensalFidc489`
+
+Writer do Informe Mensal FIDC no layout da ICVM 489 (até a data-base 2019-11-01); blocos
+idênticos ao da ICVM 576 são reaproveitados do mesmo schema.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InfMensalFidc489Document` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+```python
+from filings_cvm.submission import InfMensalFidc489
+
+xml = InfMensalFidc489().export(doc)
+```
+
+Limites e regras do padrão: `docs/submission/inf_mensal_fidc_489.md`.
+
+---
+
 ### `InformeQuadrimestral`
 
 `filings_cvm.submission.InformeQuadrimestral`
