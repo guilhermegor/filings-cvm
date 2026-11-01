@@ -47,6 +47,12 @@ from filings_cvm._internal.config.schemas.lamina import (
 	LaminaTaxaEntrada,
 	LaminaTaxaSaida,
 )
+from filings_cvm._internal.config.schemas.lamina_v1 import (
+	LaminaV1Block,
+	LaminaV1Document,
+	LaminaV1Header,
+	LaminaV1Inform,
+)
 from filings_cvm._internal.config.schemas.perfil_mensal import (
 	ClientCount,
 	DocumentHeader,
@@ -98,6 +104,10 @@ __all__ = [
 	"LaminaTaxaAdministracao",
 	"LaminaTaxaEntrada",
 	"LaminaTaxaSaida",
+	"LaminaV1Block",
+	"LaminaV1Document",
+	"LaminaV1Header",
+	"LaminaV1Inform",
 	"ListaClasseCotas",
 	"ListaCotstCateg",
 	"NominalRiskBlock",
