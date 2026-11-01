@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Set up the Python virtual environment: pyenv-preferred with a system-Python
-# fallback (for hosts where pyenv cannot be installed), optional corporate-CA
-# wiring, then a Poetry install with a stdlib-venv + pip fallback for restricted
-# environments. Cross-platform logic lives in lib/bootstrap.sh and lib/pip_fallback.sh.
 
 set -euo pipefail
 
@@ -70,14 +66,16 @@ bootstrap_local_venv_with_pip() {
 	local str_venv_python
 
 	print_status "warning" "Creating local .venv with stdlib venv + pip fallback..."
-	rm -rf "$PROJECT_ROOT/.venv"
-	"$PYTHON" -m venv "$PROJECT_ROOT/.venv"
+	pip_fallback_recreate_project_venv || return 1
 
 	str_venv_python="$(pip_fallback_project_venv_python)"
-	pip_fallback_install_groups_in_venv \
+	if ! pip_fallback_install_groups_in_venv \
 		"$str_venv_python" \
 		"main,dev,docs" \
-		"project dependencies (main, dev, docs)"
+		"project dependencies (main, dev, docs)"; then
+		print_status "error" "Local .venv bootstrap failed — the environment is not usable"
+		return 1
+	fi
 
 	print_status "success" "Local .venv created with pip fallback"
 	print_status "warning" "Fallback mode installed dependencies from pyproject.toml without Poetry package installation"
@@ -99,15 +97,6 @@ install_playwright() {
 }
 
 try_install_playwright_browsers() {
-	# Best-effort Playwright browser install. The Poetry/.venv environment is already
-	# usable without browsers, so a failure here must NEVER abort `init` — it warns and
-	# points at `make fix_playwright`. This guards against `playwright install` failing on
-	# hosts without a compatible browser toolchain (notably `Error: spawn UNKNOWN` under
-	# Git Bash/MINGW on Windows). `--with-deps` installs Linux OS packages via apt and is
-	# only valid on Debian/Ubuntu, so it is added on Linux only.
-	#
-	# $@ is the Python launcher to run the install with, e.g. `run_poetry run python`
-	# (a shell function is fine as the first word) or an absolute `.venv` python path.
 	local -a cmd_python=("$@")
 	local -a args_install=(chromium)
 	[[ "${OS_TYPE:-$(detect_os)}" == "linux" ]] && args_install+=(--with-deps)
@@ -117,7 +106,7 @@ try_install_playwright_browsers() {
 		print_status "success" "Playwright browsers installed"
 	else
 		print_status "warning" \
-			"Could not install Playwright browsers — init continues; run 'make fix_playwright' later if you need them"
+			"Could not install Playwright browsers — init continues; run 'poe fix_playwright' later if you need them"
 	fi
 }
 
@@ -134,7 +123,10 @@ main() {
 		bool_full_env_ready=1
 	else
 		print_status "warning" "Falling back because Poetry could not provide a local full environment"
-		bootstrap_local_venv_with_pip
+		if ! bootstrap_local_venv_with_pip; then
+			print_status "error" "venv setup failed — no usable environment was produced. Never treat this as success."
+			return 1
+		fi
 		bool_fallback_used=1
 	fi
 

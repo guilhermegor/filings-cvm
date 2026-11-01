@@ -1,10 +1,19 @@
 #!/bin/bash
-# Pre-commit hook: reject filenames containing characters outside [a-zA-Z0-9._-].
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
+
+discover_files() {
+	if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		git ls-files -z
+		return 0
+	fi
+	find . \
+		\( -path ./.git -o -path ./.venv -o -path ./node_modules \) -prune \
+		-o -type f -print0
+}
 
 check_unix_filenames() {
 	local has_errors=0
@@ -32,7 +41,30 @@ check_unix_filenames() {
 }
 
 main() {
-	check_unix_filenames "$@" || exit 1
+	if [ "$#" -gt 0 ]; then
+		check_unix_filenames "$@" || exit 1
+		return 0
+	fi
+
+	cd "$SCRIPT_DIR/.."
+	local -a list_files=()
+
+	local str_tmp
+	str_tmp="$(mktemp)"
+	# shellcheck disable=SC2064  # expand str_tmp NOW: the trap must name this run's file.
+	trap "rm -f '$str_tmp'" RETURN
+	if ! discover_files >"$str_tmp"; then
+		print_status "error" "file discovery failed — refusing to check a partial list"
+		exit 1
+	fi
+	mapfile -d '' -t list_files <"$str_tmp"
+
+	if [ "${#list_files[@]}" -eq 0 ]; then
+		print_status "error" "no files discovered — this gate would pass vacuously"
+		exit 1
+	fi
+
+	check_unix_filenames "${list_files[@]}" || exit 1
 }
 
 main "$@"

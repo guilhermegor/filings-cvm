@@ -1,17 +1,4 @@
 #!/usr/bin/env bash
-#
-# export_repo_content.sh
-#
-# Flatten the repository into a single text file (paths + contents) suitable for
-# pasting into a web-UI LLM as project context when asking for new features.
-#
-# File selection honors .gitignore when run inside a git work tree
-# (git ls-files --cached --others --exclude-standard); otherwise it falls back to
-# a find walk that prunes heavy/generated directories. Real .env files, logs, the
-# local corporate CA, and binary files are always skipped — the output file too.
-#
-# Usage:
-#   bin/export_repo_content.sh [output_file]   # default: repo_context.txt (repo root)
 
 set -euo pipefail
 
@@ -24,8 +11,6 @@ OUTPUT_REL="${OUTPUT_FILE#./}"
 TMP_OUTPUT=""
 TMP_LIST=""
 
-# Directory names pruned by the non-git fallback walk. Kept in rough sync with the
-# skeleton .gitignore files; the git-aware path needs none of this — it reads .gitignore.
 PRUNE_DIRS=(
 	.git .venv venv env .uv
 	__pycache__ .pytest_cache .ruff_cache .mypy_cache
@@ -45,7 +30,7 @@ trap cleanup EXIT
 prepare_output_path() {
 	local output_dir
 	output_dir="$(dirname "$OUTPUT_FILE")"
-	mkdir -p "$output_dir"
+	ensure_dir "$output_dir"
 }
 
 create_temp_files() {
@@ -58,8 +43,6 @@ is_output_file() {
 	[[ "${file#./}" == "$OUTPUT_REL" ]]
 }
 
-# Real env files carry secrets and must never reach an LLM dump; .env.example is safe.
-# Logs, macOS cruft, and the locally generated corporate CA are noise.
 is_secret_or_noise() {
 	local rel="${1#./}"
 	local base
@@ -80,8 +63,6 @@ is_secret_or_noise() {
 
 should_include() {
 	local file="$1"
-	# git ls-files --cached can list staged deletions (tracked, removed from disk);
-	# skip anything without a readable regular file behind it.
 	[[ -f "$file" ]] || return 1
 	is_output_file "$file" && return 1
 	is_secret_or_noise "$file" && return 1
@@ -90,7 +71,6 @@ should_include() {
 
 is_probably_text_file() {
 	local file="${1:-}"
-	# Empty files count as text; grep -I reports binary files as non-matching.
 	[[ ! -s "$file" ]] && return 0
 	LC_ALL=C grep -Iq . "$file"
 }
