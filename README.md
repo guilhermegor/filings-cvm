@@ -50,6 +50,7 @@ partir de `filings_cvm.submission`.
 
 - ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp)) — `PerfilMensal` / `PerfilMensalDocument`
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp)) — `InformeDiario` / `InformeDiarioDocument`
+- ✅ **Informe Diário — V1** ([`PadraoXMLInfoDiarioNet.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNet.asp), até 2012-07-01) — `InformeDiarioV1` / `InformeDiarioV1Document`
 - ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp)) — `CadastroAtivos` / `CadastroAtivosDocument`
 
 Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes —
