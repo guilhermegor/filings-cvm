@@ -49,13 +49,11 @@ por teste** nas duas direções.
 
 ## ⚠️ `departamento_acionistas` é header-only
 
-Em 2025 esse membro vem com **cabeçalho e nenhuma linha**. Por isso seu contract declara
-**nenhuma coluna de CNPJ**: o check de CNPJ exige um valor **presente** e válido, então num quadro
-vazio ele falharia com `ContractError`.
-
-Provado por mutação: acrescentando `("CNPJ_Companhia",)` ao contract, a leitura do membro vazio
-levanta `Column 'CNPJ_Companhia' … holds no valid CNPJ`. É a mesma classe de falha dos membros
-header-only do CRI — desta vez pega no grounding, não em produção.
+Em 2025 esse membro vem com **cabeçalho e nenhuma linha** — e mesmo assim seu contract declara
+`("CNPJ_Companhia",)` (#320). Antes do #317 o check de CNPJ falhava numa coluna vazia, o que
+obrigava a uma tupla vazia; desde o #317 uma coluna sem valor presente passa. `CNPJ_Companhia` é a
+chave da companhia ("CNPJ da companhia", `varchar(18)` no META) e a única coluna de CNPJ/CPF do
+membro, então no dia em que a CVM publicar linhas um CNPJ malformado levanta `ContractError`.
 
 ---
 

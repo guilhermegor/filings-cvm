@@ -27,6 +27,56 @@ _QUANTUM = Decimal(1).scaleb(-AMOUNT_SCALE)
 
 
 @type_checker
+def _decimal_from(value: object) -> Decimal:
+	"""Convert a ``Decimal``/``str``/``int`` to ``Decimal``, refusing anything else.
+
+	Parameters
+	----------
+	value : object
+		Raw amount.
+
+	Returns
+	-------
+	Decimal
+		The parsed value (not yet range-checked or truncated).
+
+	Raises
+	------
+	ValueError
+		If the value is a ``float``/``bool``, another type, or not a decimal literal.
+	"""
+	raw = _require_exact_type(value)
+	try:
+		return raw if isinstance(raw, Decimal) else Decimal(raw)
+	except (InvalidOperation, ValueError) as exc:
+		raise ValueError(f"invalid decimal amount: {value!r}") from exc
+
+
+@type_checker
+def _require_exact_type(value: object) -> Decimal | str | int:
+	"""Reject ``float``, ``bool`` and any non-numeric-text type.
+
+	Parameters
+	----------
+	value : object
+		Raw amount.
+
+	Returns
+	-------
+	Decimal or str or int
+		The same value, narrowed.
+
+	Raises
+	------
+	ValueError
+		If the value is not a ``Decimal``, ``str`` or ``int`` (``float``/``bool`` included).
+	"""
+	if isinstance(value, float | bool) or not isinstance(value, Decimal | str | int):
+		raise ValueError(f"amount must be Decimal, str or int, never {type(value).__name__}")
+	return value
+
+
+@type_checker
 def parse_cofi_amount(value: object) -> Decimal:
 	"""Coerce a raw amount to a ``Decimal`` truncated to 2 places, refusing ``float``.
 
@@ -49,12 +99,7 @@ def parse_cofi_amount(value: object) -> Decimal:
 		If the value is a ``float``/``bool``, not a finite number, or its absolute
 		value does not fit the 18-digit column (16 integer digits).
 	"""
-	if isinstance(value, float | bool) or not isinstance(value, Decimal | str | int):
-		raise ValueError(f"amount must be Decimal, str or int, never {type(value).__name__}")
-	try:
-		as_decimal = value if isinstance(value, Decimal) else Decimal(value)
-	except (InvalidOperation, ValueError) as exc:
-		raise ValueError(f"invalid decimal amount: {value!r}") from exc
+	as_decimal = _decimal_from(value)
 	if not as_decimal.is_finite() or abs(as_decimal) >= _AMOUNT_CEILING:
 		raise ValueError(f"amount out of range for an 18-digit column: {value!r}")
 	return as_decimal.quantize(_QUANTUM, rounding=ROUND_DOWN)

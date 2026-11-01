@@ -45,47 +45,63 @@ def _lines(doc: BalanceteDocument) -> list[str]:
 def test_header_layout_matches_spec_positions() -> None:
 	"""Header layout matches spec positions."""
 	header = _lines(_doc())[0]
-	assert len(header) == RECORD_LEN
-	assert header[0:3] == "#C1"  # pos 1-3
-	assert header[3:7] == "4010"  # pos 4-7
-	assert header[7:21] == CNPJ  # pos 8-21
-	assert header[21:29] == " " * 8  # pos 22-29 filler
-	assert header[29:35] == "012025"  # pos 30-35
-	assert header[35:] == " " * 36  # pos 36-71 filler
+	assert (
+		(
+			len(header),
+			header[0:3],  # pos 1-3
+			header[3:7],  # pos 4-7
+			header[7:21],  # pos 8-21
+			header[21:29],  # pos 22-29 filler
+			header[29:35],  # pos 30-35
+			header[35:],  # pos 36-71 filler
+		)
+		== (RECORD_LEN, "#C1", "4010", CNPJ, " " * 8, "012025", " " * 36)
+	)
 
 
 def test_account_layout_matches_spec_positions() -> None:
 	"""Account layout matches spec positions."""
 	doc = _doc(_fundo(CNPJ, _conta(total="12.34", vl_ate_90="-1.5", vl_apos_90="0")))
 	acct = _lines(doc)[1]
-	assert len(acct) == RECORD_LEN
-	assert acct[0:10] == "1110000009"
-	assert acct[10:14] == " " * 4
-	assert acct[14:32] == "000000000000001234"
-	assert acct[32] == "+"
-	assert acct[33:51] == "000000000000000150"
-	assert acct[51] == "-"
-	assert acct[52:70] == "0" * 18
-	assert acct[70] == "+"
+	assert (
+		len(acct),
+		acct[0:10],
+		acct[10:14],
+		acct[14:32],
+		acct[32],
+		acct[33:51],
+		acct[51],
+		acct[52:70],
+		acct[70],
+	) == (
+		RECORD_LEN,
+		"1110000009",
+		" " * 4,
+		"000000000000001234",
+		"+",
+		"000000000000000150",
+		"-",
+		"0" * 18,
+		"+",
+	)
 
 
 def test_footer_counts_every_record_and_multiple_funds() -> None:
 	"""Footer counts every record and multiple funds."""
-	doc = _doc(_fundo(CNPJ, _conta(), _conta("1120000008")), _fundo(CNPJ2))
-	lines = _lines(doc)
-	assert len(lines) == 6
-	footer = lines[-1]
-	assert footer[0:2] == "@1"
-	assert footer[2:8] == "000006"
-	assert footer[8:] == " " * 63
-	assert [ln[0] for ln in lines].count("#") == 2
+	lines = _lines(_doc(_fundo(CNPJ, _conta(), _conta("1120000008")), _fundo(CNPJ2)))
+	assert (
+		len(lines),
+		lines[-1][0:2],
+		lines[-1][2:8],
+		lines[-1][8:],
+		"".join(lines).count("#C1"),
+	) == (6, "@1", "000006", " " * 63, 2)
 
 
 def test_amount_truncates_toward_zero_and_negative_sign() -> None:
 	"""Amount truncates toward zero and negative sign."""
 	acct = _lines(_doc(_fundo(CNPJ, _conta(total="-0.999"))))[1]
-	assert acct[14:32] == "000000000000000099"
-	assert acct[32] == "-"
+	assert (acct[14:32], acct[32]) == ("000000000000000099", "-")
 
 
 def test_zero_amount_is_positive() -> None:
@@ -122,10 +138,14 @@ def test_duplicate_account_rejected() -> None:
 		_fundo(CNPJ, _conta(), _conta())
 
 
-def test_empty_accounts_and_funds_rejected() -> None:
-	"""Empty accounts and funds rejected."""
+def test_empty_accounts_rejected() -> None:
+	"""A fund with no accounts is rejected."""
 	with pytest.raises(ValidationError):
 		BalanceteFundo(cnpj_fdo=CNPJ, contas=[])
+
+
+def test_empty_funds_rejected() -> None:
+	"""A document with no funds is rejected."""
 	with pytest.raises(ValidationError):
 		BalanceteDocument(competence="012025", fundos=[])
 
@@ -157,23 +177,23 @@ def test_duplicate_fund_rejected() -> None:
 		_doc(_fundo(CNPJ), _fundo(CNPJ))
 
 
-def test_footer_count_bounds() -> None:
-	"""Footer count bounds."""
+@pytest.mark.parametrize("bad", [1_000_000, 0])
+def test_footer_count_bounds(bad: int) -> None:
+	"""Footer count outside 1..999999 is rejected."""
 	with pytest.raises(ValueError):
-		footer_record(1_000_000)
-	with pytest.raises(ValueError):
-		footer_record(0)
+		footer_record(bad)
 
 
 def test_export_writes_file(tmp_path: Path) -> None:
 	"""Export writes file."""
 	target = tmp_path / "b.cvm"
-	assert Balancete().export(_doc(), str(target)) is None
-	assert target.read_bytes().decode("ascii") == Balancete().export(_doc())
+	returned = Balancete().export(_doc(), str(target))
+	assert (returned, target.read_bytes().decode("ascii")) == (None, Balancete().export(_doc()))
 
 
-def test_unencodable_content_does_not_wipe_existing_file(tmp_path: Path) -> None:
-	"""Unencodable content does not wipe existing file."""
+@pytest.fixture
+def file_after_failed_export(tmp_path: Path) -> bytes:
+	"""Export unencodable content over an existing file; return the file's bytes."""
 	# Account codes are digit-only, so force a non-ASCII char past validation.
 	doc = _doc()
 	object.__setattr__(doc.fundos[0].contas[0], "cod_conta", "é" * 10)
@@ -181,4 +201,9 @@ def test_unencodable_content_does_not_wipe_existing_file(tmp_path: Path) -> None
 	target.write_bytes(b"keep")
 	with pytest.raises(UnicodeEncodeError):
 		Balancete().export(doc, str(target))
-	assert target.read_bytes() == b"keep"
+	return target.read_bytes()
+
+
+def test_unencodable_content_does_not_wipe_existing_file(file_after_failed_export: bytes) -> None:
+	"""Unencodable content does not wipe existing file."""
+	assert file_after_failed_export == b"keep"

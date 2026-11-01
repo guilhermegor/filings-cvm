@@ -4,10 +4,9 @@ Produces the ``.cvm`` text file (71-position records) from a validated
 :class:`BalanceteDocument`. Pure logic plus file I/O at the edges — no network.
 """
 
-from pathlib import Path
-
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.balancete import BalanceteDocument
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm._internal.utils.cofi_records import (
 	account_record,
 	footer_record,
@@ -15,7 +14,7 @@ from filings_cvm._internal.utils.cofi_records import (
 )
 
 
-COD_DOC = "4010"
+_COD_DOC = "4010"
 _ENCODING = "ascii"
 
 
@@ -50,8 +49,7 @@ class Balancete(SubmissionWriter[BalanceteDocument]):
 		text = self._build(doc)
 		if output_path is None:
 			return text
-		payload = text.encode(_ENCODING)
-		Path(output_path).write_bytes(payload)
+		atomic_write_bytes(output_path, text.encode(_ENCODING))
 		return None
 
 	def _build(self, doc: BalanceteDocument) -> str:
@@ -69,7 +67,7 @@ class Balancete(SubmissionWriter[BalanceteDocument]):
 		"""
 		records: list[str] = []
 		for fundo in doc.fundos:
-			records.append(header_record(COD_DOC, fundo.cnpj_fdo, doc.competence))
+			records.append(header_record(_COD_DOC, fundo.cnpj_fdo, doc.competence))
 			records.extend(
 				account_record(c.cod_conta, c.vl_total, c.vl_ate_90, c.vl_apos_90)
 				for c in fundo.contas

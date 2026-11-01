@@ -70,10 +70,8 @@ class BalanceteConta(BaseModel):
 		ValueError
 			If the value is not a string or is not 10 digits.
 		"""
-		if not isinstance(value, str):
-			raise ValueError("cod_conta must be a string")
-		if not _COD_CONTA_RE.fullmatch(value):
-			raise ValueError(f"cod_conta must have 10 digits, got {value!r}")
+		if not isinstance(value, str) or not _COD_CONTA_RE.fullmatch(value):
+			raise ValueError(f"cod_conta must be a string of 10 digits, got {value!r}")
 		return value
 
 
@@ -175,8 +173,8 @@ class BalanceteDocument(BaseModel):
 		return value
 
 	@model_validator(mode="after")
-	def _check_funds(self) -> BalanceteDocument:
-		"""Reject repeated funds and files too long for the footer count.
+	def _check_unique_funds(self) -> BalanceteDocument:
+		"""Reject a fund CNPJ informed more than once.
 
 		Returns
 		-------
@@ -186,11 +184,27 @@ class BalanceteDocument(BaseModel):
 		Raises
 		------
 		ValueError
-			If a CNPJ repeats or the total record count exceeds the footer field.
+			If a CNPJ repeats.
 		"""
 		cnpjs = [fundo.cnpj_fdo for fundo in self.fundos]
 		if len(set(cnpjs)) != len(cnpjs):
 			raise ValueError("duplicate fund CNPJ in one file")
+		return self
+
+	@model_validator(mode="after")
+	def _check_record_count(self) -> BalanceteDocument:
+		"""Reject files too long for the footer count.
+
+		Returns
+		-------
+		BalanceteDocument
+			The validated model.
+
+		Raises
+		------
+		ValueError
+			If the total record count exceeds the footer field.
+		"""
 		n_records = sum(1 + len(fundo.contas) for fundo in self.fundos) + 1
 		if n_records > MAX_RECORDS:
 			raise ValueError(f"{n_records} records exceed the 6-digit footer count")
