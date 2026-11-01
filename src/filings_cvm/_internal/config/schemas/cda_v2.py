@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar, Literal
 
-from pydantic import AfterValidator, BaseModel, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 from filings_cvm._internal.config.schemas._fields import validated_cnpj
 from filings_cvm._internal.config.schemas.cda import (
@@ -95,6 +95,12 @@ _BLOCK_APLIC_TYPES: dict[str, frozenset[int]] = {
 }
 
 
+class _Strict(BaseModel):
+	"""Base of every V2 model: an unknown or misspelled field is an error, not dropped."""
+
+	model_config = ConfigDict(extra="forbid")
+
+
 @type_checker
 def _check_competence(value: str) -> str:
 	"""Require MM/AAAA.
@@ -122,7 +128,7 @@ def _check_competence(value: str) -> str:
 _Competence = Annotated[str, AfterValidator(_check_competence)]
 
 
-class CdaV2Header(BaseModel):
+class CdaV2Header(_Strict):
 	"""CAB_INFORM — document header (COD_DOC fixed at 3, VERSAO at 2.0)."""
 
 	cod_doc: Literal[3] = 3
@@ -153,7 +159,7 @@ def _together(name: str, quantity: object, value: object) -> None:
 		raise ValueError(f"qtde_{name} and vl_{name} must be filled together")
 
 
-class CdaV2Negoc(BaseModel):
+class CdaV2Negoc(_Strict):
 	"""NEGOC — month's trades; TP_NEGOC is always present, quantity and value come in pairs."""
 
 	tp_negoc: Literal[1, 2]
@@ -176,13 +182,13 @@ class CdaV2Negoc(BaseModel):
 		return self
 
 
-class CdaV2SwapNegoc(BaseModel):
+class CdaV2SwapNegoc(_Strict):
 	"""NEGOC of a SWAP: only the negotiation type."""
 
 	tp_negoc: Literal[1, 2]
 
 
-class CdaV2PosFim(BaseModel):
+class CdaV2PosFim(_Strict):
 	"""POS_FIM — final quantity, cost and market value (cost and quantity per Table A)."""
 
 	qtde_pos_fim: Quantity | None = None
@@ -190,14 +196,14 @@ class CdaV2PosFim(BaseModel):
 	merc_pos_fim: SignedMoney
 
 
-class CdaV2SwapPosFim(BaseModel):
+class CdaV2SwapPosFim(_Strict):
 	"""POS_FIM of a SWAP: cost (optional) and market value."""
 
 	custo_correc_pos_fim: SignedMoney | None = None
 	merc_pos_fim: SignedMoney
 
 
-class CdaV2SwapAplic(BaseModel):
+class CdaV2SwapAplic(_Strict):
 	"""APLIC of a SWAP (183 or 184)."""
 
 	cod_tp_aplic: Literal[183, 184]
@@ -274,7 +280,7 @@ def _check_related(code: int, tp_ativ: int | None) -> None:
 		raise ValueError(f"COD_TP_ATIV {tp_ativ} is not valid for COD_TP_APLIC {code}")
 
 
-class CdaV2Aplic(BaseModel):
+class CdaV2Aplic(_Strict):
 	"""APLIC — application: confidentiality, negotiation and final position."""
 
 	cod_tp_aplic: int
@@ -310,7 +316,7 @@ class CdaV2Aplic(BaseModel):
 		_check_related(code, tp_ativ)
 
 
-class CdaV2TitPub(BaseModel):
+class CdaV2TitPub(_Strict):
 	"""TIT_PUB — SELIC public security (type 75)."""
 
 	cod_selic: Text
@@ -330,7 +336,7 @@ class CdaV2TitPub(BaseModel):
 		return self
 
 
-class CdaV2Cotas(BaseModel):
+class CdaV2Cotas(_Strict):
 	"""COTAS — fund shares (types 92, 93, 190)."""
 
 	cnpj_fdo: str
@@ -350,14 +356,14 @@ class CdaV2Cotas(BaseModel):
 		return self
 
 
-class CdaV2Swap(BaseModel):
+class CdaV2Swap(_Strict):
 	"""SWAP — swap differential (types 183, 184)."""
 
-	cod_swap: str = Field(pattern=r"SWP[A-Za-z0-9]{3}")
+	cod_swap: str = Field(pattern=r"^SWP[A-Za-z0-9]{3}$")
 	aplic: CdaV2SwapAplic
 
 
-class CdaV2DemaisCodif(BaseModel):
+class CdaV2DemaisCodif(_Strict):
 	"""DEMAIS_CODIF — other coded assets."""
 
 	cod_ativ: Text
@@ -385,7 +391,7 @@ class CdaV2DemaisCodif(BaseModel):
 		return self
 
 
-class CdaV2DemaisNCodif(BaseModel):
+class CdaV2DemaisNCodif(_Strict):
 	"""DEMAIS_N_CODIF — other, uncoded assets."""
 
 	cod_tp_ativ: int
@@ -406,7 +412,7 @@ class CdaV2DemaisNCodif(BaseModel):
 		return self
 
 
-class CdaV2Inform(BaseModel):
+class CdaV2Inform(_Strict):
 	"""INFORM — one fund/class. Block lists are emitted in the page's mandated order."""
 
 	BLOCK_ORDER: ClassVar[tuple[str, ...]] = (
@@ -438,7 +444,7 @@ class CdaV2Inform(BaseModel):
 		return self
 
 
-class CdaV2Document(BaseModel):
+class CdaV2Document(_Strict):
 	"""DOC_ARQ — complete CDA V2 file (at most 50 funds, one competence)."""
 
 	header: CdaV2Header

@@ -5,7 +5,9 @@ schema models. Pure logic plus file I/O at the edges — no network.
 """
 
 from decimal import Decimal
+import os
 from pathlib import Path
+import tempfile
 from xml.etree import ElementTree as ET
 
 from pydantic import BaseModel
@@ -170,6 +172,30 @@ def _serialize(doc: CdaV2Document) -> str:
 	)
 
 
+@type_checker
+def _replace_atomically(target: Path, payload: bytes) -> None:
+	"""Write ``payload`` to a unique temp file beside ``target``, then replace ``target``.
+
+	A failed write (full disk) leaves any existing ``target`` intact. #330 will replace this
+	with the shared ``atomic_write_bytes``.
+
+	Parameters
+	----------
+	target : Path
+		Destination file.
+	payload : bytes
+		File content.
+	"""
+	fd, tmp_name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.", suffix=".tmp")
+	try:
+		with os.fdopen(fd, "wb") as handle:
+			handle.write(payload)
+		Path(tmp_name).replace(target)
+	except BaseException:
+		Path(tmp_name).unlink(missing_ok=True)
+		raise
+
+
 class CdaV2(SubmissionWriter[CdaV2Document]):
 	"""Serialize a validated CDA V2 document to CVM-compliant XML.
 
@@ -200,6 +226,6 @@ class CdaV2(SubmissionWriter[CdaV2Document]):
 		xml_str = _serialize(doc)
 		if output_path is None:
 			return xml_str
-		# Bytes first, so an unencodable char cannot truncate an existing file.
-		Path(output_path).write_bytes(xml_str.encode("windows-1252"))
+		# Encode first, so an unencodable char cannot touch an existing file.
+		_replace_atomically(Path(output_path), xml_str.encode("windows-1252"))
 		return None

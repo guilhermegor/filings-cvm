@@ -5,6 +5,7 @@ decimals, Table A matrix, block x application-type relations), not from the writ
 """
 # ruff: noqa: S314  (parses the writer's own output, not untrusted input)
 
+import contextlib
 from decimal import Decimal
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -374,3 +375,54 @@ def test_negoc_requires_tp_negoc() -> None:
 	"""Negoc requires tp negoc."""
 	with pytest.raises(ValidationError):
 		CdaV2Negoc(qtde_vendas_negoc="1", vl_vendas_negoc="1")
+
+
+def test_swap_rejects_extra_characters_around_code() -> None:
+	"""Swap rejects extra characters around code."""
+	with pytest.raises(ValidationError):
+		CdaV2Swap(
+			cod_swap="XSWP123Y",
+			aplic=CdaV2SwapAplic(
+				cod_tp_aplic=183, qtde_dias_confid=0, pos_fim=CdaV2SwapPosFim(merc_pos_fim="1")
+			),
+		)
+
+
+def test_swap_pos_fim_rejects_misspelled_field() -> None:
+	"""Swap pos fim rejects misspelled field."""
+	with pytest.raises(ValidationError):
+		CdaV2SwapPosFim(merc_pos_fim="1", custo_correc_pos_fin="9")
+
+
+def _failing_fdopen(*_args: object, **_kwargs: object) -> None:
+	raise OSError("disk full")
+
+
+def _export_with_full_disk(path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+	monkeypatch.setattr("os.fdopen", _failing_fdopen)
+	with contextlib.suppress(OSError):
+		CdaV2().export(_full_doc(), str(path))
+
+
+def test_export_failure_keeps_existing_file(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Export failure keeps existing file."""
+	path = tmp_path / "cda.xml"
+	path.write_bytes(b"old")
+	_export_with_full_disk(path, monkeypatch)
+	assert path.read_bytes() == b"old"
+
+
+def test_export_failure_leaves_no_temp_file(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Export failure leaves no temp file."""
+	_export_with_full_disk(tmp_path / "cda.xml", monkeypatch)
+	assert list(tmp_path.iterdir()) == []
+
+
+def test_export_success_leaves_only_the_target(tmp_path: Path) -> None:
+	"""Export success leaves only the target."""
+	CdaV2().export(_full_doc(), str(tmp_path / "cda.xml"))
+	assert [p.name for p in tmp_path.iterdir()] == ["cda.xml"]
