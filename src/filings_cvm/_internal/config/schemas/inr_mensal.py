@@ -42,86 +42,91 @@ _TABLE_A_MAX = 30
 # "APENAS para aplicações com código entre 15 e 24 da Tabela A" (derivatives).
 _DERIVATIVE_MIN = 15
 _DERIVATIVE_MAX = 24
+# (is a derivative code, notional omitted) -> what is wrong; absent keys are valid.
+_NOTIONAL_PROBLEMS = {
+	(True, True): "vl_nocion_aplic is required for Tabela A codes 15 to 24",
+	(False, False): "vl_nocion_aplic must be omitted outside Tabela A codes 15 to 24",
+}
 
 # Flows, transfers and notionals cannot be negative; market value and net worth can.
-AmountField = Annotated[
+_AmountField = Annotated[
 	int, BeforeValidator(whole_amount), Field(strict=True, ge=0, le=_MAX_DIGITS_VALUE)
 ]
-SignedAmountField = Annotated[
+_SignedAmountField = Annotated[
 	int,
 	BeforeValidator(whole_amount),
 	Field(strict=True, ge=-_MAX_DIGITS_VALUE, le=_MAX_DIGITS_VALUE),
 ]
-CompetenceField = Annotated[str, AfterValidator(check_month_year)]
-DateField = Annotated[str, AfterValidator(check_br_date)]
-CvmCodeField = Annotated[str, AfterValidator(check_cvm_code)]
-ParticipantCodeField = Annotated[str, AfterValidator(check_participant_code)]
-ApplicationCodeField = Annotated[int, Field(strict=True, ge=_TABLE_A_MIN, le=_TABLE_A_MAX)]
+_CompetenceField = Annotated[str, AfterValidator(check_month_year)]
+_DateField = Annotated[str, AfterValidator(check_br_date)]
+_CvmCodeField = Annotated[str, AfterValidator(check_cvm_code)]
+_ParticipantCodeField = Annotated[str, AfterValidator(check_participant_code)]
+_ApplicationCodeField = Annotated[int, Field(strict=True, ge=_TABLE_A_MIN, le=_TABLE_A_MAX)]
 
 
-class InrBlock(BaseModel):
+class _InrBlock(BaseModel):
 	"""Base of every block: closed (no unknown fields) and immutable."""
 
 	model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-class InrMensalHeader(InrBlock):
+class InrMensalHeader(_InrBlock):
 	"""CAB_INFORM — document header."""
 
 	cod_doc: Literal[477] = 477
 	versao: Literal["1.0"] = "1.0"
-	cd_cvm: CvmCodeField
-	dt_compt: CompetenceField
-	dt_gerac_arq: DateField
+	cd_cvm: _CvmCodeField
+	dt_compt: _CompetenceField
+	dt_gerac_arq: _DateField
 
 
-class EntradaSaida(InrBlock):
+class EntradaSaida(_InrBlock):
 	"""ENTRADA_SAIDA — resources in and out during the period (reais)."""
 
-	vl_entr: AmountField
-	vl_saida: AmountField
+	vl_entr: _AmountField
+	vl_saida: _AmountField
 
 
-class TransfRecursos(InrBlock):
+class TransfRecursos(_InrBlock):
 	"""TRANSF_RECURSOS — transfers between investment modalities (reais)."""
 
-	vl_invest_carteira_haver_nres: AmountField
-	vl_haver_nres_invest_carteira: AmountField
-	vl_invest_carteira_adr: AmountField
-	vl_adr_invest_carteira: AmountField
-	vl_invest_carteira_estrang_direta: AmountField
-	vl_estrang_direta_invest_carteira: AmountField
+	vl_invest_carteira_haver_nres: _AmountField
+	vl_haver_nres_invest_carteira: _AmountField
+	vl_invest_carteira_adr: _AmountField
+	vl_adr_invest_carteira: _AmountField
+	vl_invest_carteira_estrang_direta: _AmountField
+	vl_estrang_direta_invest_carteira: _AmountField
 
 
-class RecursosRecebMesmoInvest(InrBlock):
+class RecursosRecebMesmoInvest(_InrBlock):
 	"""RECURSOS_RECEB_MESMO_INVEST — one resource received from the same investor."""
 
-	cd_partic_origem: ParticipantCodeField
-	vl_recebido: AmountField
+	cd_partic_origem: _ParticipantCodeField
+	vl_recebido: _AmountField
 
 
-class RecursosEnvMesmoInvest(InrBlock):
+class RecursosEnvMesmoInvest(_InrBlock):
 	"""RECURSOS_ENV_MESMO_INVEST — one resource sent to the same investor."""
 
-	cd_partic_dest: ParticipantCodeField
-	vl_enviado: AmountField
+	cd_partic_dest: _ParticipantCodeField
+	vl_enviado: _AmountField
 
 
-class RecursosRecebOutroInvest(InrBlock):
+class RecursosRecebOutroInvest(_InrBlock):
 	"""RECURSOS_RECEB_OUTRO_INVEST — one resource received from a different investor."""
 
-	cd_partic_origem: ParticipantCodeField
-	vl_recebido: AmountField
+	cd_partic_origem: _ParticipantCodeField
+	vl_recebido: _AmountField
 
 
-class RecursosEnvOutroInvest(InrBlock):
+class RecursosEnvOutroInvest(_InrBlock):
 	"""RECURSOS_ENV_OUTRO_INVEST — one resource sent to a different investor."""
 
-	cd_partic_dest: ParticipantCodeField
-	vl_enviado: AmountField
+	cd_partic_dest: _ParticipantCodeField
+	vl_enviado: _AmountField
 
 
-class RecursosMesmoInvest(InrBlock):
+class RecursosMesmoInvest(_InrBlock):
 	"""RECURSOS_MESMO_INVEST — optional container; omit it when there is nothing to report."""
 
 	recursos_receb_mesmo_invest: list[RecursosRecebMesmoInvest] = Field(default_factory=list)
@@ -135,7 +140,7 @@ class RecursosMesmoInvest(InrBlock):
 		return self
 
 
-class RecursosOutroInvest(InrBlock):
+class RecursosOutroInvest(_InrBlock):
 	"""RECURSOS_OUTRO_INVEST — optional container; omit it when there is nothing to report."""
 
 	recursos_receb_outro_invest: list[RecursosRecebOutroInvest] = Field(default_factory=list)
@@ -149,7 +154,7 @@ class RecursosOutroInvest(InrBlock):
 		return self
 
 
-class MovRecursos(InrBlock):
+class MovRecursos(_InrBlock):
 	"""MOV_RECURSOS — resource movement during the period."""
 
 	transf_recursos: TransfRecursos
@@ -157,35 +162,34 @@ class MovRecursos(InrBlock):
 	recursos_outro_invest: RecursosOutroInvest | None = None
 
 
-class Aplicacoes(InrBlock):
+class Aplicacoes(_InrBlock):
 	"""APLICACOES — one application (Tabela A code) held by the participant."""
 
-	cd_aplic: ApplicationCodeField
-	vl_mercado_aplic: SignedAmountField
-	vl_nocion_aplic: AmountField | None = None
+	cd_aplic: _ApplicationCodeField
+	vl_mercado_aplic: _SignedAmountField
+	vl_nocion_aplic: _AmountField | None = None
 
 	@model_validator(mode="after")
 	def _notional_only_for_derivatives(self) -> Aplicacoes:
 		"""Require the notional for codes 15-24 (derivatives) and forbid it elsewhere."""
 		is_derivative = _DERIVATIVE_MIN <= self.cd_aplic <= _DERIVATIVE_MAX
-		if is_derivative and self.vl_nocion_aplic is None:
-			raise ValueError("vl_nocion_aplic is required for Tabela A codes 15 to 24")
-		if not is_derivative and self.vl_nocion_aplic is not None:
-			raise ValueError("vl_nocion_aplic must be omitted outside Tabela A codes 15 to 24")
+		problem = _NOTIONAL_PROBLEMS.get((is_derivative, self.vl_nocion_aplic is None))
+		if problem:
+			raise ValueError(problem)
 		return self
 
 
-class Participante(InrBlock):
+class Participante(_InrBlock):
 	"""PARTICIPANTE — the monthly report of one participant."""
 
-	cod_partic: ParticipantCodeField
+	cod_partic: _ParticipantCodeField
 	entrada_saida: EntradaSaida
 	mov_recursos: MovRecursos
 	aplicacoes: list[Aplicacoes] = Field(default_factory=list)
-	patrim_liq: SignedAmountField
+	patrim_liq: _SignedAmountField
 
 
-class InrMensalDocument(InrBlock):
+class InrMensalDocument(_InrBlock):
 	"""DOC_ARQ — a complete file: header plus 1 to 1000 participants of one competence."""
 
 	header: InrMensalHeader

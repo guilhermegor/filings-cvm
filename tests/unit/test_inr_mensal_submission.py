@@ -1,5 +1,7 @@
 """Unit tests for the Informe Mensal de Investidor Não Residente submission writer."""
 
+from collections.abc import Callable
+import contextlib
 from decimal import Decimal
 from pathlib import Path
 from xml.etree import ElementTree as ET  # noqa: S405
@@ -76,37 +78,48 @@ def _tags(element: ET.Element) -> list[str]:
 	return [c.tag.removeprefix(NS) for c in element]
 
 
-def test_export_header_block_matches_spec_tags() -> None:
+def test_export_starts_with_windows_1252_declaration() -> None:
+	"""Export starts with the windows-1252 declaration."""
+	assert InrMensal().export(_doc()).startswith('<?xml version="1.0" encoding="windows-1252"?>')
+
+
+@pytest.mark.parametrize(
+	("pick", "expected"),
+	[
+		(lambda r: r.tag, f"{NS}DOC_ARQ"),
+		(lambda r: r[0].tag, f"{NS}CAB_INFORM"),
+		(lambda r: _tags(r[0]), HEADER_TAGS),
+		(lambda r: [c.text for c in r[0]], ["477", "1.0", "12345", "01/2025", "15/02/2025"]),
+		(lambda r: r[1].tag, f"{NS}LISTA_PARTICIPANTES"),
+	],
+)
+def test_export_header_block_matches_spec_tags(pick: Callable, expected: object) -> None:
 	"""Export header block matches spec tags."""
-	xml = InrMensal().export(_doc())
-	assert xml.startswith('<?xml version="1.0" encoding="windows-1252"?>')
-	root = ET.fromstring(xml.split("\n", 1)[1])  # noqa: S314
-	assert root.tag == f"{NS}DOC_ARQ"
-	header = root[0]
-	assert header.tag == f"{NS}CAB_INFORM"
-	assert _tags(header) == HEADER_TAGS
-	assert [c.text for c in header] == ["477", "1.0", "12345", "01/2025", "15/02/2025"]
-	assert root[1].tag == f"{NS}LISTA_PARTICIPANTES"
+	assert pick(_root(_doc())) == expected
 
 
-def test_export_minimal_participant_block_tags_and_values() -> None:
+@pytest.mark.parametrize(
+	("pick", "expected"),
+	[
+		(lambda p: p.tag, f"{NS}PARTICIPANTE"),
+		(lambda p: _tags(p), ["COD_PARTIC", "ENTRADA_SAIDA", "MOV_RECURSOS", "PATRIM_LIQ"]),
+		(lambda p: p[0].text, CODE),
+		(
+			lambda p: [(c.tag.removeprefix(NS), c.text) for c in p[1]],
+			[("VL_ENTR", "10"), ("VL_SAIDA", "20")],
+		),
+		(lambda p: _tags(p[2]), ["TRANSF_RECURSOS"]),
+		(lambda p: _tags(p[2][0]), TRANSF_TAGS),
+		(lambda p: p[3].text, "500"),
+	],
+)
+def test_export_minimal_participant_block(pick: Callable, expected: object) -> None:
 	"""Export minimal participant block tags and values."""
-	part = _root(_doc())[1][0]
-	assert part.tag == f"{NS}PARTICIPANTE"
-	assert _tags(part) == ["COD_PARTIC", "ENTRADA_SAIDA", "MOV_RECURSOS", "PATRIM_LIQ"]
-	assert part[0].text == CODE
-	assert [(c.tag.removeprefix(NS), c.text) for c in part[1]] == [
-		("VL_ENTR", "10"),
-		("VL_SAIDA", "20"),
-	]
-	mov = part[2]
-	assert _tags(mov) == ["TRANSF_RECURSOS"]
-	assert _tags(mov[0]) == TRANSF_TAGS
-	assert part[3].text == "500"
+	assert pick(_root(_doc())[1][0]) == expected
 
 
-def test_export_same_investor_blocks() -> None:
-	"""Export same investor blocks."""
+def _same_investor_mov() -> ET.Element:
+	"""Export a participant with same-investor blocks and return its MOV_RECURSOS."""
 	mesmo = RecursosMesmoInvest(
 		recursos_receb_mesmo_invest=[
 			RecursosRecebMesmoInvest(cd_partic_origem=CODE2, vl_recebido=7)
@@ -114,18 +127,30 @@ def test_export_same_investor_blocks() -> None:
 		recursos_env_mesmo_invest=[RecursosEnvMesmoInvest(cd_partic_dest=CODE2, vl_enviado=8)],
 	)
 	mov = MovRecursos(transf_recursos=_transf(), recursos_mesmo_invest=mesmo)
-	elem = _root(_doc(_participant(mov_recursos=mov)))[1][0][2]
-	assert _tags(elem) == ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST"]
-	container = elem[1]
-	assert _tags(container) == ["RECURSOS_RECEB_MESMO_INVEST", "RECURSOS_ENV_MESMO_INVEST"]
-	assert _tags(container[0]) == ["CD_PARTIC_ORIGEM", "VL_RECEBIDO"]
-	assert _tags(container[1]) == ["CD_PARTIC_DEST", "VL_ENVIADO"]
-	assert container[0][0].text == CODE2
-	assert container[1][1].text == "8"
+	return _root(_doc(_participant(mov_recursos=mov)))[1][0][2]
 
 
-def test_export_other_investor_blocks_repeat() -> None:
-	"""Export other investor blocks repeat."""
+@pytest.mark.parametrize(
+	("pick", "expected"),
+	[
+		(lambda e: _tags(e), ["TRANSF_RECURSOS", "RECURSOS_MESMO_INVEST"]),
+		(
+			lambda e: _tags(e[1]),
+			["RECURSOS_RECEB_MESMO_INVEST", "RECURSOS_ENV_MESMO_INVEST"],
+		),
+		(lambda e: _tags(e[1][0]), ["CD_PARTIC_ORIGEM", "VL_RECEBIDO"]),
+		(lambda e: _tags(e[1][1]), ["CD_PARTIC_DEST", "VL_ENVIADO"]),
+		(lambda e: e[1][0][0].text, CODE2),
+		(lambda e: e[1][1][1].text, "8"),
+	],
+)
+def test_export_same_investor_blocks(pick: Callable, expected: object) -> None:
+	"""Export same investor blocks."""
+	assert pick(_same_investor_mov()) == expected
+
+
+def _other_investor_container() -> ET.Element:
+	"""Export a participant with other-investor blocks and return RECURSOS_OUTRO_INVEST."""
 	outro = RecursosOutroInvest(
 		recursos_receb_outro_invest=[
 			RecursosRecebOutroInvest(cd_partic_origem=CODE, vl_recebido=1),
@@ -134,33 +159,61 @@ def test_export_other_investor_blocks_repeat() -> None:
 		recursos_env_outro_invest=[RecursosEnvOutroInvest(cd_partic_dest=CODE2, vl_enviado=3)],
 	)
 	mov = MovRecursos(transf_recursos=_transf(), recursos_outro_invest=outro)
-	container = _root(_doc(_participant(mov_recursos=mov)))[1][0][2][1]
-	assert _tags(container) == [
-		"RECURSOS_RECEB_OUTRO_INVEST",
-		"RECURSOS_RECEB_OUTRO_INVEST",
-		"RECURSOS_ENV_OUTRO_INVEST",
-	]
-	assert _tags(container[2]) == ["CD_PARTIC_DEST", "VL_ENVIADO"]
+	return _root(_doc(_participant(mov_recursos=mov)))[1][0][2][1]
 
 
-def test_export_applications_before_net_worth_with_notional_only_for_derivatives() -> None:
-	"""Export applications before net worth with notional only for derivatives."""
+@pytest.mark.parametrize(
+	("pick", "expected"),
+	[
+		(
+			lambda c: _tags(c),
+			[
+				"RECURSOS_RECEB_OUTRO_INVEST",
+				"RECURSOS_RECEB_OUTRO_INVEST",
+				"RECURSOS_ENV_OUTRO_INVEST",
+			],
+		),
+		(lambda c: _tags(c[2]), ["CD_PARTIC_DEST", "VL_ENVIADO"]),
+	],
+)
+def test_export_other_investor_blocks_repeat(pick: Callable, expected: object) -> None:
+	"""Export other investor blocks repeat."""
+	assert pick(_other_investor_container()) == expected
+
+
+def _participant_with_applications() -> ET.Element:
+	"""Export a participant holding a plain and a derivative application."""
 	apps = [
 		Aplicacoes(cd_aplic=1, vl_mercado_aplic=100),
 		Aplicacoes(cd_aplic=15, vl_mercado_aplic=-5, vl_nocion_aplic=900),
 	]
-	part = _root(_doc(_participant(aplicacoes=apps)))[1][0]
-	assert _tags(part) == [
-		"COD_PARTIC",
-		"ENTRADA_SAIDA",
-		"MOV_RECURSOS",
-		"APLICACOES",
-		"APLICACOES",
-		"PATRIM_LIQ",
-	]
-	assert _tags(part[3]) == ["CD_APLIC", "VL_MERCADO_APLIC"]
-	assert _tags(part[4]) == ["CD_APLIC", "VL_MERCADO_APLIC", "VL_NOCION_APLIC"]
-	assert part[4][1].text == "-5"
+	return _root(_doc(_participant(aplicacoes=apps)))[1][0]
+
+
+@pytest.mark.parametrize(
+	("pick", "expected"),
+	[
+		(
+			lambda p: _tags(p),
+			[
+				"COD_PARTIC",
+				"ENTRADA_SAIDA",
+				"MOV_RECURSOS",
+				"APLICACOES",
+				"APLICACOES",
+				"PATRIM_LIQ",
+			],
+		),
+		(lambda p: _tags(p[3]), ["CD_APLIC", "VL_MERCADO_APLIC"]),
+		(lambda p: _tags(p[4]), ["CD_APLIC", "VL_MERCADO_APLIC", "VL_NOCION_APLIC"]),
+		(lambda p: p[4][1].text, "-5"),
+	],
+)
+def test_export_applications_before_net_worth_with_notional_only_for_derivatives(
+	pick: Callable, expected: object
+) -> None:
+	"""Export applications before net worth with notional only for derivatives."""
+	assert pick(_participant_with_applications()) == expected
 
 
 def test_export_multiple_participants_in_order() -> None:
@@ -169,23 +222,38 @@ def test_export_multiple_participants_in_order() -> None:
 	assert [p[0].text for p in lista] == [CODE, CODE2]
 
 
-def test_export_output_path_writes_cp1252_and_returns_none(tmp_path: Path) -> None:
-	"""Export output path writes cp1252 and returns none."""
+def test_export_output_path_returns_none(tmp_path: Path) -> None:
+	"""Export to a file returns none."""
+	assert InrMensal().export(_doc(), output_path=str(tmp_path / "inr.xml")) is None
+
+
+def test_export_output_path_writes_cp1252_declaration(tmp_path: Path) -> None:
+	"""Export to a file writes the windows-1252 declaration."""
 	target = tmp_path / "inr.xml"
-	assert InrMensal().export(_doc(), output_path=str(target)) is None
+	InrMensal().export(_doc(), output_path=str(target))
 	assert target.read_bytes().startswith(b'<?xml version="1.0" encoding="windows-1252"?>')
+
+
+def _unencodable_doc() -> InrMensalDocument:
+	"""Build a document whose header text cannot be encoded as windows-1252."""
+	bad = InrMensalHeader.model_construct(
+		cod_doc=477, versao="1.0", cd_cvm="12345中", dt_compt="01/2025", dt_gerac_arq="15/02/2025"
+	)
+	return InrMensalDocument.model_construct(header=bad, participantes=[_participant()])
+
+
+def test_export_unencodable_text_raises_value_error(tmp_path: Path) -> None:
+	"""Export unencodable text raises value error."""
+	with pytest.raises(ValueError, match="windows-1252"):
+		InrMensal().export(_unencodable_doc(), output_path=str(tmp_path / "inr.xml"))
 
 
 def test_export_unencodable_text_leaves_existing_file_intact(tmp_path: Path) -> None:
 	"""Export unencodable text leaves existing file intact."""
 	target = tmp_path / "inr.xml"
 	target.write_bytes(b"keep")
-	bad = InrMensalHeader.model_construct(
-		cod_doc=477, versao="1.0", cd_cvm="12345中", dt_compt="01/2025", dt_gerac_arq="15/02/2025"
-	)
-	doc = InrMensalDocument.model_construct(header=bad, participantes=[_participant()])
-	with pytest.raises(ValueError, match="windows-1252"):
-		InrMensal().export(doc, output_path=str(target))
+	with contextlib.suppress(ValueError):
+		InrMensal().export(_unencodable_doc(), output_path=str(target))
 	assert target.read_bytes() == b"keep"
 
 
@@ -204,11 +272,19 @@ def test_amount_accepts_whole_decimal_and_str() -> None:
 	assert (block.vl_entr, block.vl_saida) == (12, 7)
 
 
-def test_flows_reject_negative_but_market_value_and_net_worth_may_be_negative() -> None:
-	"""Flows reject negative but market value and net worth may be negative."""
+def test_flows_reject_negative() -> None:
+	"""Flows reject negative."""
 	with pytest.raises(ValidationError):
 		EntradaSaida(vl_entr=-1, vl_saida=0)
+
+
+def test_market_value_may_be_negative() -> None:
+	"""Market value may be negative."""
 	assert Aplicacoes(cd_aplic=2, vl_mercado_aplic=-1).vl_mercado_aplic == -1
+
+
+def test_net_worth_may_be_negative() -> None:
+	"""Net worth may be negative."""
 	assert _participant(patrim_liq=-9).patrim_liq == -9
 
 
@@ -283,25 +359,45 @@ def test_header_fixed_fields_cannot_change() -> None:
 		InrMensalHeader(cod_doc=1, cd_cvm="1", dt_compt="01/2025", dt_gerac_arq="15/02/2025")
 
 
-def test_empty_optional_containers_are_refused() -> None:
+@pytest.mark.parametrize("container", [RecursosMesmoInvest, RecursosOutroInvest])
+def test_empty_optional_containers_are_refused(container: type) -> None:
 	"""Empty optional containers are refused."""
 	with pytest.raises(ValidationError, match="omit"):
-		RecursosMesmoInvest()
-	with pytest.raises(ValidationError, match="omit"):
-		RecursosOutroInvest()
+		container()
 
 
-def test_participant_count_and_uniqueness() -> None:
-	"""Participant count and uniqueness."""
-	header = InrMensalHeader(cd_cvm="1", dt_compt="01/2025", dt_gerac_arq="15/02/2025")
+def _header() -> InrMensalHeader:
+	"""Build a valid header."""
+	return InrMensalHeader(cd_cvm="1", dt_compt="01/2025", dt_gerac_arq="15/02/2025")
+
+
+def test_document_requires_a_participant() -> None:
+	"""Document requires a participant."""
 	with pytest.raises(ValidationError):
-		InrMensalDocument(header=header, participantes=[])
+		InrMensalDocument(header=_header(), participantes=[])
+
+
+def test_document_rejects_repeated_participant_code() -> None:
+	"""Document rejects repeated participant code."""
 	with pytest.raises(ValidationError, match="only once"):
 		_doc(_participant(CODE), _participant(CODE))
-	many = [_participant(f"1.1.{i}.0-0") for i in range(1, 1002)]
+
+
+def _participants(count: int) -> list[Participante]:
+	"""Build ``count`` participants with distinct codes."""
+	return [_participant(f"1.1.{i}.0-0") for i in range(1, count + 1)]
+
+
+def test_document_rejects_more_than_1000_participants() -> None:
+	"""Document rejects more than 1000 participants."""
 	with pytest.raises(ValidationError):
-		InrMensalDocument(header=header, participantes=many)
-	assert len(InrMensalDocument(header=header, participantes=many[:1000]).participantes) == 1000
+		InrMensalDocument(header=_header(), participantes=_participants(1001))
+
+
+def test_document_accepts_1000_participants() -> None:
+	"""Document accepts 1000 participants."""
+	doc = InrMensalDocument(header=_header(), participantes=_participants(1000))
+	assert len(doc.participantes) == 1000
 
 
 def test_unknown_fields_are_rejected() -> None:

@@ -24,6 +24,32 @@ _MAX_BYTES = 10 * 1024 * 1024  # the page: "tamanho máximo do arquivo ... é de
 
 
 @type_checker
+def _fill_block(element: ET.Element, value: BaseModel) -> None:
+	"""Append every field of a nested model to ``element``, in declaration order."""
+	for field in type(value).model_fields:
+		_append(element, field, getattr(value, field))
+
+
+@type_checker
+def _fill_text(element: ET.Element, value: object) -> None:
+	"""Set a scalar's text on ``element``."""
+	element.text = str(value)
+
+
+# Keyed by "is it a nested model", so the dict is the branch.
+_FILLERS = {True: _fill_block, False: _fill_text}
+# Keyed by exact type: ``None`` is omitted, a list repeats its element, a scalar is one item.
+_ITEMS = {type(None): lambda _: [], list: lambda value: value}
+
+
+@type_checker
+def _append_one(parent: ET.Element, name: str, value: object) -> None:
+	"""Append one non-list field to ``parent`` as an element named after the upper-cased field."""
+	element = ET.SubElement(parent, name.upper())
+	_FILLERS[isinstance(value, BaseModel)](element, value)
+
+
+@type_checker
 def _append(parent: ET.Element, name: str, value: object) -> None:
 	"""Append one field to ``parent`` as an element, or as repeated elements for a list.
 
@@ -36,18 +62,38 @@ def _append(parent: ET.Element, name: str, value: object) -> None:
 	value : object
 		``None`` (omitted), a nested model, a list of either, or a scalar.
 	"""
-	if value is None:
-		return
-	if isinstance(value, list):
-		for item in value:
-			_append(parent, name, item)
-		return
-	element = ET.SubElement(parent, name.upper())
-	if isinstance(value, BaseModel):
-		for field in type(value).model_fields:
-			_append(element, field, getattr(value, field))
-		return
-	element.text = str(value)
+	for item in _ITEMS.get(type(value), lambda single: [single])(value):
+		_append_one(parent, name, item)
+
+
+@type_checker
+def _build_xml(doc: InrMensalDocument) -> str:
+	"""Build the indented XML text, declaration included, for a document."""
+	root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
+	_append(root, "cab_inform", doc.header)
+	participants = ET.SubElement(root, "LISTA_PARTICIPANTES")
+	for participant in doc.participantes:
+		_append(participants, "participante", participant)
+	ET.indent(root, space=_INDENT)
+	return _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
+
+
+@type_checker
+def _encode_checked(xml_str: str) -> bytes:
+	"""Encode as windows-1252 and prove the bytes are well-formed XML."""
+	try:
+		payload = xml_str.encode(_ENCODING)
+		ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
+	except (UnicodeEncodeError, ET.ParseError) as exc:
+		raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
+	return payload
+
+
+@type_checker
+def _require_within_limit(payload: bytes) -> None:
+	"""Raise ``ValueError`` when the file is over the page's 10 MB cap."""
+	if len(payload) > _MAX_BYTES:
+		raise ValueError(f"file is {len(payload)} bytes; the page allows at most 10 MB")
 
 
 class InrMensal(SubmissionWriter[InrMensalDocument]):
@@ -86,20 +132,9 @@ class InrMensal(SubmissionWriter[InrMensalDocument]):
 			If the document cannot be encoded as windows-1252 XML (only possible when validation
 			was bypassed, e.g. ``model_construct``).
 		"""
-		root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-		_append(root, "cab_inform", doc.header)
-		participants = ET.SubElement(root, "LISTA_PARTICIPANTES")
-		for participant in doc.participantes:
-			_append(participants, "participante", participant)
-		ET.indent(root, space=_INDENT)
-		xml_str = _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
-		try:
-			payload = xml_str.encode(_ENCODING)
-			ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
-		except (UnicodeEncodeError, ET.ParseError) as exc:
-			raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
-		if len(payload) > _MAX_BYTES:
-			raise ValueError(f"file is {len(payload)} bytes; the page allows at most 10 MB")
+		xml_str = _build_xml(doc)
+		payload = _encode_checked(xml_str)
+		_require_within_limit(payload)
 		if output_path is None:
 			return xml_str
 		Path(output_path).write_bytes(payload)

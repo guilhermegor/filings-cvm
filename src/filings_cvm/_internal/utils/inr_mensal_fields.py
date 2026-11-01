@@ -8,9 +8,11 @@ Every shape check uses ``re.fullmatch`` with ``[0-9]``: a ``$`` anchor accepts a
 and ``\d`` accepts non-ASCII digits, and either would let a malformed value reach the XML.
 """
 
+from collections.abc import Callable
 from datetime import date, datetime
 from decimal import Decimal
 import re
+from typing import Any
 
 from filings_cvm._internal.utils.typing import type_checker
 
@@ -24,6 +26,20 @@ _PARTICIPANT_RE = re.compile(r"[1-9][0-9]{0,4}\.[1-9][0-9]{0,5}\.[1-9][0-9]{0,5}
 _CVM_CODE_RE = re.compile(r"[1-9][0-9]{0,4}")
 # Earliest year a CVM filing can plausibly carry; rejects 0001-style typos.
 _MIN_YEAR = 1900
+
+
+@type_checker
+def _require_shape(value: str, pattern: re.Pattern[str], message: str) -> None:
+	"""Raise ``ValueError(message)`` unless ``value`` fully matches ``pattern``."""
+	if not pattern.fullmatch(value):
+		raise ValueError(message)
+
+
+@type_checker
+def _require_year(year: int) -> None:
+	"""Raise ``ValueError`` when ``year`` is before 1900."""
+	if year < _MIN_YEAR:
+		raise ValueError(f"year must be >= {_MIN_YEAR}")
 
 
 @type_checker
@@ -45,11 +61,9 @@ def parse_br_date(value: str) -> date:
 	ValueError
 		If the shape is wrong, the date does not exist (``31/02``) or the year is before 1900.
 	"""
-	if not _DATE_BR_RE.fullmatch(value):
-		raise ValueError("date must follow DD/MM/AAAA")
+	_require_shape(value, _DATE_BR_RE, "date must follow DD/MM/AAAA")
 	parsed = datetime.strptime(value, "%d/%m/%Y").date()  # noqa: DTZ007
-	if parsed.year < _MIN_YEAR:
-		raise ValueError(f"year must be >= {_MIN_YEAR}")
+	_require_year(parsed.year)
 	return parsed
 
 
@@ -90,10 +104,8 @@ def check_month_year(value: str) -> str:
 	ValueError
 		If the shape is wrong, the month is out of range or the year is before 1900.
 	"""
-	if not _MONTH_YEAR_RE.fullmatch(value):
-		raise ValueError("competence must follow MM/AAAA")
-	if datetime.strptime(value, "%m/%Y").year < _MIN_YEAR:  # noqa: DTZ007
-		raise ValueError(f"year must be >= {_MIN_YEAR}")
+	_require_shape(value, _MONTH_YEAR_RE, "competence must follow MM/AAAA")
+	_require_year(datetime.strptime(value, "%m/%Y").year)  # noqa: DTZ007
 	return value
 
 
@@ -149,6 +161,29 @@ def check_participant_code(value: str) -> str:
 
 
 @type_checker
+def _whole_from_str(value: str) -> int:
+	"""Parse an amount written in digits; anything else is refused."""
+	_require_shape(value, _WHOLE_RE, "amount must be a whole number written in digits")
+	return int(value)
+
+
+@type_checker
+def _whole_from_decimal(value: Decimal) -> int:
+	"""Accept a finite ``Decimal`` with no fractional part."""
+	if not (value.is_finite() and value == value.to_integral_value()):
+		raise ValueError("amount must be a finite whole number")
+	return int(value)
+
+
+# Keyed by exact type so ``bool`` (an ``int`` subclass) and ``float`` fall through to a refusal.
+_WHOLE_CONVERTERS: dict[type, Callable[[Any], int]] = {
+	int: int,
+	str: _whole_from_str,
+	Decimal: _whole_from_decimal,
+}
+
+
+@type_checker
 def whole_amount(value: object) -> int:
 	"""Coerce an amount to ``int``; the page says every amount is "numérico e inteiro".
 
@@ -171,14 +206,7 @@ def whole_amount(value: object) -> int:
 	ValueError
 		If the value is not a whole number of an accepted type.
 	"""
-	if isinstance(value, bool) or not isinstance(value, Decimal | int | str):
+	convert = _WHOLE_CONVERTERS.get(type(value))
+	if convert is None:
 		raise ValueError(f"expected int, Decimal or str, got {type(value).__name__}")
-	if isinstance(value, str):
-		if not _WHOLE_RE.fullmatch(value):
-			raise ValueError("amount must be a whole number written in digits")
-		return int(value)
-	if isinstance(value, Decimal):
-		if not value.is_finite() or value != value.to_integral_value():
-			raise ValueError("amount must be a finite whole number")
-		return int(value)
-	return value
+	return convert(value)
