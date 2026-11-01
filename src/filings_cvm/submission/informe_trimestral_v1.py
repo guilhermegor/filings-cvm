@@ -6,14 +6,13 @@ namespace, encoding and element serialiser are the V2 writer's, imported rather 
 only the schema differs. Pure logic plus file I/O at the edges — no network.
 """
 
-import os
-from pathlib import Path
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.informe_trimestral_v1 import (
 	InformeTrimestralV1Document,
 )
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm._internal.utils.typing import type_checker
 from filings_cvm.submission.informe_quadrimestral import (
 	_DECLARATION,
@@ -75,28 +74,6 @@ def _encode(xml_str: str) -> bytes:
 	return payload
 
 
-@type_checker
-def _write_replacing(path: Path, payload: bytes) -> None:
-	"""Write ``payload`` to a sibling temp file, then swap it over ``path`` in one step.
-
-	A crash mid-write leaves the previous file intact.
-
-	Parameters
-	----------
-	path : Path
-		Destination file.
-	payload : bytes
-		The bytes to write.
-	"""
-	# ponytail: #330's atomic_write_bytes replaces this once it lands on main.
-	tmp = path.with_name(f".{path.name}.tmp")
-	try:
-		tmp.write_bytes(payload)
-		os.replace(tmp, path)
-	finally:
-		tmp.unlink(missing_ok=True)
-
-
 class InformeTrimestralV1(SubmissionWriter[InformeTrimestralV1Document]):
 	"""Serialize a validated Informe Trimestral V1 document to CVM-compliant XML.
 
@@ -130,5 +107,5 @@ class InformeTrimestralV1(SubmissionWriter[InformeTrimestralV1Document]):
 		payload = _encode(xml_str)
 		if output_path is None:
 			return xml_str
-		_write_replacing(Path(output_path), payload)
+		atomic_write_bytes(output_path, payload)
 		return None

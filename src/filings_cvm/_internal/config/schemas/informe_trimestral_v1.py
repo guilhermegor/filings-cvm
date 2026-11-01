@@ -102,7 +102,7 @@ class InformeTrimestralV1Document(_Block):
 	"""DOC_ARQ — a whole file: one competence, 1 to 100 funds."""
 
 	header: InformeTrimestralV1Header
-	informs: list[InformeTrimestralV1Inform] = Field(min_length=1, max_length=_MAX_INFORMS)
+	informs: tuple[InformeTrimestralV1Inform, ...] = Field(min_length=1, max_length=_MAX_INFORMS)
 
 	@model_validator(mode="after")
 	def _check_unique_funds(self) -> InformeTrimestralV1Document:

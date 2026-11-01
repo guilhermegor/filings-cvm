@@ -279,3 +279,9 @@ def test_unencodable_text_never_wipes_existing_file(tmp_path: Path) -> None:
 	with suppress(ValueError):
 		InformeTrimestralV1().export(_unencodable_doc(), str(out))
 	assert out.read_bytes() == b"keep me"
+
+
+def test_informs_list_input_is_coerced_to_an_immutable_tuple() -> None:
+	"""List input is stored as a tuple, so a caller cannot append after validation."""
+	doc = _doc(_inform())
+	assert isinstance(doc.informs, tuple)
