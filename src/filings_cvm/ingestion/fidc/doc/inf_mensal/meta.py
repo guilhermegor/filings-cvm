@@ -1,6 +1,6 @@
 """CVM **META** for the FIDC Informe Mensal dataset (`FIDC/DOC/INF_MENSAL`).
 
-The spec CVM publishes for the 17 table members of `inf_mensal_fidc_AAAAMM.zip` — the declared
+The spec CVM publishes for the table members of `inf_mensal_fidc_AAAAMM.zip` — the declared
 description, type and size of every field. Note the `_txt` infix in the archive name
 (`meta_inf_mensal_fidc_txt.zip`).
 """
