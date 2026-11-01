@@ -5,7 +5,7 @@ entrega (e reapresentação) de um documento por fundo/classe. É o registro do 
 o documento**. Fonte: `fi_entrega_documento_AAAAMM.zip`, do dataset
 [`FI/DOC/ENTREGA`](https://dados.cvm.gov.br/dataset/fi-doc-entrega).
 
-> **Veja também:** [Referência da API](../api.md) · [META](meta.md) · [Proveniência](index.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [META](meta.md) · [Proveniência](index.md).
 
 ---
 

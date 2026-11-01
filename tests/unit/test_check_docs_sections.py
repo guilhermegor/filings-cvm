@@ -27,6 +27,7 @@ def _tree(tmp_path: Path, a_text: str = _GOOD) -> Path:
 	docs = tmp_path / "docs"
 	(docs / "ingestion").mkdir(parents=True)
 	for slug in cds.CANONICAL_SLUGS:
+		(docs / f"{slug}.md").parent.mkdir(parents=True, exist_ok=True)
 		(docs / f"{slug}.md").write_text("# x\n", encoding="utf-8")
 	(docs / "ingestion" / "a.md").write_text(a_text, encoding="utf-8")
 	return docs
@@ -153,12 +154,13 @@ def test_real_docs_pass() -> None:
 	assert cds.stale_allowlist(_ROOT / "docs") == []
 
 
-def test_canonical_slugs_are_the_six_required_pages() -> None:
+def test_canonical_slugs_are_the_seven_required_pages() -> None:
 	"""Pinned literally: the other tests derive from the constant, so they cannot catch a drop."""
 	assert set(cds.CANONICAL_SLUGS) == {
 		"index",
 		"usage",
-		"api",
+		"examples",
+		"api/index",
 		"faq",
 		"contributing",
 		"changelog",

@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Informe Diário V3**, vigente a partir de 01/10/2015
 ([`PadraoXMLInfoDiarioNetV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp)).
 
-> **Veja também:** [Informe Diário (V4)](informe_diario.md) · [Referência da API](../api.md)
+> **Veja também:** [Informe Diário (V4)](informe_diario.md) · [Referência da API](../api/reference.md)
 
 ## Descrição
 

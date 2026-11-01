@@ -4,7 +4,7 @@ Leitura (← CVM) da lista de **atos declaratórios** que suspendem a intermedia
 valores mobiliários, publicada no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/).
 Este reader **inaugura** o *portal root* `ato_declr/` (distinto de `intermed/`).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

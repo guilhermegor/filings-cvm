@@ -7,7 +7,7 @@ CVM, publicado no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dado
 > Terceira fatia da **Wave 3** do #41 (snapshots CAD de prestadores de serviço). Copia o molde
 > multi-membro do [AUDITOR](auditor.md) / [AGENTE_FIDUC](agente_fiduc.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

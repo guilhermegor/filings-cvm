@@ -9,7 +9,7 @@ Imobiliário (FII)**, publicado no
 > de serviço). É o **único** membro da Wave 3 num **CSV solto** (não ZIP), no molde do
 > [Cadastro FI](cadastro_fi.md) / Emissor CEPAC, não o multi-membro dos irmãos.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

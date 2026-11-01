@@ -3,7 +3,7 @@
 Leitura (← CVM) do **índice das demonstrações financeiras dos FII** (`dfin_fii_AAAA.csv`),
 publicado no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FII/DOC/DFIN/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > o [Informe Mensal FII](inf_mensal_fii.md), que inaugura o portal root `fii/`.
 
 ---

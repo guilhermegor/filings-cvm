@@ -4,7 +4,7 @@ Leitura (← CVM) do **Informe Mensal dos FIAGRO** (`inf_mensal_fiagro_AAAAMM.zi
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FIAGRO/DOC/INF_MENSAL/DADOS/).
 Inaugura o *portal root* `fiagro/` da biblioteca (irmão de `fi/`, `fidc/`, `fii/`, `fip/`).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

@@ -8,7 +8,7 @@ Leitura (← CVM) do cadastro dos **agentes fiduciários** supervisionados pela 
 > multi-membro estabelecido pelo [AUDITOR](auditor.md) — base privada + `pf`/`pj` + Meta reader,
 > contratos pinados aos headers publicados.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

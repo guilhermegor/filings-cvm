@@ -4,7 +4,7 @@ Leitura (← CVM) do **Formulário Cadastral** das companhias abertas (`fca_cia_
 publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > o [IPE](ipe_cia_aberta.md) e o [VLMO](vlmo_cia_aberta.md), as outras fatias do `CIA_ABERTA/DOC`.
 
 ---
@@ -104,7 +104,7 @@ df_vm = FcaCiaAbertaValorMobiliarioReader(
 ```
 
 O frame devolvido carrega, além das colunas da fonte, as seis colunas de
-[proveniência](../api.md).
+[proveniência](../api/reference.md).
 
 ---
 
