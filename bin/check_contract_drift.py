@@ -37,15 +37,23 @@ from datetime import date, timedelta
 import inspect
 import json
 import os
+from pathlib import Path
+import re
 import sys
+import tempfile
 from typing import TYPE_CHECKING, Any
 import urllib.request
+import zipfile
 
+from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
+from filings_cvm._internal.config.contracts.balancete_fi import (
+	BALANCETE_FI,
+	BALANCETE_FI_PRE202311,
+)
 from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
 from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
 from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
 from filings_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
-from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
 from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
 from filings_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
 from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
@@ -54,6 +62,7 @@ from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
 from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
 from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
+from filings_cvm._internal.config.contracts.entrega_fi import ENTREGA_FI, ENTREGA_FI_DIARIO
 from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 from filings_cvm._internal.config.contracts.extrato_fi import (
 	EXTRATO_FI,
@@ -105,6 +114,8 @@ _META_NAME_MAX_LEN = 50
 # class directly. Keyed by class name, resolved through the portal-root packages.
 _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"AtoDeclrReader": ATO_DECLR,
+	"BalanceteFiPre202311Reader": BALANCETE_FI_PRE202311,
+	"BalanceteFiReader": BALANCETE_FI,
 	"BalanceteFieReader": BALANCETE_FIE,
 	"BalancoFieReader": BALANCO_FIE,
 	"CadastroAdmFiiReader": CAD_ADM_FII,
@@ -117,6 +128,8 @@ _UNEXPOSED_CONTRACTS: dict[str, FileContract] = {
 	"DfinCraReader": DFIN_CRA,
 	"DfinCriReader": DFIN_CRI,
 	"DfinFiiReader": DFIN_FII,
+	"EntregaFiDiarioReader": ENTREGA_FI_DIARIO,
+	"EntregaFiReader": ENTREGA_FI,
 	"EventualFiReader": EVENTUAL_FI,
 	"ExtratoFiPre2020Reader": EXTRATO_FI_PRE2020,
 	"ExtratoFiReader": EXTRATO_FI,
@@ -270,6 +283,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaAgenteFiducReader": ("AgenteFiducPfReader", "AgenteFiducPjReader"),
 	"MetaAuditorReader": ("AuditorPfReader", "AuditorPjReader"),
+	"MetaBalanceteFiReader": ("BalanceteFiReader", "BalanceteFiPre202311Reader"),
 	"MetaBalanceteFieReader": ("BalanceteFieReader",),
 	"MetaBalancoFieReader": ("BalancoFieReader",),
 	"MetaCadEmissorCepacReader": ("CadastroEmissorCepacReader",),
@@ -296,9 +310,16 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 	),
 	"MetaCadastroFiReader": ("CadastroFiReader",),
 	"MetaCdaReader": ("CdaReader",),
+	"MetaComplFiReader": (
+		"ComplFiReader",
+		"ComplFiInfReader",
+		"ComplFiInfCotstReader",
+		"ComplFiPrestReader",
+	),
 	"MetaDfinCraReader": ("DfinCraReader",),
 	"MetaDfinCriReader": ("DfinCriReader",),
 	"MetaDfinFiiReader": ("DfinFiiReader",),
+	"MetaEntregaFiReader": ("EntregaFiReader", "EntregaFiDiarioReader"),
 	"MetaEventualFiReader": ("EventualFiReader",),
 	# One META for the dataset; it describes the 117-column header, so it covers the current
 	# reader and the snapshot; the pre-2020 contract is out of its scope, as noted further down.
@@ -353,6 +374,7 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 		"InfMensalFidcTabVReader",
 		"InfMensalFidcTabVIReader",
 		"InfMensalFidcTabVIIReader",
+		"InfMensalFidcTabVIIIReader",
 		"InfMensalFidcTabIXReader",
 		"InfMensalFidcTabXReader",
 		"InfMensalFidcTabX1Reader",
@@ -429,7 +451,11 @@ _META_MEMBERS: dict[str, tuple[str, ...]] = {
 # omits", this one suppresses "contract column the META omits" — and only for a reader whose
 # contract was never in the META's scope. Without it the job reports the same explained line every
 # week forever, and a recurring known-false finding is how a report stops being read.
+_FRE_NO_SECTION = "FRE META has no section for this member"
+
 _META_UNDESCRIBED_READERS: dict[str, str] = {
+	# BALANCETE META lists the 6-column fund/class header only; no CNPJ_FUNDO field.
+	"BalanceteFiPre202311Reader": "META describes the 202311-onward schema only",
 	# CVM publishes one META for PERFIL_MENSAL and it describes the post-RCVM 175 header only —
 	# all 107 of its fields, and no CNPJ_FUNDO at all. The pre-175 contract is pinned to its own
 	# published header instead, so the META can neither confirm nor refute that one.
@@ -437,6 +463,55 @@ _META_UNDESCRIBED_READERS: dict[str, str] = {
 	# Same shape, different cause; the EXTRATO META lists the 117-column header only, so its
 	# 116-column pre-2020 contract has no field to reconcile against.
 	"ExtratoFiPre2020Reader": "META describes the 2020-onward schema only",
+	# Eight of the 36 FRE data members have no section at all in its 50-section META, which
+	# predates the PCD, empregado_local and empregado_posicao split. Their real headers match the
+	# contracts exactly, as measured on the 2025 archive in issue #115.
+	"FreCiaAbertaAdministradorPcdReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPcdReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoLocalDeclaracaoGeneroReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoLocalDeclaracaoRacaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoGeneroReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoDeclaracaoRacaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoFaixaEtariaReader": _FRE_NO_SECTION,
+	"FreCiaAbertaEmpregadoPosicaoLocalReader": _FRE_NO_SECTION,
+}
+
+# META sections describing a member CVM **does not ship** in the data archive — keyed by META
+# reader, valued by the verbatim ``section`` names. Their fields are dropped before reconciling,
+# so they are not reported as "META declares field X" every week. This is the reverse of
+# ``_META_UNDESCRIBED_READERS`` (a data member the META omits); a section listed here was checked
+# absent from the published archive, so it is not an unimplemented member (that would be real
+# signal and must stay reported). Measured in issue #115 against the 2025 archives.
+_META_ONLY_SECTIONS: dict[str, frozenset[str]] = {
+	# The FRE META has 50 sections for a 36-member archive, and these 22 have no CSV in it.
+	"MetaFreCiaAbertaReader": frozenset(
+		{
+			"fre_cia_aberta_ativo_imobilizado",
+			"fre_cia_aberta_ativo_intangivel",
+			"fre_cia_aberta_auditor_responsavel",
+			"fre_cia_aberta_capital_social_aumento",
+			"fre_cia_aberta_capital_social_aumento_classe_acao",
+			"fre_cia_aberta_capital_social_desdobramento",
+			"fre_cia_aberta_capital_social_desdobramento_classe_acao",
+			"fre_cia_aberta_capital_social_reducao",
+			"fre_cia_aberta_capital_social_reducao_classe_acao",
+			"fre_cia_aberta_direito_acao",
+			"fre_cia_aberta_empregado_declaracao_genero",
+			"fre_cia_aberta_empregado_declaracao_raca",
+			"fre_cia_aberta_grupo_economico_reestruturacao",
+			"fre_cia_aberta_historico_emissor",
+			"fre_cia_aberta_participacao_sociedade_valorizacao_acao",
+			"fre_cia_aberta_plano_recompra",
+			"fre_cia_aberta_plano_recompra_classe_acao",
+			"fre_cia_aberta_politica_negociacao",
+			"fre_cia_aberta_politica_negociacao_cargo",
+			"fre_cia_aberta_valor_mobiliario_tesouraria_movimentacao",
+			"fre_cia_aberta_valor_mobiliario_tesouraria_ultimo_exercicio",
+			"fre_cia_aberta_volume_valor_mobiliario",
+		}
+	),
+	# 13 META sections for a 12-member archive; inf_anual_fii_2025.zip has no such CSV.
+	"MetaInfAnualFiiReader": frozenset({"representante_cotista_fundo"}),
 }
 
 _PARTIAL_DATASETS: dict[str, str] = {
@@ -638,6 +713,20 @@ _PROBE_OFFSETS_DAYS = (0, 31, 62, 93, 365, 730, 1095)
 _DRIFT_RETRY_POLICY: RetryPolicy = RetryPolicy(int_max_attempts=1)
 
 
+# Closed series: CVM stopped publishing, and the reader refuses any other month with a
+# ``ValueError`` at construction. The rolling probe dates would all be refused, so probe the last
+# published month instead.
+_CLOSED_SERIES_PROBES: dict[str, tuple[date, ...]] = {
+	"ComplFiReader": (date(2019, 4, 1),),
+	"ComplFiInfReader": (date(2019, 4, 1),),
+	"ComplFiInfCotstReader": (date(2019, 4, 1),),
+	"ComplFiPrestReader": (date(2019, 4, 1),),
+	"BalanceteFiPre202311Reader": (date(2023, 10, 1),),
+	"PerfilMensalPre175Reader": (date(2023, 11, 1),),
+	"ExtratoFiPre2020Reader": (date(2019, 1, 1),),
+}
+
+
 def _probe_dates() -> tuple[date, ...]:
 	"""Candidate reference dates to try, newest first."""
 	dt_today = date.today()
@@ -666,19 +755,28 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 	"""
 	cls_contract = contract_of(cls_reader)
 	bool_dated = "date_ref" in inspect.signature(cls_reader.__init__).parameters
-	list_dates: tuple[date | None, ...] = _probe_dates() if bool_dated else (None,)
+	list_dates: tuple[date | None, ...] = (
+		_CLOSED_SERIES_PROBES.get(cls_reader.__name__, _probe_dates()) if bool_dated else (None,)
+	)
 
+	cls_refused: ValueError | None = None
+	int_unpublished = 0
 	for date_ref in list_dates:
-		cls_instance = (
-			cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
-			if bool_dated
-			else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
-		)
+		try:
+			cls_instance = (
+				cls_reader(date_ref=date_ref, retry_policy=_DRIFT_RETRY_POLICY)
+				if bool_dated
+				else cls_reader(retry_policy=_DRIFT_RETRY_POLICY)
+			)
+		except ValueError as cls_exc:
+			cls_refused = cls_exc  # date outside the reader's series — same as a 404, try the next
+			continue
 		try:
 			df_read = cls_instance.read(int_timeout_s=int_timeout_s)
 		except ContractError as cls_exc:
 			return [f"{cls_contract.str_name}: read failed its contract — {cls_exc}"]
 		except OSError:
+			int_unpublished += 1
 			continue  # period not published (or transient) — try an older one
 		bool_report_extra = _READER_TO_META.get(cls_reader.__name__) not in _PARTIAL_DATASETS
 		return real_header_drift(
@@ -687,6 +785,8 @@ def check_real_header(cls_reader: type[IngestionReader], int_timeout_s: int = 60
 			real_columns(df_read),
 			bool_report_extra=bool_report_extra,
 		)
+	if cls_refused is not None and not int_unpublished:
+		raise cls_refused  # every date refused: a real misconfiguration, let the sweep report it
 	return []  # no probed period available — not drift
 
 
@@ -721,6 +821,17 @@ def check_meta(
 		df_meta = cls_meta(retry_policy=_DRIFT_RETRY_POLICY).read(int_timeout_s=int_timeout_s)
 	except OSError:
 		return []  # META unavailable (transient) — not drift
+	frozenset_meta_only = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	list_shipped: list[str] = []
+	if frozenset_meta_only:
+		frozenset_shipped = archived_meta_only_sections(cls_meta, tuple_members, int_timeout_s)
+		list_shipped = [
+			f"{str_label}: META-only section '{str_section}' now ships a CSV in the archive — "
+			"drop it from _META_ONLY_SECTIONS"
+			for str_section in sorted(frozenset_shipped)
+		]
+		frozenset_meta_only -= frozenset_shipped
+	df_meta = df_meta[~df_meta["section"].isin(frozenset_meta_only)]
 	frozenset_fields = frozenset(df_meta["field"].astype(str))
 
 	list_cols: list[str] = []
@@ -733,9 +844,96 @@ def check_meta(
 				set_seen.add(str_col)
 				list_cols.append(str_col)
 	bool_report_extra = cls_meta.__name__ not in _PARTIAL_DATASETS
-	return meta_name_drift(
+	return list_shipped + meta_name_drift(
 		str_label, tuple(list_cols), frozenset_fields, bool_report_extra=bool_report_extra
 	)
+
+
+# A data member's period suffix: ``_2025`` (yearly) or ``_202506`` (monthly).
+_RE_PERIOD_SUFFIX = re.compile(r"_\d{4}(\d{2})?$")
+
+
+def sections_of_members(
+	cls_meta: type[BaseMetaReader], tuple_names: tuple[str, ...]
+) -> frozenset[str]:
+	"""Label data-archive member filenames the way the META labels its sections.
+
+	``fre_cia_aberta_auditor_2025.csv`` drops its period suffix and goes through the META reader's
+	own ``_section_of``, so it compares with ``_META_ONLY_SECTIONS`` whatever prefix that META
+	keeps or strips.
+
+	Parameters
+	----------
+	cls_meta : type[BaseMetaReader]
+		The dataset's META reader.
+	tuple_names : tuple of str
+		Member filenames of the data archive.
+
+	Returns
+	-------
+	frozenset of str
+		The members' section labels.
+	"""
+	reader_meta = cls_meta()
+	return frozenset(
+		reader_meta._section_of(f"meta_{_RE_PERIOD_SUFFIX.sub('', Path(str_name).stem)}.txt")
+		for str_name in tuple_names
+	)
+
+
+def archived_meta_only_sections(
+	cls_meta: type[BaseMetaReader],
+	tuple_members: tuple[type[IngestionReader], ...],
+	int_timeout_s: int = 60,
+) -> frozenset[str]:
+	"""Return the ``_META_ONLY_SECTIONS`` entries whose CSV the recent data archives ship.
+
+	An exempted section that gains a real member must reach the report, not stay muted. One member
+	reader downloads the archive into a scratch ``path_raw``; its member list is all that is read.
+	When no probed period is reachable, nothing is returned and the exemption stands this week.
+
+	Parameters
+	----------
+	cls_meta : type[BaseMetaReader]
+		The dataset's META reader.
+	tuple_members : tuple of type[IngestionReader]
+		The dataset's member readers; the first one fetches the archive.
+	int_timeout_s : int, optional
+		Socket timeout forwarded to ``read``, by default 60.
+
+	Returns
+	-------
+	frozenset of str
+		Exempted sections now present in the archive.
+	"""
+	frozenset_exempt = _META_ONLY_SECTIONS.get(cls_meta.__name__, frozenset())
+	cls_reader = tuple_members[0]
+	# The current year's archive is published incrementally, and the 2026 INF_ANUAL_FII one held
+	# only 10 of its 12 members in Oct 2026, so it is unioned with the last complete year.
+	# ponytail - dedupes by year, which fits the two yearly archives exempted today; a monthly
+	# dataset added here would need a per-period key.
+	set_years: set[int] = set()
+	set_names: set[str] = set()
+	for date_ref in _probe_dates():
+		if date_ref.year in set_years:
+			continue
+		with tempfile.TemporaryDirectory() as str_tmp:
+			path_tmp = Path(str_tmp)
+			try:
+				cls_reader(
+					date_ref=date_ref, path_raw=path_tmp, retry_policy=_DRIFT_RETRY_POLICY
+				).read(int_timeout_s=int_timeout_s)
+			except ContractError:
+				pass  # the archive landed; a member's own drift is check_real_header's to report
+			except OSError:
+				continue  # period not published (or transient) — try an older one
+			for path_zip in path_tmp.glob("*.zip"):
+				with zipfile.ZipFile(path_zip) as zip_archive:
+					set_names.update(zip_archive.namelist())
+		set_years.add(date_ref.year)
+		if len(set_years) == 2:
+			break
+	return frozenset_exempt & sections_of_members(cls_meta, tuple(set_names))
 
 
 def collect_drift(int_timeout_s: int = 60) -> list[str]:

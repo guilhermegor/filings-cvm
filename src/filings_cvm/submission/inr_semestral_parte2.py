@@ -6,11 +6,14 @@ The asset blocks are emitted in the order the standard requires: ``TIT_PUB``, ``
 ``INV_EXT``, ``DEMAIS_N_CODIF``. Pure logic plus file I/O at the edges, no network.
 """
 
+from collections.abc import Callable, Sequence
 from decimal import Decimal
+from typing import Any
 import xml.etree.ElementTree as ET
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.inr_semestral import (
+	InrAtivoExterior,
 	InrClassifRisco,
 	InrCotas,
 	InrDemaisCodif,
@@ -26,11 +29,10 @@ from filings_cvm._internal.config.schemas.inr_semestral import (
 	InrTitAgroCredPriv,
 	InrTitPub,
 )
-from filings_cvm._internal.utils.inr_semestral_fields import format_decimal, write_xml_file
+from filings_cvm._internal.utils.inr_semestral_fields import finish_xml, format_decimal
 from filings_cvm._internal.utils.typing import type_checker
 
 
-_XML_DECLARATION = '<?xml version="1.0" encoding="windows-1252"?>\n'
 _NAMESPACE = "urn:cda"
 _QTY_PLACES = 6
 _MONEY_PLACES = 2
@@ -73,6 +75,66 @@ def _decimal(parent: ET.Element, tag: str, value: Decimal, places: int) -> None:
 
 
 @type_checker
+def _leaf_opt(parent: ET.Element, tag: str, value: object) -> None:
+	"""Append ``<tag>value</tag>`` unless ``value`` is ``None``.
+
+	Parameters
+	----------
+	parent : ET.Element
+		Element to append to.
+	tag : str
+		Tag name.
+	value : object
+		The optional value.
+	"""
+	if value is not None:
+		_leaf(parent, tag, value)
+
+
+@type_checker
+def _decimal_opt(parent: ET.Element, tag: str, value: Decimal | None, places: int) -> None:
+	"""Append a decimal leaf unless ``value`` is ``None``.
+
+	Parameters
+	----------
+	parent : ET.Element
+		Element to append to.
+	tag : str
+		Tag name.
+	value : Decimal or None
+		The optional value.
+	places : int
+		Decimal places to render.
+	"""
+	if value is not None:
+		_decimal(parent, tag, value, places)
+
+
+@type_checker
+def _pos_fim(parent: ET.Element, qtde: Decimal | None, merc: Decimal) -> ET.Element:
+	"""Append ``POS_FIM`` with its optional quantity and market value.
+
+	Parameters
+	----------
+	parent : ET.Element
+		The ``APLIC`` element.
+	qtde : Decimal or None
+		``QTDE_POS_FIM``.
+	merc : Decimal
+		``MERC_POS_FIM``.
+
+	Returns
+	-------
+	ET.Element
+		The ``POS_FIM`` element, so a caller can add a notional.
+	"""
+	end = ET.SubElement(parent, "POS_FIM")
+	_decimal_opt(end, "QTDE_POS_FIM", qtde, _QTY_PLACES)
+	_decimal(end, "MERC_POS_FIM", merc, _MONEY_PLACES)
+	return end
+
+
+@type_checker
 def _aplic(parent: ET.Element, cod_tp_aplic: str | None, pos: InrPosFim) -> None:
 	"""Append ``APLIC`` with its optional type code and ``POS_FIM``.
 
@@ -86,15 +148,9 @@ def _aplic(parent: ET.Element, cod_tp_aplic: str | None, pos: InrPosFim) -> None
 		The final position (a notional is rendered when the model carries one).
 	"""
 	node = ET.SubElement(parent, "APLIC")
-	if cod_tp_aplic is not None:
-		_leaf(node, "COD_TP_APLIC", cod_tp_aplic)
-	end = ET.SubElement(node, "POS_FIM")
-	if pos.qtde_pos_fim is not None:
-		_decimal(end, "QTDE_POS_FIM", pos.qtde_pos_fim, _QTY_PLACES)
-	_decimal(end, "MERC_POS_FIM", pos.merc_pos_fim, _MONEY_PLACES)
-	notional = getattr(pos, "nocion_pos_fim", None)
-	if notional is not None:
-		_decimal(end, "NOCION_POS_FIM", notional, _MONEY_PLACES)
+	_leaf_opt(node, "COD_TP_APLIC", cod_tp_aplic)
+	end = _pos_fim(node, pos.qtde_pos_fim, pos.merc_pos_fim)
+	_decimal_opt(end, "NOCION_POS_FIM", getattr(pos, "nocion_pos_fim", None), _MONEY_PLACES)
 
 
 @type_checker
@@ -142,8 +198,7 @@ def _indexation(
 		_leaf(node, "TIT_POS_FIX_COD_INDEX", index.tit_pos_fix_cod_index)
 		_decimal(node, "TIT_POS_FIX_PR_INDEX", index.tit_pos_fix_pr_index, _RATE_PLACES)
 		_decimal(node, "TIT_POS_FIX_CUPOM", index.tit_pos_fix_cupom, _RATE_PLACES)
-	if rate is not None:
-		_decimal(parent, "TIT_PRE_FIX_TAXA_CONTR", rate, _RATE_PLACES)
+	_decimal_opt(parent, "TIT_PRE_FIX_TAXA_CONTR", rate, _RATE_PLACES)
 
 
 @type_checker
@@ -270,9 +325,27 @@ def _tit_agro(parent: ET.Element, item: InrTitAgroCredPriv) -> None:
 	_indexation(node, item.st_tit_pos_fix, item.tit_pos_fix_index, item.tit_pre_fix_taxa_contr)
 	_leaf(node, "ST_TIT_REG_CETIP", item.st_tit_reg_cetip)
 	_leaf(node, "ST_TIT_GARANT_SEGURO", item.st_tit_garant_seguro)
-	if item.cnpj_instit_financ is not None:
-		_leaf(node, "CNPJ_INSTIT_FINANC", item.cnpj_instit_financ)
+	_leaf_opt(node, "CNPJ_INSTIT_FINANC", item.cnpj_instit_financ)
 	_aplic(node, item.cod_tp_aplic, item.pos_fim)
+
+
+@type_checker
+def _ativo_ext(aplic: ET.Element, asset: InrAtivoExterior | None) -> None:
+	"""Append the optional ``ATIVO_EXT`` block.
+
+	Parameters
+	----------
+	aplic : ET.Element
+		The ``APLIC`` element.
+	asset : InrAtivoExterior or None
+		The foreign-asset model.
+	"""
+	if asset is None:
+		return
+	ext = ET.SubElement(aplic, "ATIVO_EXT")
+	_leaf(ext, "DESC_AT_EXT", asset.desc_at_ext)
+	_leaf(ext, "QTDE_AT_EXT", asset.qtde_at_ext)
+	_decimal(ext, "VALOR_AT_EXT", asset.valor_at_ext, _MONEY_PLACES)
 
 
 @type_checker
@@ -291,23 +364,15 @@ def _inv_ext(parent: ET.Element, item: InrInvExt) -> None:
 	_leaf(node, "INV_COLETIVO", item.inv_coletivo)
 	_leaf(node, "GEST_INV_COLETIVO", item.gest_inv_coletivo)
 	_leaf(node, "NM_EMIS", item.nm_emis)
-	if item.dt_venc is not None:
-		_leaf(node, "DT_VENC", item.dt_venc)
+	_leaf_opt(node, "DT_VENC", item.dt_venc)
 	_leaf(node, "COD_PAIS", item.cod_pais)
 	_leaf(node, "COD_BV_MERC", item.cod_bv_merc)
 	_leaf(node, "COD_ATIVO_BV_MERC", item.cod_ativo_bv_merc)
 	_rating(node, item.st_classif_risco, item.classif_risco)
 	aplic = ET.SubElement(node, "APLIC")
 	_leaf(aplic, "DT_APLIC", item.dt_aplic)
-	end = ET.SubElement(aplic, "POS_FIM")
-	if item.pos_fim.qtde_pos_fim is not None:
-		_decimal(end, "QTDE_POS_FIM", item.pos_fim.qtde_pos_fim, _QTY_PLACES)
-	_decimal(end, "MERC_POS_FIM", item.pos_fim.merc_pos_fim, _MONEY_PLACES)
-	if item.ativo_ext is not None:
-		ext = ET.SubElement(aplic, "ATIVO_EXT")
-		_leaf(ext, "DESC_AT_EXT", item.ativo_ext.desc_at_ext)
-		_leaf(ext, "QTDE_AT_EXT", item.ativo_ext.qtde_at_ext)
-		_decimal(ext, "VALOR_AT_EXT", item.ativo_ext.valor_at_ext, _MONEY_PLACES)
+	_pos_fim(aplic, item.pos_fim.qtde_pos_fim, item.pos_fim.merc_pos_fim)
+	_ativo_ext(aplic, item.ativo_ext)
 
 
 @type_checker
@@ -329,6 +394,25 @@ def _demais_n_codif(parent: ET.Element, item: InrDemaisNCodif) -> None:
 
 
 @type_checker
+def _each(
+	parent: ET.Element, items: Sequence[object], emit: Callable[[ET.Element, Any], None]
+) -> None:
+	"""Emit every item of one asset block with ``emit``.
+
+	Parameters
+	----------
+	parent : ET.Element
+		``LISTA_ATIV`` element.
+	items : Sequence[object]
+		The block models.
+	emit : Callable
+		Writer of one item.
+	"""
+	for item in items:
+		emit(parent, item)
+
+
+@type_checker
 def _inform(parent: ET.Element, inform: InrInform) -> None:
 	"""Append one ``INFORM`` with its blocks in the order the standard requires.
 
@@ -342,24 +426,15 @@ def _inform(parent: ET.Element, inform: InrInform) -> None:
 	node = ET.SubElement(parent, "INFORM")
 	_leaf(node, "COD_PARTIC", inform.cod_partic)
 	assets = ET.SubElement(node, "LISTA_ATIV")
-	for item in inform.tit_pub:
-		_tit_pub(assets, item)
-	for cota in inform.cotas:
-		_cotas(assets, cota)
-	for swap in inform.swap:
-		_swap(assets, swap)
-	if inform.nocion_swap is not None:
-		_decimal(assets, "NOCION_SWAP", inform.nocion_swap, _MONEY_PLACES)
-	for codif in inform.demais_codif:
-		_demais_codif(assets, codif)
-	for dep in inform.dep_prazo_tit_if:
-		_dep_prazo(assets, dep)
-	for agro in inform.tit_agro_cred_priv:
-		_tit_agro(assets, agro)
-	for ext in inform.inv_ext:
-		_inv_ext(assets, ext)
-	for ncodif in inform.demais_n_codif:
-		_demais_n_codif(assets, ncodif)
+	_each(assets, inform.tit_pub, _tit_pub)
+	_each(assets, inform.cotas, _cotas)
+	_each(assets, inform.swap, _swap)
+	_decimal_opt(assets, "NOCION_SWAP", inform.nocion_swap, _MONEY_PLACES)
+	_each(assets, inform.demais_codif, _demais_codif)
+	_each(assets, inform.dep_prazo_tit_if, _dep_prazo)
+	_each(assets, inform.tit_agro_cred_priv, _tit_agro)
+	_each(assets, inform.inv_ext, _inv_ext)
+	_each(assets, inform.demais_n_codif, _demais_n_codif)
 
 
 class InrSemestralParte2(SubmissionWriter[InrParte2Document]):
@@ -396,11 +471,4 @@ class InrSemestralParte2(SubmissionWriter[InrParte2Document]):
 		listing = ET.SubElement(root, "LISTA_INFORM")
 		for inform in doc.informs:
 			_inform(listing, inform)
-		ET.indent(root, space="    ")
-		xml_str = _XML_DECLARATION + ET.tostring(
-			root, encoding="unicode", short_empty_elements=False
-		)
-		if output_path is None:
-			return xml_str
-		write_xml_file(output_path, xml_str)
-		return None
+		return finish_xml(root, output_path)

@@ -14,11 +14,10 @@ from filings_cvm._internal.config.schemas.inr_semestral import (
 	InrParticipante,
 	InrRecursosEntreInvestidores,
 )
-from filings_cvm._internal.utils.inr_semestral_fields import write_xml_file
+from filings_cvm._internal.utils.inr_semestral_fields import finish_xml
 from filings_cvm._internal.utils.typing import type_checker
 
 
-_XML_DECLARATION = '<?xml version="1.0" encoding="windows-1252"?>\n'
 # The page states "urn:infmensal" for this file as well; kept verbatim from the spec.
 _NAMESPACE = "urn:infmensal"
 
@@ -40,6 +39,44 @@ def _leaf(parent: ET.Element, tag: str, value: object) -> None:
 
 
 @type_checker
+def _received(root: ET.Element, suffix: str, block: InrRecursosEntreInvestidores) -> None:
+	"""Append the ``RECURSOS_RECEB_*`` entries of a block.
+
+	Parameters
+	----------
+	root : ET.Element
+		The ``RECURSOS_*_INVEST`` element.
+	suffix : str
+		``MESMO_INVEST`` or ``OUTRO_INVEST``.
+	block : InrRecursosEntreInvestidores
+		The block model.
+	"""
+	for item in block.recebidos:
+		node = ET.SubElement(root, f"RECURSOS_RECEB_{suffix}")
+		_leaf(node, "CD_PARTIC_ORIGEM", item.cd_partic_origem)
+		_leaf(node, "VL_RECEBIDO", item.vl_recebido)
+
+
+@type_checker
+def _sent(root: ET.Element, suffix: str, block: InrRecursosEntreInvestidores) -> None:
+	"""Append the ``RECURSOS_ENV_*`` entries of a block.
+
+	Parameters
+	----------
+	root : ET.Element
+		The ``RECURSOS_*_INVEST`` element.
+	suffix : str
+		``MESMO_INVEST`` or ``OUTRO_INVEST``.
+	block : InrRecursosEntreInvestidores
+		The block model.
+	"""
+	for sent in block.enviados:
+		node = ET.SubElement(root, f"RECURSOS_ENV_{suffix}")
+		_leaf(node, "CD_PARTIC_DEST", sent.cd_partic_dest)
+		_leaf(node, "VL_ENVIADO", sent.vl_enviado)
+
+
+@type_checker
 def _exchange(parent: ET.Element, tag: str, block: InrRecursosEntreInvestidores | None) -> None:
 	"""Append an optional ``RECURSOS_*_INVEST`` block, omitted when it carries nothing.
 
@@ -56,14 +93,8 @@ def _exchange(parent: ET.Element, tag: str, block: InrRecursosEntreInvestidores 
 		return
 	suffix = tag.removeprefix("RECURSOS_")
 	root = ET.SubElement(parent, tag)
-	for item in block.recebidos:
-		node = ET.SubElement(root, f"RECURSOS_RECEB_{suffix}")
-		_leaf(node, "CD_PARTIC_ORIGEM", item.cd_partic_origem)
-		_leaf(node, "VL_RECEBIDO", item.vl_recebido)
-	for sent in block.enviados:
-		node = ET.SubElement(root, f"RECURSOS_ENV_{suffix}")
-		_leaf(node, "CD_PARTIC_DEST", sent.cd_partic_dest)
-		_leaf(node, "VL_ENVIADO", sent.vl_enviado)
+	_received(root, suffix, block)
+	_sent(root, suffix, block)
 
 
 @type_checker
@@ -139,11 +170,4 @@ class InrSemestralParte1(SubmissionWriter[InrParte1Document]):
 		listing = ET.SubElement(root, "LISTA_PARTICIPANTES")
 		for part in doc.participantes:
 			_participant(listing, part)
-		ET.indent(root, space="    ")
-		xml_str = _XML_DECLARATION + ET.tostring(
-			root, encoding="unicode", short_empty_elements=False
-		)
-		if output_path is None:
-			return xml_str
-		write_xml_file(output_path, xml_str)
-		return None
+		return finish_xml(root, output_path)

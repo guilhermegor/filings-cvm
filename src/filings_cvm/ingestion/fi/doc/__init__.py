@@ -7,7 +7,24 @@ family (`LAMINA`, nested in :mod:`filings_cvm.ingestion.fi.doc.lamina`). Re-expo
 `filings_cvm.ingestion`.
 """
 
+from filings_cvm.ingestion.fi.doc.balancete import (
+	BalanceteFiPre202311Reader,
+	BalanceteFiReader,
+	MetaBalanceteFiReader,
+)
 from filings_cvm.ingestion.fi.doc.cda import CdaReader, MetaCdaReader
+from filings_cvm.ingestion.fi.doc.compl import (
+	ComplFiInfCotstReader,
+	ComplFiInfReader,
+	ComplFiPrestReader,
+	ComplFiReader,
+	MetaComplFiReader,
+)
+from filings_cvm.ingestion.fi.doc.entrega import (
+	EntregaFiDiarioReader,
+	EntregaFiReader,
+	MetaEntregaFiReader,
+)
 from filings_cvm.ingestion.fi.doc.eventual import (
 	EventualFiReader,
 	MetaEventualFiReader,
@@ -35,7 +52,15 @@ from filings_cvm.ingestion.fi.doc.perfil_mensal import (
 
 
 __all__ = [
+	"BalanceteFiPre202311Reader",
+	"BalanceteFiReader",
 	"CdaReader",
+	"ComplFiInfCotstReader",
+	"ComplFiInfReader",
+	"ComplFiPrestReader",
+	"ComplFiReader",
+	"EntregaFiDiarioReader",
+	"EntregaFiReader",
 	"EventualFiReader",
 	"ExtratoFiPre2020Reader",
 	"ExtratoFiReader",
@@ -43,7 +68,10 @@ __all__ = [
 	"InformeDiarioReader",
 	"LaminaCarteiraReader",
 	"LaminaReader",
+	"MetaBalanceteFiReader",
 	"MetaCdaReader",
+	"MetaComplFiReader",
+	"MetaEntregaFiReader",
 	"MetaEventualFiReader",
 	"MetaExtratoFiReader",
 	"MetaInformeDiarioReader",

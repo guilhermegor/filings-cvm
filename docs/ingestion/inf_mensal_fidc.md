@@ -10,7 +10,7 @@ Inaugura o *portal root* `fidc/` da biblioteca (irmão de `fi/`).
 
 ## Descrição
 
-`inf_mensal_fidc_AAAAMM.zip` traz **17 membros** — as tabelas do informe mensal (Tabelas I–X mais
+`inf_mensal_fidc_AAAAMM.zip` traz **18 membros** — as tabelas do informe mensal (Tabelas I–X mais
 as sub-tabelas de X). Cada membro compartilha o mesmo prefixo-chave de quatro colunas —
 `TP_FUNDO_CLASSE`, `CNPJ_FUNDO_CLASSE`, `DENOM_SOCIAL`, `DT_COMPTC` — e então carrega as colunas
 específicas da sua tabela. Cada membro tem o seu reader:
@@ -24,6 +24,7 @@ específicas da sua tabela. Cada membro tem o seu reader:
 | `InfMensalFidcTabVReader` | `inf_mensal_fidc_tab_V` | V — prazos dos direitos creditórios a adquirir |
 | `InfMensalFidcTabVIReader` | `inf_mensal_fidc_tab_VI` | VI — prazos dos direitos creditórios da carteira |
 | `InfMensalFidcTabVIIReader` | `inf_mensal_fidc_tab_VII` | VII — direitos creditórios por origem |
+| `InfMensalFidcTabVIIIReader` | `inf_mensal_fidc_tab_VIII` | VIII — valores numerados (`SEQUENCIAL` × `VALOR`, longa) |
 | `InfMensalFidcTabIXReader` | `inf_mensal_fidc_tab_IX` | IX — taxas de negociação (compra/venda) |
 | `InfMensalFidcTabXReader` | `inf_mensal_fidc_tab_X` | X — classificação de risco (SCR) e débito tributário |
 | `InfMensalFidcTabX1Reader` | `inf_mensal_fidc_tab_X_1` | X.1 — nº de cotistas por classe/série |
@@ -35,10 +36,10 @@ específicas da sua tabela. Cada membro tem o seu reader:
 | `InfMensalFidcTabX6Reader` | `inf_mensal_fidc_tab_X_6` | X.6 — desempenho esperado × realizado |
 | `InfMensalFidcTabX7Reader` | `inf_mensal_fidc_tab_X_7` | X.7 — garantias dos direitos creditórios |
 
-Os 17 baixam o **mesmo** ZIP mensal, então um `path_raw` gravado por qualquer um serve aos outros.
+Os 18 baixam o **mesmo** ZIP mensal, então um `path_raw` gravado por qualquer um serve aos outros.
 O dump é **particionado por mês** (`AAAAMM`): os readers aceitam `date_ref` (qualquer dia do mês de
 referência seleciona o dump e, dentro dele, o membro `…_AAAAMM.csv`). As sub-tabelas (X.1, X.2, …)
-são naturalmente **longas** — muitas linhas por fundo, uma por série/subclasse —, então nenhum
+e a tabela VIII são naturalmente **longas** — muitas linhas por fundo, uma por série/subclasse —, então nenhum
 reader declara granularidade única.
 
 ### Tipagem
@@ -48,6 +49,12 @@ Toda coluna é texto (`str`) exceto `DT_COMPTC`, convertida para `date` puro. Co
 CVM** — **nunca `float`** —, para que um consumidor converta para `Decimal` no ponto em que calcula.
 O mapa de tipos é derivado do contrato, então os dois não podem divergir.
 
+A **tabela VIII** tem só 6 colunas: o prefixo-chave mais `SEQUENCIAL` (1 a 25 em 202506) e
+`VALOR` (`numeric(20,2)` na META), uma linha por fundo × `SEQUENCIAL` — 39.984 linhas em 202506.
+A META da CVM deixa a descrição das duas em branco, então o reader não afirma o que o valor
+mede. `VALOR` e `SEQUENCIAL` ficam **texto exato**. A tabela sempre esteve no ZIP (do `HIST` de
+2013 até 202609); a contagem antiga de 17 membros estava errada, não desatualizada.
+
 ---
 
 ## Política de retry — paciência por tabela
@@ -55,7 +62,7 @@ O mapa de tipos é derivado do contrato, então os dois não podem divergir.
 Todo reader aceita um `retry_policy: RetryPolicy | None = None` no construtor, repassado ao *seam*
 de download como a sua agenda de novas tentativas / *backoff*. Cada reader **declara a sua própria
 paciência** por meio do atributo de classe `_RETRY_POLICY`, então a política fica **junto da
-tabela** e é ajustável **por tabela** — sem tocar na base nem nos outros 16 readers.
+tabela** e é ajustável **por tabela** — sem tocar na base nem nos outros 17 readers.
 
 A resolução é em duas camadas:
 
@@ -126,14 +133,14 @@ cotistas = InfMensalFidcTabX1Reader(date_ref=date(2025, 6, 1)).read()
 # muitas linhas por fundo — uma por TAB_X_CLASSE_SERIE / ID_SUBCLASSE.
 ```
 
-### Persistir o dump bruto (camada *bronze*) uma vez para os 17
+### Persistir o dump bruto (camada *bronze*) uma vez para os 18
 
 ```python
 from datetime import date
 from pathlib import Path
 from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
 
-# Um download; o ZIP e os 17 CSVs ficam em disco para os outros readers.
+# Um download; o ZIP e os 18 CSVs ficam em disco para os outros readers.
 InfMensalFidcTabIReader(
     date_ref=date(2025, 6, 1),
     path_raw=Path("/data/bronze/cvm/inf_mensal_fidc/202506"),

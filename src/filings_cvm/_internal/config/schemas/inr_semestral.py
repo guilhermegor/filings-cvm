@@ -50,6 +50,7 @@ from filings_cvm._internal.utils.inr_semestral_fields import (
 	check_code,
 	check_cvm_code,
 	check_month_year,
+	ensure,
 	strict_decimal,
 	strict_int,
 	text_field,
@@ -59,38 +60,38 @@ from filings_cvm._internal.utils.inr_semestral_fields import (
 from filings_cvm._internal.utils.typing import type_checker
 
 
-MAX_PARTICIPANTS = 1000
+_MAX_PARTICIPANTS = 1000
 
 _SWAP_PREFIX = "SWP"
 
 # Parte I values: "numerico e inteiro".
-IntegerValue = Annotated[int, BeforeValidator(strict_int), Field(ge=0)]
+_IntegerValue = Annotated[int, BeforeValidator(strict_int), Field(ge=0)]
 # Parte II amounts: up to 15 integer and 2 decimal places.
-MoneyValue = Annotated[
+_MoneyValue = Annotated[
 	Decimal, BeforeValidator(strict_decimal(2)), Field(max_digits=17, decimal_places=2)
 ]
 # QTDE_POS_FIM: up to 15 integer and 6 decimal places, never negative.
-QuantityValue = Annotated[
+_QuantityValue = Annotated[
 	Decimal,
 	BeforeValidator(strict_decimal(6)),
 	Field(ge=Decimal(0), max_digits=21, decimal_places=6),
 ]
 # Indexer percentage, coupon, contracted rate: up to 3 integer and 6 decimal places.
-RateValue = Annotated[
+_RateValue = Annotated[
 	Decimal,
 	BeforeValidator(strict_decimal(6)),
 	Field(ge=Decimal(0), max_digits=9, decimal_places=6),
 ]
 
-DateBr = Annotated[StrictStr, AfterValidator(check_br_date)]
-Competence = Annotated[StrictStr, AfterValidator(check_month_year)]
-CodPartic = Annotated[StrictStr, AfterValidator(check_cod_partic)]
-CvmCode = Annotated[StrictStr, AfterValidator(check_cvm_code)]
-Cnpj = Annotated[StrictStr, AfterValidator(to_cnpj_field)]
-Code = Annotated[StrictStr, AfterValidator(check_code)]
-SimNao = Literal["S", "N"]
-IssuerName = Annotated[StrictStr, AfterValidator(text_field(150))]
-AssetDescription = Annotated[StrictStr, AfterValidator(text_field(1000))]
+_DateBr = Annotated[StrictStr, AfterValidator(check_br_date)]
+_Competence = Annotated[StrictStr, AfterValidator(check_month_year)]
+_CodPartic = Annotated[StrictStr, AfterValidator(check_cod_partic)]
+_CvmCode = Annotated[StrictStr, AfterValidator(check_cvm_code)]
+_Cnpj = Annotated[StrictStr, AfterValidator(to_cnpj_field)]
+_Code = Annotated[StrictStr, AfterValidator(check_code)]
+_SimNao = Literal["S", "N"]
+_IssuerName = Annotated[StrictStr, AfterValidator(text_field(150))]
+_AssetDescription = Annotated[StrictStr, AfterValidator(text_field(1000))]
 
 
 @type_checker
@@ -121,16 +122,16 @@ def _require_member(value: str, table: frozenset[str], label: str) -> str:
 	return value
 
 
-AssetTypeCode = Annotated[
+_AssetTypeCode = Annotated[
 	StrictStr, AfterValidator(lambda v: _require_member(v, ASSET_TYPES, "Table C"))
 ]
-IndexerCode = Annotated[
+_IndexerCode = Annotated[
 	StrictStr, AfterValidator(lambda v: _require_member(v, INDEXERS, "Table D"))
 ]
-CountryCode = Annotated[
+_CountryCode = Annotated[
 	StrictStr, AfterValidator(lambda v: _require_member(v, COUNTRIES, "Table G"))
 ]
-ExchangeCode = Annotated[
+_ExchangeCode = Annotated[
 	StrictStr, AfterValidator(lambda v: _require_member(v, EXCHANGES, "Table H"))
 ]
 
@@ -165,9 +166,9 @@ class InrParte1Header(_Strict):
 
 	cod_doc: Literal["69"] = "69"
 	versao: Literal["1.0"] = "1.0"
-	cd_cvm: CvmCode
-	dt_compt: Competence
-	dt_gerac_arq: DateBr
+	cd_cvm: _CvmCode
+	dt_compt: _Competence
+	dt_gerac_arq: _DateBr
 
 
 class InrEntradaSaida(_Strict):
@@ -181,8 +182,8 @@ class InrEntradaSaida(_Strict):
 		``VL_SAIDA``.
 	"""
 
-	vl_entr: IntegerValue
-	vl_saida: IntegerValue
+	vl_entr: _IntegerValue
+	vl_saida: _IntegerValue
 
 
 class InrTransfRecursos(_Strict):
@@ -204,12 +205,12 @@ class InrTransfRecursos(_Strict):
 		Direct foreign investment to portfolio investment.
 	"""
 
-	vl_invest_carteira_haver_nres: IntegerValue
-	vl_haver_nres_invest_carteira: IntegerValue
-	vl_invest_carteira_adr: IntegerValue
-	vl_adr_invest_carteira: IntegerValue
-	vl_invest_carteira_estrang_direta: IntegerValue
-	vl_estrang_direta_invest_carteira: IntegerValue
+	vl_invest_carteira_haver_nres: _IntegerValue
+	vl_haver_nres_invest_carteira: _IntegerValue
+	vl_invest_carteira_adr: _IntegerValue
+	vl_adr_invest_carteira: _IntegerValue
+	vl_invest_carteira_estrang_direta: _IntegerValue
+	vl_estrang_direta_invest_carteira: _IntegerValue
 
 
 class InrRecursoRecebido(_Strict):
@@ -223,8 +224,8 @@ class InrRecursoRecebido(_Strict):
 		Amount received, in reais.
 	"""
 
-	cd_partic_origem: CodPartic
-	vl_recebido: IntegerValue
+	cd_partic_origem: _CodPartic
+	vl_recebido: _IntegerValue
 
 
 class InrRecursoEnviado(_Strict):
@@ -238,8 +239,8 @@ class InrRecursoEnviado(_Strict):
 		Amount sent, in reais.
 	"""
 
-	cd_partic_dest: CodPartic
-	vl_enviado: IntegerValue
+	cd_partic_dest: _CodPartic
+	vl_enviado: _IntegerValue
 
 
 class InrRecursosEntreInvestidores(_Strict):
@@ -276,12 +277,38 @@ class InrParticipante(_Strict):
 		Net equity, in reais.
 	"""
 
-	cod_partic: CodPartic
+	cod_partic: _CodPartic
 	entrada_saida: InrEntradaSaida
 	transf_recursos: InrTransfRecursos
 	recursos_mesmo_invest: InrRecursosEntreInvestidores | None = None
 	recursos_outro_invest: InrRecursosEntreInvestidores | None = None
-	patrim_liq: IntegerValue
+	patrim_liq: _IntegerValue
+
+
+@type_checker
+def _check_participant(cod_partic: str, seen: set[str], cd_cvm: str) -> None:
+	"""Require a participant code to be new and issued under the representative.
+
+	Parameters
+	----------
+	cod_partic : str
+		The participant code.
+	seen : set[str]
+		Codes already seen; this one is added.
+	cd_cvm : str
+		The header's representative CVM code.
+
+	Raises
+	------
+	ValueError
+		If the code repeats or its first segment differs from ``cd_cvm``.
+	"""
+	ensure(cod_partic not in seen, f"duplicate participant {cod_partic}")
+	seen.add(cod_partic)
+	ensure(
+		cod_partic.split(".")[0] == cd_cvm,
+		f"participant {cod_partic} is not under representative {cd_cvm}",
+	)
 
 
 class InrParte1Document(_Strict):
@@ -296,7 +323,7 @@ class InrParte1Document(_Strict):
 	"""
 
 	header: InrParte1Header
-	participantes: list[InrParticipante] = Field(min_length=1, max_length=MAX_PARTICIPANTS)
+	participantes: list[InrParticipante] = Field(min_length=1, max_length=_MAX_PARTICIPANTS)
 
 	@model_validator(mode="after")
 	def _check_participants(self) -> InrParte1Document:
@@ -314,14 +341,7 @@ class InrParte1Document(_Strict):
 		"""
 		seen: set[str] = set()
 		for part in self.participantes:
-			if part.cod_partic in seen:
-				raise ValueError(f"duplicate participant {part.cod_partic}")
-			seen.add(part.cod_partic)
-			if part.cod_partic.split(".")[0] != self.header.cd_cvm:
-				raise ValueError(
-					f"participant {part.cod_partic} is not under representative "
-					f"{self.header.cd_cvm}"
-				)
+			_check_participant(part.cod_partic, seen, self.header.cd_cvm)
 		return self
 
 
@@ -347,8 +367,8 @@ class InrParte2Header(_Strict):
 
 	cod_doc: Literal["70"] = "70"
 	versao: Literal["1.0"] = "1.0"
-	dt_compt: Competence
-	dt_gerac_arq: DateBr
+	dt_compt: _Competence
+	dt_gerac_arq: _DateBr
 
 
 class InrPosFim(_Strict):
@@ -362,8 +382,8 @@ class InrPosFim(_Strict):
 		Market value of the final position, always required.
 	"""
 
-	qtde_pos_fim: QuantityValue | None = None
-	merc_pos_fim: MoneyValue
+	qtde_pos_fim: _QuantityValue | None = None
+	merc_pos_fim: _MoneyValue
 
 
 class InrPosFimNocional(InrPosFim):
@@ -375,7 +395,7 @@ class InrPosFimNocional(InrPosFim):
 		Final notional; required or forbidden depending on the application type (Table A).
 	"""
 
-	nocion_pos_fim: MoneyValue | None = None
+	nocion_pos_fim: _MoneyValue | None = None
 
 
 class InrClassifRisco(_Strict):
@@ -392,7 +412,7 @@ class InrClassifRisco(_Strict):
 	"""
 
 	ag_classif_risco: Annotated[StrictStr, AfterValidator(text_field(200))]
-	dt_classif_risco: DateBr
+	dt_classif_risco: _DateBr
 	grau_classif_risco: Annotated[StrictStr, AfterValidator(text_field(6))]
 
 
@@ -409,9 +429,9 @@ class InrIndexador(_Strict):
 		Coupon (zero when there is none; the spec makes the tag mandatory for post-fixed).
 	"""
 
-	tit_pos_fix_cod_index: IndexerCode
-	tit_pos_fix_pr_index: RateValue
-	tit_pos_fix_cupom: RateValue
+	tit_pos_fix_cod_index: _IndexerCode
+	tit_pos_fix_pr_index: _RateValue
+	tit_pos_fix_cupom: _RateValue
 
 
 class InrEmissorPj(_Strict):
@@ -425,8 +445,8 @@ class InrEmissorPj(_Strict):
 		Issuer name, up to 150 characters.
 	"""
 
-	cnpj_emis: Cnpj
-	nm_emis: IssuerName
+	cnpj_emis: _Cnpj
+	nm_emis: _IssuerName
 
 
 class InrEmissorPfPj(_Strict):
@@ -444,7 +464,7 @@ class InrEmissorPfPj(_Strict):
 
 	tp_pf_pj_emis: Literal["PF", "PJ"]
 	nr_pf_pj_emis: StrictStr
-	nm_emis: IssuerName
+	nm_emis: _IssuerName
 
 	@model_validator(mode="after")
 	def _check_document(self) -> InrEmissorPfPj:
@@ -472,9 +492,9 @@ class _IndexedSecurity(_Strict):
 		Contracted rate; required when pre-fixed, forbidden when post-fixed.
 	"""
 
-	st_tit_pos_fix: SimNao
+	st_tit_pos_fix: _SimNao
 	tit_pos_fix_index: InrIndexador | None = None
-	tit_pre_fix_taxa_contr: RateValue | None = None
+	tit_pre_fix_taxa_contr: _RateValue | None = None
 
 	@model_validator(mode="after")
 	def _check_indexation(self) -> _IndexedSecurity:
@@ -491,12 +511,14 @@ class _IndexedSecurity(_Strict):
 			If the fields do not match ``st_tit_pos_fix``.
 		"""
 		post = self.st_tit_pos_fix == "S"
-		if post != (self.tit_pos_fix_index is not None):
-			raise ValueError("tit_pos_fix_index is required if post-fixed and forbidden otherwise")
-		if post == (self.tit_pre_fix_taxa_contr is not None):
-			raise ValueError(
-				"tit_pre_fix_taxa_contr is required if pre-fixed and forbidden otherwise"
-			)
+		ensure(
+			post == (self.tit_pos_fix_index is not None),
+			"tit_pos_fix_index is required if post-fixed and forbidden otherwise",
+		)
+		ensure(
+			post != (self.tit_pre_fix_taxa_contr is not None),
+			"tit_pre_fix_taxa_contr is required if pre-fixed and forbidden otherwise",
+		)
 		return self
 
 
@@ -518,6 +540,33 @@ def _check_rating(st_classif_risco: str, classif_risco: InrClassifRisco | None) 
 	"""
 	if (st_classif_risco == "S") != (classif_risco is not None):
 		raise ValueError("classif_risco is required if st_classif_risco is 'S' and omitted if 'N'")
+
+
+@type_checker
+def _check_flag(field: str, rule: str, present: bool, cod_tp_aplic: str) -> None:
+	"""Require a Table A field to be present exactly when its rule says ``"S"``.
+
+	Parameters
+	----------
+	field : str
+		Field name for the error message.
+	rule : str
+		``"S"`` (required) or anything else (forbidden).
+	present : bool
+		Whether the field is informed.
+	cod_tp_aplic : str
+		The application type code.
+
+	Raises
+	------
+	ValueError
+		If presence does not match the rule.
+	"""
+	verb = {"S": "required"}.get(rule, "forbidden")
+	ensure(
+		(rule == "S") == present,
+		f"{field} is {verb} for application type {cod_tp_aplic}",
+	)
 
 
 @type_checker
@@ -543,22 +592,16 @@ def _check_application(
 		If the type is not reportable in the block, or a quantity/notional field is present or
 		missing against Table A.
 	"""
-	if cod_tp_aplic not in BLOCK_APPLICATIONS[block]:
-		raise ValueError(f"application type {cod_tp_aplic} cannot be reported in {block}")
+	ensure(
+		cod_tp_aplic in BLOCK_APPLICATIONS[block],
+		f"application type {cod_tp_aplic} cannot be reported in {block}",
+	)
 	quantity_rule, notional_rule = APPLICATION_FIELD_RULES[cod_tp_aplic]
-	if (quantity_rule == "S") != (pos_fim.qtde_pos_fim is not None):
-		raise ValueError(
-			f"qtde_pos_fim is {'required' if quantity_rule == 'S' else 'forbidden'} "
-			f"for application type {cod_tp_aplic}"
-		)
+	_check_flag("qtde_pos_fim", quantity_rule, pos_fim.qtde_pos_fim is not None, cod_tp_aplic)
 	if not notional_in_block:
 		return
 	has_notional = getattr(pos_fim, "nocion_pos_fim", None) is not None
-	if (notional_rule == "S") != has_notional:
-		raise ValueError(
-			f"nocion_pos_fim is {'required' if notional_rule == 'S' else 'forbidden'} "
-			f"for application type {cod_tp_aplic}"
-		)
+	_check_flag("nocion_pos_fim", notional_rule, has_notional, cod_tp_aplic)
 
 
 @type_checker
@@ -598,8 +641,8 @@ class InrTitPub(_Strict):
 		Final position (quantity and market value).
 	"""
 
-	cod_selic: Code
-	dt_venc: DateBr
+	cod_selic: _Code
+	dt_venc: _DateBr
 	cod_tp_aplic: Literal["75", "147"]
 	pos_fim: InrPosFim
 
@@ -627,7 +670,7 @@ class InrCotas(_Strict):
 		Final position (quantity and market value).
 	"""
 
-	cnpj_fdo: Cnpj
+	cnpj_fdo: _Cnpj
 	pos_fim: InrPosFim
 
 	@model_validator(mode="after")
@@ -698,9 +741,9 @@ class InrDemaisCodif(_Strict):
 		Final position; the notional follows Table A.
 	"""
 
-	cod_ativ: Code
-	cod_tp_ativ: AssetTypeCode
-	dt_ini_vigen: DateBr
+	cod_ativ: _Code
+	cod_tp_ativ: _AssetTypeCode
+	dt_ini_vigen: _DateBr
 	cod_tp_aplic: StrictStr
 	pos_fim: InrPosFimNocional
 
@@ -737,10 +780,10 @@ class InrDepPrazoTitIf(_IndexedSecurity):
 		Final position (quantity and market value).
 	"""
 
-	cod_tp_ativ: AssetTypeCode
+	cod_tp_ativ: _AssetTypeCode
 	emis: InrEmissorPj
-	dt_venc: DateBr
-	st_classif_risco: SimNao
+	dt_venc: _DateBr
+	st_classif_risco: _SimNao
 	classif_risco: InrClassifRisco | None = None
 	pos_fim: InrPosFim
 
@@ -782,12 +825,12 @@ class InrTitAgroCredPriv(_IndexedSecurity):
 		Final position (quantity and market value).
 	"""
 
-	cod_tp_ativ: AssetTypeCode
+	cod_tp_ativ: _AssetTypeCode
 	emis: InrEmissorPfPj
-	dt_venc: DateBr
-	st_tit_reg_cetip: SimNao
-	st_tit_garant_seguro: SimNao
-	cnpj_instit_financ: Cnpj | None = None
+	dt_venc: _DateBr
+	st_tit_reg_cetip: _SimNao
+	st_tit_garant_seguro: _SimNao
+	cnpj_instit_financ: _Cnpj | None = None
 	cod_tp_aplic: Literal["193", "195", "196"]
 	pos_fim: InrPosFim
 
@@ -821,8 +864,8 @@ class InrAtivoExterior(_Strict):
 	"""
 
 	desc_at_ext: Annotated[StrictStr, AfterValidator(text_field(50))]
-	qtde_at_ext: IntegerValue
-	valor_at_ext: MoneyValue
+	qtde_at_ext: _IntegerValue
+	valor_at_ext: _MoneyValue
 
 
 class InrInvExt(_Strict):
@@ -858,17 +901,17 @@ class InrInvExt(_Strict):
 		Asset-abroad detail, when informed.
 	"""
 
-	cod_tp_ativ: AssetTypeCode
-	inv_coletivo: SimNao
-	gest_inv_coletivo: SimNao
-	nm_emis: IssuerName
-	dt_venc: DateBr | None = None
-	cod_pais: CountryCode
-	cod_bv_merc: ExchangeCode
-	cod_ativo_bv_merc: Code
-	st_classif_risco: SimNao
+	cod_tp_ativ: _AssetTypeCode
+	inv_coletivo: _SimNao
+	gest_inv_coletivo: _SimNao
+	nm_emis: _IssuerName
+	dt_venc: _DateBr | None = None
+	cod_pais: _CountryCode
+	cod_bv_merc: _ExchangeCode
+	cod_ativo_bv_merc: _Code
+	st_classif_risco: _SimNao
 	classif_risco: InrClassifRisco | None = None
-	dt_aplic: DateBr
+	dt_aplic: _DateBr
 	pos_fim: InrPosFim
 	ativo_ext: InrAtivoExterior | None = None
 
@@ -904,8 +947,8 @@ class InrDemaisNCodif(_Strict):
 		Final position; the notional follows Table A.
 	"""
 
-	cod_tp_ativ: AssetTypeCode
-	desc: AssetDescription
+	cod_tp_ativ: _AssetTypeCode
+	desc: _AssetDescription
 	emis: InrEmissorPfPj
 	cod_tp_aplic: StrictStr
 	pos_fim: InrPosFimNocional
@@ -945,11 +988,11 @@ class InrInform(_Strict):
 		Remaining blocks.
 	"""
 
-	cod_partic: CodPartic
+	cod_partic: _CodPartic
 	tit_pub: list[InrTitPub] = Field(default_factory=list)
 	cotas: list[InrCotas] = Field(default_factory=list)
 	swap: list[InrSwap] = Field(default_factory=list)
-	nocion_swap: MoneyValue | None = None
+	nocion_swap: _MoneyValue | None = None
 	demais_codif: list[InrDemaisCodif] = Field(default_factory=list)
 	dep_prazo_tit_if: list[InrDepPrazoTitIf] = Field(default_factory=list)
 	tit_agro_cred_priv: list[InrTitAgroCredPriv] = Field(default_factory=list)
@@ -980,10 +1023,11 @@ class InrInform(_Strict):
 			self.inv_ext,
 			self.demais_n_codif,
 		)
-		if not any(blocks):
-			raise ValueError("at least one asset block must be informed")
-		if bool(self.swap) != (self.nocion_swap is not None):
-			raise ValueError("nocion_swap is required with swap blocks and forbidden without")
+		ensure(any(blocks), "at least one asset block must be informed")
+		ensure(
+			bool(self.swap) == (self.nocion_swap is not None),
+			"nocion_swap is required with swap blocks and forbidden without",
+		)
 		return self
 
 
@@ -999,7 +1043,7 @@ class InrParte2Document(_Strict):
 	"""
 
 	header: InrParte2Header
-	informs: list[InrInform] = Field(min_length=1, max_length=MAX_PARTICIPANTS)
+	informs: list[InrInform] = Field(min_length=1, max_length=_MAX_PARTICIPANTS)
 
 	@model_validator(mode="after")
 	def _check_participants(self) -> InrParte2Document:

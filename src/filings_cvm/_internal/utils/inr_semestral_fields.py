@@ -11,7 +11,7 @@ from collections.abc import Callable
 from datetime import date, datetime
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 import re
-import unicodedata
+import xml.etree.ElementTree as ET
 
 from filings_cvm._internal.utils.br_identifiers import (
 	is_valid_cnpj,
@@ -36,9 +36,31 @@ _CPF_SHAPE_RE = re.compile(r"[0-9]{11}|[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}")
 _CODE_RE = re.compile(r"[0-9A-Za-z._/-]+")
 _MIN_YEAR = 1900
 _XML_TEXT_ENCODING = "windows-1252"
-_ALLOWED_CONTROLS = frozenset({"\n", "\t"})
+_XML_DECLARATION = '<?xml version="1.0" encoding="windows-1252"?>\n'
+# Cc controls except tab (09) and newline (0A).
+_CONTROL_RE = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
 # Length caps the spec does not state for a code field: a conservative, documented assumption.
 CODE_MAX_LEN = 50
+
+
+@type_checker
+def ensure(ok: bool, message: str) -> None:
+	"""Raise ``ValueError(message)`` unless ``ok``.
+
+	Parameters
+	----------
+	ok : bool
+		The condition that must hold.
+	message : str
+		Error text.
+
+	Raises
+	------
+	ValueError
+		If ``ok`` is false.
+	"""
+	if not ok:
+		raise ValueError(message)
 
 
 @type_checker
@@ -60,11 +82,9 @@ def parse_br_date(value: str) -> date:
 	ValueError
 		If the shape is wrong, the date does not exist (``31/02``) or the year is before 1900.
 	"""
-	if not _DATE_BR_RE.fullmatch(value):
-		raise ValueError("date must follow DD/MM/AAAA")
+	ensure(bool(_DATE_BR_RE.fullmatch(value)), "date must follow DD/MM/AAAA")
 	parsed = datetime.strptime(value, "%d/%m/%Y").date()  # noqa: DTZ007
-	if parsed.year < _MIN_YEAR:
-		raise ValueError(f"year must be >= {_MIN_YEAR}")
+	ensure(parsed.year >= _MIN_YEAR, f"year must be >= {_MIN_YEAR}")
 	return parsed
 
 
@@ -105,11 +125,9 @@ def check_month_year(value: str) -> str:
 	ValueError
 		If the shape is wrong, the month is not 01-12 or the year is before 1900.
 	"""
-	if not _MONTH_YEAR_RE.fullmatch(value):
-		raise ValueError("competence must follow MM/AAAA")
+	ensure(bool(_MONTH_YEAR_RE.fullmatch(value)), "competence must follow MM/AAAA")
 	parsed = datetime.strptime(value, "%m/%Y").date()  # noqa: DTZ007
-	if parsed.year < _MIN_YEAR:
-		raise ValueError(f"year must be >= {_MIN_YEAR}")
+	ensure(parsed.year >= _MIN_YEAR, f"year must be >= {_MIN_YEAR}")
 	return value
 
 
@@ -133,8 +151,10 @@ def check_cod_partic(value: str) -> str:
 		If it does not have the shape (segments up to 5/6/6 digits without zero filler, account
 		type 0 or 1, one check digit).
 	"""
-	if not _COD_PARTIC_RE.fullmatch(value):
-		raise ValueError("participant code must follow AAAAA.BBBBBB.CCCCCC.T-DV, no zero filler")
+	ensure(
+		bool(_COD_PARTIC_RE.fullmatch(value)),
+		"participant code must follow AAAAA.BBBBBB.CCCCCC.T-DV, no zero filler",
+	)
 	return value
 
 
@@ -157,8 +177,9 @@ def check_cvm_code(value: str) -> str:
 	ValueError
 		If it is not 1-5 digits starting with 1-9.
 	"""
-	if not _CVM_CODE_RE.fullmatch(value):
-		raise ValueError("CVM code must be 1 to 5 digits with no leading zero")
+	ensure(
+		bool(_CVM_CODE_RE.fullmatch(value)), "CVM code must be 1 to 5 digits with no leading zero"
+	)
 	return value
 
 
@@ -184,10 +205,11 @@ def to_cnpj_field(value: str) -> str:
 	ValueError
 		If the shape is wrong or the check digits fail.
 	"""
-	if not _CNPJ_SHAPE_RE.fullmatch(value):
-		raise ValueError("CNPJ must be 14 characters, bare or masked as NN.NNN.NNN/NNNN-NN")
-	if not is_valid_cnpj(value):
-		raise ValueError(f"invalid CNPJ: {value!r}")
+	ensure(
+		bool(_CNPJ_SHAPE_RE.fullmatch(value)),
+		"CNPJ must be 14 characters, bare or masked as NN.NNN.NNN/NNNN-NN",
+	)
+	ensure(is_valid_cnpj(value), f"invalid CNPJ: {value!r}")
 	return unmask_cnpj(value).lstrip("0")
 
 
@@ -214,8 +236,10 @@ def to_person_doc(tp_pessoa: str, value: str) -> str:
 	"""
 	if tp_pessoa == "PJ":
 		return to_cnpj_field(value)
-	if not _CPF_SHAPE_RE.fullmatch(value) or not is_valid_cpf(value):
-		raise ValueError(f"invalid CPF for PF: {value!r}")
+	ensure(
+		bool(_CPF_SHAPE_RE.fullmatch(value)) and is_valid_cpf(value),
+		f"invalid CPF for PF: {value!r}",
+	)
 	return unmask_cpf(value).lstrip("0")
 
 
@@ -239,9 +263,94 @@ def check_code(value: str) -> str:
 		If it is empty, longer than ``CODE_MAX_LEN`` or holds characters outside
 		``[0-9A-Za-z._/-]``.
 	"""
-	if len(value) > CODE_MAX_LEN or not _CODE_RE.fullmatch(value):
-		raise ValueError(f"code must be 1 to {CODE_MAX_LEN} characters of [0-9A-Za-z._/-]")
+	ensure(
+		len(value) <= CODE_MAX_LEN and bool(_CODE_RE.fullmatch(value)),
+		f"code must be 1 to {CODE_MAX_LEN} characters of [0-9A-Za-z._/-]",
+	)
 	return value
+
+
+@type_checker
+def _ensure_encodable(value: str) -> None:
+	"""Require ``value`` to be encodable in windows-1252.
+
+	Parameters
+	----------
+	value : str
+		The text.
+
+	Raises
+	------
+	ValueError
+		Naming the first character windows-1252 cannot encode.
+	"""
+	try:
+		value.encode(_XML_TEXT_ENCODING)
+	except UnicodeEncodeError as exc:
+		raise ValueError(
+			f"character {value[exc.start]!r} is not encodable in windows-1252"
+		) from exc
+
+
+@type_checker
+def _to_decimal(value: object, label: str, expected: str) -> Decimal:
+	"""Coerce an ``int``/``str``/``Decimal`` to ``Decimal``; refuse everything else.
+
+	Parameters
+	----------
+	value : object
+		Raw input.
+	label : str
+		Field kind for the error message (``"decimal"`` or ``"integer"``).
+	expected : str
+		Accepted types, for the error message.
+
+	Returns
+	-------
+	Decimal
+		The parsed value (possibly NaN or infinite; the caller checks).
+
+	Raises
+	------
+	ValueError
+		If the type is a float, bool or unsupported, or the text is not a number.
+	"""
+	ensure(
+		not isinstance(value, bool) and isinstance(value, Decimal | int | str),
+		f"expected {expected}, got {type(value).__name__}",
+	)
+	try:
+		return value if isinstance(value, Decimal) else Decimal(str(value))
+	except InvalidOperation as exc:
+		raise ValueError(f"invalid {label} value: {value!r}") from exc
+
+
+@type_checker
+def _truncate(value: Decimal, quantum: Decimal) -> Decimal:
+	"""Truncate toward zero at ``quantum``; ``-0`` becomes ``0``.
+
+	Parameters
+	----------
+	value : Decimal
+		A finite value.
+	quantum : Decimal
+		The scale, e.g. ``Decimal("0.01")``.
+
+	Returns
+	-------
+	Decimal
+		The truncated value.
+
+	Raises
+	------
+	ValueError
+		If the value has too many digits to quantize.
+	"""
+	try:
+		truncated = value.quantize(quantum, rounding=ROUND_DOWN)
+	except InvalidOperation as exc:
+		raise ValueError(f"invalid decimal value: {value!r}") from exc
+	return truncated if truncated else truncated.copy_abs()
 
 
 @type_checker
@@ -281,19 +390,10 @@ def text_field(max_len: int) -> Callable[[str], str]:
 		ValueError
 			If it is blank, too long, holds a control character or is not encodable.
 		"""
-		if not value.strip():
-			raise ValueError("text must not be blank")
-		if len(value) > max_len:
-			raise ValueError(f"text must have at most {max_len} characters")
-		for char in value:
-			if unicodedata.category(char) == "Cc" and char not in _ALLOWED_CONTROLS:
-				raise ValueError(f"control character U+{ord(char):04X} is not allowed")
-		try:
-			value.encode(_XML_TEXT_ENCODING)
-		except UnicodeEncodeError as exc:
-			raise ValueError(
-				f"character {value[exc.start]!r} is not encodable in windows-1252"
-			) from exc
+		ensure(bool(value.strip()), "text must not be blank")
+		ensure(len(value) <= max_len, f"text must have at most {max_len} characters")
+		ensure(_CONTROL_RE.search(value) is None, "control character is not allowed")
+		_ensure_encodable(value)
 		return value
 
 	return _check
@@ -338,16 +438,9 @@ def strict_decimal(places: int) -> Callable[[object], Decimal]:
 		ValueError
 			If the value is a float, bool or unsupported type, or is not a finite decimal.
 		"""
-		if isinstance(value, bool) or not isinstance(value, Decimal | int | str):
-			raise ValueError(f"expected Decimal, int or str, got {type(value).__name__}")
-		try:
-			as_decimal = value if isinstance(value, Decimal) else Decimal(value)
-			if not as_decimal.is_finite():
-				raise ValueError("value must be finite")
-			truncated = as_decimal.quantize(quantum, rounding=ROUND_DOWN)
-		except InvalidOperation as exc:
-			raise ValueError(f"invalid decimal value: {value!r}") from exc
-		return abs(truncated) if truncated == 0 else truncated
+		as_decimal = _to_decimal(value, "decimal", "Decimal, int or str")
+		ensure(as_decimal.is_finite(), "value must be finite")
+		return _truncate(as_decimal, quantum)
 
 	return _coerce
 
@@ -409,12 +502,33 @@ def strict_int(value: object) -> int:
 	ValueError
 		If the value is a float, bool, unsupported type, or has a fractional part.
 	"""
-	if isinstance(value, bool) or not isinstance(value, Decimal | int | str):
-		raise ValueError(f"expected int, Decimal or str, got {type(value).__name__}")
-	try:
-		as_decimal = value if isinstance(value, Decimal) else Decimal(value)
-	except InvalidOperation as exc:
-		raise ValueError(f"invalid integer value: {value!r}") from exc
-	if not as_decimal.is_finite() or as_decimal != as_decimal.to_integral_value():
-		raise ValueError("value must be a whole number")
+	as_decimal = _to_decimal(value, "integer", "int, Decimal or str")
+	ensure(
+		as_decimal.is_finite() and as_decimal == as_decimal.to_integral_value(),
+		"value must be a whole number",
+	)
 	return int(as_decimal)
+
+
+@type_checker
+def finish_xml(root: ET.Element, output_path: str | None) -> str | None:
+	"""Indent ``root``, prepend the declaration, then return or write the document.
+
+	Parameters
+	----------
+	root : ET.Element
+		The ``DOC_ARQ`` element.
+	output_path : str or None
+		Destination file; ``None`` returns the text instead.
+
+	Returns
+	-------
+	str or None
+		The XML when ``output_path`` is ``None``, else ``None``.
+	"""
+	ET.indent(root, space="    ")
+	xml_str = _XML_DECLARATION + ET.tostring(root, encoding="unicode", short_empty_elements=False)
+	if output_path is None:
+		return xml_str
+	write_xml_file(output_path, xml_str)
+	return None
