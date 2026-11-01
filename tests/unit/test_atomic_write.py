@@ -146,6 +146,24 @@ def mode_written_under_umask_022(tmp_path: Path) -> int:
 	return stat.S_IMODE(path_out.stat().st_mode)
 
 
+@pytest.fixture
+def mode_kept_after_overwrite(tmp_path: Path) -> int:
+	"""Overwrite a 0600 file under umask 022 and return its permission bits."""
+	path_out = tmp_path / "out.xml"
+	path_out.write_bytes(b"old")
+	path_out.chmod(0o600)
+	umask = os.umask(0o022)
+	atomic_write_bytes(path_out, b"x")
+	os.umask(umask)
+	return stat.S_IMODE(path_out.stat().st_mode)
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permission bits")
+def test_atomic_write_bytes_keeps_existing_target_mode(mode_kept_after_overwrite: int) -> None:
+	"""Replacing a restrictive file keeps its permission bits."""
+	assert mode_kept_after_overwrite == 0o600
+
+
 @pytest.mark.skipif(os.name != "posix", reason="POSIX permission bits and directory fsync")
 def test_atomic_write_bytes_uses_umask_default_mode(mode_written_under_umask_022: int) -> None:
 	"""The file gets open()'s default permissions, not mkstemp's 0600."""
