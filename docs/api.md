@@ -21,7 +21,7 @@ from filings_cvm import RetryPolicy
 > **portal root** que é dono do leitor — o mesmo agrupamento que a
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md), [Lâmina V3](submission/lamina.md), [Lâmina V1](submission/lamina_v1.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
 
@@ -150,6 +150,21 @@ Modelos públicos: `LaminaDocument`, `LaminaHeader`, `LaminaInform` e os blocos
 `LaminaListaTabRentMensal`, `LaminaTabRentMensal`, `LaminaTabVarDesemp`,
 `LaminaInformExemploComp`, `LaminaTabSimulDespesas`). Limites e decisões: veja
 [Lâmina V3](submission/lamina.md).
+
+### `LaminaV1`
+
+Escritor da **Lâmina de Fundos V1** (`PadraoXMLLamina.asp`, `COD_DOC=24`, `VERSAO=1.0`). Mesma
+assinatura de `Lamina.export(doc, output_path=None)`; a escrita em arquivo é atômica.
+
+```python
+from filings_cvm.submission import LaminaV1
+
+xml = LaminaV1().export(doc)                         # retorna str
+LaminaV1().export(doc, output_path="lamina_v1.xml")  # grava arquivo, retorna None
+```
+
+Modelos públicos: `LaminaV1Document`, `LaminaV1Header`, `LaminaV1Inform`; os blocos internos são
+os da V3. Diferenças e limites: veja [Lâmina V1](submission/lamina_v1.md).
 
 ### `Cda`
 
