@@ -204,7 +204,7 @@ def test_sacado_with_placeholder_document_is_accepted() -> None:
 
 
 def test_invalid_fund_cnpj_is_rejected() -> None:
-	"""CNPJ with bad check digits fails the page's 'CPF/CNPJ tem que ser válidos'."""
+	"""CNPJ with bad check digits fails the page's `CPF/CNPJ tem que ser válidos`."""
 	with pytest.raises(ValidationError, match="CNPJ"):
 		_doc(lambda d: d["cab_inform"].update(nr_cnpj_fundo="11222333000182"))
 

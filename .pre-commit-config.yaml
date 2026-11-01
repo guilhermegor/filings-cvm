@@ -286,6 +286,19 @@ repos:
         files: ^(\.coveragerc|src/.*\.py|bin/check_coverage_floor\.py)$
         pass_filenames: false
 
+      - id: check-comment-language
+        name: documentation-language boundary (code is English)
+        entry: bash bin/poetry_exec.sh run python bin/check_comment_language.py
+        language: system
+        files: \.(py|ya?ml|sql|sh|toml|cfg|ini)$|\.env\.example$
+        exclude: ^docs/
+
+      - id: check-comment-budget
+        name: comment budget (ratchet + long runs + decorative banners)
+        entry: bash bin/poetry_exec.sh run python bin/check_comment_budget.py --require-baseline
+        language: system
+        pass_filenames: false
+
       - id: gate-integrity
         name: gate integrity (a PR must not weaken a check without saying why)
         entry: bash bin/poetry_exec.sh run python bin/check_gate_integrity.py

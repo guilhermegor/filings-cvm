@@ -1,4 +1,4 @@
-"""CVM open-data **Investidor Não Residente** readers (`INVNR/`).
+"""CVM open-data `Investidor Não Residente` readers (`INVNR/`).
 
 Mirrors the `dados.cvm.gov.br/dados/INVNR/` portal branch — one sibling among the portal's other
 roots. It publishes only a registry (`INVNR/CAD`, :mod:`filings_cvm.ingestion.invnr.cad`) of the

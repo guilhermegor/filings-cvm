@@ -274,6 +274,13 @@ jobs:
       - name: Run Required Checks Sync Gate
         if: runner.os == 'Linux'
         run: poetry run python bin/check_required_checks_sync.py --required-list bin/required-checks.txt
+      - name: Run Documentation-Language Boundary Enforcement
+        if: runner.os == 'Linux'
+        run: poetry run python bin/check_comment_language.py
+
+      - name: Run Comment Budget Ratchet
+        if: runner.os == 'Linux'
+        run: poetry run python bin/check_comment_budget.py --require-baseline
       # ---- END code- and test-quality guards (#294) ------------------------------------
 
       - name: Run Integration Tests

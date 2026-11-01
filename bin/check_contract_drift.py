@@ -531,9 +531,6 @@ _READER_TO_META: dict[str, str] = {
 }
 
 
-# ---------------------------------------------------------------------------------------------
-# Pure oracles (no network) — the two comparisons, unit-tested exhaustively.
-# ---------------------------------------------------------------------------------------------
 
 
 def real_header_drift(
@@ -639,9 +636,6 @@ def meta_name_drift(
 	return list_problems
 
 
-# ---------------------------------------------------------------------------------------------
-# Registry access (no network) — resolve reader classes and their contracts.
-# ---------------------------------------------------------------------------------------------
 
 
 def contract_of(cls_reader: type[IngestionReader]) -> FileContract:
@@ -696,9 +690,6 @@ def real_columns(df_read: pd.DataFrame) -> tuple[str, ...]:
 	return tuple(df_read.columns[:-int_n])
 
 
-# ---------------------------------------------------------------------------------------------
-# Online checks — one read per member (network); tolerant of an unpublished period.
-# ---------------------------------------------------------------------------------------------
 
 # Reference dates probed when a reader needs one, newest first: this month, the last few months
 # (covers month-partitioned dumps whose current file is not yet published), then the last few
@@ -970,9 +961,6 @@ def collect_drift(int_timeout_s: int = 60) -> list[str]:
 	return list_problems
 
 
-# ---------------------------------------------------------------------------------------------
-# Issue upsert (network) — one tracking issue, found again by label + marker.
-# ---------------------------------------------------------------------------------------------
 
 
 def build_issue_body(list_problems: list[str]) -> str:

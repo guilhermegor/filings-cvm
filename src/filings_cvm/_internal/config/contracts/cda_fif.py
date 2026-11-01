@@ -1,6 +1,6 @@
 """Data contract for the CVM open-data *CDA FIF* CSVs (ingestion).
 
-The CDA (Composição e Diversificação das Aplicações) monthly dump `cda_fi_AAAAMM.zip`
+The CDA (`Composição e Diversificação das Aplicações`) monthly dump `cda_fi_AAAAMM.zip`
 holds **several** CSV blocks (BLC_1…BLC_8, one per asset-type layout, plus PL). This
 contract declares only the columns **every** block shares — the identifying keys — so the
 same contract validates each block before the blocks are consolidated into one frame.

@@ -114,9 +114,6 @@ _IMPLEMENTED_PACKAGES: frozenset[str] = frozenset(
 )
 
 
-# ---------------------------------------------------------------------------------------------
-# Pure logic (no network) — the gap, unit-tested.
-# ---------------------------------------------------------------------------------------------
 
 
 def missing_packages(
@@ -197,9 +194,6 @@ def build_issue_body(list_missing: list[str], int_published: int) -> str:
 	)
 
 
-# ---------------------------------------------------------------------------------------------
-# Network — fetch the portal index and upsert the tracking issue.
-# ---------------------------------------------------------------------------------------------
 
 
 def fetch_published(int_timeout_s: int = 60) -> frozenset[str]:

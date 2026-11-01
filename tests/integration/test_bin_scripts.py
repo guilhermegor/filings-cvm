@@ -25,11 +25,6 @@ import sys
 import pytest
 
 
-# --------------------------
-# Module Utilities
-# --------------------------
-
-
 def _bin_script(str_name: str) -> Path:
 	"""Return the absolute path to a script under the repository's ``bin/``.
 
@@ -103,11 +98,6 @@ def _run(
 	)
 
 
-# --------------------------
-# bin/poetry_exec.sh
-# --------------------------
-
-
 def test_poetry_exec_no_args_exits_with_usage_error() -> None:
 	"""No arguments yields exit code 2 and a usage message routed to stderr."""
 	cls_result = _run("poetry_exec.sh")
@@ -131,11 +121,6 @@ def test_poetry_exec_version_keeps_stdout_clean() -> None:
 
 	# The resolution status the wrapper emits lands on stderr, not stdout.
 	assert "Detected OS" in cls_result.stderr
-
-
-# --------------------------
-# bin/precommit.sh
-# --------------------------
 
 
 def test_precommit_skips_gracefully_off_git_tree(tmp_path: Path) -> None:
@@ -202,11 +187,6 @@ def test_precommit_registers_safe_directory_for_shared_worktree(tmp_path: Path) 
 	assert str(path_repo) in str_cfg or "%(prefix)" in str_cfg
 	# The self-heal never fabricates a repo and never emits the "no git repo" skip.
 	assert "No git repository here" not in str_output
-
-
-# --------------------------
-# bin/lint_actions.sh
-# --------------------------
 
 
 def _skip_without_actionlint() -> None:
@@ -289,11 +269,6 @@ def test_lint_actions_rejects_a_trigger_that_is_not_a_workflow_event(tmp_path: P
 
 	assert cls_result.returncode != 0
 	assert "unknown Webhook event" in cls_result.stdout + cls_result.stderr
-
-
-# --------------------------
-# bin/quality_ratchet.py, bin/check_required_checks_sync.py, bin/check_coverage_floor.py
-# --------------------------
 
 
 def _run_python(

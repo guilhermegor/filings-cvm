@@ -1,4 +1,4 @@
-"""Data contracts for the CVM open-data *Extrato das Informações sobre o Fundo* (ingestion).
+"""Data contracts for the CVM open-data `Extrato das Informações sobre o Fundo` (ingestion).
 
 The dataset ``FI/DOC/EXTRATO`` publishes **two different artifacts**, not one series — a fact the
 directory listing gives away and the filenames do not:

@@ -1,7 +1,7 @@
 """CVM CGVN CIA_ABERTA (índice) — ingestion (leitura) reader.
 
-The **index** member: one row per *Informe sobre o Código Brasileiro de Governança
-Corporativa* a listed company filed in the year, with a ``Link_Download`` returned as text
+The **index** member: one row per `Informe sobre o Código Brasileiro de Governança
+Corporativa` a listed company filed in the year, with a ``Link_Download`` returned as text
 and **never followed**.
 
 It carries **four** date columns — the reference and delivery dates plus the fiscal year's
