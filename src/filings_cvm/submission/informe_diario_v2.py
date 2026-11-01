@@ -4,14 +4,11 @@ Produces the V2 Daily Report XML (in force 2012-07-01 to 2015-09-30) from valida
 schema models. Shared formatting and the shareholder block are reused from the V4 writer.
 """
 
-import os
-from pathlib import Path
-import tempfile
-
 from filings_cvm._internal.config.schemas.informe_diario_v2 import (
 	InformeDiarioV2Document,
 	InformeDiarioV2Inform,
 )
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm.submission.informe_diario import InformeDiario
 
 
@@ -47,7 +44,7 @@ class InformeDiarioV2(InformeDiario):
 		xml_str = self._build_v2_xml(doc)
 		if output_path is None:
 			return xml_str
-		self._write_atomic(xml_str, Path(output_path))
+		atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
 		return None
 
 	def _build_v2_xml(self, doc: InformeDiarioV2Document) -> str:
@@ -78,31 +75,6 @@ class InformeDiarioV2(InformeDiario):
 			lines.extend(self._build_v2_inform_lines(inform))
 		lines.append("</DOC_ARQ>")
 		return "\n".join(lines)
-
-	@staticmethod
-	def _write_atomic(xml_str: str, target: Path) -> None:
-		"""Encode first, then replace the target via a same-directory temp file.
-
-		Parameters
-		----------
-		xml_str : str
-			XML text.
-		target : Path
-			Destination file; left intact if encoding or writing fails.
-
-		Notes
-		-----
-		PR #330 (``atomic_write_bytes``) will migrate this.
-		"""
-		data = xml_str.encode("windows-1252")
-		fd, tmp = tempfile.mkstemp(dir=target.parent, suffix=".tmp")
-		try:
-			with os.fdopen(fd, "wb") as fh:
-				fh.write(data)
-			os.replace(tmp, target)
-		except BaseException:
-			Path(tmp).unlink(missing_ok=True)
-			raise
 
 	def _build_v2_inform_lines(self, inform: InformeDiarioV2Inform) -> list[str]:
 		"""Build the XML lines for one V2 INFORM block.

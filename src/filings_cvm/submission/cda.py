@@ -5,13 +5,13 @@ Pure logic plus file I/O at the edges — no network.
 """
 
 from decimal import Decimal
-from pathlib import Path
 from xml.etree import ElementTree as ET
 
 from pydantic import BaseModel
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.cda import CdaDocument, CdaInform
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 
 
 # Decimal places per tag, from the page's field descriptions.
@@ -88,7 +88,7 @@ class Cda(SubmissionWriter[CdaDocument]):
 		)
 		if output_path is not None:
 			# Bytes first, so an unencodable char cannot truncate an existing file.
-			Path(output_path).write_bytes(xml_str.encode("windows-1252"))
+			atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
 			return None
 		return xml_str
 

@@ -138,3 +138,25 @@ def test_file_written_as_windows_1252(tmp_path: object) -> None:
 	path = tmp_path / "v2.xml"  # type: ignore[operator]
 	InformeDiarioV2().export(_doc(), output_path=str(path))
 	assert path.read_bytes().startswith(b'<?xml version="1.0" encoding="windows-1252"?>')
+
+
+def test_cod_doc_other_than_one_rejected() -> None:
+	"""The page fixes COD_DOC at 1 for daily reports."""
+	with pytest.raises(ValidationError):
+		InformeDiarioV2Header(dt_compt="15/01/2014", dt_gerac_arq="16/01/2014", cod_doc=2)
+
+
+def test_export_overwrite_preserves_mode(tmp_path: object) -> None:
+	"""Overwriting keeps the target's permission bits."""
+	path = tmp_path / "v2.xml"  # type: ignore[operator]
+	path.write_bytes(b"old")
+	path.chmod(0o644)
+	InformeDiarioV2().export(_doc(), output_path=str(path))
+	assert path.stat().st_mode & 0o777 == 0o644
+
+
+def test_export_leaves_no_temp_file(tmp_path: object) -> None:
+	"""A finished export leaves only the target in the directory."""
+	path = tmp_path / "v2.xml"  # type: ignore[operator]
+	InformeDiarioV2().export(_doc(), output_path=str(path))
+	assert [p.name for p in path.parent.iterdir()] == ["v2.xml"]

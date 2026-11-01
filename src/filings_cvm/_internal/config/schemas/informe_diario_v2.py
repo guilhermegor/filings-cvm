@@ -29,6 +29,7 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 class InformeDiarioV2Header(InformeDiarioHeader, BaseModel):
 	"""CAB_INFORM — V2 header; ``VERSAO`` is pinned to ``2.0``."""
 
+	cod_doc: Literal[1] = 1
 	versao: Literal["2.0"] = "2.0"
 
 

@@ -8,4 +8,4 @@ Branch `feat/336-informe-diario-v2-writer`. Spec: `PadraoXMLInfoDiarioNet739.asp
 - [x] Registered in `submission/__init__.py`; docs page, nav, api.md, index.md, README, CLAUDE.md.
 - [ ] PR (`Closes #336`).
 
-Note: `atomic_write_bytes` (#330) is not on main; output is written like the V4 writer and #330 will migrate it.
+Note: output goes through `atomic_write_bytes` (merged from main, #330/#362).
