@@ -171,6 +171,15 @@ Modelos de entrada, todos em `filings_cvm.submission`: `CdaDocument`, `CdaHeader
 `CdaPosFim`, `CdaAtivoExt`, `CdaEmitter`, `CdaBankEmitter`, `CdaPosFixIndex`, `CdaRiskRating`.
 Campos, escalas e regras em [CDA V4](submission/cda.md).
 
+### `CdaV3`
+
+`filings_cvm.submission.CdaV3`
+
+Como `Cda`, para o padrão CDA V3 (`VERSAO=3.0`, até 50 fundos). `export(doc, output_path=None)` recebe
+um `CdaV3Document` (um `CdaDocument` V4 é recusado). Modelos próprios do V3: `CdaV3Document`,
+`CdaV3Header`, `CdaV3Inform`, `CdaV3Cotas`, `CdaV3DepPrazoTitIf`, `CdaV3InvExt`; os demais vêm do V4.
+Detalhes em [CDA V3](submission/cda_v3.md).
+
 ---
 
 ### `CadastroAtivos`
