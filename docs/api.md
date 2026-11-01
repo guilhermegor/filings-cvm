@@ -169,7 +169,7 @@ Modelos de entrada, todos em `filings_cvm.submission`: `CdaDocument`, `CdaHeader
 `CdaTitPub`, `CdaCotas`, `CdaSwap`, `CdaSwapAplic`, `CdaSwapPosFim`, `CdaDemaisCodif`,
 `CdaDepPrazoTitIf`, `CdaTitAgroCredPriv`, `CdaInvExt`, `CdaDemaisNCodif`, `CdaAplic`, `CdaNegoc`,
 `CdaPosFim`, `CdaAtivoExt`, `CdaEmitter`, `CdaBankEmitter`, `CdaPosFixIndex`, `CdaRiskRating`.
-Campos, escalas e regras em [CDA V4](submission/cda.md).
+Campos, escalas e regras em [CDA V4](submission/cda.md). O CDA V2 (`CdaV2` + `CdaV2Document`, `CdaV2Header`, `CdaV2Inform`, `CdaV2TitPub`, `CdaV2Cotas`, `CdaV2Swap`, `CdaV2DemaisCodif`, `CdaV2DemaisNCodif` e os blocos `CdaV2Aplic`/`CdaV2Negoc`/`CdaV2PosFim`) está em [CDA V2](submission/cda_v2.md).
 
 ---
 
