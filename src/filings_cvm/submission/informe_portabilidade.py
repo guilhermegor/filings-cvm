@@ -105,6 +105,27 @@ def _encode_checked(xml_str: str) -> bytes:
 	return payload
 
 
+@type_checker
+def _require_informs(doc: InformePortabilidadeDocument) -> None:
+	"""Reject a document whose ``informs`` list was emptied after construction.
+
+	The document model does not validate on assignment, so the schema's one-or-more rule
+	can be bypassed by ``doc.informs = []``.
+
+	Parameters
+	----------
+	doc : InformePortabilidadeDocument
+		The document about to be serialised.
+
+	Raises
+	------
+	ValueError
+		If ``doc.informs`` is empty.
+	"""
+	if not doc.informs:
+		raise ValueError("document has no INFORM block: at least one is required")
+
+
 class InformePortabilidade(SubmissionWriter[InformePortabilidadeDocument]):
 	"""Serialize a validated Informe de Portabilidade document to CVM-compliant XML.
 
@@ -140,9 +161,11 @@ class InformePortabilidade(SubmissionWriter[InformePortabilidadeDocument]):
 		Raises
 		------
 		ValueError
-			If the document holds text windows-1252 cannot encode or XML cannot carry
-			(only possible when validation was bypassed, e.g. ``model_construct``).
+			If ``informs`` is empty (e.g. emptied after construction), or the document holds
+			text windows-1252 cannot encode or XML cannot carry (only possible when validation
+			was bypassed, e.g. ``model_construct``).
 		"""
+		_require_informs(doc)
 		xml_str = _build_xml(doc)
 		payload = _encode_checked(xml_str)
 		if output_path is None:

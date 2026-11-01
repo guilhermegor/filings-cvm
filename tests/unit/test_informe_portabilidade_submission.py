@@ -171,6 +171,14 @@ def _unencodable_doc() -> InformePortabilidadeDocument:
 	)
 
 
+def test_export_rejects_informs_emptied_after_construction() -> None:
+	"""Export rejects informs emptied after construction (no validate_assignment on the doc)."""
+	doc = _doc()
+	doc.informs = []
+	with pytest.raises(ValueError, match="no INFORM block"):
+		InformePortabilidade().export(doc)
+
+
 def test_export_unencodable_text_raises(tmp_path: Path) -> None:
 	"""Export unencodable text raises."""
 	with pytest.raises(ValueError, match="cannot be serialised"):
