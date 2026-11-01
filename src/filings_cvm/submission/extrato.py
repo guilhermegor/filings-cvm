@@ -13,7 +13,7 @@ from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parse
 from pydantic import BaseModel
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
-from filings_cvm._internal.config.schemas.extrato import ExtratoDocument
+from filings_cvm._internal.config.schemas.extrato import ExtratoDocument, ExtratoRow
 from filings_cvm._internal.utils.typing import type_checker
 
 
@@ -71,6 +71,46 @@ def _append(parent: ET.Element, name: str, value: object) -> None:
 	element.text = _scalar_text(value)
 
 
+@type_checker
+def _build_payload(header: BaseModel, rows: list[ExtratoRow]) -> tuple[str, bytes]:
+	"""Serialize a header and rows to the Extrato XML text and its encoded bytes.
+
+	Shared by every Extrato version: the versions differ in the header, not in the walk.
+
+	Parameters
+	----------
+	header : BaseModel
+		The ``CAB_INFORM`` block.
+	rows : list[ExtratoRow]
+		One ``ROW_EXTRATO`` per fund.
+
+	Returns
+	-------
+	tuple[str, bytes]
+		The XML text and its windows-1252 encoding.
+
+	Raises
+	------
+	ValueError
+		If the text cannot be encoded or is not well-formed XML, or exceeds 1 MB.
+	"""
+	root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
+	_append(root, "cab_inform", header)
+	funds = ET.SubElement(root, "EXTRATO_FUNDO")
+	for row in rows:
+		_append(funds, "row_extrato", row)
+	ET.indent(root, space=_INDENT)
+	xml_str = _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
+	try:
+		payload = xml_str.encode(_ENCODING)
+		ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
+	except (UnicodeEncodeError, ET.ParseError) as exc:
+		raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
+	if len(payload) > _MAX_BYTES:
+		raise ValueError(f"file is {len(payload)} bytes; the page allows at most 1 MB")
+	return xml_str, payload
+
+
 class Extrato(SubmissionWriter[ExtratoDocument]):
 	"""Serialize a validated Extrato V3 document to CVM-compliant XML.
 
@@ -109,20 +149,7 @@ class Extrato(SubmissionWriter[ExtratoDocument]):
 			possible when validation was bypassed, e.g. ``model_construct``), or the encoded
 			file exceeds the page's 1 MB limit.
 		"""
-		root = ET.Element("DOC_ARQ", {"xmlns": _NAMESPACE})
-		_append(root, "cab_inform", doc.header)
-		funds = ET.SubElement(root, "EXTRATO_FUNDO")
-		for row in doc.rows:
-			_append(funds, "row_extrato", row)
-		ET.indent(root, space=_INDENT)
-		xml_str = _DECLARATION + ET.tostring(root, encoding="unicode") + "\n"
-		try:
-			payload = xml_str.encode(_ENCODING)
-			ET.fromstring(payload)  # noqa: S314  # well-formedness self-check of our own output
-		except (UnicodeEncodeError, ET.ParseError) as exc:
-			raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
-		if len(payload) > _MAX_BYTES:
-			raise ValueError(f"file is {len(payload)} bytes; the page allows at most 1 MB")
+		xml_str, payload = _build_payload(doc.header, doc.rows)
 		if output_path is None:
 			return xml_str
 		Path(output_path).write_bytes(payload)
