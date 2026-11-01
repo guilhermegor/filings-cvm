@@ -38,6 +38,8 @@ não desta documentação:
   — envio (`submission/informe_diario.py`).
 - ✅ **Informe Quadrimestral — V2** ([`PadraoXMLInfoTrimV2.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp))
   — envio (`submission/informe_quadrimestral.py`).
+- ✅ **Informe Trimestral — V1** ([`PadraoXMLInfoTrim.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp), válido até 2017-06)
+  — envio (`submission/informe_trimestral_v1.py`).
 - ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp))
   — envio (`submission/cadastro_ativos.py`).
 

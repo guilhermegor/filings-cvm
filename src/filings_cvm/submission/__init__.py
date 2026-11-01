@@ -123,6 +123,11 @@ from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ListaClasseCotas,
 	ListaCotstCateg,
 )
+from filings_cvm._internal.config.schemas.informe_trimestral_v1 import (
+	InformeTrimestralV1Document,
+	InformeTrimestralV1Header,
+	InformeTrimestralV1Inform,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -175,6 +180,7 @@ from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
 from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
+from filings_cvm.submission.informe_trimestral_v1 import InformeTrimestralV1
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
@@ -253,6 +259,10 @@ __all__ = [
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
+	"InformeTrimestralV1",
+	"InformeTrimestralV1Document",
+	"InformeTrimestralV1Header",
+	"InformeTrimestralV1Inform",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
