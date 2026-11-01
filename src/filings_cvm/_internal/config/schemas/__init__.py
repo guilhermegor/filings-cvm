@@ -16,6 +16,22 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.informe_anual_auditor import (
+	AUDITED_ENTITY_TYPES,
+	TRAINING_TYPES,
+	AffiliatedEntity,
+	AuditedEntity,
+	AuditorAddress,
+	AuditorAnnualBilling,
+	AuditorBlock,
+	AuditorHeader,
+	AuditorIdentity,
+	AuditorRepresentative,
+	AuditorStaff,
+	AuditorTraining,
+	InformeAnualAuditorDocument,
+	TrainingParticipant,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -65,6 +81,18 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 
 
 __all__ = [
+	"AUDITED_ENTITY_TYPES",
+	"TRAINING_TYPES",
+	"AffiliatedEntity",
+	"AuditedEntity",
+	"AuditorAddress",
+	"AuditorAnnualBilling",
+	"AuditorBlock",
+	"AuditorHeader",
+	"AuditorIdentity",
+	"AuditorRepresentative",
+	"AuditorStaff",
+	"AuditorTraining",
 	"ClasseCotas",
 	"ClientCount",
 	"CotistCategory",
@@ -75,6 +103,7 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InformeAnualAuditorDocument",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
@@ -109,6 +138,7 @@ __all__ = [
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
+	"TrainingParticipant",
 	"VarOutros",
 	"VarPercValCota",
 ]

@@ -108,6 +108,19 @@ from filings_cvm._internal.config.schemas.inf_mensal_fidc import (
 	TaxaValorMobili,
 	ValoresMob,
 )
+from filings_cvm._internal.config.schemas.informe_anual_auditor import (
+	AffiliatedEntity,
+	AuditedEntity,
+	AuditorAddress,
+	AuditorAnnualBilling,
+	AuditorHeader,
+	AuditorIdentity,
+	AuditorRepresentative,
+	AuditorStaff,
+	AuditorTraining,
+	InformeAnualAuditorDocument,
+	TrainingParticipant,
+)
 from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
@@ -171,6 +184,7 @@ from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
+from filings_cvm.submission.informe_anual_auditor import InformeAnualAuditor
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
@@ -182,10 +196,19 @@ from filings_cvm.submission.perfil_mensal import (
 
 
 __all__ = [
+	"AffiliatedEntity",
 	"Alienacao",
 	"Amort",
 	"Amortizacao",
 	"AplicAtivo",
+	"AuditedEntity",
+	"AuditorAddress",
+	"AuditorAnnualBilling",
+	"AuditorHeader",
+	"AuditorIdentity",
+	"AuditorRepresentative",
+	"AuditorStaff",
+	"AuditorTraining",
 	"CadastroAtivos",
 	"CadastroAtivosDocument",
 	"CadastroAtivosHeader",
@@ -245,6 +268,8 @@ __all__ = [
 	"InfMensalFidcHeader",
 	"InfMensalFidcInform",
 	"InformSacados",
+	"InformeAnualAuditor",
+	"InformeAnualAuditorDocument",
 	"InformeDiario",
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
@@ -320,6 +345,7 @@ __all__ = [
 	"TaxaSemAquis",
 	"TaxaTitpubFed",
 	"TaxaValorMobili",
+	"TrainingParticipant",
 	"ValoresMob",
 	"VarOutros",
 	"VarPercValCota",
