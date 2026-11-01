@@ -3831,3 +3831,105 @@ def test_dependabot_pushed_head_fails_closed_on_a_timeout(monkeypatch: pytest.Mo
 	cls_hang = Mock(side_effect=subprocess.TimeoutExpired("gh", 20))
 	monkeypatch.setattr(subprocess, "run", cls_hang)
 	assert not _load_gate().dependabot_pushed_head("o/r", "abc")
+
+
+def _run_git(path_cwd: Path, dict_env: dict[str, str], *list_args: str) -> None:
+	"""Run ``git`` with a fixed identity in ``path_cwd``, raising on failure."""
+	list_ident = ["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"]
+	subprocess.run(  # noqa: S603
+		["git", *list_ident, *list_args],  # noqa: S607
+		cwd=path_cwd,
+		env=dict_env,
+		check=True,
+		capture_output=True,
+	)
+
+
+def _base_checkout(tmp_path: Path) -> Path:
+	"""Build a repo whose ``origin/main`` roster is the base and whose worktree roster differs.
+
+	Returns
+	-------
+	Path
+		The repo root; its working-tree roster additionally lists the PR author as a bot.
+	"""
+	path_git = tmp_path / ".git"
+	dict_env = {
+		**os.environ,
+		"GIT_DIR": str(path_git),
+		"GIT_WORK_TREE": str(tmp_path),
+		"GIT_INDEX_FILE": str(path_git / "index"),
+	}
+	run = functools.partial(_run_git, tmp_path, dict_env)
+	run("init", "-q", "-b", "main")
+	path_roster = tmp_path / ".review-bots.yaml"
+	path_roster.write_text(
+		"reviewers:\n  - login: coderabbitai[bot]\n    posts: threads\n", encoding="utf-8"
+	)
+	run("add", ".review-bots.yaml")
+	run("commit", "-q", "-m", "base")
+	run("update-ref", "refs/remotes/origin/main", "HEAD")
+	path_roster.write_text(
+		"reviewers:\n  - login: coderabbitai[bot]\n    posts: threads\n"
+		"  - login: mallory\n    posts: threads\n",
+		encoding="utf-8",
+	)
+	return tmp_path
+
+
+def test_policy_root_pr_edited_roster_cannot_add_its_author_as_a_bot(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A PR that adds itself to ``.review-bots.yaml`` is still judged by the base roster."""
+	cls_gate = _load_gate()
+	path_repo = _base_checkout(tmp_path)
+	monkeypatch.chdir(path_repo)
+	monkeypatch.setenv("GITHUB_BASE_REF", "main")
+	cls_gate.policy_root.cache_clear()
+	assert set(cls_gate.load_roster(cls_gate.policy_root())) == {
+		cls_gate.normalise_login("coderabbitai[bot]")
+	}
+	cls_gate.policy_root.cache_clear()
+
+
+def test_policy_root_without_base_ref_reads_the_checkout(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Local and pre-commit runs (no ``GITHUB_BASE_REF``) keep reading the cwd."""
+	cls_gate = _load_gate()
+	monkeypatch.chdir(tmp_path)
+	monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+	cls_gate.policy_root.cache_clear()
+	assert cls_gate.policy_root() == tmp_path
+	cls_gate.policy_root.cache_clear()
+
+
+def test_policy_root_unresolvable_base_fails_closed(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A named but unresolvable base must raise, never fall back to the PR's roster."""
+	cls_gate = _load_gate()
+	monkeypatch.chdir(tmp_path)
+	monkeypatch.setenv("GITHUB_BASE_REF", "nope")
+	cls_gate.policy_root.cache_clear()
+	with pytest.raises(RuntimeError):
+		cls_gate.policy_root()
+	cls_gate.policy_root.cache_clear()
+
+
+def _load_integrity_dispatch() -> dict:
+	"""Import ``check_gate_integrity.py`` and return its path-name dispatch table."""
+	path_integrity = _find_gate_path().with_name("check_gate_integrity.py")
+	cls_spec = importlib.util.spec_from_file_location("_check_gate_integrity", path_integrity)
+	assert cls_spec is not None
+	assert cls_spec.loader is not None
+	cls_module = importlib.util.module_from_spec(cls_spec)
+	cls_spec.loader.exec_module(cls_module)
+	return cls_module._DICT_DISPATCH
+
+
+@pytest.mark.parametrize(("str_new", "bool_flagged"), [("a: 2\n", True), ("a: 1\n", False)])
+def test_gate_integrity_flags_a_changed_review_roster(str_new: str, bool_flagged: bool) -> None:
+	"""A diff touching ``.review-bots.yaml`` is a finding; an identical file is not."""
+	fn_check = _load_integrity_dispatch()[".review-bots.yaml"]
+	assert bool(fn_check("a: 1\n", str_new, ".review-bots.yaml")) is bool_flagged

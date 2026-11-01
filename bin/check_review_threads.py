@@ -73,6 +73,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 
 
 try:
@@ -160,6 +161,61 @@ query($owner:String!, $repo:String!, $number:Int!, $rc:String, $tc:String, $cc:S
   }
 }
 """
+
+
+_GIT_LOCATION_VARS = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE")
+
+
+def _git(*list_args: str) -> subprocess.CompletedProcess:
+	"""Run ``git`` quietly here, without the variables that outrank the working directory."""
+	return subprocess.run(  # noqa: S603
+		["git", *list_args],  # noqa: S607
+		capture_output=True,
+		text=True,
+		check=False,
+		env={k: v for k, v in os.environ.items() if k not in _GIT_LOCATION_VARS},
+	)
+
+
+@functools.cache
+def policy_root() -> pathlib.Path:
+	"""Return the directory the roster, marker rows and posters are read from.
+
+	The roster is the gate's POLICY, so it must not come from the checkout the PR author
+	controls: a PR that edits ``.review-bots.yaml`` (adding itself as a bot, changing markers)
+	would be judged by the policy it wrote (#379). When ``GITHUB_BASE_REF`` is set (every
+	``pull_request`` run) the file is read from ``origin/<base>`` — fetched shallowly when the
+	checkout lacks it — into a temp dir. A base without the file yields an empty dir, i.e. the
+	gate is not adopted there. Without ``GITHUB_BASE_REF`` (local and pre-commit runs, and
+	``issue_comment`` runs whose checkout already is the default branch) it is the cwd.
+
+	Returns
+	-------
+	pathlib.Path
+		Directory holding the trusted ``.review-bots.yaml`` (or none, when the base lacks it).
+
+	Raises
+	------
+	RuntimeError
+		When the base ref is named but cannot be resolved — failing closed rather than
+		falling back to the PR's own roster.
+	"""
+	str_base = os.environ.get("GITHUB_BASE_REF", "").strip()
+	if not str_base:
+		return pathlib.Path.cwd()
+	str_ref = f"origin/{str_base}"
+	if _git("rev-parse", "--verify", "--quiet", str_ref).returncode != 0:
+		_git("fetch", "--depth=1", "origin", f"+{str_base}:refs/remotes/{str_ref}")
+	if _git("rev-parse", "--verify", "--quiet", str_ref).returncode != 0:
+		raise RuntimeError(
+			f"cannot resolve {str_ref} to read {_ROSTER_FILE} from the base ref — refusing "
+			f"to judge the PR by a roster its own checkout supplies."
+		)
+	path_dir = pathlib.Path(tempfile.mkdtemp(prefix="review-bots-base-"))
+	cls_show = _git("show", f"{str_ref}:{_ROSTER_FILE}")
+	if cls_show.returncode == 0:
+		(path_dir / _ROSTER_FILE).write_text(cls_show.stdout, encoding="utf-8")
+	return path_dir
 
 
 def _roster_exists_on_default_branch(path_root: pathlib.Path) -> bool:
@@ -1854,7 +1910,7 @@ def _unanswered_bodies(dict_pr: dict, list_notices: list[dict], set_roster: set[
 		dict_pr.get("reviews", {}).get("nodes", []),
 		list_notices,
 		set_roster,
-		tuple_markers=load_comment_markers(pathlib.Path.cwd()),
+		tuple_markers=load_comment_markers(policy_root()),
 	)
 
 
@@ -2067,8 +2123,8 @@ def _missing_review(
 		str_head_oid=dict_pr.get("headRefOid") or "",
 		list_notices=dict_pr.get("comments", {}).get("nodes", []),
 		str_head_date=_head_committed_date(dict_pr),
-		tuple_markers=load_comment_markers(pathlib.Path.cwd()),
-		set_posters=load_marker_posters(pathlib.Path.cwd()),
+		tuple_markers=load_comment_markers(policy_root()),
+		set_posters=load_marker_posters(policy_root()),
 		fn_fingerprint=_compare_fingerprint(
 			dict_pr, str_repo_full, {normalise_login(str_login) for str_login in set_reviewers}
 		),
@@ -2095,7 +2151,7 @@ def main(list_argv: list[str] | None = None) -> int:
 	if not str_repo_full or not str_number.isdigit():
 		return _print_skip(bool_json, "PR_NUMBER / GITHUB_REPOSITORY not set — nothing to check")
 
-	dict_roster = load_roster(pathlib.Path.cwd())
+	dict_roster = load_roster(policy_root())
 	if not dict_roster:
 		return _print_skip(
 			bool_json, f"No {_ROSTER_FILE} — the review-thread gate is not adopted here"
@@ -2109,7 +2165,7 @@ def main(list_argv: list[str] | None = None) -> int:
 		str_owner,
 		str_repo,
 		int(str_number),
-		frozenset(dict_roster) | load_marker_posters(pathlib.Path.cwd()),
+		frozenset(dict_roster) | load_marker_posters(policy_root()),
 	)
 	list_threads = dict_pr["reviewThreads"]["nodes"]
 	list_notices = dict_pr.get("comments", {}).get("nodes", [])
