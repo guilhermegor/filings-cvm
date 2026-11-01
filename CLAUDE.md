@@ -83,7 +83,7 @@ Status marks the `submission` direction unless noted; `ingestion` is tracked as 
 - ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
 - ⬜ Balanço (`PadraoXMLBalanco.asp`)
 - ⬜ Balancete (`PadraoXMLBalancete.asp`)
-- Informe Quadrimestral (FIP) — ✅ **submission V2** (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) — `submission/informe_quadrimestral.py` (`InformeQuadrimestral`); schema `_internal/config/schemas/informe_quadrimestral.py`; validadores em `_internal/utils/xml_fields.py` · ⬜ Informe Trimestral V1 (`PadraoXMLInfoTrim.asp`)
+- Informe Quadrimestral (FIP) — ✅ **submission V2** (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) — `submission/informe_quadrimestral.py` (`InformeQuadrimestral`); schema `_internal/config/schemas/informe_quadrimestral.py`; validadores em `_internal/utils/xml_fields.py` · ✅ **submission V1** Informe Trimestral, válido até 2017-06 (`PadraoXMLInfoTrim.asp`) — `submission/informe_trimestral_v1.py` (`InformeTrimestralV1`); schema `_internal/config/schemas/informe_trimestral_v1.py` (reusa o serializador da V2; 5 campos por fundo, `VERSAO` 1.0)
 - Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **18
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
