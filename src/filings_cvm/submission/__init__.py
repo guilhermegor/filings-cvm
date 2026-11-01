@@ -123,6 +123,21 @@ from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ListaClasseCotas,
 	ListaCotstCateg,
 )
+from filings_cvm._internal.config.schemas.inr_mensal import (
+	Aplicacoes,
+	EntradaSaida,
+	InrMensalDocument,
+	InrMensalHeader,
+	MovRecursos,
+	Participante,
+	RecursosEnvMesmoInvest,
+	RecursosEnvOutroInvest,
+	RecursosMesmoInvest,
+	RecursosOutroInvest,
+	RecursosRecebMesmoInvest,
+	RecursosRecebOutroInvest,
+	TransfRecursos,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -175,6 +190,7 @@ from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
 from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
+from filings_cvm.submission.inr_mensal import InrMensal
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
@@ -186,6 +202,7 @@ __all__ = [
 	"Amort",
 	"Amortizacao",
 	"AplicAtivo",
+	"Aplicacoes",
 	"CadastroAtivos",
 	"CadastroAtivosDocument",
 	"CadastroAtivosHeader",
@@ -231,6 +248,7 @@ __all__ = [
 	"DevSacado",
 	"Dicred",
 	"DocumentHeader",
+	"EntradaSaida",
 	"Extrato",
 	"ExtratoDocument",
 	"ExtratoHeader",
@@ -253,6 +271,9 @@ __all__ = [
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
+	"InrMensal",
+	"InrMensalDocument",
+	"InrMensalHeader",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
@@ -281,6 +302,7 @@ __all__ = [
 	"ListaCotstCateg",
 	"ListaDevSacados",
 	"MercDerivativo",
+	"MovRecursos",
 	"NegocDicredMes",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
@@ -289,6 +311,7 @@ __all__ = [
 	"OtcOperation",
 	"OutrasInform",
 	"OutrosAtivos",
+	"Participante",
 	"Passiv",
 	"PassivPosicoes",
 	"PassivValores",
@@ -301,6 +324,12 @@ __all__ = [
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"QtVl",
+	"RecursosEnvMesmoInvest",
+	"RecursosEnvOutroInvest",
+	"RecursosMesmoInvest",
+	"RecursosOutroInvest",
+	"RecursosRecebMesmoInvest",
+	"RecursosRecebOutroInvest",
 	"RentClasse",
 	"RentMes",
 	"ResgMes",
@@ -320,6 +349,7 @@ __all__ = [
 	"TaxaSemAquis",
 	"TaxaTitpubFed",
 	"TaxaValorMobili",
+	"TransfRecursos",
 	"ValoresMob",
 	"VarOutros",
 	"VarPercValCota",
