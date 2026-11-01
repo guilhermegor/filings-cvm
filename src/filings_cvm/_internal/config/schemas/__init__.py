@@ -16,6 +16,11 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.informe_diario_v1 import (
+	InformeDiarioV1Document,
+	InformeDiarioV1Header,
+	InformeDiarioV1Inform,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -75,6 +80,9 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InformeDiarioV1Document",
+	"InformeDiarioV1Header",
+	"InformeDiarioV1Inform",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
