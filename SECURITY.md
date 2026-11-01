@@ -27,7 +27,8 @@ You will get an acknowledgement on a **best-effort basis within 7 days**. If a r
 confirmed, a fix ships in a new release and a GitHub Security Advisory is published crediting the
 reporter (unless anonymity is requested).
 
-If private reporting is unavailable, contact the maintainer listed in `.github/CODEOWNERS`.
+If private reporting is unavailable, contact the maintainer, [@guilhermegor](https://github.com/guilhermegor),
+through the contact options on that profile. Share no vulnerability details in public.
 
 ## What to expect
 

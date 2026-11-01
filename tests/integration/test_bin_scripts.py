@@ -552,6 +552,9 @@ def _source_and_call(
 		("release/0.2.0", 0),
 		("feat/no-number", 1),
 		("main", 1),
+		("feat/12-", 1),
+		("feat/12", 1),
+		("feat/0-work", 1),
 	],
 )
 def test_check_pr_policy_branch_requires_an_issue_number(
@@ -629,13 +632,14 @@ def test_check_pr_policy_unknown_mode_is_a_usage_error() -> None:
 	("str_branch", "str_body", "str_expected"),
 	[
 		("fix/42-thing", "", "42"),
+		("ci/366-work", "", "366"),
 		("chore/x", "Closes #7\nFixes #9", "7\n9"),
 		("chore/x", "Closes: #7", "7"),
 		("chore/x", "This does not close #7", ""),
 		("chore/x", "```\nCloses #7\n```", ""),
 		("dependabot/pip/a", "Closes #7", ""),
 	],
-	ids=["branch", "body-keywords", "colon-form", "negated", "fenced", "bot-branch"],
+	ids=["branch", "ci-branch", "body-keywords", "colon-form", "negated", "fenced", "bot-branch"],
 )
 def test_close_linked_issues_resolves_only_real_closing_references(
 	str_branch: str, str_body: str, str_expected: str
@@ -690,3 +694,20 @@ def test_dependabot_auto_merge_classifies_updates(str_json: str, str_expected: s
 	)
 
 	assert cls_result.stdout.strip() == str_expected
+
+
+def test_check_pr_policy_body_ignores_headings_inside_a_code_fence(tmp_path: Path) -> None:
+	"""A template heading that appears only inside a fenced block does not satisfy the gate.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch dir holding a synthetic template.
+	"""
+	path_template = tmp_path / "template.md"
+	path_template.write_text("## Testing\n", encoding="utf-8")
+	dict_env = {"BODY": "```\n## Testing\n```", "TEMPLATE": str(path_template)}
+
+	cls_result = _run("check_pr_policy.sh", "body", dict_env=dict_env)
+
+	assert cls_result.returncode == 1

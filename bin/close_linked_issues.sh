@@ -2,13 +2,12 @@
 
 set -uo pipefail
 
-BRANCH_TYPES='feat|feature|fix|bugfix|hotfix|docs|refactor|chore|test'
 KEYWORDS='(close[sd]?|fix(e[sd])?|resolve[sd]?)'
 
 issue_from_branch() {
 	local str_branch="$1" str_num
 
-	str_num=$(printf '%s' "$str_branch" | sed -nE "s#^($BRANCH_TYPES)/([0-9]+)-.*#\2#p")
+	str_num=$(printf '%s' "$str_branch" | sed -nE "s#^[a-z]+/([0-9]+)-.*#\1#p")
 	if [[ "$str_branch" =~ /(19|20)[0-9]{2}-(0[1-9]|1[0-2])(-|$) ]]; then
 		return 0
 	fi
