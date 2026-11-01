@@ -16,6 +16,11 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.informe_portabilidade import (
+	InformePortabilidadeDocument,
+	PortabilidadeHeader,
+	PortabilidadeInform,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -75,6 +80,7 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InformePortabilidadeDocument",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
@@ -107,6 +113,8 @@ __all__ = [
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
+	"PortabilidadeHeader",
+	"PortabilidadeInform",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"VarOutros",
