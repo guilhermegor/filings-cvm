@@ -38,7 +38,7 @@ Serializa um documento validado para XML compatível com a CVM (padrão Perfil M
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `doc` | `PerfilMensalDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML (UTF-8 em memória). |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` (de forma atômica: o destino é o arquivo anterior ou o novo completo, nunca parcial; exige permissão de escrita no diretório do destino, pois o arquivo temporário é criado ao lado dele) e retorna `None`. Caso contrário, retorna a `str` XML (UTF-8 em memória). |
 | `versao` | `str` | Versão do formato colocada na tag `VERSAO`. Padrão `"4.0"`. |
 
 ```python
