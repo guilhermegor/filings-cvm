@@ -159,6 +159,13 @@ poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command
 
 `check_dead_code.py` skips when `vulture` is absent locally; CI installs it, so it always runs there.
 
+## Template Drift
+
+The repo carries a BlueprintX provenance stamp (`.blueprintx-provenance.yaml`). To compare it
+with the current template, run `python bin/check_template_drift.py --root . --blueprintx-root <checkout>`
+(or set `BLUEPRINTX_TEMPLATE_ROOT`); `bin/template_update.py` is the dry-run-by-default updater.
+Both are reports, not gates. See [Template updates](docs/template-updates.md) for the known limits.
+
 ## Pull Request Process
 
 1. **Create an Issue First**:
