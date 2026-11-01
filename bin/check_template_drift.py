@@ -60,6 +60,7 @@ _UNKNOWN_COMMIT = "unknown"
 _CONTENT_LABELS = {
     "⬆️ template changed since scaffold:": "template_changed",
     "⚠️ both changed:": "both_changed",
+    "❓ not compared (template source missing from the checkout):": "unchecked",
 }
 _INT_COPY_FIELDS = 4
 _INT_RM_FIELDS = 2
@@ -389,7 +390,7 @@ def _template_files(path_blueprintx_root: pathlib.Path, path_dir: pathlib.Path) 
         cls_git = None
     str_out = cls_git.stdout.decode() if cls_git else ""
     list_tracked = [str_f for str_f in str_out.split("\0") if str_f]
-    if cls_git and cls_git.returncode == 0 and list_tracked:
+    if cls_git and cls_git.returncode == 0:
         path_rel_dir = path_dir.relative_to(path_blueprintx_root)
         return [pathlib.Path(str_f).relative_to(path_rel_dir).as_posix() for str_f in list_tracked]
     return [
@@ -414,7 +415,7 @@ def missing_relpaths(path_root: pathlib.Path, set_required: set[str]) -> list[st
     list of str
             Sorted relative paths present in the template but absent from the project.
     """
-    return sorted(str_rel for str_rel in set_required if not (path_root / str_rel).exists())
+    return sorted(str_rel for str_rel in set_required if not (path_root / str_rel).is_file())
 
 
 def read_commit(path_root: pathlib.Path) -> str | None:
@@ -476,7 +477,11 @@ def base_blob(path_blueprintx_root: pathlib.Path, str_commit: str, str_src: str)
 
 
 def commit_known(path_blueprintx_root: pathlib.Path, str_commit: str) -> bool:
-    """Return whether ``str_commit`` resolves to a commit in the checkout.
+    """Return whether ``str_commit`` is a commit in the checkout's HEAD history.
+
+    A stamp from a divergent branch, or from a commit newer than a checkout that is behind,
+    is no merge base: "template changed since scaffold" would then mean "differs", and an
+    update would move files and the stamp backwards.
 
     Parameters
     ----------
@@ -488,14 +493,15 @@ def commit_known(path_blueprintx_root: pathlib.Path, str_commit: str) -> bool:
     Returns
     -------
     bool
-            ``True`` when the checkout can read that commit.
+            ``True`` when that commit exists and is an ancestor of (or equal to) HEAD.
     """
     if str_commit.startswith("-"):
         return False
     dict_env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
     try:
         cls_git = subprocess.run(  # noqa: S603
-            ["git", "-C", str(path_blueprintx_root), "cat-file", "-e", f"{str_commit}^{{commit}}"],  # noqa: S607, E501
+            ["git", "-C", str(path_blueprintx_root)]  # noqa: S607
+            + ["merge-base", "--is-ancestor", f"{str_commit}^{{commit}}", "HEAD"],
             capture_output=True,
             check=False,
             env=dict_env,
@@ -503,6 +509,28 @@ def commit_known(path_blueprintx_root: pathlib.Path, str_commit: str) -> bool:
     except FileNotFoundError:
         return False
     return cls_git.returncode == 0
+
+
+def normalize_eol(bytes_data: bytes | None) -> bytes | None:
+    """Convert CRLF to LF in text content, so a checkout's line endings are not a change.
+
+    ``git show`` returns the blob as stored (LF) while a working tree under
+    ``core.autocrlf=true`` holds CRLF; compared raw, an untouched file looks edited.
+
+    Parameters
+    ----------
+    bytes_data : bytes or None
+        File content, or ``None`` when the file did not exist.
+
+    Returns
+    -------
+    bytes or None
+            The content with CRLF replaced by LF; binary content (any NUL byte) and ``None``
+            are returned unchanged.
+    """
+    if bytes_data is None or b"\x00" in bytes_data:
+        return bytes_data
+    return bytes_data.replace(b"\r\n", b"\n")
 
 
 def _content_state(
@@ -524,8 +552,9 @@ def _content_state(
     str
             ``same``, ``template_changed`` (project left it alone) or ``both_changed``.
     """
-    bytes_ours = path_project_file.read_bytes()
-    bytes_theirs = path_theirs.read_bytes()
+    bytes_ours = normalize_eol(path_project_file.read_bytes())
+    bytes_theirs = normalize_eol(path_theirs.read_bytes())
+    bytes_base = normalize_eol(bytes_base)
     if bytes_theirs in (bytes_ours, bytes_base):
         return "same"
     return "template_changed" if bytes_ours == bytes_base else "both_changed"
@@ -553,12 +582,21 @@ def content_drift(
     Returns
     -------
     dict of str to list of str
-            ``template_changed`` and ``both_changed`` to sorted project-relative paths.
+            ``template_changed`` and ``both_changed`` to sorted project-relative paths, plus
+            ``unchecked``: present files whose template source is not a file in the checkout, so
+            they were compared against nothing.
     """
-    dict_drift: dict[str, list[str]] = {"template_changed": [], "both_changed": []}
+    dict_drift: dict[str, list[str]] = {
+        "template_changed": [],
+        "both_changed": [],
+        "unchecked": [],
+    }
     for str_rel, str_src in sorted(dict_sources.items()):
         path_theirs = path_blueprintx_root / str_src
-        if not (path_root / str_rel).is_file() or not path_theirs.is_file():
+        if not (path_root / str_rel).is_file():
+            continue
+        if not path_theirs.is_file():
+            dict_drift["unchecked"].append(str_rel)
             continue
         bytes_base = base_blob(path_blueprintx_root, str_commit, str_src)
         str_state = _content_state(path_root / str_rel, path_theirs, bytes_base)
@@ -590,8 +628,8 @@ def _report_content(
     if str_commit is None or not commit_known(path_blueprintx_root, str_commit):
         print(
             f"SKIPPED content drift: the stamped blueprintx_commit ({str_commit}) is missing "
-            f"or not in {path_blueprintx_root}, so there is no merge base. This run proves "
-            f"nothing about content drift."
+            f"or not in the HEAD history of {path_blueprintx_root}, so there is no merge base. "
+            f"This run proves nothing about content drift."
         )
         return None
     dict_drift = content_drift(path_root, path_blueprintx_root, str_commit, dict_sources)
@@ -602,8 +640,8 @@ def _report_content(
             print(f"{str_label} {str_rel}")
     print(
         f"\n{len(dict_drift['template_changed'])} file(s) changed in the template since "
-        f"scaffold, {len(dict_drift['both_changed'])} changed on both sides. This is a "
-        f"REPORT, not a gate."
+        f"scaffold, {len(dict_drift['both_changed'])} changed on both sides, "
+        f"{len(dict_drift['unchecked'])} not compared. This is a REPORT, not a gate."
     )
     return True
 

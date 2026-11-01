@@ -531,3 +531,91 @@ def test_a_stamp_without_a_commit_skips_content_drift_loudly(
 	str_out = _drift_output(tmp_path, capsys, "base\n", "new\n", bool_stamp_commit=False)
 
 	assert "SKIPPED content drift" in str_out
+
+
+def test_a_crlf_checkout_of_an_untouched_file_is_template_changed_not_both(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""An autocrlf working tree must not turn an untouched file into 'both changed'."""
+	str_out = _drift_output(tmp_path, capsys, "base\r\n", "new\r\n")
+
+	assert "template changed since scaffold: a.txt" in str_out
+
+
+def _output_without_template_source(path_tmp: Path, capsys: pytest.CaptureFixture) -> str:
+	"""Run the reporter when the checkout lost the template file the project still has.
+
+	Parameters
+	----------
+	path_tmp : pathlib.Path
+		A temporary directory to build under.
+	capsys : pytest.CaptureFixture
+		Captures the printed report.
+
+	Returns
+	-------
+	str
+			Everything the reporter printed.
+	"""
+	path_root, str_sha = _versioned_checkout(path_tmp)
+	(path_root / _COMMON / "a.txt").unlink()
+	path_project = _project(
+		path_tmp, f"tier: mvc-service-native-db\nblueprintx_commit: {str_sha}\n"
+	)
+	(path_project / "a.txt").write_text("base\n", encoding="utf-8")
+	capsys.readouterr()
+	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
+	return capsys.readouterr().out
+
+
+def test_a_template_source_missing_from_the_checkout_is_reported(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""A managed file never compared against anything is named, not skipped silently."""
+	assert "not compared" in _output_without_template_source(tmp_path, capsys)
+
+
+def test_a_template_source_missing_from_the_checkout_is_not_a_clean_verdict(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""An unchecked file must never end in 'No template drift detected'."""
+	str_out = _output_without_template_source(tmp_path, capsys)
+
+	assert "No template drift detected" not in str_out
+
+
+def test_a_directory_at_a_required_path_is_missing(tmp_path: Path) -> None:
+	"""Only a regular file satisfies a required path."""
+	(tmp_path / "a.txt").mkdir()
+
+	assert gate.missing_relpaths(tmp_path, {"a.txt"}) == ["a.txt"]
+
+
+def test_a_git_checkout_with_no_tracked_files_in_a_dir_lists_nothing(tmp_path: Path) -> None:
+	"""A successful ``git ls-files`` that lists nothing is an answer, not a reason to walk."""
+	path_dir = tmp_path / "tpl"
+	path_dir.mkdir()
+	(path_dir / "stray.txt").write_text("x", encoding="utf-8")
+	_git(tmp_path, "init", "-q")
+
+	assert gate._template_files(tmp_path, path_dir) == []
+
+
+def test_a_stamp_that_is_not_an_ancestor_of_head_is_no_merge_base(tmp_path: Path) -> None:
+	"""A commit that exists but is not in HEAD's history cannot anchor a comparison."""
+	path_root, str_sha = _versioned_checkout(tmp_path)
+	_git(
+		path_root,
+		*("-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"),
+		*("commit", "-q", "--allow-empty", "-m", "next"),
+	)
+	cls_head = subprocess.run(  # noqa: S603
+		["git", "-C", str(path_root), "rev-parse", "HEAD"],  # noqa: S607
+		capture_output=True,
+		encoding="utf-8",
+		check=True,
+	)
+	str_next = cls_head.stdout.strip()
+	_git(path_root, "checkout", "-q", str_sha)
+
+	assert gate.commit_known(path_root, str_next) is False
