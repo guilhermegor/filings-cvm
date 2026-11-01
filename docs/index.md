@@ -38,6 +38,8 @@ não desta documentação:
   — envio (`submission/perfil_mensal_original.py`).
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp))
   — envio (`submission/informe_diario.py`).
+- ✅ **Informe Diário — V3** ([`PadraoXMLInfoDiarioNetV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp))
+  — envio (`submission/informe_diario_v3.py`).
 - ✅ **Informe Quadrimestral — V2** ([`PadraoXMLInfoTrimV2.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp))
   — envio (`submission/informe_quadrimestral.py`).
 - ✅ **Informe Trimestral — V1** ([`PadraoXMLInfoTrim.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp), válido até 2017-06)

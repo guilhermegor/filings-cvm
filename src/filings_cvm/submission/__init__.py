@@ -114,6 +114,11 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_diario_v3 import (
+	InformeDiarioV3Document,
+	InformeDiarioV3Header,
+	InformeDiarioV3Inform,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -202,6 +207,7 @@ from filings_cvm.submission.inf_mensal_fidc import (
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
+from filings_cvm.submission.informe_diario_v3 import InformeDiarioV3
 from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
 from filings_cvm.submission.informe_trimestral_v1 import InformeTrimestralV1
 from filings_cvm.submission.inr_mensal import InrMensal
@@ -282,6 +288,10 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformeDiarioV3",
+	"InformeDiarioV3Document",
+	"InformeDiarioV3Header",
+	"InformeDiarioV3Inform",
 	"InformeQuadrimestral",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
