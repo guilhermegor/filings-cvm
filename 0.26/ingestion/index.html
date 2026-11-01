@@ -447,6 +447,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../submission/informe_diario_v3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Diário V3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../submission/informe_quadrimestral/" class="md-nav__link">
         
   
@@ -1999,6 +2027,34 @@
   
   
     <li class="md-nav__item">
+      <a href="processo_sancionador/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processo Sancionador (PROCESSO/SANCIONADOR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="cia_aberta_cad/" class="md-nav__link">
         
   
@@ -2580,9 +2636,9 @@ volta para modelos tipados — a contraparte do <a href="../submission/perfil_me
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion.fidc</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfMensalFidcTabIReader</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">filings_cvm.ingestion.fi</span><span class="w"> </span><span class="kn">import</span> <span class="n">InformeDiarioReader</span>
 </span></code></pre></div>
-<p>São <strong>23 roots</strong>: <code>adm_cart</code>, <code>adm_fii</code>, <code>agente_auton</code>, <code>agente_fiduc</code>, <code>ato_declr</code>, <code>auditor</code>,
+<p>São <strong>24 roots</strong>: <code>adm_cart</code>, <code>adm_fii</code>, <code>agente_auton</code>, <code>agente_fiduc</code>, <code>ato_declr</code>, <code>auditor</code>,
 <code>cia_aberta</code>, <code>cia_estrang</code>, <code>cia_incent</code>, <code>consultor_vlmob</code>, <code>coord_oferta</code>, <code>crowdfunding</code>, <code>emissor_cepac</code>,
-<code>fi</code>, <code>fiagro</code>, <code>fidc</code>, <code>fie</code>, <code>fii</code>, <code>fip</code>, <code>intermed</code>, <code>invnr</code>, <code>oferta</code>, <code>securit</code>.</p>
+<code>fi</code>, <code>fiagro</code>, <code>fidc</code>, <code>fie</code>, <code>fii</code>, <code>fip</code>, <code>intermed</code>, <code>invnr</code>, <code>oferta</code>, <code>processo</code>, <code>securit</code>.</p>
 <blockquote>
 <p>⚠️ <strong>Mudança incompatível na 0.26.0.</strong> <code>from filings_cvm import &lt;Leitor&gt;</code> e
 <code>from filings_cvm.ingestion import &lt;Leitor&gt;</code> <strong>deixaram de funcionar</strong> — os 216 leitores não são
@@ -2808,6 +2864,15 @@ dataset mostra o import correto). O agrupamento é o <strong>do próprio portal 
   <code>DD/MM/YYYY</code> → fica <code>str</code> (a coerção é ISO-only). ⚠️ <strong>A META é um <code>.zip</code></strong> de 2 membros, com
   <code>section</code> simétricas. Contracts <strong>gerados dos headers</strong> e <strong>pinados</strong>. <strong>Quinta fatia da Wave 4 do
   #41</strong>; fecha a issue #14.</p>
+</li>
+<li>
+<p><strong><a href="processo_sancionador/">Processo Sancionador (PROCESSO/SANCIONADOR)</a></strong> — <strong>2 readers</strong>
+  <code>ProcessoSancionadorReader</code> (processos, 9 cols, 2 date cols, 581 linhas, <code>NUP</code> único) /
+  <code>ProcessoSancionadorAcusadoReader</code> (acusados, 4 cols, 1 date col, 2.070 linhas) sobre o
+  <code>processo_sancionador.zip</code>. <strong>Snapshot</strong> de URL fixa, <strong>sem <code>date_ref</code></strong>. ⚠️ <strong>Nenhuma coluna
+  guarda CNPJ/CPF</strong> (<code>tuple_cnpj_cols</code> vazio nos dois, medido); <code>Nome_Acusado</code> é dado pessoal →
+  fixtures só com o header. <code>NUP</code> (17 dígitos) fica <code>str</code>; aspas são literais. ⚠️ <strong>A META é um
+  <code>.zip</code></strong> de 2 membros, com <code>section</code> assimétricas. Inaugura o root <code>processo/</code>.</p>
 </li>
 <li>
 <p><strong><a href="cia_aberta_cad/">Cadastro de Companhias Abertas (CIA_ABERTA/CAD)</a></strong> — <strong>1 reader</strong>
