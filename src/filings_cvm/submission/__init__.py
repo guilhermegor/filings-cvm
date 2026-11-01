@@ -114,6 +114,11 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.config.schemas.informe_diario_v3 import (
+	InformeDiarioV3Document,
+	InformeDiarioV3Header,
+	InformeDiarioV3Inform,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -122,6 +127,11 @@ from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	InformeQuadrimestralInform,
 	ListaClasseCotas,
 	ListaCotstCateg,
+)
+from filings_cvm._internal.config.schemas.informe_trimestral_v1 import (
+	InformeTrimestralV1Document,
+	InformeTrimestralV1Header,
+	InformeTrimestralV1Inform,
 )
 from filings_cvm._internal.config.schemas.inr_mensal import (
 	Aplicacoes,
@@ -175,6 +185,14 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_original import (
+	PerfilMensalOriginalClientCount,
+	PerfilMensalOriginalDocument,
+	PerfilMensalOriginalHeader,
+	PerfilMensalOriginalPatrimonyDistribution,
+	PerfilMensalOriginalRow,
+	PerfilMensalOriginalTradingDays,
+)
 from filings_cvm.submission.cadastro_ativos import (
 	CadastroAtivos,
 )
@@ -189,12 +207,15 @@ from filings_cvm.submission.inf_mensal_fidc import (
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
+from filings_cvm.submission.informe_diario_v3 import InformeDiarioV3
 from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
+from filings_cvm.submission.informe_trimestral_v1 import InformeTrimestralV1
 from filings_cvm.submission.inr_mensal import InrMensal
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
+from filings_cvm.submission.perfil_mensal_original import PerfilMensalOriginal
 
 
 __all__ = [
@@ -267,10 +288,18 @@ __all__ = [
 	"InformeDiarioDocument",
 	"InformeDiarioHeader",
 	"InformeDiarioInform",
+	"InformeDiarioV3",
+	"InformeDiarioV3Document",
+	"InformeDiarioV3Header",
+	"InformeDiarioV3Inform",
 	"InformeQuadrimestral",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
+	"InformeTrimestralV1",
+	"InformeTrimestralV1Document",
+	"InformeTrimestralV1Header",
+	"InformeTrimestralV1Inform",
 	"InrMensal",
 	"InrMensalDocument",
 	"InrMensalHeader",
@@ -319,6 +348,13 @@ __all__ = [
 	"Patrliq",
 	"PerfilMensal",
 	"PerfilMensalDocument",
+	"PerfilMensalOriginal",
+	"PerfilMensalOriginalClientCount",
+	"PerfilMensalOriginalDocument",
+	"PerfilMensalOriginalHeader",
+	"PerfilMensalOriginalPatrimonyDistribution",
+	"PerfilMensalOriginalRow",
+	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
