@@ -61,6 +61,7 @@ nav:
       - Cadastro de Coordenadores de Oferta (COORD_OFERTA): ingestion/coord_oferta.md
       - Cadastro de Plataformas de Crowdfunding (CROWDFUNDING): ingestion/crowdfunding.md
       - Ofertas de Distribuição (OFERTA/DISTRIB): ingestion/oferta_distrib.md
+      - Processo Sancionador (PROCESSO/SANCIONADOR): ingestion/processo_sancionador.md
       - Cadastro de Companhias Abertas (CIA_ABERTA/CAD): ingestion/cia_aberta_cad.md
       - Companhias Abertas — IPE: ingestion/ipe_cia_aberta.md
       - Companhias Abertas — VLMO: ingestion/vlmo_cia_aberta.md
