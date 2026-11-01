@@ -303,6 +303,26 @@ Modelos de schema (Pydantic): `InformeTrimestralV1Document` (`DOC_ARQ`),
 
 ## Leitor (ingestion)
 
+### `InformePortabilidade`
+
+`filings_cvm.submission.InformePortabilidade`
+
+Serializa um `InformePortabilidadeDocument` validado para o XML do Informe de Portabilidade
+(`COD_DOC=478`, namespace `urn:portab`). Detalhes em [Informe de Portabilidade](submission/informe_portabilidade.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InformePortabilidadeDocument` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` (codificado antes de abrir o arquivo) e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+```python
+from filings_cvm.submission import InformePortabilidade
+
+xml = InformePortabilidade().export(doc)
+```
+
 ### `InformeDiarioReader`
 
 `filings_cvm.ingestion.InformeDiarioReader`
