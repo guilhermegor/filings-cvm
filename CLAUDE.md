@@ -353,7 +353,8 @@ envio; é o registro do que foi entregue, não um informe):
   arquivo do `META/`** (medido pela listagem; as outras 3 grafias dão 404), com **107 campos = o header
   pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
   `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
-- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
+- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`)
+- ✅ Perfil Mensal — original (`PadraoXMLPerfil.asp`) — `submission/perfil_mensal_original.py` (`PerfilMensalOriginal`); schema `_internal/config/schemas/perfil_mensal_original.py`. **NÃO deriva do V4** (medido: exemplo XML de 53 tags contra 92, 36 nomes em comum): `NR_CLIENT`/`DISTR_PATRIM` com 14 tags `*_NAC`/`*_ENT_AB_FC_PREV_COMPL`, corpo próprio (`PERC_PL_MAIOR_COTST`, `NR_DIAS_NEGOC`, …) e **cabeçalho sem `VERSAO`**. Só `PercentField` vem do V4; `max_digits` do pydantic ignora zeros à direita e não limita as inteiras, então as escalas "N inteiras e M decimais" usam um teto de magnitude
 - Extrato das Informações sobre o Fundo — ✅ **ingestion** dataset `FI/DOC/EXTRATO`, que publica
   **DOIS artefatos**: `extrato_fi_AAAA.csv` (**CSV solto anual**, 2015–2026, **toda** entrega do ano)
   e `extrato_fi.csv` (**URL fixa, sem ano**) — `ingestion/fi/doc/extrato/*` (`ExtratoFiReader` 117c
@@ -772,7 +773,7 @@ Sob `CIA_ABERTA/CAD/`:
   DFP/ITR **neste mesmo root**
 
 **Investidores Não Residentes**
-- ⬜ Informe Mensal de Investidor não Residente (`PadraoXMLInfoMensalINR.asp`)
+- Informe Mensal de Investidor não Residente — ✅ **submission** (`PadraoXMLInfoMensalINR.asp`) — `submission/inr_mensal.py` (`InrMensal`); schema `_internal/config/schemas/inr_mensal.py`; validators `_internal/utils/inr_mensal_fields.py`. Valores inteiros (a página diz "numérico e inteiro" apesar de pedir vírgula decimal); `COD_DOC` 477; `VL_NOCION_APLIC` só para a Tabela A 15–24
 - ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
 
 **Mercados de Negociação**
