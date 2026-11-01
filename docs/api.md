@@ -119,6 +119,15 @@ Serializa um `InformeDiarioV2Document` para o XML do padrão Informe Diário V2 
 Mesma borda de I/O do `InformeDiario`. Modelos: `InformeDiarioV2Document`, `InformeDiarioV2Header`,
 `InformeDiarioV2Inform` (só `cnpj_fdo`, sem `data_prox_pl`). Veja [Informe Diário V2](submission/informe_diario_v2.md).
 
+### `InformeDiarioV3`
+
+`filings_cvm.submission.InformeDiarioV3`
+
+Serializa um `InformeDiarioV3Document` para XML do padrão Informe Diário V3 (`VERSAO` 3.0, só
+`CNPJ_FDO`). `export(doc, output_path=None) -> str | None`, mesma borda de I/O do `InformeDiario`.
+Modelos: `InformeDiarioV3Document`, `InformeDiarioV3Header`, `InformeDiarioV3Inform`. Veja
+[Informe Diário V3](submission/informe_diario_v3.md).
+
 ### `Extrato`
 
 `filings_cvm.submission.Extrato`
