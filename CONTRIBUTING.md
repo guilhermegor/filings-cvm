@@ -159,6 +159,26 @@ poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command
 
 `check_dead_code.py` skips when `vulture` is absent locally; CI installs it, so it always runs there.
 
+### Docs and Hygiene Guards
+
+Also vendored from BlueprintX `python-common`, each as a pre-commit hook and a CI step. All of
+them pass on the current tree, so none needs a baseline:
+
+| Guard | Rule | Escape hatch |
+|---|---|---|
+| `check_docs_code_refs.py` | an absolute `from x import y` in a fenced `python` block of `docs/` or `README.md` resolves against `src/` | `<!-- docs-refs-ok: <reason> -->` above the block |
+| `check_docs_gap.py` | every published `docs/` page is in the `mkdocs.yml` nav, and the nav has at most 8 top-level entries | `exclude_docs` for a page that must not ship |
+| `check_identifier_masking.py` | no masked CPF/CNPJ literal compared directly (it matches zero rows and raises nothing) | `# identifier-mask-ok: <reason>` |
+| `check_secrets.sh` | gitleaks finds no secret (staged changes in the hook, full history in CI) | a narrow, reasoned entry in `.gitleaks.toml` |
+| `check_clean_index.sh` | pre-push only: the index is empty, because a rejected commit leaves it populated and the push would ship the previous commit | `git push --no-verify` |
+
+`check_secrets.sh` skips locally when `gitleaks` is not installed; CI sets `GITLEAKS_REQUIRED=1`
+so a missing binary fails there. `secret_scan.yaml` adds GitGuardian on top when the
+`GITGUARDIAN_API_KEY` secret exists, and says so in a warning when it does not. The skeleton the
+docs gate enforces is declared in `docs/.docs-skeleton.yaml` and kept in step with
+`bin/check_docs_sections.py` by a unit test. Scripts that run on the Windows CI job print ASCII
+only, because its console cannot encode symbols such as a check mark.
+
 ## Pull Request Process
 
 1. **Create an Issue First**:
