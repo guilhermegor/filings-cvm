@@ -16,7 +16,7 @@ cleanly to our readers: ``fi-cad`` is one package but three reader families (cad
 cad_fi_hist), and CKAN's granularity differs between ``*-cad`` (two path levels) and ``*-doc-*``
 (three). Deriving "implemented?" from reader names or URLs is the same failure class the drift job
 avoids (``cad_fi`` vs ``cad_fi_hist``). So the packages we cover are listed explicitly here and
-kept in step with the ``CLAUDE.md`` catalog; a structural test checks the slugs are well-formed.
+kept in step with the ``AGENTS.md`` catalog; a structural test checks the slugs are well-formed.
 
 **Detection only.** Reporting a gap is cheap and safe pre-1.0; generating a reader is not — a
 generated reader touches a ``FileContract`` pinned to the real header, the surface where "tests
@@ -50,7 +50,7 @@ _ISSUE_MARKER = "<!-- portal-completeness-bot -->"
 _ISSUE_TITLE = "Datasets do portal da CVM ainda não implementados"
 
 # The CKAN package slugs this library already ingests. **Declared, never derived** — see the module
-# docstring. Keep in step with the CLAUDE.md catalog: implementing a portal dataset means adding
+# docstring. Keep in step with the AGENTS.md catalog: implementing a portal dataset means adding
 # its slug here so it drops off the gap. 46 today.
 #
 # ⚠️ Forgetting this edit is silent and it happened: the set sat at 21 for the whole of Waves 3
