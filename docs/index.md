@@ -40,6 +40,8 @@ não desta documentação:
   — envio (`submission/informe_quadrimestral.py`).
 - ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp))
   — envio (`submission/cadastro_ativos.py`).
+- ✅ **Informe Mensal de Investidor não Residente** ([`PadraoXMLInfoMensalINR.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp))
+  — envio (`submission/inr_mensal.py`).
 
 Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
 Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.

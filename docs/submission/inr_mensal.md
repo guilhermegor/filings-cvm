@@ -40,8 +40,9 @@ não podem ser negativos; valor de mercado e patrimônio líquido podem.
 - A página pede "vírgula para casas decimais" e, ao mesmo tempo, "valor numérico e inteiro" em
   todo campo: adotou-se **inteiro**, sem parte decimal.
 - O exemplo traz `COD_DOC` 477, a lista de tags diz "deve ser 'XX'": usou-se **477**.
-- Premissas não declaradas pela página: código de participante único por arquivo; o `AAAAA` do
-  código não é forçado a igualar `CD_CVM`.
+- Premissas não declaradas pela página: código de participante único por arquivo. A página define
+  `CD_CVM` e o `AAAAA` de `COD_PARTIC` como o código CVM do representante, então o `AAAAA` de cada
+  participante tem de igualar `CD_CVM`.
 - Nenhum validador da CVM foi executado.
 
 ---
