@@ -24,6 +24,7 @@ from filings_cvm._internal.config.contracts.itr_cia_aberta import (
 	ITR_CIA_ABERTA_DFC_MD_IND,
 )
 from filings_cvm._internal.utils.tabular_reader import (
+	ContractError,
 	FileContract,
 	find_contract_problems,
 	read_table,
@@ -49,6 +50,37 @@ def test_read_table_preserves_zero_padded_codes_and_decimals(tmp_path: Path) -> 
 	# Inference would have turned "007" into 7 and "10.50" into 10.5 before typing.
 	assert list(df_["code"]) == ["007", "042"]
 	assert list(df_["amount"]) == ["10.50", "1000.00"]
+
+
+def test_read_table_strips_whitespace_from_column_names(tmp_path: Path) -> None:
+	"""A header published as ``"code "`` still reaches the contract's ``code`` column.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the CSV fixture.
+	"""
+	path_csv = tmp_path / "source.csv"
+	path_csv.write_text("code ; amount\n007;10.50\n", encoding="utf-8")
+
+	df_ = read_table(path_csv, "", {"code": "str", "amount": "str"}, EXAMPLE_SOURCE)
+
+	assert list(df_.iloc[0][["code", "amount"]]) == ["007", "10.50"]
+
+
+def test_read_table_rejects_column_names_that_collide_once_trimmed(tmp_path: Path) -> None:
+	"""``"code"`` and ``"code "`` in one header would silently merge, so the read refuses.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the CSV fixture.
+	"""
+	path_csv = tmp_path / "source.csv"
+	path_csv.write_text("code;code ;amount\n007;008;10.50\n", encoding="utf-8")
+
+	with pytest.raises(ContractError, match="collide after trimming whitespace: code"):
+		read_table(path_csv, "", {"amount": "str"}, EXAMPLE_SOURCE)
 
 
 def test_read_table_coerces_declared_types_from_text(tmp_path: Path) -> None:
