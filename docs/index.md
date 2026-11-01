@@ -61,7 +61,7 @@ pip install filings-cvm
 ```
 
 Continue em **[Uso](usage.md)** para o primeiro documento, ou veja cada padrão em **Envio**:
-**[Perfil Mensal](submission/perfil_mensal.md)**, **[Informe Diário](submission/informe_diario.md)**,
+**[Perfil Mensal](submission/perfil_mensal.md)**, **[Informe Diário](submission/informe_diario.md)** (e **[V2](submission/informe_diario_v2.md)**),
 **[Lâmina V3](submission/lamina.md)** e **[Cadastro de Ativos](submission/cadastro_ativos.md)**.
 
 ---
