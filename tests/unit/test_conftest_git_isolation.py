@@ -9,13 +9,23 @@ import sys
 
 import pytest
 
-from tests.conftest import _GIT_HOOK_ENV
 
+# Spelled out on purpose: deriving it from the fixture's own list would let a removed name
+# silently drop its own test case.
+_EXPECTED_HIDDEN = (
+	"GIT_DIR",
+	"GIT_WORK_TREE",
+	"GIT_INDEX_FILE",
+	"GIT_OBJECT_DIRECTORY",
+	"GIT_ALTERNATE_OBJECT_DIRECTORIES",
+	"GIT_COMMON_DIR",
+	"GIT_PREFIX",
+)
 
 _INNER = "import os\ndef test_inner():\n\tassert os.environ.get({name!r}) is None\n"
 
 
-@pytest.mark.parametrize("name", _GIT_HOOK_ENV)
+@pytest.mark.parametrize("name", _EXPECTED_HIDDEN)
 def test_git_hook_variable_is_hidden_from_tests(name: str, tmp_path: Path) -> None:
 	"""A test run with ``name`` set in the outer environment sees it unset."""
 	(tmp_path / "test_inner.py").write_text(_INNER.format(name=name))
