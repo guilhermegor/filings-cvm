@@ -139,6 +139,27 @@ repos:
           - python
         pass_filenames: false
 
+      - id: check-layer-imports
+        name: layer import policy (.layer-policy.yaml)
+        entry: bash bin/poetry_exec.sh run python bin/check_layer_imports.py
+        language: system
+        files: ^(src/.*\.py|\.layer-policy\.yaml|bin/check_layer_imports\.py)$
+        pass_filenames: false
+
+      - id: dynamic-version-stub
+        name: pyproject version stays the 0.0.0 stub (tag-versioned)
+        entry: bash bin/poetry_exec.sh run python bin/check_dynamic_version_stub.py
+        language: system
+        files: ^(pyproject\.toml|bin/check_dynamic_version_stub\.py)$
+        pass_filenames: false
+
+      - id: check-description-sync
+        name: project description agrees across pyproject.toml and mkdocs.yml
+        entry: bash bin/poetry_exec.sh run bash bin/check_description_sync.sh
+        language: system
+        files: ^(pyproject\.toml|mkdocs\.yml|bin/check_description_sync\.sh|bin/lib/description_sources\.py)$
+        pass_filenames: false
+
       - id: check-schemas
         name: schema modules hold only pydantic models
         entry: bash bin/poetry_exec.sh run python bin/check_schemas.py

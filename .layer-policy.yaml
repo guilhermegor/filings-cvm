@@ -1,0 +1,36 @@
+# Per-layer import policy, enforced by bin/check_layer_imports.py (hook `check-layer-imports`).
+#
+# Layers sit one level below src/<package>/: `ingestion/`, `submission/`, `_internal/` and the
+# package root (`__root__`). `_internal/utils*` is split out of `_internal` because it is the
+# seam layer: the one place a vendor may be reached directly.
+
+src_prefix_depth: 1
+
+annotation_only:
+  pandas: >-
+    Annotation only. Build or combine a frame through utils.frames (frame_from_records,
+    concat_frames); read one through utils.tabular_reader.read_table (it enforces a
+    FileContract + dtypes).
+
+layers:
+  __root__:
+    allow: {}
+
+  ingestion:
+    allow: {}
+
+  submission:
+    allow:
+      pydantic: >-
+        Writers take a validated schema model (_internal/config/schemas) and name it in
+        signatures; pydantic is the data-contract vocabulary of the submission direction.
+
+  _internal:
+    allow:
+      pydantic: >-
+        _internal/config/schemas holds the shared, direction-neutral Pydantic models, and the
+        ports are generic over them (SubmissionWriter[TDoc]).
+
+  "_internal/utils*":
+    allow:
+      pandas: "the seam layer owns the pandas surface (frames, dtypes, tabular_reader)"

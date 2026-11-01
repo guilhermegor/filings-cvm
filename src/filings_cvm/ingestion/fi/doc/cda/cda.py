@@ -54,6 +54,7 @@ import pandas as pd
 
 from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.frames import concat_frames
 from filings_cvm._internal.utils.http_downloader import download_file
 from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
 from filings_cvm._internal.utils.raw_workspace import raw_workspace
@@ -289,7 +290,7 @@ class CdaReader(IngestionReader):
 
 		if not list_frames:
 			raise ValueError("No CDA BLC_* block found in the archive")
-		return pd.concat(list_frames, ignore_index=True, sort=False)
+		return concat_frames(list_frames)
 
 	@staticmethod
 	def _read_pl(list_members: Sequence[Path]) -> pd.DataFrame:
