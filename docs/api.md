@@ -50,6 +50,19 @@ PerfilMensal().export(doc, output_path="perfil.xml")   # grava arquivo, retorna 
 
 Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
 
+### `PerfilMensalOriginal`
+
+`filings_cvm.submission.PerfilMensalOriginal`
+
+Serializa um `PerfilMensalOriginalDocument` (padrão Perfil Mensal original, `PadraoXMLPerfil.asp`).
+Layout próprio — não é o V4 nem derivado dele, e o cabeçalho **não tem `VERSAO`**. Veja
+[Perfil Mensal original](submission/perfil_mensal_original.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+Mesma semântica do `PerfilMensal.export` (gravação atômica em `windows-1252`), sem o parâmetro
+`versao`.
+
 ### `InfFundo157`
 
 `filings_cvm.submission.InfFundo157`
@@ -2144,6 +2157,17 @@ armazenado sem máscara), `nr_client`, `total_recurs_exter`, `total_recurs_br`,
 | `OtcOperation` | `OPER_CURS_MERC_BALCAO` | Contraparte de balcão sem contraparte central (até 3). |
 | `PrivateCreditIssuer` | `EMISSORES_TIT_CRED_PRIV` | Emissor de título de crédito privado (até 3). |
 | `PerformanceFeeDetails` | `RESP_VED_REGUL_COBR_TAXA_PERFORM` | Data e valor da cota na última cobrança de taxa de performance. |
+
+### Perfil Mensal original — documento e blocos
+
+| Modelo | Tag XML | Papel |
+|--------|---------|-------|
+| `PerfilMensalOriginalDocument` | `DOC_ARQ` | Documento completo: `header` + `rows` (um fundo por linha, sem repetição). |
+| `PerfilMensalOriginalHeader` | `CAB_INFORM` | `COD_DOC=40`, `dt_compt` (`MM/AAAA`), `dt_gerac_arq` (`DD/MM/AAAA`); sem `VERSAO`. |
+| `PerfilMensalOriginalRow` | `ROW_PERFIL` | Perfil mensal de um fundo. Obrigatórios: `cnpj_fdo`, `nr_client`, `distr_patrim`, `perc_pl_maior_cotst`. |
+| `PerfilMensalOriginalClientCount` | `NR_CLIENT` | Contagem de clientes por tipo (14 campos, obrigatórios, ≥ 0). |
+| `PerfilMensalOriginalPatrimonyDistribution` | `DISTR_PATRIM` | Percentual do PL por tipo (14 campos, obrigatórios, 0 a 100). |
+| `PerfilMensalOriginalTradingDays` | `NR_DIAS_NEGOC` | Bloco opcional: prazo de liquidação de 50% / 100% dos ativos (em par) e `APRES_LIQDZ`. |
 
 ### Informe Diário — documento e blocos
 

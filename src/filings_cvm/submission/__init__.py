@@ -175,6 +175,14 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_original import (
+	PerfilMensalOriginalClientCount,
+	PerfilMensalOriginalDocument,
+	PerfilMensalOriginalHeader,
+	PerfilMensalOriginalPatrimonyDistribution,
+	PerfilMensalOriginalRow,
+	PerfilMensalOriginalTradingDays,
+)
 from filings_cvm.submission.cadastro_ativos import (
 	CadastroAtivos,
 )
@@ -195,6 +203,7 @@ from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
+from filings_cvm.submission.perfil_mensal_original import PerfilMensalOriginal
 
 
 __all__ = [
@@ -319,6 +328,13 @@ __all__ = [
 	"Patrliq",
 	"PerfilMensal",
 	"PerfilMensalDocument",
+	"PerfilMensalOriginal",
+	"PerfilMensalOriginalClientCount",
+	"PerfilMensalOriginalDocument",
+	"PerfilMensalOriginalHeader",
+	"PerfilMensalOriginalPatrimonyDistribution",
+	"PerfilMensalOriginalRow",
+	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
