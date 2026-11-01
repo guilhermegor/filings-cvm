@@ -6,6 +6,22 @@ standard. Ships in the wheel under ``_internal``; the public API is curated by t
 ``submission``/``ingestion`` packages, which re-export the names consumers need.
 """
 
+from filings_cvm._internal.config.schemas.cda_v2 import (
+	CdaV2Aplic,
+	CdaV2Cotas,
+	CdaV2DemaisCodif,
+	CdaV2DemaisNCodif,
+	CdaV2Document,
+	CdaV2Header,
+	CdaV2Inform,
+	CdaV2Negoc,
+	CdaV2PosFim,
+	CdaV2Swap,
+	CdaV2SwapAplic,
+	CdaV2SwapNegoc,
+	CdaV2SwapPosFim,
+	CdaV2TitPub,
+)
 from filings_cvm._internal.config.schemas.extrato import (
 	ExtratoDocument,
 	ExtratoHeader,
@@ -65,6 +81,20 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 
 
 __all__ = [
+	"CdaV2Aplic",
+	"CdaV2Cotas",
+	"CdaV2DemaisCodif",
+	"CdaV2DemaisNCodif",
+	"CdaV2Document",
+	"CdaV2Header",
+	"CdaV2Inform",
+	"CdaV2Negoc",
+	"CdaV2PosFim",
+	"CdaV2Swap",
+	"CdaV2SwapAplic",
+	"CdaV2SwapNegoc",
+	"CdaV2SwapPosFim",
+	"CdaV2TitPub",
 	"ClasseCotas",
 	"ClientCount",
 	"CotistCategory",
