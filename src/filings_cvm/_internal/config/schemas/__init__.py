@@ -62,6 +62,14 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_original import (
+	PerfilMensalOriginalClientCount,
+	PerfilMensalOriginalDocument,
+	PerfilMensalOriginalHeader,
+	PerfilMensalOriginalPatrimonyDistribution,
+	PerfilMensalOriginalRow,
+	PerfilMensalOriginalTradingDays,
+)
 
 
 __all__ = [
@@ -105,6 +113,12 @@ __all__ = [
 	"OtcOperation",
 	"PatrimonyDistribution",
 	"PerfilMensalDocument",
+	"PerfilMensalOriginalClientCount",
+	"PerfilMensalOriginalDocument",
+	"PerfilMensalOriginalHeader",
+	"PerfilMensalOriginalPatrimonyDistribution",
+	"PerfilMensalOriginalRow",
+	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
