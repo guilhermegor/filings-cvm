@@ -503,3 +503,190 @@ def test_coverage_floor_rejects_an_omit_that_swallows_a_section(
 	cls_result = _run_python(_bin_script("check_coverage_floor.py"), cwd=tmp_path)
 
 	assert cls_result.returncode == int_expected_rc, cls_result.stderr
+
+
+# --------------------------
+# bin/check_pr_policy.sh, bin/close_linked_issues.sh, bin/dependabot_auto_merge.sh
+# --------------------------
+
+
+def _source_and_call(
+	str_script: str, str_call: str, dict_env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
+	"""Source a ``bin/`` script (its ``main`` is source-guarded) and run one shell call.
+
+	Parameters
+	----------
+	str_script : str
+		The script filename under ``bin/``.
+	str_call : str
+		Shell snippet run after sourcing; inputs are read from ``dict_env`` so quoting in
+		them cannot break the snippet.
+	dict_env : dict of {str: str}
+		Environment variables the snippet reads.
+
+	Returns
+	-------
+	subprocess.CompletedProcess[str]
+		The finished process.
+	"""
+	return subprocess.run(  # noqa: S603 — resolved bash, repo script, constant snippets
+		[
+			shutil.which("bash") or "bash",
+			"-c",
+			f"source '{_bin_script(str_script)}'; {str_call}",
+		],
+		capture_output=True,
+		text=True,
+		check=False,
+		env={**_env_without_git(), **dict_env},
+	)
+
+
+@pytest.mark.parametrize(
+	("str_branch", "int_expected_rc"),
+	[
+		("feat/12-add-thing", 0),
+		("ci/366-repo-policy-workflows", 0),
+		("dependabot/pip/x-1.0", 0),
+		("release/0.2.0", 0),
+		("feat/no-number", 1),
+		("main", 1),
+	],
+)
+def test_check_pr_policy_branch_requires_an_issue_number(
+	str_branch: str, int_expected_rc: int
+) -> None:
+	"""A branch passes when it is ``<type>/<N>-<slug>`` or an exempt bot/release prefix.
+
+	Parameters
+	----------
+	str_branch : str
+		Branch name under test.
+	int_expected_rc : int
+		Expected exit code.
+	"""
+	cls_result = _run("check_pr_policy.sh", "branch", dict_env={"BRANCH": str_branch})
+
+	assert cls_result.returncode == int_expected_rc
+
+
+@pytest.mark.parametrize(
+	("str_title", "int_expected_rc"),
+	[
+		("feat(ingestion): add reader (#1)", 0),
+		("ci: import the workflows", 0),
+		("fix!: breaking", 0),
+		("Add stuff", 1),
+		("feat:missing space", 1),
+	],
+)
+def test_check_pr_policy_title_requires_conventional_commit(
+	str_title: str, int_expected_rc: int
+) -> None:
+	"""A PR title must be a Conventional Commit (it becomes the squash-merge subject).
+
+	Parameters
+	----------
+	str_title : str
+		PR title under test.
+	int_expected_rc : int
+		Expected exit code.
+	"""
+	cls_result = _run("check_pr_policy.sh", "title", dict_env={"TITLE": str_title})
+
+	assert cls_result.returncode == int_expected_rc
+
+
+def test_check_pr_policy_body_names_each_missing_template_section(tmp_path: Path) -> None:
+	"""The body check reports every ``## `` heading of the template the body lacks.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Scratch dir holding a synthetic template.
+	"""
+	path_template = tmp_path / "template.md"
+	path_template.write_text("## Description\n\n## Testing\n", encoding="utf-8")
+	dict_env = {"BODY": "## Description\nhello", "TEMPLATE": str(path_template)}
+
+	cls_result = _run("check_pr_policy.sh", "body", dict_env=dict_env)
+
+	assert cls_result.returncode == 1
+	assert "'## Testing'" in cls_result.stderr
+	assert "'## Description'" not in cls_result.stderr
+
+
+def test_check_pr_policy_unknown_mode_is_a_usage_error() -> None:
+	"""An unknown sub-command exits 2 with usage on stderr."""
+	cls_result = _run("check_pr_policy.sh", "nope")
+
+	assert cls_result.returncode == 2
+	assert "usage" in cls_result.stderr
+
+
+@pytest.mark.parametrize(
+	("str_branch", "str_body", "str_expected"),
+	[
+		("fix/42-thing", "", "42"),
+		("chore/x", "Closes #7\nFixes #9", "7\n9"),
+		("chore/x", "Closes: #7", "7"),
+		("chore/x", "This does not close #7", ""),
+		("chore/x", "```\nCloses #7\n```", ""),
+		("dependabot/pip/a", "Closes #7", ""),
+	],
+	ids=["branch", "body-keywords", "colon-form", "negated", "fenced", "bot-branch"],
+)
+def test_close_linked_issues_resolves_only_real_closing_references(
+	str_branch: str, str_body: str, str_expected: str
+) -> None:
+	"""Issue numbers come from the branch and from prose closing keywords, nothing else.
+
+	Parameters
+	----------
+	str_branch : str
+		PR head branch.
+	str_body : str
+		PR body.
+	str_expected : str
+		Expected newline-joined sorted issue numbers.
+	"""
+	cls_result = _source_and_call(
+		"close_linked_issues.sh",
+		'resolve_issues "$BRANCH" "$BODY"',
+		{"BRANCH": str_branch, "BODY": str_body},
+	)
+
+	assert cls_result.returncode == 0
+	assert cls_result.stdout.strip() == str_expected
+
+
+@pytest.mark.parametrize(
+	("str_json", "str_expected"),
+	[
+		('[{"updateType":"version-update:semver-patch"}]', "minor"),
+		(
+			'[{"updateType":"version-update:semver-minor"},'
+			'{"updateType":"version-update:semver-patch"}]',
+			"minor",
+		),
+		('[{"updateType":"version-update:semver-major"}]', "major"),
+		("", "major"),
+		("[]", "major"),
+	],
+)
+def test_dependabot_auto_merge_classifies_updates(str_json: str, str_expected: str) -> None:
+	"""Only an all-patch/minor update set is ``minor``; anything else, or no metadata, is major.
+
+	Parameters
+	----------
+	str_json : str
+		The ``updated-dependencies-json`` payload.
+	str_expected : str
+		Expected classification.
+	"""
+	cls_result = _source_and_call(
+		"dependabot_auto_merge.sh", 'classify_update "$J"', {"J": str_json}
+	)
+
+	assert cls_result.stdout.strip() == str_expected
