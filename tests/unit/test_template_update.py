@@ -9,6 +9,7 @@ import fnmatch
 import importlib.util
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from types import ModuleType
@@ -454,3 +455,74 @@ def test_rerunning_with_markers_still_left_keeps_the_stamp(tmp_path: Path) -> No
 	_update(path_project, path_bx, "--apply")
 
 	assert drift.read_commit(path_project) == str_before
+
+
+def test_a_signal_killed_merge_is_unmergeable_not_a_conflict(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""A negative return code means git died by signal; its partial stdout is not a merge."""
+	monkeypatch.setattr(
+		updater.subprocess,
+		"run",
+		lambda *args, **kwargs: subprocess.CompletedProcess([], -9, stdout=b"partial"),
+	)
+
+	assert updater.merge_three_way(b"o", b"b", b"t") == (None, -1)
+
+
+def test_a_directory_at_a_managed_path_is_an_error(tmp_path: Path) -> None:
+	"""Writing a file over a directory would crash mid-apply; report it instead."""
+	(tmp_path / "a.txt").mkdir()
+	path_theirs = tmp_path / "theirs.txt"
+	path_theirs.write_text("new\n", encoding="utf-8")
+
+	assert updater.plan_file(tmp_path / "a.txt", path_theirs, b"base\n") == ("error", None)
+
+
+def test_a_crlf_copy_of_an_untouched_file_is_fast_forwarded(tmp_path: Path) -> None:
+	"""CRLF from an autocrlf checkout is not a local edit."""
+	path_project, path_bx, _ = _scenario(tmp_path, _BASE, _BASE, {"a.txt": "new\n"})
+	(path_project / "a.txt").write_bytes(b"base\r\n")
+
+	_update(path_project, path_bx, "--apply")
+
+	assert (path_project / "a.txt").read_text(encoding="utf-8") == "new\n"
+
+
+def test_a_project_that_is_not_a_work_tree_root_leaves_the_enclosing_repository_alone(
+	tmp_path: Path,
+) -> None:
+	"""``git switch`` inside an enclosing repository would move that repository's HEAD."""
+	path_project, path_bx, _ = _scenario(tmp_path, _BASE, _BASE, {"a.txt": "new\n"})
+	shutil.rmtree(path_project / ".git")
+	_git(tmp_path, "init", "-q")
+
+	_update(path_project, path_bx, "--apply")
+
+	assert (path_project / "a.txt").read_text(encoding="utf-8") == "base\n"
+
+
+def test_a_branch_without_a_record_of_an_earlier_run_is_written_in_full(
+	tmp_path: Path,
+) -> None:
+	"""An interrupted run left the branch but not its merges; resuming must not skip them."""
+	dict_ours = {"a.txt": "mine1\nl2\nl3\n"}
+	dict_theirs = {"a.txt": "l1\nl2\nnew3\n"}
+	path_project, path_bx, str_head = _scenario(tmp_path, _THREE_LINES, dict_ours, dict_theirs)
+	_git(path_project, "switch", "-c", f"chore/template-update-{str_head[:10]}")
+
+	_update(path_project, path_bx, "--apply")
+
+	assert (path_project / "a.txt").read_text(encoding="utf-8") == "mine1\nl2\nnew3\n"
+
+
+def test_a_stamp_that_is_not_in_the_checkout_head_history_skips(tmp_path: Path) -> None:
+	"""A checkout behind the stamp would move files and the stamp backwards."""
+	path_project, path_bx, str_head = _scenario(tmp_path, _BASE, _BASE, {"a.txt": "new\n"})
+	_git(path_bx, "checkout", "-q", "--detach", "HEAD~1")
+	path_stamp = path_project / drift._PROVENANCE_FILENAME
+	path_stamp.write_text(f"tier: {_TIER}\nblueprintx_commit: {str_head}\n", encoding="utf-8")
+
+	_update(path_project, path_bx, "--apply")
+
+	assert (path_project / "a.txt").read_text(encoding="utf-8") == "base\n"

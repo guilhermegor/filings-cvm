@@ -1,119 +1,142 @@
-# Template updates
+# Atualizações do template
 
-A scaffold is a one-shot copy. A fix that lands in `templates/` afterwards reaches only
-projects generated after it. `python bin/check_template_drift.py` is the reporter that closes that gap
-(blueprintx#872).
+Um scaffold é uma cópia única. Uma correção que entra em `templates/` depois disso só chega aos
+projetos gerados depois dela. `python bin/check_template_drift.py` é o relator que fecha essa
+lacuna (blueprintx#872).
 
-## What it compares
+## O que ele compara
 
-For a project stamped with `tier` and `blueprintx_commit` in `.blueprintx-provenance.yaml`,
-three versions of every template-managed file exist:
+Para um projeto carimbado com `tier` e `blueprintx_commit` em `.blueprintx-provenance.yaml`,
+existem três versões de cada arquivo gerenciado pelo template:
 
-| Name | Where it comes from |
+| Nome | De onde vem |
 |---|---|
-| base | the template file at the stamped `blueprintx_commit` |
-| theirs | the template file in the BlueprintX checkout now |
-| ours | the project's file |
+| base | o arquivo do template no `blueprintx_commit` carimbado |
+| theirs | o arquivo do template no checkout do BlueprintX agora |
+| ours | o arquivo do projeto |
 
-The set of template-managed files is never listed by hand. Each tier's scaffold entry
-answers `--list-copies` by dry-running its own copy steps (`bin/lib/scaffold_python_templates.sh`
-for the service tiers, `bin/scaffold/python_lib_minimal.sh` for lib-minimal) and printing one
-`COPY` or `RM` line per copy. The dry run stubs `cp`, `rm`, `mkdir`, `touch`, `chmod`,
-`envsubst` and `print_status` through `scaffold_dry_run` in `bin/lib/scaffold_provenance.sh`,
-so the output cannot disagree with what the scaffold does.
+O conjunto de arquivos gerenciados nunca é listado à mão. A entrada de scaffold de cada tier
+responde a `--list-copies` executando em modo simulado os seus próprios passos de cópia
+(`bin/lib/scaffold_python_templates.sh` para os tiers de serviço, `bin/scaffold/python_lib_minimal.sh`
+para o lib-minimal) e imprimindo uma linha `COPY` ou `RM` por cópia. A simulação substitui `cp`,
+`rm`, `mkdir`, `touch`, `chmod`, `envsubst` e `print_status` por meio de `scaffold_dry_run` em
+`bin/lib/scaffold_provenance.sh`, de modo que a saída não pode divergir do que o scaffold faz.
 
-The dry run takes `--roster true|false` to match the project's review-bot roster choice, and
-clears `GITGUARDIAN_API_KEY` so the output never depends on the caller's environment. Files that
-are rendered rather than copied (`README.md`, `pyproject.toml`) do not appear. BlueprintX's own CI
-scaffolds every tier for real and fails when `--list-copies` and the generated tree disagree.
+A simulação aceita `--roster true|false` para corresponder à escolha do projeto sobre o roster de
+bots de revisão, e limpa `GITGUARDIAN_API_KEY` para que a saída nunca dependa do ambiente de quem
+chama. Arquivos renderizados em vez de copiados (`README.md`, `pyproject.toml`) não aparecem. O CI
+do próprio BlueprintX gera cada tier de verdade e falha quando `--list-copies` e a árvore gerada
+divergem.
 
-## What it reports
+## O que ele reporta
 
-- Missing: the template ships a path the project does not have.
-- Template changed since scaffold: ours equals base and theirs differs.
-- Both changed: ours and theirs both differ from base and from each other.
+- Ausente: o template entrega um caminho que o projeto não tem.
+- Template mudou desde o scaffold: ours é igual a base e theirs difere.
+- Ambos mudaram: ours e theirs diferem de base e entre si.
+- Não comparado: o projeto tem o arquivo, mas a fonte no checkout do BlueprintX não é um arquivo
+  (por exemplo, foi apagada localmente); a execução não prova nada sobre ele e nunca termina em
+  veredito limpo.
 
-A file the project edited while the template stood still is not drift. Files a scaffold
-renders through `envsubst` (`pyproject.toml`, `LICENSE`, `README.md`, `SECURITY.md`) are not
-verbatim copies, so they are outside the comparison, as are files copied from `bin/ci/`.
-Copies guarded by an answer given at scaffold time (the review-bot roster) are listed exactly
-when the dry run is given the matching value, read back from the stamp. Other guarded copies
-(a GitGuardian key, publish targets) are not policed yet, and the dry run ignores the
-caller's `GITGUARDIAN_API_KEY` so the verdict never depends on the environment. A file absent
-at the stamped commit that the project wrote itself is reported as both changed, unless its
-content already equals the current template, in which case it is the same.
+Um arquivo que o projeto editou enquanto o template ficou parado não é deriva. Quebras de linha
+CRLF (checkout com `core.autocrlf`) não contam como edição: o texto é normalizado para LF antes de
+comparar; conteúdo binário não é alterado. Arquivos que o scaffold renderiza com `envsubst`
+(`pyproject.toml`, `LICENSE`, `README.md`, `SECURITY.md`) não são cópias literais e ficam fora da
+comparação, assim como os arquivos copiados de `bin/ci/`. Cópias condicionadas a uma resposta dada
+no scaffold (o roster de bots de revisão) são listadas exatamente quando a simulação recebe o valor
+correspondente, lido do carimbo. As demais cópias condicionadas (chave do GitGuardian, destinos de
+publicação) ainda não são policiadas. Um arquivo ausente no commit carimbado que o projeto escreveu
+por conta própria é reportado como "ambos mudaram", a menos que o conteúdo já seja igual ao template
+atual, caso em que é "igual".
 
-## Why it self-skips
+## Por que ele se auto-ignora
 
-Without a BlueprintX checkout, a stamp, or a usable `blueprintx_commit` (absent, `unknown`, or
-not in the checkout's history), the content section prints `SKIPPED content drift` and says why.
-It never prints a clean verdict for a comparison that did not run. The command always exits 0.
+Cada pré-requisito que falta tem a sua própria saída, e nenhuma delas é um veredito limpo:
 
-## Applying updates: `python bin/template_update.py`
+- Sem carimbo (`.blueprintx-provenance.yaml`) ou sem checkout do BlueprintX, a ferramenta imprime uma
+  linha `SKIPPED: ...` genérica explicando o que falta e encerra antes de qualquer comparação.
+- Com checkout e carimbo, mas com `blueprintx_commit` ausente, `unknown` ou fora do histórico de
+  `HEAD` do checkout (um commit divergente ou mais novo que o checkout não serve de base de
+  mesclagem), a seção de conteúdo imprime `SKIPPED content drift` e diz o motivo. A verificação de
+  caminhos ausentes ainda roda.
 
-`python bin/template_update.py` reads the same base, ours and theirs data and acts on it. It is a dry run
-unless `--apply` is passed. The checkout comes from `--blueprintx-root` or
-`BLUEPRINTX_TEMPLATE_ROOT`, as for the reporter, and the reporter's resolution of the managed
-paths is reused rather than repeated (`managed_sources` in `bin/check_template_drift.py`).
+A ferramenta sempre encerra com 0.
 
-| Project file | Action |
+## Aplicando atualizações: `python bin/template_update.py`
+
+`python bin/template_update.py` lê os mesmos dados base, ours e theirs e age sobre eles. É uma
+simulação, a menos que `--apply` seja passado. O checkout vem de `--blueprintx-root` ou de
+`BLUEPRINTX_TEMPLATE_ROOT`, como no relator, e a resolução dos caminhos gerenciados é reaproveitada
+(`managed_sources` em `bin/check_template_drift.py`).
+
+| Arquivo do projeto | Ação |
 |---|---|
-| missing | add it, with the template's file mode |
-| equal to base | fast-forward to theirs |
-| equal to theirs, or theirs equal to base | nothing to do |
-| edited locally and the template moved too | `git merge-file` base, ours, theirs |
+| ausente | adiciona, com o modo de arquivo do template |
+| igual a base | avança (fast-forward) para theirs |
+| igual a theirs, ou theirs igual a base | nada a fazer |
+| editado localmente e o template também mudou | `git merge-file` base, ours, theirs |
+| um diretório no lugar do arquivo | listado como não mesclável e deixado intacto |
 
-A clean merge is written as is. A conflict is written with `<<<<<<< ours`, `=======` and
-`>>>>>>> template` markers and listed in the output. A file git cannot merge (binary content)
-is listed as unmergeable and left untouched. A local edit is never overwritten silently, and a
-file whose base is unknown (added to the template after the stamped commit) merges against an
-empty base, so a differing local copy surfaces as a conflict.
+Uma mesclagem limpa é escrita como está. Um conflito é escrito com marcadores `<<<<<<< ours`,
+`=======` e `>>>>>>> template` e listado na saída. Um arquivo que o git não consegue mesclar
+(conteúdo binário, ou o `git merge-file` encerrado por sinal) é listado como não mesclável e
+deixado intacto. Uma edição local nunca é sobrescrita em silêncio, e um arquivo cuja base é
+desconhecida (adicionado ao template depois do commit carimbado) é mesclado contra uma base vazia,
+de modo que uma cópia local diferente aparece como conflito.
 
-`--apply` first runs `git switch -c chore/template-update-<short-sha>`, where the short sha is
-the checkout's HEAD. It never writes to the branch you were on, and it stops before changing
-anything when the branch cannot be created (not a git work tree, or the branch exists). It then
-writes the files and leaves them uncommitted for review. `blueprintx_commit` in the stamp moves
-to the checkout's HEAD only when every file applied cleanly; after a conflict the stamp is
-unchanged and the command exits 1, so resolving the markers and running it again continues from
-the same base.
+`--apply` primeiro confere que `--root` é a raiz de uma árvore de trabalho git (um projeto dentro de
+outro repositório não tem o HEAD desse repositório movido) e então executa
+`git switch -c chore/template-update-<short-sha>`, em que o sha curto é o HEAD do checkout. Nunca
+escreve na branch em que você estava e para antes de alterar qualquer coisa quando a branch não pode
+ser criada. Depois escreve os arquivos e os deixa sem commit para revisão. `blueprintx_commit` no
+carimbo passa para o HEAD do checkout somente quando todos os arquivos foram aplicados sem
+pendências; após um conflito o carimbo não muda e a ferramenta encerra com 1, de modo que resolver os
+marcadores e rodar de novo continua a partir da mesma base.
 
-Without a usable stamp, checkout or `blueprintx_commit` the command prints `SKIPPED update`
-(or the reporter's `SKIPPED`) and exits 0 without touching the project.
+Sem carimbo, checkout ou `blueprintx_commit` utilizável (inclusive um commit que não é ancestral do
+HEAD do checkout), a ferramenta imprime `SKIPPED update` (ou o `SKIPPED` do relator) e encerra com 0
+sem tocar no projeto.
 
-### Retrying after a conflict
+### Tentando de novo após um conflito
 
-Run `python bin/template_update.py --apply` again while the update branch is still checked out. The
-branch is reused, files already written are not rewritten, and a conflicted or merged file
-counts as resolved once it holds no `<<<<<<<` or `>>>>>>>` marker line. Only then does
-`blueprintx_commit` move. An unmergeable file keeps blocking until it is dealt with by hand.
+Rode `python bin/template_update.py --apply` outra vez enquanto a branch de atualização continua em
+checkout. A branch é reaproveitada, arquivos já escritos não são reescritos, e um arquivo
+conflitado ou mesclado conta como resolvido assim que não tem linha de marcador `<<<<<<<` ou
+`>>>>>>>`. Só então `blueprintx_commit` avança. Um arquivo não mesclável continua bloqueando até ser
+tratado à mão.
 
-`--apply` also refuses a BlueprintX checkout with uncommitted or untracked changes, because
-theirs is read from the working tree while the stamped commit comes from history.
+Retomar só vale quando uma execução anterior registrou que escreveu o plano (um arquivo
+`template-update-<short-sha>.written` dentro do diretório `.git`). Uma branch de mesmo nome sem esse
+registro (execução interrompida ou criada à mão) recebe o plano completo, para que mesclagens não
+escritas nunca sejam puladas e carimbadas como aplicadas.
 
-## In this repository
+`--apply` também recusa um checkout do BlueprintX com alterações não commitadas ou não rastreadas,
+porque theirs é lido da árvore de trabalho enquanto o commit carimbado vem do histórico.
 
-filings-cvm carries a stamp (`.blueprintx-provenance.yaml`, tier `lib-minimal`). The poe tasks
-`template_drift` and `template_update` arrive with the poe migration; until then run the scripts
-directly, pointing them at a BlueprintX checkout with `--blueprintx-root` or the
-`BLUEPRINTX_TEMPLATE_ROOT` environment variable:
+## Neste repositório
+
+O filings-cvm carrega um carimbo (`.blueprintx-provenance.yaml`, tier `lib-minimal`). As tarefas poe
+`template_drift` e `template_update` chegam com a migração para o poe; até lá, rode os scripts
+diretamente, apontando para um checkout do BlueprintX com `--blueprintx-root` ou com a variável de
+ambiente `BLUEPRINTX_TEMPLATE_ROOT`:
 
 ```bash
 python bin/check_template_drift.py --root . --blueprintx-root ~/github/blueprintx
 python bin/template_update.py --root . --blueprintx-root ~/github/blueprintx   # dry run
 ```
 
-`blueprintx_commit` in the stamp is not the commit the repo was literally scaffolded from. It
-was chosen by measurement: the BlueprintX commit at which the template files nobody here has
-touched still equal the project's copies, so that "template changed" and "both changed" are
-classified correctly. Only `tier` and `review_bot_roster` are scaffold-time answers the stamp
-records.
+`blueprintx_commit` no carimbo não é o commit do qual o repositório foi literalmente gerado. Foi
+escolhido por medição: o commit do BlueprintX em que os arquivos do template que ninguém aqui tocou
+ainda são iguais às cópias do projeto, de modo que "template mudou" e "ambos mudaram" sejam
+classificados corretamente. Apenas `tier` e `review_bot_roster` são respostas de scaffold que o
+carimbo registra.
 
-### Known limits
+### Limites conhecidos
 
-- The tools report only files the template still ships. They do not list files the project has
-  that the template removed or replaced (`Makefile`, `tasks.sh`, `bin/db.sh`, `docs/api.md`).
-- Rendered files (`pyproject.toml`, `README.md`, `mkdocs.yml`, `SECURITY.md`, `LICENSE`) and
-  the `bin/ci/` copies are outside the comparison.
-- The vendored package tree appears under the tier's placeholder name `src/project/...`, so for
-  this repository all of `src/` is reported as missing. Ignore those lines.
-- Scaffold-time answers other than the review-bot roster are not recorded in the stamp.
+- As ferramentas reportam apenas arquivos que o template ainda entrega. Não listam arquivos que o
+  projeto tem e que o template removeu ou substituiu (`Makefile`, `tasks.sh`, `bin/db.sh`,
+  `docs/api.md`).
+- Arquivos renderizados (`pyproject.toml`, `README.md`, `mkdocs.yml`, `SECURITY.md`, `LICENSE`) e as
+  cópias de `bin/ci/` ficam fora da comparação.
+- A árvore do pacote vendorizado aparece sob o nome de espaço reservado do tier, `src/project/...`;
+  neste repositório, todo o `src/` é reportado como ausente. Ignore essas linhas.
+- Respostas de scaffold além do roster de bots de revisão não são registradas no carimbo.

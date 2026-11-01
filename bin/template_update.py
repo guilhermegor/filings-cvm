@@ -87,7 +87,7 @@ def merge_three_way(
             check=False,
             env=_git_env(),
         )
-    if cls_run.returncode > _MAX_CONFLICTS:
+    if not 0 <= cls_run.returncode <= _MAX_CONFLICTS:
         return None, -1
     return cls_run.stdout, cls_run.returncode
 
@@ -114,14 +114,18 @@ def plan_file(
             ``error``.
     """
     bytes_theirs = path_theirs.read_bytes()
+    if path_project_file.is_dir():
+        return "error", None
     if not path_project_file.is_file():
         return "add", bytes_theirs
-    bytes_ours = path_project_file.read_bytes()
-    if bytes_theirs in (bytes_ours, bytes_base):
+    bytes_ours = drift.normalize_eol(path_project_file.read_bytes())
+    bytes_base = drift.normalize_eol(bytes_base)
+    bytes_theirs_lf = drift.normalize_eol(bytes_theirs)
+    if bytes_theirs_lf in (bytes_ours, bytes_base):
         return "same", None
     if bytes_ours == bytes_base:
         return "fast_forward", bytes_theirs
-    bytes_merged, int_conflicts = merge_three_way(bytes_ours, bytes_base or b"", bytes_theirs)
+    bytes_merged, int_conflicts = merge_three_way(bytes_ours, bytes_base or b"", bytes_theirs_lf)
     if bytes_merged is None:
         return "error", None
     return ("conflict" if int_conflicts else "merged"), bytes_merged
@@ -299,6 +303,17 @@ def _enter_branch(path_root: pathlib.Path, str_branch: str) -> bool | None:
             was just created, ``None`` (after printing why) when neither is possible.
     """
     list_vcs = ["git", "-C", str(path_root)]
+    cls_top = subprocess.run(  # noqa: S603
+        [*list_vcs, "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+        env=_git_env(),
+    )
+    str_top = cls_top.stdout.strip()
+    if cls_top.returncode != 0 or pathlib.Path(str_top).resolve() != path_root.resolve():
+        print(f"ERROR: {path_root} is not the root of a Git work tree; nothing was changed.")
+        return None
     cls_now = subprocess.run(  # noqa: S603
         [*list_vcs, "branch", "--show-current"],
         capture_output=True,
@@ -319,6 +334,36 @@ def _enter_branch(path_root: pathlib.Path, str_branch: str) -> bool | None:
         print(f"ERROR: cannot create branch {str_branch}: {cls_switch.stderr.strip()}")
         return None
     return False
+
+
+def _record_path(path_root: pathlib.Path, str_short: str) -> pathlib.Path | None:
+    """Return the file inside the git dir that marks a run as having written its plan.
+
+    Merged and conflicted files are only skipped on a resume, so a resume must know an
+    earlier run really wrote them; a branch that merely exists proves nothing.
+
+    Parameters
+    ----------
+    path_root : pathlib.Path
+        The project root.
+    str_short : str
+        The checkout's abbreviated HEAD, which names the update branch.
+
+    Returns
+    -------
+    pathlib.Path or None
+            The (possibly not yet existing) record file, or ``None`` when git cannot say.
+    """
+    cls_run = subprocess.run(  # noqa: S603
+        ["git", "-C", str(path_root), "rev-parse", "--git-path"]  # noqa: S607
+        + [f"template-update-{str_short}.written"],
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+        env=_git_env(),
+    )
+    str_out = cls_run.stdout.strip()
+    return path_root / str_out if cls_run.returncode == 0 and str_out else None
 
 
 def _checkout_dirty(path_blueprintx: pathlib.Path) -> bool:
@@ -355,9 +400,11 @@ def _apply(
 ) -> int:
     """Enter the update branch, write the plan, and stamp the new commit if all was clean.
 
-    Running it again while the update branch is checked out resumes: only added and
-    fast-forwarded files are written, merged and conflicted files are never rewritten, and
-    a file counts as resolved once it holds no conflict markers.
+    Running it again while the update branch is checked out resumes, provided an earlier run
+    recorded that it wrote its plan: only added and fast-forwarded files are written, merged
+    and conflicted files are never rewritten, and a file counts as resolved once it holds no
+    conflict markers. Without that record (an interrupted or hand-made branch) the plan is
+    written in full.
 
     Parameters
     ----------
@@ -381,11 +428,14 @@ def _apply(
         print(f"ERROR: cannot read HEAD of {path_blueprintx}; nothing was changed.")
         return 1
     str_branch = f"chore/template-update-{str_short}"
-    bool_resume = _enter_branch(path_root, str_branch)
-    if bool_resume is None:
+    bool_on_branch = _enter_branch(path_root, str_branch)
+    path_record = _record_path(path_root, str_short)
+    if bool_on_branch is None or path_record is None:
         return 1
+    bool_resume = bool_on_branch and path_record.is_file()
     dict_write = {k: v for k, v in dict_plan.items() if not bool_resume or v[0] in _TRIVIAL}
     _write_plan(path_root, path_blueprintx, dict_write, dict_sources)
+    path_record.write_text(f"{str_full}\n", encoding="utf-8")
     list_blocked = _blocked(path_root, dict_plan, bool_resume)
     if list_blocked:
         print(
@@ -453,7 +503,8 @@ def main(list_argv: list) -> int:
     if str_commit is None or not drift.commit_known(path_blueprintx, str_commit):
         print(
             f"SKIPPED update: the stamped blueprintx_commit ({str_commit}) is missing or not in "
-            f"{path_blueprintx}, so there is no merge base. Nothing was changed."
+            f"the HEAD history of {path_blueprintx}, so there is no merge base. Nothing was "
+            f"changed."
         )
         return 0
     dict_plan = build_plan(path_root, path_blueprintx, str_commit, dict_sources)

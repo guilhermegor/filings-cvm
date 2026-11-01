@@ -163,8 +163,10 @@ poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command
 
 The repo carries a BlueprintX provenance stamp (`.blueprintx-provenance.yaml`). To compare it
 with the current template, run `python bin/check_template_drift.py --root . --blueprintx-root <checkout>`
-(or set `BLUEPRINTX_TEMPLATE_ROOT`); `bin/template_update.py` is the dry-run-by-default updater.
-Both are reports, not gates. See [Template updates](docs/template-updates.md) for the known limits.
+(or set `BLUEPRINTX_TEMPLATE_ROOT`); it is a report, not a gate. `bin/template_update.py` is a
+dry run unless `--apply` is passed; `--apply` writes files on a `chore/template-update-<short-sha>`
+branch, moves `blueprintx_commit` only when every file applied cleanly, and exits 1 otherwise.
+See [Template updates](docs/template-updates.md) for the known limits.
 
 ## Pull Request Process
 
