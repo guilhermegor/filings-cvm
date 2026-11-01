@@ -39,4 +39,4 @@ class InformeDiarioV3(SubmissionWriter[InformeDiarioV3Document]):
 		Optional[str]
 			XML string when output_path is None, else None.
 		"""
-		return InformeDiario().export(doc, output_path, versao=doc.header.versao)
+		return InformeDiario().export(doc, output_path, versao="3.0")

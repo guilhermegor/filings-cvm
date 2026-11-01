@@ -124,6 +124,12 @@ def test_header_rejects_other_versao() -> None:
 		InformeDiarioV3Header(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025", versao="4.0")
 
 
+def test_header_rejects_other_cod_doc() -> None:
+	"""Reject a header claiming another COD_DOC."""
+	with pytest.raises(ValidationError):
+		InformeDiarioV3Header(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025", cod_doc=2)
+
+
 def test_more_than_100_funds_rejected() -> None:
 	"""Reject a document with more than 100 informes."""
 	header = InformeDiarioV3Header(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025")
@@ -150,6 +156,13 @@ def test_export_writes_windows_1252_file(tmp_path: Path) -> None:
 		.decode("windows-1252")
 		.startswith('<?xml version="1.0" encoding="windows-1252"?>')
 	)
+
+
+def test_export_pins_versao_even_if_header_is_mutated() -> None:
+	"""Emit VERSAO 3.0 even when the header was mutated to 4.0 after validation."""
+	doc = _doc()
+	doc.header.versao = "4.0"  # type: ignore[assignment]
+	assert "<VERSAO>3.0</VERSAO>" in str(InformeDiarioV3().export(doc))
 
 
 def test_v3_writer_rejects_a_v4_document() -> None:

@@ -1,7 +1,7 @@
 """Pydantic models for the CVM Daily Report (Informe Diário) XML standard — V3.
 
-V3 (valid from 2015-10-01, ICVM 555/512) is described at
-https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp.
+V3 (valid from 2015-10-01, ICVM 555/512) is described by the CVM page
+(https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp).
 Measured against the V4 schema in :mod:`filings_cvm._internal.config.schemas.informe_diario`
 the page differs in exactly two ways:
 
@@ -26,9 +26,10 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 
 
 class InformeDiarioV3Header(InformeDiarioHeader, BaseModel):
-	"""CAB_INFORM — V3 header; ``VERSAO`` is pinned to ``3.0``."""
+	"""CAB_INFORM — V3 header; ``VERSAO`` is pinned to ``3.0`` and ``COD_DOC`` to ``1``."""
 
 	versao: Literal["3.0"] = "3.0"
+	cod_doc: Literal[1] = 1
 
 
 class InformeDiarioV3Inform(InformeDiarioInform, BaseModel):

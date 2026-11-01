@@ -19,7 +19,7 @@ A página foi comparada ao schema V4. Só há duas diferenças:
 - O fundo é identificado **somente** por `CNPJ_FDO`; `COD_SUBCLASSE` não existe (rejeitado).
 
 Ordem das tags, escalas (2 casas; `VL_QUOTA` até 12; `PR_COTST` até 4) e o bloco
-`COTST_SIGNIF` são idênticos ao V4, por isso os modelos e o writer estendem os do V4.
+`COTST_SIGNIF` são idênticos ao V4, por isso os modelos estendem os do V4. O writer usa o writer V4 por composição, não por herança.
 
 ## Decisões
 
