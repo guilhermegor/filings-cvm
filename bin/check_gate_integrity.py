@@ -23,6 +23,7 @@ files a change touches — never off arbitrary source):
 - a ``[mypy-<module>] ignore_errors = True`` section ADDED, or an EXISTING section flipped
   from ``False``/absent to ``True`` — compared by effective value, not by section presence
 - an ``error:``-escalated ``filterwarnings`` entry removed from ``pytest.ini``
+- ANY change to ``.review-bots.yaml`` (the review-threads gate roster; #379)
 - a ``bin/ci/*`` file, or a ``bin/check_*``/``bin/lint_*`` gate script, DELETED
 - any watched config (``.pre-commit-config.yaml``, ``ruff.toml``, ``mypy.ini``, ``pytest.ini``)
   or workflow file DELETED outright — the most complete form of every weakening above
@@ -1035,7 +1036,30 @@ def test_assertion_problems(str_old: str, str_new: str, str_shown: str) -> list:
     ]
 
 
+def review_roster_problems(str_old: str, str_new: str, str_shown: str) -> list:
+    """Flag any change to ``.review-bots.yaml``: it is the review gate's policy (#379).
+
+    Parameters
+    ----------
+    str_old : str
+        Content at the merge-base.
+    str_new : str
+        Content in this change.
+    str_shown : str
+        Path to show in messages.
+
+    Returns
+    -------
+    list of str
+        One finding when the content differs; a roster change needs its own justification.
+    """
+    if str_old == str_new:
+        return []
+    return [f"{str_shown}: the review-bot roster / marker policy changed"]
+
+
 _DICT_DISPATCH = {
+    ".review-bots.yaml": review_roster_problems,
     ".pre-commit-config.yaml": precommit_problems,
     "ruff.toml": ruff_toml_problems,
     "mypy.ini": mypy_ini_problems,
