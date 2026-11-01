@@ -1,17 +1,4 @@
 #!/usr/bin/env bash
-#
-# commit.sh — commit with a one-shot retry for auto-fixing pre-commit hooks.
-#
-# Hooks like ruff-format, end-of-file-fixer, and trailing-whitespace REWRITE the
-# staged file and then exit non-zero, aborting the first `git commit`. Run naively
-# that leaves HEAD unmoved while looking like "it ran" — a silent no-commit. This
-# helper re-stages the hook-modified paths, retries the commit exactly once, and
-# then verifies HEAD actually advanced (failing loudly if it did not).
-#
-# Usage:
-#   bin/commit.sh "<conventional message>" [path ...]
-#
-# With no paths it commits whatever is already staged.
 
 set -euo pipefail
 
@@ -43,8 +30,6 @@ main() {
 	str_head_before="$(git rev-parse HEAD 2>/dev/null || echo none)"
 
 	if ! git commit -m "$str_message"; then
-		# Most often an auto-fixing hook reformatted staged files and aborted.
-		# Re-stage what changed and retry exactly once.
 		print_status "warning" "commit aborted (likely a reformatting hook) — re-staging and retrying once"
 		git add -u
 		if [[ "$#" -gt 0 ]]; then

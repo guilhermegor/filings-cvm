@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Generate bin/corporate_ca.pem from the certificate your corporate TLS-inspecting
-# proxy presents for pypi.org. Run this only on a network behind such a proxy; on
-# a normal network you do not need it. The generated pem is git-ignored and picked
-# up automatically by `make venv` / `make run` (see lib/bootstrap.sh).
 
 set -euo pipefail
 
@@ -11,54 +7,70 @@ source "$SCRIPT_DIR/lib/common.sh"
 # shellcheck source=bin/lib/bootstrap.sh
 source "$SCRIPT_DIR/lib/bootstrap.sh"
 
-extract_corporate_ca() {
-	print_status "config" "Extracting corporate CA from pypi.org ..."
+export_windows_trust_store() {
+	print_status "config" "Reading the Windows trust store (ROOT + CA) ..."
 	BOOTSTRAP_CERT_OUT="$CORPORATE_CA_PEM" "$PYTHON" - <<'PYEOF'
 import os
-import socket
+import pathlib
 import ssl
 import sys
 
-hostname = "pypi.org"
-out = os.environ["BOOTSTRAP_CERT_OUT"]
+path_out = pathlib.Path(os.environ["BOOTSTRAP_CERT_OUT"])
+list_pem: list[str] = []
+set_seen: set[bytes] = set()
 
-# Verification is intentionally disabled here: the whole point is to capture the
-# CA that a TLS-inspecting proxy substitutes for pypi.org's chain, which by
-# definition is not yet trusted. The captured cert is written to disk for the
-# operator to inspect; nothing is fetched over this connection but the cert.
-ctx = ssl.create_default_context()
-ctx.check_hostname = False
-ctx.verify_mode = ssl.CERT_NONE
+for str_store in ("ROOT", "CA"):
+    try:
+        list_certs = ssl.enum_certificates(str_store)
+    except (AttributeError, OSError) as exc:
+        print(f"Cannot read the {str_store} store: {exc}", file=sys.stderr)
+        continue
+    for bytes_der, _str_encoding, _obj_trust in list_certs:
+        if bytes_der in set_seen:
+            continue
+        set_seen.add(bytes_der)
+        list_pem.append(ssl.DER_cert_to_PEM_cert(bytes_der))
 
-try:
-    with socket.create_connection((hostname, 443), timeout=10) as sock:
-        with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
-            der = ssock.getpeercert(binary_form=True)
-    pem = ssl.DER_cert_to_PEM_cert(der)
-    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
-    with open(out, "w") as fh:
-        fh.write(pem)
-except Exception as exc:  # noqa: BLE001
-    print(f"Failed to extract certificate: {exc}", file=sys.stderr)
+if not list_pem:
+    print("No certificates found in the Windows trust store", file=sys.stderr)
     sys.exit(1)
+
+path_out.parent.mkdir(parents=True, exist_ok=True)
+path_out.write_text("".join(list_pem), encoding="utf-8")
+print(len(list_pem))
 PYEOF
+}
+
+explain_manual_route() {
+	print_status "error" "Automatic extraction is implemented for Windows only."
+	print_status "info" "On this OS the system trust store is already a PEM file. Copy it (or just your corporate CA) to:"
+	print_status "info" "    $CORPORATE_CA_PEM"
+	print_status "info" "Common locations:"
+	print_status "info" "    Debian/Ubuntu  /etc/ssl/certs/ca-certificates.crt"
+	print_status "info" "    RHEL/Fedora    /etc/pki/tls/certs/ca-bundle.crt"
+	print_status "info" "    macOS          security find-certificate -a -p /Library/Keychains/System.keychain"
+	print_status "info" "Then re-run 'poe venv'."
 }
 
 main() {
 	print_status "section" "Corporate CA Setup"
 	bootstrap_init
 
-	print_status "warning" "This trusts whatever CA your network presents for pypi.org."
-	print_status "warning" "Only run it behind a corporate TLS-inspecting proxy."
 	if [[ -f "$CORPORATE_CA_PEM" ]]; then
 		print_status "warning" "Overwriting existing $CORPORATE_CA_PEM"
 	fi
 
-	extract_corporate_ca
-	print_status "success" "Corporate CA saved: $CORPORATE_CA_PEM"
+	if [[ "$OS_TYPE" != "windows" ]]; then
+		explain_manual_route
+		exit 1
+	fi
+
+	local str_count
+	str_count="$(export_windows_trust_store)"
+	print_status "success" "Trust store exported ($str_count certs): $CORPORATE_CA_PEM"
 
 	wire_corporate_ca
-	print_status "info" "Re-run 'make venv' to install dependencies through the proxy."
+	print_status "info" "Re-run 'poe venv' to install dependencies through the proxy."
 }
 
 main "$@"
