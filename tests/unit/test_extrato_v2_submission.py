@@ -144,3 +144,9 @@ def test_v2_export_with_output_path_returns_none(tmp_path: Path) -> None:
 def test_v2_export_writes_a_windows_1252_declaration(tmp_path: Path) -> None:
 	"""The written file declares windows-1252."""
 	assert b"windows-1252" in _export_to(tmp_path)[0].read_bytes()[:60]
+
+
+def test_v2_export_leaves_no_temp_file_behind(tmp_path: Path) -> None:
+	"""The atomic write leaves only the destination in the directory."""
+	out = _export_to(tmp_path)[0]
+	assert list(tmp_path.iterdir()) == [out]
