@@ -4,6 +4,7 @@ The expected tag order and decimal scales are pinned to the CVM page
 ``PadraoXMLPerfilV3.asp`` (XML sample), not to the V4 writer.
 """
 
+from pathlib import Path
 import re
 
 from pydantic import ValidationError
@@ -124,10 +125,15 @@ def _row(**distr_overrides: str) -> PerfilMensalV3Row:
 	)
 
 
+def _document(row: PerfilMensalV3Row) -> PerfilMensalV3Document:
+	"""Wrap one row in a V3 document."""
+	header = DocumentHeader(dt_compt="01/2025", dt_gerac_arq="15/01/2025")
+	return PerfilMensalV3Document(header=header, rows=[row])
+
+
 def _xml(row: PerfilMensalV3Row) -> str:
 	"""Serialize a one-row V3 document."""
-	header = DocumentHeader(dt_compt="01/2025", dt_gerac_arq="15/01/2025")
-	xml = PerfilMensalV3().export(PerfilMensalV3Document(header=header, rows=[row]))
+	xml = PerfilMensalV3().export(_document(row))
 	assert xml is not None
 	return xml
 
@@ -158,6 +164,40 @@ def test_export_tag_order_follows_the_v3_page() -> None:
 	assert all(tag in order for tag in emitted)
 
 
+def test_export_row_emits_nr_client_block() -> None:
+	"""The mandatory NR_CLIENT block is present (tag order alone cannot prove it)."""
+	assert "<NR_CLIENT>" in _xml(_row()).split("<ROW_PERFIL>")[1]
+
+
+def test_export_to_output_path_returns_none(tmp_path: Path) -> None:
+	"""With an output path, export returns None instead of the XML string.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the output file.
+	"""
+	out = tmp_path / "perfil_mensal_v3.xml"
+
+	assert PerfilMensalV3().export(_document(_row()), output_path=str(out)) is None
+
+
+def test_export_to_output_path_writes_windows_1252_declaration(tmp_path: Path) -> None:
+	"""The file written to the output path carries the windows-1252 declaration.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the output file.
+	"""
+	out = tmp_path / "perfil_mensal_v3.xml"
+	PerfilMensalV3().export(_document(_row()), output_path=str(out))
+
+	assert out.read_text(encoding="windows-1252").startswith(
+		'<?xml version="1.0" encoding="windows-1252"?>'
+	)
+
+
 def test_export_distr_patrim_emits_all_sixteen_tags() -> None:
 	"""All 16 PR_* tags are emitted."""
 	assert _xml(_row(pr_pf_varj="12.34")).count("<PR_") == 16
@@ -181,9 +221,16 @@ def test_row_without_distr_patrim_is_rejected() -> None:
 		)
 
 
-def test_distr_patrim_missing_one_tag_is_rejected() -> None:
-	"""Each of the 16 PR_* tags is individually mandatory."""
-	fields = dict.fromkeys(_PR_FIELDS[1:], "0")
+@pytest.mark.parametrize("missing", _PR_FIELDS)
+def test_distr_patrim_missing_one_tag_is_rejected(missing: str) -> None:
+	"""Each of the 16 PR_* tags is individually mandatory.
+
+	Parameters
+	----------
+	missing : str
+		The PR_* field omitted from the otherwise-complete mapping.
+	"""
+	fields = {f: "0" for f in _PR_FIELDS if f != missing}
 
 	with pytest.raises(ValidationError):
 		PatrimonyDistributionV3(**fields)
