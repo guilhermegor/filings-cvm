@@ -30,6 +30,11 @@ from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ListaClasseCotas,
 	ListaCotstCateg,
 )
+from filings_cvm._internal.config.schemas.informe_trimestral_v1 import (
+	InformeTrimestralV1Document,
+	InformeTrimestralV1Header,
+	InformeTrimestralV1Inform,
+)
 from filings_cvm._internal.config.schemas.inr_mensal import (
 	Aplicacoes,
 	EntradaSaida,
@@ -109,6 +114,9 @@ __all__ = [
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
+	"InformeTrimestralV1Document",
+	"InformeTrimestralV1Header",
+	"InformeTrimestralV1Inform",
 	"InrMensalDocument",
 	"InrMensalHeader",
 	"LaminaAntesInic2",

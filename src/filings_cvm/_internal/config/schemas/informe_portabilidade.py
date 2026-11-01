@@ -17,7 +17,7 @@ from datetime import datetime
 import re
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from filings_cvm._internal.config.schemas._fields import validated_cnpj
 from filings_cvm._internal.utils.typing import type_checker
@@ -35,11 +35,13 @@ _CNPJ_SHAPE_RE = re.compile(
 _MIN_YEAR = 1900
 
 # A request count: strict (no float/bool/str coercion) and never negative.
-CountField = Annotated[int, Field(strict=True, ge=0)]
+_CountField = Annotated[int, Field(strict=True, ge=0)]
 
 
 class PortabilidadeHeader(BaseModel):
 	"""CAB_INFORM — document-level header block."""
+
+	model_config = ConfigDict(validate_assignment=True)
 
 	cod_doc: Literal[478] = 478
 	versao: Literal["1.0"] = "1.0"
@@ -90,22 +92,23 @@ class PortabilidadeHeader(BaseModel):
 		"""
 		if not _DATE_BR_RE.fullmatch(v):
 			raise ValueError("date must follow DD/MM/AAAA")
-		if datetime.strptime(v, "%d/%m/%Y").year < _MIN_YEAR:  # noqa: DTZ007
-			raise ValueError(f"year must be >= {_MIN_YEAR}")
+		_check_min_year(v, "%d/%m/%Y")
 		return v
 
 
 class PortabilidadeInform(BaseModel):
 	"""INFORM — portability requests of one regulated entity for one month."""
 
+	model_config = ConfigDict(validate_assignment=True)
+
 	cnpj_partic: Annotated[str, Field(strict=True)]
 	dt_event: Annotated[str, Field(strict=True)]
-	qtde_solicit_orig: CountField
-	qtde_solicit_dest: CountField
-	qtde_canc: CountField
-	atend_prazo_regul: CountField
-	atend_prazo_estend: CountField
-	qtde_recus: CountField
+	qtde_solicit_orig: _CountField
+	qtde_solicit_dest: _CountField
+	qtde_canc: _CountField
+	atend_prazo_regul: _CountField
+	atend_prazo_estend: _CountField
+	qtde_recus: _CountField
 
 	@field_validator("cnpj_partic")
 	@classmethod
@@ -162,6 +165,26 @@ class InformePortabilidadeDocument(BaseModel):
 
 
 @type_checker
+def _check_min_year(value: str, fmt: str) -> None:
+	"""Reject a date whose year is before ``_MIN_YEAR`` (shared by both validators).
+
+	Parameters
+	----------
+	value : str
+		The date text, already shape-checked.
+	fmt : str
+		The ``strptime`` format of ``value``.
+
+	Raises
+	------
+	ValueError
+		If the date does not exist or its year is before ``_MIN_YEAR``.
+	"""
+	if datetime.strptime(value, fmt).year < _MIN_YEAR:  # noqa: DTZ007
+		raise ValueError(f"year must be >= {_MIN_YEAR}")
+
+
+@type_checker
 def _check_month_year(value: str) -> str:
 	"""Validate a ``MM/AAAA`` string (private helper shared by two models of this module).
 
@@ -182,6 +205,5 @@ def _check_month_year(value: str) -> str:
 	"""
 	if not _MONTH_YEAR_RE.fullmatch(value):
 		raise ValueError("month must follow MM/AAAA")
-	if datetime.strptime(value, "%m/%Y").year < _MIN_YEAR:  # noqa: DTZ007
-		raise ValueError(f"year must be >= {_MIN_YEAR}")
+	_check_min_year(value, "%m/%Y")
 	return value
