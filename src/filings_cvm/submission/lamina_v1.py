@@ -5,13 +5,11 @@ one (the schema walks in XML order, named after its tag), reused through its ele
 only the document root differs. Pure logic plus file I/O at the edges — no network.
 """
 
-import os
-from pathlib import Path
-import tempfile
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.lamina_v1 import LaminaV1Document
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm._internal.utils.typing import type_checker
 from filings_cvm.submission.lamina import _DECLARATION, _ENCODING, _INDENT, _NAMESPACE, _append
 
@@ -66,30 +64,6 @@ def _encode(xml_str: str) -> bytes:
 	return payload
 
 
-@type_checker
-def _write_atomic(path: Path, payload: bytes) -> None:
-	"""Write ``payload`` to a temp file beside ``path`` and rename it into place.
-
-	A failure leaves any existing destination untouched. ponytail: #330's
-	``atomic_write_bytes`` replaces this once it is on main.
-
-	Parameters
-	----------
-	path : Path
-		Destination file.
-	payload : bytes
-		The bytes to write.
-	"""
-	fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
-	try:
-		with os.fdopen(fd, "wb") as handle:
-			handle.write(payload)
-		os.replace(tmp, path)
-	except BaseException:
-		Path(tmp).unlink(missing_ok=True)
-		raise
-
-
 class LaminaV1(SubmissionWriter[LaminaV1Document]):
 	"""Serialize a validated Lâmina V1 document to CVM-compliant XML.
 
@@ -130,5 +104,5 @@ class LaminaV1(SubmissionWriter[LaminaV1Document]):
 		payload = _encode(xml_str)
 		if output_path is None:
 			return xml_str
-		_write_atomic(Path(output_path), payload)
+		atomic_write_bytes(output_path, payload)
 		return None
