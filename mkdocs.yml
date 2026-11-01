@@ -75,6 +75,7 @@ nav:
   - Referência da API: api.md
   - Perguntas frequentes: faq.md
   - Contribuindo: contributing.md
+  - Atualizações do template: template-updates.md
   - Histórico de versões: changelog.md
 theme:
   name: material
