@@ -19,6 +19,6 @@ Branch `feat/inr-mensal-writer-29`. Spec: `PadraoXMLInfoMensalINR.asp` (fetched 
   and net worth may be negative.
 - `VL_NOCION_APLIC` is required for Tabela A codes 15-24 and refused otherwise (page: "APENAS").
 - Participant code check digit: algorithm unpublished, checked only as one digit.
-- Assumed: a participant code appears once per file; the `AAAAA` of a code is not forced to equal
-  `CD_CVM`; empty optional containers are refused (the page says to omit them).
+- Assumed: a participant code appears once per file; the `AAAAA` of every `COD_PARTIC` must equal
+  `CD_CVM` (the page defines both as the representative's CVM code); empty optional containers are refused (the page says to omit them).
 - No CVM validator (the page links a syntax tester) was run.

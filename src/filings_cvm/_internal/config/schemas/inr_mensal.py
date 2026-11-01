@@ -202,3 +202,12 @@ class InrMensalDocument(_InrBlock):
 		if len(set(codes)) != len(codes):
 			raise ValueError("each participant code may appear only once per file")
 		return self
+
+	@model_validator(mode="after")
+	def _codes_belong_to_the_representative(self) -> InrMensalDocument:
+		"""Require every participant's AAAAA (representative) to equal the header ``CD_CVM``."""
+		prefix = self.header.cd_cvm
+		stray = [p.cod_partic for p in self.participantes if p.cod_partic.split(".")[0] != prefix]
+		if stray:
+			raise ValueError(f"participant code prefix must equal header CD_CVM: {stray[0]}")
+		return self

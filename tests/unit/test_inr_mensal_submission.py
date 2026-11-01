@@ -368,7 +368,7 @@ def test_empty_optional_containers_are_refused(container: type) -> None:
 
 def _header() -> InrMensalHeader:
 	"""Build a valid header."""
-	return InrMensalHeader(cd_cvm="1", dt_compt="01/2025", dt_gerac_arq="15/02/2025")
+	return InrMensalHeader(cd_cvm="12345", dt_compt="01/2025", dt_gerac_arq="15/02/2025")
 
 
 def test_document_requires_a_participant() -> None:
@@ -383,9 +383,15 @@ def test_document_rejects_repeated_participant_code() -> None:
 		_doc(_participant(CODE), _participant(CODE))
 
 
+def test_document_rejects_participant_prefix_other_than_header_cd_cvm() -> None:
+	"""AAAAA of every COD_PARTIC is the representative, so it must equal the header CD_CVM."""
+	with pytest.raises(ValidationError, match="must equal header CD_CVM"):
+		_doc(_participant("99999.123456.654321.1-9"))
+
+
 def _participants(count: int) -> list[Participante]:
 	"""Build ``count`` participants with distinct codes."""
-	return [_participant(f"1.1.{i}.0-0") for i in range(1, count + 1)]
+	return [_participant(f"12345.1.{i}.0-0") for i in range(1, count + 1)]
 
 
 def test_document_rejects_more_than_1000_participants() -> None:
@@ -409,6 +415,6 @@ def test_unknown_fields_are_rejected() -> None:
 def test_export_over_ten_megabytes_raises_value_error() -> None:
 	"""The page caps a file at 10 MB; an oversized document must not be emitted."""
 	apps = [Aplicacoes(cd_aplic=1, vl_mercado_aplic=1)] * 10_000
-	doc = _doc(*[_participant(f"1.1.{i}.0-1", aplicacoes=apps) for i in range(1, 13)])
+	doc = _doc(*[_participant(f"12345.1.{i}.0-1", aplicacoes=apps) for i in range(1, 13)])
 	with pytest.raises(ValueError, match="at most 10 MB"):
 		InrMensal().export(doc)
