@@ -389,6 +389,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../submission/perfil_mensal_original/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perfil Mensal original
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../submission/informe_diario/" class="md-nav__link">
         
   
@@ -425,6 +453,34 @@
     
   
     Informe Quadrimestral
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submission/informe_trimestral_v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Trimestral V1
   
 
     
@@ -593,6 +649,34 @@
     
   
     Cadastro de Ativos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submission/inr_mensal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informe Mensal INR
   
 
     
@@ -2472,6 +2556,10 @@ segue em <code>filings_cvm</code>.</li>
 </ul>
 <h3 id="feat">Feat<a class="headerlink" href="#feat" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>submission</strong>: add Informe Trimestral V1 XML writer (#338) (#356)</li>
+<li><strong>submission</strong>: add Perfil Mensal original XML writer (#342) (#368)</li>
+<li><strong>submission</strong>: add the Informe Mensal INR writer (#303)</li>
+<li><strong>submission</strong>: write writer output atomically (#330)</li>
 <li><strong>ingestion</strong>: add the FIDC monthly tab_VIII reader (#325)</li>
 <li><strong>submission</strong>: add Informe Quadrimestral V2 writer (#302)</li>
 <li><strong>submission</strong>: add Extrato V3 XML writer (#315)</li>
@@ -2545,6 +2633,7 @@ segue em <code>filings_cvm</code>.</li>
 </ul>
 <h3 id="fix">Fix<a class="headerlink" href="#fix" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>submission</strong>: apply target mode before writing atomic payload (#362)</li>
 <li><strong>drift</strong>: treat a refused probe date like a missing artifact (#324) (#328)</li>
 <li><strong>contracts</strong>: validate CNPJ on header-only CRI/FCA members (#322)</li>
 <li><strong>drift</strong>: probe the two closed series the job skipped (#323)</li>
