@@ -216,6 +216,30 @@ Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
 
 ---
 
+### `InrSemestralParte1` / `InrSemestralParte2`
+
+`filings_cvm.submission.InrSemestralParte1` · `filings_cvm.submission.InrSemestralParte2`
+
+Serializam os dois arquivos do Informe Semestral de Investidor não Residente, enviados juntos: Parte I (`InrParte1Document`, `COD_DOC` 69) e Parte II (`InrParte2Document`, `COD_DOC` 70).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InrParte1Document` \| `InrParte2Document` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+```python
+from filings_cvm.submission import InrSemestralParte1, InrSemestralParte2
+
+xml = InrSemestralParte2().export(parte2)                        # retorna str
+InrSemestralParte1().export(parte1, output_path="parte1.xml")    # grava arquivo, retorna None
+```
+
+Limites e regras do padrão: `docs/submission/inr_semestral.md`.
+
+---
+
 ### `InformeQuadrimestral`
 
 `filings_cvm.submission.InformeQuadrimestral`
