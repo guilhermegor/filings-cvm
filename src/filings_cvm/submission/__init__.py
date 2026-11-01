@@ -43,6 +43,11 @@ from filings_cvm._internal.config.schemas.extrato import (
 	ExtratoHeader,
 	ExtratoRow,
 )
+from filings_cvm._internal.config.schemas.extrato_v1 import (
+	ExtratoV1Document,
+	ExtratoV1Header,
+	ExtratoV1Row,
+)
 from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Cotista,
 	InfFundo157Document,
@@ -167,6 +172,7 @@ from filings_cvm.submission.cda import (
 	Cda,
 )
 from filings_cvm.submission.extrato import Extrato
+from filings_cvm.submission.extrato_v1 import ExtratoV1
 from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
@@ -235,6 +241,10 @@ __all__ = [
 	"ExtratoDocument",
 	"ExtratoHeader",
 	"ExtratoRow",
+	"ExtratoV1",
+	"ExtratoV1Document",
+	"ExtratoV1Header",
+	"ExtratoV1Row",
 	"Garantia",
 	"InfFundo157",
 	"InfFundo157Cotista",
