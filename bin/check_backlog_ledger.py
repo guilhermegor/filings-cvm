@@ -30,7 +30,7 @@ Failures (each a hard error, exit 1):
 
 - the branch touches a ``src``/``ci`` path but no ``docs/backlog/*.md`` is part of its diff;
 - a touched ledger's filename does not match ``<kebab-topic>_YYYYMMDD_HHMMSS.md``;
-- a touched ledger carries no ``- [ ]`` / ``- [x]`` checkbox item (to-dos as bare bullets).
+- a touched ledger carries no ``- [ ]`` / ``- [x]`` checkbox item (task lists as bare bullets).
 """
 
 from __future__ import annotations

@@ -1,7 +1,7 @@
-"""CVM Informe Mensal FIDC — tabela X.7 (garantias dos direitos creditórios) reader.
+"""CVM Informe Mensal FIDC — tabela X.7 (`garantias dos direitos creditórios`) reader.
 
-The ``inf_mensal_fidc_tab_X_7`` member of ``inf_mensal_fidc_AAAAMM.zip``: garantias dos direitos
-creditórios (valor e percentual). See ``_base_inf_mensal_fidc_reader`` for the shared behaviour
+The ``inf_mensal_fidc_tab_X_7`` member of ``inf_mensal_fidc_AAAAMM.zip``: collateral of the credit
+rights (amount and percentage). See ``_base_inf_mensal_fidc_reader`` for the shared behaviour
 (monthly ``date_ref``, ``DT_COMPTC`` date column, shared archive, ``path_raw``).
 """
 

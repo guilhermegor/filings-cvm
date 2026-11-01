@@ -1,4 +1,4 @@
-"""CVM ITR CIA_ABERTA (índice dos formulários) — ingestion (leitura) reader.
+"""CVM ITR CIA_ABERTA (`índice dos formulários`) — ingestion (leitura) reader.
 
 One row per ITR filing delivered in the year: who filed, when, and a `LINK_DOC`
 pointing at the document on CVM's RAD portal (host `http://www.rad.cvm.gov.br`). The link is

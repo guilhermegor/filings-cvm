@@ -1,4 +1,4 @@
-"""CVM FRE CIA_ABERTA (transações com partes relacionadas) — ingestion (leitura) reader.
+"""CVM FRE CIA_ABERTA (`transações com partes relacionadas`) — ingestion (leitura) reader.
 
 Related-party transactions: counterparty, amounts, terms and the issuer's position.
 
