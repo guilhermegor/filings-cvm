@@ -425,6 +425,77 @@ def _read_raw(
 	int_header_row: int = 0,
 	int_csv_quoting: int = csv.QUOTE_MINIMAL,
 ) -> pd.DataFrame:
+	"""Read a file into a raw DataFrame and strip whitespace from its column NAMES.
+
+	A publisher that ships ``"Symb "`` yields a column that prints as ``Symb`` while only
+	``df["Symb "]`` reaches it, so the contract would report a required column missing on a
+	name plainly visible in ``df.columns``. Stripping at the read boundary fixes it for every
+	caller. See :func:`_read_raw_dispatch` for the per-format reading itself.
+
+	Parameters
+	----------
+	path_file : pathlib.Path
+		The file to read.
+	str_sheet : str
+		Worksheet name (Excel only).
+	str_dtype : str | None
+		Optional dtype applied to every column on read.
+	str_csv_sep : str
+		CSV delimiter.
+	list_columns : sequence of str, optional
+		CSV only: read headerless and assign these column names.
+	str_encoding : str, optional
+		CSV/JSON text encoding, by default ``"utf-8-sig"``.
+	int_header_row : int, optional
+		Excel header-row index, by default ``0``.
+	int_csv_quoting : int, optional
+		CSV quoting constant, by default ``csv.QUOTE_MINIMAL``.
+
+	Returns
+	-------
+	pd.DataFrame
+		The raw rows, with trimmed column names.
+
+	Raises
+	------
+	ContractError
+		If two column names collide once whitespace is trimmed.
+	"""
+	df_raw = _read_raw_dispatch(
+		path_file,
+		str_sheet,
+		str_dtype,
+		str_csv_sep,
+		list_columns,
+		str_encoding,
+		int_header_row,
+		int_csv_quoting,
+	)
+	list_normalised = [str(col).strip() for col in df_raw.columns]
+	list_duplicates = sorted({c for c in list_normalised if list_normalised.count(c) > 1})
+	if list_duplicates:
+		raise ContractError(
+			[
+				f"Column names collide after trimming whitespace: {', '.join(list_duplicates)}. "
+				f"The source published the same name with and without surrounding spaces; "
+				f"disambiguate it before reading."
+			]
+		)
+	df_raw.columns = list_normalised
+	return df_raw
+
+
+@type_checker
+def _read_raw_dispatch(
+	path_file: Path,
+	str_sheet: str,
+	str_dtype: str | None,
+	str_csv_sep: str,
+	list_columns: Sequence[str] | None = None,
+	str_encoding: str = "utf-8-sig",
+	int_header_row: int = 0,
+	int_csv_quoting: int = csv.QUOTE_MINIMAL,
+) -> pd.DataFrame:
 	"""Read a file into a raw DataFrame, dispatching by extension (CSV, JSON, or Excel).
 
 	Parameters
