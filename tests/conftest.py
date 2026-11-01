@@ -21,6 +21,7 @@ which is deliberately noisy: it shows up in a diff and has to be justified in re
 from __future__ import annotations
 
 from collections.abc import Iterator
+from functools import partial
 import socket
 from typing import NoReturn
 
@@ -146,3 +147,30 @@ def block_network(request: pytest.FixtureRequest) -> Iterator[None]:
 		socket.socket = _socket_real  # type: ignore[misc]
 		socket.create_connection = _create_connection_real  # type: ignore[assignment]
 		socket.getaddrinfo = _getaddrinfo_real  # type: ignore[assignment]
+
+
+_GIT_HOOK_ENV = (
+	"GIT_DIR",
+	"GIT_WORK_TREE",
+	"GIT_INDEX_FILE",
+	"GIT_OBJECT_DIRECTORY",
+	"GIT_ALTERNATE_OBJECT_DIRECTORIES",
+	"GIT_COMMON_DIR",
+	"GIT_PREFIX",
+)
+
+
+@pytest.fixture(autouse=True)
+def isolate_git_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""Drop the ``GIT_*`` variables a git hook exports, so a test's scratch repo stays its own.
+
+	Under ``pre-commit`` the process inherits ``GIT_INDEX_FILE`` (and friends) pointing at the
+	real repository. A test that runs ``git init`` / ``git add`` in a ``tmp_path`` would then write
+	its scratch index over the real one, staging the deletion of the whole tree.
+
+	Parameters
+	----------
+	monkeypatch : pytest.MonkeyPatch
+		Removes each variable for the duration of the test.
+	"""
+	tuple(map(partial(monkeypatch.delenv, raising=False), _GIT_HOOK_ENV))
