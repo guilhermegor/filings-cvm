@@ -130,6 +130,7 @@ def fsync_spy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> _Spy:
 	return spy
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permission bits and directory fsync")
 def test_atomic_write_bytes_fsyncs_the_directory(fsync_spy: _Spy) -> None:
 	"""The rename is made durable by an fsync on the parent directory."""
 	assert len(fsync_spy.list_first) == 2
@@ -145,6 +146,7 @@ def mode_written_under_umask_022(tmp_path: Path) -> int:
 	return stat.S_IMODE(path_out.stat().st_mode)
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permission bits and directory fsync")
 def test_atomic_write_bytes_uses_umask_default_mode(mode_written_under_umask_022: int) -> None:
 	"""The file gets open()'s default permissions, not mkstemp's 0600."""
 	assert mode_written_under_umask_022 == 0o644
