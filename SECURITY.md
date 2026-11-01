@@ -27,6 +27,20 @@ You will get an acknowledgement on a **best-effort basis within 7 days**. If a r
 confirmed, a fix ships in a new release and a GitHub Security Advisory is published crediting the
 reporter (unless anonymity is requested).
 
+If private reporting is unavailable, contact the maintainer listed in `.github/CODEOWNERS`.
+
+## What to expect
+
+| Stage | What happens |
+|-------|--------------|
+| Acknowledgement | The report is confirmed as received. |
+| Assessment | The maintainers reproduce it and judge severity and scope. |
+| Fix | A patch is prepared privately, with a regression test where practical. |
+| Disclosure | A GitHub Security Advisory is published and the fix is released. |
+
+This is a volunteer-maintained project, so response times are best-effort rather than
+contractual. Please allow a reasonable window before any public disclosure.
+
 ## Scope
 
 This is a **read-only ingestion / file-standard library**: it downloads and parses public CVM
@@ -48,3 +62,13 @@ issues therefore include:
   runtime environment to seed, so there is no credential surface here to compromise.
 - It performs **no code execution** on ingested data — files are parsed into typed DataFrames,
   never `eval`'d or executed.
+
+## Automated security hygiene
+
+This repository enables, via `poe enable_security`:
+
+- **Private vulnerability reporting** — the intake channel described above.
+- **Dependabot alerts** — notifications for known-vulnerable dependencies.
+- **Dependabot security updates** — automatic PRs that fix an alerted vulnerability.
+
+Ordinary (non-security) version bumps are handled separately by `.github/dependabot.yml`.
