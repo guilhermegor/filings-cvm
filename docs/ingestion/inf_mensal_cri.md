@@ -70,9 +70,10 @@ passaria, porque os testes afirmam o contract que foi escrito.
 - **`geral` tem três colunas `CNPJ_*` 100% vazias** (`CNPJ_Agente_Fiduciario`, `CNPJ_Custodiante`,
   `CNPJ_Agencia_Classificadora`) — publicadas (logo no contract), mas fora de `tuple_cnpj_cols`.
 - **`carteira_modificacao` e `responsavel` são header-only em 2025** (zero linhas — uma modificação
-  e o responsável são registrados só em circunstâncias específicas). Um membro sem linhas não tem
-  CNPJ a validar, então esses dois declaram `tuple_cnpj_cols` vazio — do contrário um arquivo
-  legitimamente vazio falharia o contract.
+  e o responsável são registrados só em circunstâncias específicas). Mesmo assim os dois declaram
+  `CNPJ_Emissora` em `tuple_cnpj_cols` (#320): desde o #317 uma coluna vazia passa no check, e a
+  coluna é a chave da emissora (`varchar(18)` no META, a única de CNPJ/CPF desses membros) — no dia
+  em que a CVM publicar linhas, um CNPJ malformado falha em vez de passar sem checagem.
 - **`geral.Outras_Contigencias_Relevantes`** preserva a grafia da CVM **verbatim** (o CRI mantém o
   bloco de contingências que o CRA derruba).
 

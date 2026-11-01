@@ -32,6 +32,7 @@ from pydantic import (
 )
 
 from filings_cvm._internal.config.schemas._fields import validate_person_doc, validated_cnpj
+from filings_cvm._internal.utils.rule_check import raise_first
 from filings_cvm._internal.utils.xml_fields import (
 	check_br_date,
 	check_cnpj_shape,
@@ -55,18 +56,18 @@ _PERCENT_MAX = Decimal(100)
 _PR_FATURA_FLOOR = Decimal(10)
 _LONG_MAX = 9223372036854775807
 
-MoneyField = Annotated[
+_MoneyField = Annotated[
 	Decimal,
 	BeforeValidator(strict_decimal(_MONEY_SCALE)),
 	Field(ge=Decimal(0), max_digits=_DIGITS, decimal_places=_MONEY_SCALE),
 ]
-PercentField = Annotated[
+_PercentField = Annotated[
 	Decimal,
 	BeforeValidator(strict_decimal(_PERCENT_SCALE)),
 	Field(ge=Decimal(0), le=_PERCENT_MAX, max_digits=_DIGITS, decimal_places=_PERCENT_SCALE),
 ]
 # Share of billing, reported only above 10%.
-BillingShareField = Annotated[
+_BillingShareField = Annotated[
 	Decimal,
 	BeforeValidator(strict_decimal(_PERCENT_SCALE)),
 	Field(
@@ -77,21 +78,21 @@ BillingShareField = Annotated[
 	),
 ]
 
-CountField = Annotated[int, Field(strict=True, ge=0, le=_LONG_MAX)]
-CodeField = Annotated[int, Field(strict=True, ge=1, le=_LONG_MAX)]
-YearField = Annotated[int, Field(strict=True, ge=1900, le=9999)]
-DateField = Annotated[str, AfterValidator(check_br_date)]
-DigitsField = Annotated[str, AfterValidator(check_long_digits)]
-CepField = Annotated[str, AfterValidator(check_cep)]
-CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
+_CountField = Annotated[int, Field(strict=True, ge=0, le=_LONG_MAX)]
+_CodeField = Annotated[int, Field(strict=True, ge=1, le=_LONG_MAX)]
+_YearField = Annotated[int, Field(strict=True, ge=1900, le=9999)]
+_DateField = Annotated[str, AfterValidator(check_br_date)]
+_DigitsField = Annotated[str, AfterValidator(check_long_digits)]
+_CepField = Annotated[str, AfterValidator(check_cep)]
+_CnpjField = Annotated[str, AfterValidator(check_cnpj_shape), AfterValidator(validated_cnpj)]
 
 _XML_TEXT = AfterValidator(check_xml_text)
-Text18 = Annotated[str, StringConstraints(min_length=1, max_length=18), _XML_TEXT]
-Text30 = Annotated[str, StringConstraints(min_length=1, max_length=30), _XML_TEXT]
-Text100 = Annotated[str, StringConstraints(min_length=1, max_length=100), _XML_TEXT]
-Text200 = Annotated[str, StringConstraints(min_length=1, max_length=200), _XML_TEXT]
-Text500 = Annotated[str, StringConstraints(min_length=1, max_length=500), _XML_TEXT]
-EmailField = Annotated[
+_Text18 = Annotated[str, StringConstraints(min_length=1, max_length=18), _XML_TEXT]
+_Text30 = Annotated[str, StringConstraints(min_length=1, max_length=30), _XML_TEXT]
+_Text100 = Annotated[str, StringConstraints(min_length=1, max_length=100), _XML_TEXT]
+_Text200 = Annotated[str, StringConstraints(min_length=1, max_length=200), _XML_TEXT]
+_Text500 = Annotated[str, StringConstraints(min_length=1, max_length=500), _XML_TEXT]
+_EmailField = Annotated[
 	str,
 	StringConstraints(min_length=1, max_length=50),
 	_XML_TEXT,
@@ -127,8 +128,8 @@ class AuditorBlock(BaseModel):
 class AuditorHeader(AuditorBlock):
 	"""DS_INFORM — document header."""
 
-	ano_base: YearField
-	dt_gerac_arq: DateField
+	ano_base: _YearField
+	dt_gerac_arq: _DateField
 	motivo_entreg: Literal[1, 2, 3]
 
 
@@ -137,9 +138,9 @@ class AuditorIdentity(AuditorBlock):
 
 	tp_pf_pj: Literal["PF", "PJ"]
 	nr_pf_pj: str
-	cd_cvm: CodeField
-	ds_nome: Text100
-	ds_email: EmailField
+	cd_cvm: _CodeField
+	ds_nome: _Text100
+	ds_email: _EmailField
 
 	@field_validator("nr_pf_pj")
 	@classmethod
@@ -174,16 +175,16 @@ class AuditorAddress(AuditorBlock):
 	"""ENDER — head office (1) or branch (2)."""
 
 	tp_ender: Literal[1, 2]
-	nm_filial: Text100 | None = None
-	nm_lograd: Text30
-	ds_compl: Text18 | None = None
-	ds_bairro: Text30
-	cd_mun: CodeField
-	nr_cep: CepField
-	nr_ddd_tel: DigitsField | None = None
-	nr_tel: DigitsField | None = None
-	nr_ddd_fax: DigitsField | None = None
-	nr_fax: DigitsField | None = None
+	nm_filial: _Text100 | None = None
+	nm_lograd: _Text30
+	ds_compl: _Text18 | None = None
+	ds_bairro: _Text30
+	cd_mun: _CodeField
+	nr_cep: _CepField
+	nr_ddd_tel: _DigitsField | None = None
+	nr_tel: _DigitsField | None = None
+	nr_ddd_fax: _DigitsField | None = None
+	nr_fax: _DigitsField | None = None
 
 	@model_validator(mode="after")
 	def _check_rules(self) -> AuditorAddress:
@@ -200,14 +201,26 @@ class AuditorAddress(AuditorBlock):
 			If a head office carries a branch name, a branch lacks one, or a DDD lacks its
 			number (or the reverse).
 		"""
-		if self.tp_ender == 1 and self.nm_filial is not None:
-			raise ValueError("NM_FILIAL must be omitted for the head office (TP_ENDER=1)")
-		if self.tp_ender == 2 and self.nm_filial is None:  # noqa: PLR2004
-			raise ValueError("NM_FILIAL is required for a branch (TP_ENDER=2)")
-		if (self.nr_ddd_tel is None) != (self.nr_tel is None):
-			raise ValueError("NR_DDD_TEL and NR_TEL must be given together")
-		if (self.nr_ddd_fax is None) != (self.nr_fax is None):
-			raise ValueError("NR_DDD_FAX and NR_FAX must be given together")
+		raise_first(
+			[
+				(
+					self.tp_ender == 1 and self.nm_filial is not None,
+					"NM_FILIAL must be omitted for the head office (TP_ENDER=1)",
+				),
+				(
+					self.tp_ender == 2 and self.nm_filial is None,  # noqa: PLR2004
+					"NM_FILIAL is required for a branch (TP_ENDER=2)",
+				),
+				(
+					(self.nr_ddd_tel is None) != (self.nr_tel is None),
+					"NR_DDD_TEL and NR_TEL must be given together",
+				),
+				(
+					(self.nr_ddd_fax is None) != (self.nr_fax is None),
+					"NR_DDD_FAX and NR_FAX must be given together",
+				),
+			]
+		)
 		return self
 
 
@@ -215,8 +228,8 @@ class AuditorRepresentative(AuditorBlock):
 	"""RESP — a partner who represents the firm (personal data: CPF)."""
 
 	nr_pf: str
-	ds_nome: Text100
-	ds_email: EmailField
+	ds_nome: _Text100
+	ds_email: _EmailField
 
 	@field_validator("nr_pf")
 	@classmethod
@@ -241,10 +254,10 @@ class AuditedEntity(AuditorBlock):
 	"""ENTID_AUDITA — one audited entity."""
 
 	tp_entid: Annotated[int, Field(strict=True)]
-	nr_pj: CnpjField
-	ds_nome: Text100
-	dt_contr: DateField | None = None
-	pr_fatura: BillingShareField | None = None
+	nr_pj: _CnpjField
+	ds_nome: _Text100
+	dt_contr: _DateField | None = None
+	pr_fatura: _BillingShareField | None = None
 
 	@field_validator("tp_entid")
 	@classmethod
@@ -274,25 +287,25 @@ class AuditedEntity(AuditorBlock):
 class AuditorAnnualBilling(AuditorBlock):
 	"""FATURA_ANUAL — audit billing and hours."""
 
-	vl_audit: MoneyField
-	pr_audit: PercentField
-	hh_audit: CountField
+	vl_audit: _MoneyField
+	pr_audit: _PercentField
+	hh_audit: _CountField
 
 
 class AuditorStaff(AuditorBlock):
 	"""RH — partners and technical staff."""
 
-	qt_socios: CountField | None = None
-	qt_func_tecno: CountField
+	qt_socios: _CountField | None = None
+	qt_func_tecno: _CountField
 
 
 class AffiliatedEntity(AuditorBlock):
 	"""ENTID_COLIG — an affiliated entity."""
 
 	st_estr: Literal["S", "N"]
-	nr_pj: CnpjField | None = None
-	ds_nome: Text100
-	ds_setor_ativd: Text30
+	nr_pj: _CnpjField | None = None
+	ds_nome: _Text100
+	ds_setor_ativd: _Text30
 
 	@model_validator(mode="after")
 	def _check_cnpj(self) -> AffiliatedEntity:
@@ -308,26 +321,34 @@ class AffiliatedEntity(AuditorBlock):
 		ValueError
 			If a foreign entity carries a CNPJ or a national one lacks it.
 		"""
-		if self.st_estr == "S" and self.nr_pj is not None:
-			raise ValueError("NR_PJ must be omitted for a foreign entity (ST_ESTR=S)")
-		if self.st_estr == "N" and self.nr_pj is None:
-			raise ValueError("NR_PJ is required for a national entity (ST_ESTR=N)")
+		raise_first(
+			[
+				(
+					self.st_estr == "S" and self.nr_pj is not None,
+					"NR_PJ must be omitted for a foreign entity (ST_ESTR=S)",
+				),
+				(
+					self.st_estr == "N" and self.nr_pj is None,
+					"NR_PJ is required for a national entity (ST_ESTR=N)",
+				),
+			]
+		)
 		return self
 
 
 class TrainingParticipant(AuditorBlock):
 	"""TREINA_PESSOA — a person who took the training."""
 
-	ds_nome_pessoa: Text100
+	ds_nome_pessoa: _Text100
 	tp_cargo: Literal[1, 2, 3, 4]
 
 
 class AuditorTraining(AuditorBlock):
 	"""TREINA — one course, seminar or training."""
 
-	ds_nome_treina: Text100
+	ds_nome_treina: _Text100
 	tp_treina: Annotated[int, Field(strict=True)]
-	ds_treina: Text200 | None = None
+	ds_treina: _Text200 | None = None
 	lista_treina_pessoa: Annotated[list[TrainingParticipant], Field(min_length=1)]
 
 	@field_validator("tp_treina")
@@ -366,9 +387,9 @@ class InformeAnualAuditorDocument(AuditorBlock):
 	lista_entid_audita: Annotated[list[AuditedEntity], Field(max_length=_MAX_AUDITED)] = Field(
 		default_factory=list
 	)
-	qt_outra_entid_audita: CountField
+	qt_outra_entid_audita: _CountField
 	fatura_anual: AuditorAnnualBilling
-	ds_criter_honor: Text500
+	ds_criter_honor: _Text500
 	rh: AuditorStaff
 	lista_entid_colig: Annotated[list[AffiliatedEntity], Field(max_length=_MAX_AFFILIATED)] = (
 		Field(default_factory=list)
@@ -392,20 +413,34 @@ class InformeAnualAuditorDocument(AuditorBlock):
 			type; or the base year is after the file's generation year.
 		"""
 		is_pf = self.ds_audit.tp_pf_pj == "PF"
-		if is_pf:
-			if len(self.lista_ender) != 1 or self.lista_ender[0].tp_ender != 1:
-				raise ValueError("a PF auditor sends exactly one address, the head office")
-			if self.lista_resp:
-				raise ValueError("LISTA_RESP must be omitted for a PF auditor")
-			if self.rh.qt_socios is not None:
-				raise ValueError("QT_SOCIOS must be omitted for a PF auditor")
-		elif self.rh.qt_socios is None:
-			raise ValueError("QT_SOCIOS is required for a PJ auditor")
-		for training in self.lista_treina:
-			for person in training.lista_treina_pessoa:
-				ok = person.tp_cargo == _PF_JOB if is_pf else person.tp_cargo in _PJ_JOBS
-				if not ok:
-					raise ValueError("TP_CARGO must be 4 (AIPF) for PF and 1-3 (AIPJ) for PJ")
-		if self.ds_inform.ano_base > parse_br_date(self.ds_inform.dt_gerac_arq).year:
-			raise ValueError("ANO_BASE cannot be after the year of DT_GERAC_ARQ")
+		raise_first(
+			[
+				(
+					is_pf and (len(self.lista_ender) != 1 or self.lista_ender[0].tp_ender != 1),
+					"a PF auditor sends exactly one address, the head office",
+				),
+				(is_pf and bool(self.lista_resp), "LISTA_RESP must be omitted for a PF auditor"),
+				(
+					is_pf and self.rh.qt_socios is not None,
+					"QT_SOCIOS must be omitted for a PF auditor",
+				),
+				(
+					not is_pf and self.rh.qt_socios is None,
+					"QT_SOCIOS is required for a PJ auditor",
+				),
+				(
+					any(
+						(person.tp_cargo == _PF_JOB) != is_pf
+						or (not is_pf and person.tp_cargo not in _PJ_JOBS)
+						for training in self.lista_treina
+						for person in training.lista_treina_pessoa
+					),
+					"TP_CARGO must be 4 (AIPF) for PF and 1-3 (AIPJ) for PJ",
+				),
+				(
+					self.ds_inform.ano_base > parse_br_date(self.ds_inform.dt_gerac_arq).year,
+					"ANO_BASE cannot be after the year of DT_GERAC_ARQ",
+				),
+			]
+		)
 		return self

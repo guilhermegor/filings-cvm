@@ -9,10 +9,14 @@ nav:
   - Envio (→ CVM):
       - Perfil Mensal: submission/perfil_mensal.md
       - Informe Diário: submission/informe_diario.md
+      - Informe Quadrimestral: submission/informe_quadrimestral.md
+      - Informe de Fundo 157: submission/inf_fundo_157.md
       - Lâmina V3: submission/lamina.md
+      - Extrato V3: submission/extrato.md
       - Informe Mensal FIDC: submission/inf_mensal_fidc.md
       - CDA: submission/cda.md
       - Informe Anual de Auditor: submission/informe_anual_auditor.md
+      - Cadastro de Ativos: submission/cadastro_ativos.md
   - Leitura (← CVM):
       - Visão geral: ingestion/index.md
       - Informe Diário FIF: ingestion/informe_diario.md
@@ -20,6 +24,8 @@ nav:
       - Lâmina carteira FIF: ingestion/lamina_carteira.md
       - Lâmina FIF: ingestion/lamina.md
       - Eventual FI: ingestion/eventual_fi.md
+      - Entrega FI: ingestion/entrega_fi.md
+      - Balancete FI: ingestion/balancete_fi.md
       - Complemento FI: ingestion/compl_fi.md
       - Perfil Mensal FI: ingestion/perfil_mensal_fi.md
       - Extrato FI: ingestion/extrato_fi.md

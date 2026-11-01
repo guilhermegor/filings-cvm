@@ -224,6 +224,83 @@ repos:
           - sql
         pass_filenames: false
 
+      # ---- BEGIN code- and test-quality guards (#294) ----------------------------------
+      # Vendored from BlueprintX python-common. Each one has a matching CI step in the
+      # "quality guards (#294)" block of .github/workflows/tests.yaml (gate parity).
+      # The five guards that flag pre-existing code run through bin/quality_ratchet.py:
+      # a per-file baseline (bin/quality_baseline.txt) that new code cannot exceed and
+      # that fails when a count drops without being lowered — the guard is never weakened.
+      - id: function-length
+        name: function length (60 lines, docstring excluded; ratcheted)
+        entry: bash bin/poetry_exec.sh run python bin/quality_ratchet.py function-length python bin/check_function_length.py
+        language: system
+        files: (\.(py|sh)$|^bin/quality_baseline\.txt$)
+        pass_filenames: false
+
+      - id: check-complexity
+        name: cyclomatic complexity (tests 1, src 2, bin 8; ratcheted)
+        entry: bash bin/poetry_exec.sh run python bin/quality_ratchet.py complexity bash bin/check_complexity.sh
+        language: system
+        files: (\.py$|^bin/quality_baseline\.txt$)
+        pass_filenames: false
+
+      - id: dead-code
+        name: dead code (vulture >=80% confidence; ratcheted, skips without vulture)
+        entry: bash bin/poetry_exec.sh run python bin/quality_ratchet.py dead-code python bin/check_dead_code.py
+        language: system
+        files: (\.py$|^bin/quality_baseline\.txt$)
+        pass_filenames: false
+
+      - id: check-all-exports
+        name: __all__ names every public member (ratcheted)
+        entry: bash bin/poetry_exec.sh run python bin/quality_ratchet.py all-exports python bin/check_all_exports.py
+        language: system
+        files: (\.py$|^bin/quality_baseline\.txt$)
+        pass_filenames: false
+
+      - id: one-assert
+        name: one assertion site per unit test, zero asserts fails anywhere (ratcheted)
+        entry: bash bin/poetry_exec.sh run python bin/quality_ratchet.py one-assert python bin/check_one_assert.py
+        language: system
+        files: (\.py$|^bin/quality_baseline\.txt$)
+        pass_filenames: false
+
+      - id: fixture-scope
+        name: fixture scope (non-function scope needs a written reason)
+        entry: bash bin/poetry_exec.sh run python bin/check_fixture_scope.py
+        language: system
+        files: ^tests/.*\.py$
+        pass_filenames: false
+
+      - id: assertion-weakening
+        name: assertion weakening (a PR must not loosen a test without saying why)
+        entry: bash bin/poetry_exec.sh run python bin/check_assertion_weakening.py
+        language: system
+        files: ^tests/.*\.py$
+        pass_filenames: false
+
+      - id: coverage-floor
+        name: coverage floor (omit list must not swallow ingestion/submission logic)
+        entry: bash bin/poetry_exec.sh run python bin/check_coverage_floor.py
+        language: system
+        files: ^(\.coveragerc|src/.*\.py|bin/check_coverage_floor\.py)$
+        pass_filenames: false
+
+      - id: gate-integrity
+        name: gate integrity (a PR must not weaken a check without saying why)
+        entry: bash bin/poetry_exec.sh run python bin/check_gate_integrity.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: required-checks-sync
+        name: required checks are all emitted by unconditional PR jobs
+        entry: bash bin/poetry_exec.sh run python bin/check_required_checks_sync.py --required-list bin/required-checks.txt
+        language: system
+        files: ^(\.github/workflows/.*\.ya?ml|bin/required-checks\.txt|bin/check_required_checks_sync\.py)$
+        pass_filenames: false
+      # ---- END code- and test-quality guards (#294) ------------------------------------
+
       # `|| [ $? -eq 5 ]` tolerates pytest exit 5 ("no tests collected") so a
       # fresh project with an empty suite does not block every commit; real
       # failures (exit 1) still block.
