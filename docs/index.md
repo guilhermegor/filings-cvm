@@ -36,12 +36,18 @@ não desta documentação:
   — envio (`submission/perfil_mensal.py`).
 - ✅ **Perfil Mensal — V3** ([`PadraoXMLPerfilV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp))
   — envio (`submission/perfil_mensal_v3.py`).
+- ✅ **Perfil Mensal — original** ([`PadraoXMLPerfil.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp))
+  — envio (`submission/perfil_mensal_original.py`).
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp))
   — envio (`submission/informe_diario.py`).
 - ✅ **Informe Quadrimestral — V2** ([`PadraoXMLInfoTrimV2.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp))
   — envio (`submission/informe_quadrimestral.py`).
+- ✅ **Informe Trimestral — V1** ([`PadraoXMLInfoTrim.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp), válido até 2017-06)
+  — envio (`submission/informe_trimestral_v1.py`).
 - ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp))
   — envio (`submission/cadastro_ativos.py`).
+- ✅ **Informe Mensal de Investidor não Residente** ([`PadraoXMLInfoMensalINR.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp))
+  — envio (`submission/inr_mensal.py`).
 
 Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
 Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
@@ -64,7 +70,7 @@ pip install filings-cvm
 
 Continue em **[Uso](usage.md)** para o primeiro documento, ou veja cada padrão em **Envio**:
 **[Perfil Mensal](submission/perfil_mensal.md)**, **[Informe Diário](submission/informe_diario.md)**,
-**[Lâmina V3](submission/lamina.md)** e **[Cadastro de Ativos](submission/cadastro_ativos.md)**.
+**[Lâmina V3](submission/lamina.md)**, **[Cadastro de Ativos](submission/cadastro_ativos.md)** e **[Informe Mensal INR](submission/inr_mensal.md)**.
 
 ---
 
