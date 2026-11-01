@@ -8,7 +8,7 @@ accurate — and ``omit`` is a hand-declared list nobody can contradict. Widen o
 
 The template derives its floor from ``src/capabilities/*/{domain,application}``; this repo has
 no capabilities. Its equivalent is the two public sections, ``ingestion/`` and ``submission/``
-(the root ``CLAUDE.md``: "every solution lives in one of them"). ``_internal/`` is the one
+(the root ``AGENTS.md``: "every solution lives in one of them"). ``_internal/`` is the one
 declared, deliberate exclusion. The floor is CODE-derived: every module under a section that
 defines at least one function (read via ``ast``) must stay in the denominator. Any such module
 matched by an ``omit`` pattern is a finding.
