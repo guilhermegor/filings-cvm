@@ -128,6 +128,26 @@ from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ListaClasseCotas,
 	ListaCotstCateg,
 )
+from filings_cvm._internal.config.schemas.informe_trimestral_v1 import (
+	InformeTrimestralV1Document,
+	InformeTrimestralV1Header,
+	InformeTrimestralV1Inform,
+)
+from filings_cvm._internal.config.schemas.inr_mensal import (
+	Aplicacoes,
+	EntradaSaida,
+	InrMensalDocument,
+	InrMensalHeader,
+	MovRecursos,
+	Participante,
+	RecursosEnvMesmoInvest,
+	RecursosEnvOutroInvest,
+	RecursosMesmoInvest,
+	RecursosOutroInvest,
+	RecursosRecebMesmoInvest,
+	RecursosRecebOutroInvest,
+	TransfRecursos,
+)
 from filings_cvm._internal.config.schemas.lamina import (
 	LaminaAntesInic2,
 	LaminaCarencia,
@@ -165,6 +185,14 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_original import (
+	PerfilMensalOriginalClientCount,
+	PerfilMensalOriginalDocument,
+	PerfilMensalOriginalHeader,
+	PerfilMensalOriginalPatrimonyDistribution,
+	PerfilMensalOriginalRow,
+	PerfilMensalOriginalTradingDays,
+)
 from filings_cvm.submission.cadastro_ativos import (
 	CadastroAtivos,
 )
@@ -181,10 +209,13 @@ from filings_cvm.submission.informe_diario import (
 )
 from filings_cvm.submission.informe_diario_v3 import InformeDiarioV3
 from filings_cvm.submission.informe_quadrimestral import InformeQuadrimestral
+from filings_cvm.submission.informe_trimestral_v1 import InformeTrimestralV1
+from filings_cvm.submission.inr_mensal import InrMensal
 from filings_cvm.submission.lamina import Lamina
 from filings_cvm.submission.perfil_mensal import (
 	PerfilMensal,
 )
+from filings_cvm.submission.perfil_mensal_original import PerfilMensalOriginal
 
 
 __all__ = [
@@ -192,6 +223,7 @@ __all__ = [
 	"Amort",
 	"Amortizacao",
 	"AplicAtivo",
+	"Aplicacoes",
 	"CadastroAtivos",
 	"CadastroAtivosDocument",
 	"CadastroAtivosHeader",
@@ -237,6 +269,7 @@ __all__ = [
 	"DevSacado",
 	"Dicred",
 	"DocumentHeader",
+	"EntradaSaida",
 	"Extrato",
 	"ExtratoDocument",
 	"ExtratoHeader",
@@ -263,6 +296,13 @@ __all__ = [
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
+	"InformeTrimestralV1",
+	"InformeTrimestralV1Document",
+	"InformeTrimestralV1Header",
+	"InformeTrimestralV1Inform",
+	"InrMensal",
+	"InrMensalDocument",
+	"InrMensalHeader",
 	"Lamina",
 	"LaminaAntesInic2",
 	"LaminaCarencia",
@@ -291,6 +331,7 @@ __all__ = [
 	"ListaCotstCateg",
 	"ListaDevSacados",
 	"MercDerivativo",
+	"MovRecursos",
 	"NegocDicredMes",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
@@ -299,6 +340,7 @@ __all__ = [
 	"OtcOperation",
 	"OutrasInform",
 	"OutrosAtivos",
+	"Participante",
 	"Passiv",
 	"PassivPosicoes",
 	"PassivValores",
@@ -306,11 +348,24 @@ __all__ = [
 	"Patrliq",
 	"PerfilMensal",
 	"PerfilMensalDocument",
+	"PerfilMensalOriginal",
+	"PerfilMensalOriginalClientCount",
+	"PerfilMensalOriginalDocument",
+	"PerfilMensalOriginalHeader",
+	"PerfilMensalOriginalPatrimonyDistribution",
+	"PerfilMensalOriginalRow",
+	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"QtVl",
+	"RecursosEnvMesmoInvest",
+	"RecursosEnvOutroInvest",
+	"RecursosMesmoInvest",
+	"RecursosOutroInvest",
+	"RecursosRecebMesmoInvest",
+	"RecursosRecebOutroInvest",
 	"RentClasse",
 	"RentMes",
 	"ResgMes",
@@ -330,6 +385,7 @@ __all__ = [
 	"TaxaSemAquis",
 	"TaxaTitpubFed",
 	"TaxaValorMobili",
+	"TransfRecursos",
 	"ValoresMob",
 	"VarOutros",
 	"VarPercValCota",

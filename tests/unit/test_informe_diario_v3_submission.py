@@ -11,6 +11,10 @@ from pydantic import ValidationError
 import pytest
 
 from filings_cvm.submission import (
+	InformeDiario,
+	InformeDiarioDocument,
+	InformeDiarioHeader,
+	InformeDiarioInform,
 	InformeDiarioV3,
 	InformeDiarioV3Document,
 	InformeDiarioV3Header,
@@ -63,12 +67,10 @@ def _xml(inform: InformeDiarioV3Inform | None = None) -> str:
 	return xml
 
 
-def test_versao_is_3_0() -> None:
+@pytest.mark.parametrize("tag", ["<VERSAO>3.0</VERSAO>", "<COD_DOC>1</COD_DOC>"])
+def test_header_stamps_v3_version_and_doc_code(tag: str) -> None:
 	"""Stamp VERSAO 3.0 and COD_DOC 1 in the header."""
-	xml = _xml()
-
-	assert "<VERSAO>3.0</VERSAO>" in xml
-	assert "<COD_DOC>1</COD_DOC>" in xml
+	assert tag in _xml()
 
 
 def test_inform_tag_order_matches_page() -> None:
@@ -80,13 +82,17 @@ def test_inform_tag_order_matches_page() -> None:
 	assert top_level == PAGE_ORDER
 
 
-def test_decimal_scales_follow_page() -> None:
+@pytest.mark.parametrize(
+	"tag",
+	[
+		"<VL_TOTAL>1,23</VL_TOTAL>",
+		"<VL_QUOTA>1,123456789012</VL_QUOTA>",
+		"<PR_COTST>20,1234</PR_COTST>",
+	],
+)
+def test_decimal_scales_follow_page(tag: str) -> None:
 	"""Truncate to 2 places (money), 12 (quota) and 4 (participation)."""
-	xml = _xml()
-
-	assert "<VL_TOTAL>1,23</VL_TOTAL>" in xml
-	assert "<VL_QUOTA>1,123456789012</VL_QUOTA>" in xml
-	assert "<PR_COTST>20,1234</PR_COTST>" in xml
+	assert tag in _xml()
 
 
 def test_no_subclasse_tag_is_emitted() -> None:
@@ -125,15 +131,37 @@ def test_more_than_100_funds_rejected() -> None:
 		InformeDiarioV3Document(header=header, informs=[_inform()] * 101)
 
 
-def test_export_writes_windows_1252_file(tmp_path: Path) -> None:
-	"""Write the file as windows-1252 and return None."""
+def _doc() -> InformeDiarioV3Document:
 	header = InformeDiarioV3Header(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025")
-	doc = InformeDiarioV3Document(header=header, informs=[_inform()])
-	out = tmp_path / "informe.xml"
+	return InformeDiarioV3Document(header=header, informs=[_inform()])
 
-	assert InformeDiarioV3().export(doc, output_path=str(out)) is None
+
+def test_export_to_file_returns_none(tmp_path: Path) -> None:
+	"""Return None when an output path is given."""
+	assert InformeDiarioV3().export(_doc(), output_path=str(tmp_path / "informe.xml")) is None
+
+
+def test_export_writes_windows_1252_file(tmp_path: Path) -> None:
+	"""Write the file as windows-1252."""
+	out = tmp_path / "informe.xml"
+	InformeDiarioV3().export(_doc(), output_path=str(out))
 	assert (
 		out.read_bytes()
 		.decode("windows-1252")
 		.startswith('<?xml version="1.0" encoding="windows-1252"?>')
 	)
+
+
+def test_v3_writer_rejects_a_v4_document() -> None:
+	"""Refuse a V4 document: the V3 writer is its own port adapter, not a V4 subclass."""
+	header = InformeDiarioHeader(dt_compt="15/01/2025", dt_gerac_arq="15/01/2025")
+	v4_doc = InformeDiarioDocument(
+		header=header, informs=[InformeDiarioInform(**_inform().model_dump())]
+	)
+	with pytest.raises(TypeError):
+		InformeDiarioV3().export(v4_doc)
+
+
+def test_v4_writer_stamps_its_own_versao_on_a_v3_document() -> None:
+	"""Pin that the V4 writer emits VERSAO 4.0 for a V3 model (V3 fields are a V4 subset)."""
+	assert "<VERSAO>4.0</VERSAO>" in str(InformeDiario().export(_doc()))
