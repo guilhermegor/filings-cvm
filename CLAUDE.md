@@ -381,7 +381,11 @@ envio; é o registro do que foi entregue, não um informe):
   `_internal/config/schemas/extrato.py` (`ExtratoDocument`), validadores em `_internal/utils/xml_fields.py`.
   ⚠️ A página **se contradiz** (exemplo × lista de tags: namespace `urn:extr`×`urn:perf`, `CNPJ_FDO`×`CNPJ_FUNDO`,
   tag `TP_VL_FIXO_TX_INGRESSO` reutilizada em `TX_SAIDA`); seguido o exemplo; escalas não ditas são política do repo
-  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
+  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`)
+- ✅ **submission** Extrato — **V1/450** (`PadraoXMLInfExtrato450.asp`) — `submission/extrato_v1.py` (`ExtratoV1`); schema
+  `_internal/config/schemas/extrato_v1.py` (`ExtratoV1Document`). **Estrutura própria, não é o V3**: questionário de 53
+  perguntas, `VERSAO` 1.0, blocos `LIM_*` por modalidade/emissor; reutiliza só os tipos genéricos e o serializador do V3.
+  ⚠️ CNPJ sem zeros à esquerda (a página manda omiti-los); `TX_ADM` numérico ou texto; ver `docs/submission/extrato_v1.md`.
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
