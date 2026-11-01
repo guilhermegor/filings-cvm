@@ -95,6 +95,11 @@ from filings_cvm._internal.config.schemas.perfil_mensal_original import (
 	PerfilMensalOriginalRow,
 	PerfilMensalOriginalTradingDays,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_v3 import (
+	PatrimonyDistributionV3,
+	PerfilMensalV3Document,
+	PerfilMensalV3Row,
+)
 
 
 __all__ = [
@@ -149,6 +154,7 @@ __all__ = [
 	"OtcOperation",
 	"Participante",
 	"PatrimonyDistribution",
+	"PatrimonyDistributionV3",
 	"PerfilMensalDocument",
 	"PerfilMensalOriginalClientCount",
 	"PerfilMensalOriginalDocument",
@@ -157,6 +163,8 @@ __all__ = [
 	"PerfilMensalOriginalRow",
 	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
+	"PerfilMensalV3Document",
+	"PerfilMensalV3Row",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",

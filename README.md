@@ -49,6 +49,7 @@ partir de `filings_cvm.submission`.
 ### Padrões implementados (envio)
 
 - ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp)) — `PerfilMensal` / `PerfilMensalDocument`
+- ✅ **Perfil Mensal — V3** ([`PadraoXMLPerfilV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV3.asp)) — `PerfilMensalV3` / `PerfilMensalV3Document`
 - ✅ **Perfil Mensal — original** ([`PadraoXMLPerfil.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp)) — `PerfilMensalOriginal` / `PerfilMensalOriginalDocument`
 - ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp)) — `InformeDiario` / `InformeDiarioDocument`
 - ✅ **Informe Diário — V3** ([`PadraoXMLInfoDiarioNetV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp)) — `InformeDiarioV3` / `InformeDiarioV3Document`
