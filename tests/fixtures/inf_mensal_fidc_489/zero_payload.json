@@ -1,0 +1,511 @@
+{
+	"cab_inform": {
+		"dt_compt": "10/2020",
+		"nr_cnpj_adm": "11222333000181",
+		"nr_cnpj_fundo": "11222333000181",
+		"tp_condominio": "FECHADO",
+		"fdo_excl": "SIM",
+		"cotst_vincul": "SIM"
+	},
+	"lista_inform": {
+		"aplic_ativo": {
+			"vl_disponib": "0",
+			"vl_carteira": "0",
+			"cred_existe": {
+				"vl_som_dicred_aquis": "0",
+				"vl_cred_existe_venc_adimpl": "0",
+				"vl_cred_existe_venc_inad": "0",
+				"vl_cred_total_venc_inad": "0",
+				"vl_cred_existe_inad": "0",
+				"vl_cred_refer_dicred_perfo": "0",
+				"vl_cred_venc_pend": "0",
+				"vl_cred_origem_emp_proc_recup": "0",
+				"vl_decor_receit_public": "0",
+				"vl_cred_acao_judic": "0",
+				"vl_cred_const_jur_fatrisc": "0",
+				"vl_outros_cred": "0",
+				"vl_provis_reduc_recup": "0"
+			},
+			"dicred": {
+				"vl_dicred": "0",
+				"vl_dicred_cedent": "0"
+			},
+			"valores_mob": {
+				"vl_som_valores_mob": "0",
+				"vl_debt": "0",
+				"vl_cri": "0",
+				"vl_np_comerc": "0",
+				"vl_letra_financ": "0",
+				"vl_cota_fdo_icvm409": "0",
+				"vl_outro_dicred": "0"
+			},
+			"vl_titpub_fed": "0",
+			"vl_cdb": "0",
+			"vl_aplic_oper_compss": "0",
+			"vl_ativ_financ_rf": "0",
+			"vl_cota_fidc": "0",
+			"vl_cota_fidc_nao_padrao": "0",
+			"vl_contr_compra_venda_prestc_futura": "0",
+			"merc_derivativo": {
+				"vl_som_merc_derivativo": "0",
+				"vl_merc_termo_pos_comprd": "0",
+				"vl_merc_op_pos_titul": "0",
+				"vl_merc_fut_ajust_posit": "0",
+				"vl_difer_swap_receb": "0",
+				"vl_cobert_prest": "0",
+				"vl_depos_margem": "0"
+			},
+			"outros_ativos": {
+				"vl_som_outros_ativos": "0",
+				"vl_outro_vl_receb_curprz": "0",
+				"vl_outro_vl_receb_lprazo": "0"
+			},
+			"vl_som_aplic_ativo": "0",
+			"lista_cedent": {
+				"cedent": [
+					{
+						"nr_pf_pj_cedent": "11222333000181",
+						"pr_cedent": "0"
+					}
+				]
+			}
+		},
+		"cart_segmt": {
+			"vl_som_cart_segmt": "0",
+			"vl_ind": "0",
+			"vl_merc_imobil": "0",
+			"segmt_comerc": {
+				"vl_som_segmt_comerc": "0",
+				"vl_comerc": "0",
+				"vl_comerc_varj": "0",
+				"vl_arrend_mercnt": "0"
+			},
+			"segmt_serv": {
+				"vl_som_segmt_serv": "0",
+				"vl_serv": "0",
+				"vl_serv_public": "0",
+				"vl_serv_educ": "0",
+				"vl_serv_entreten": "0"
+			},
+			"vl_agroneg": "0",
+			"segmt_financ": {
+				"vl_som_segmt_financ": "0",
+				"vl_financ_cred_pessoa": "0",
+				"vl_financ_cred_pessoa_consig": "0",
+				"vl_financ_cred_corpor": "0",
+				"vl_financ_mmarket": "0",
+				"vl_financ_veicl": "0",
+				"vl_financ_imobil_empsrl": "0",
+				"vl_financ_imobil_resid": "0",
+				"vl_financ_outro": "0"
+			},
+			"vl_cart_cred": "0",
+			"segmt_fact": {
+				"vl_som_segmt_fact": "0",
+				"vl_fact_pessoa": "0",
+				"vl_fact_corpor": "0"
+			},
+			"segmt_setor_public": {
+				"vl_som_segmt_setor_public": "0",
+				"vl_setor_public_precat": "0",
+				"vl_setor_public_cred_tribut": "0",
+				"vl_setor_public_roya": "0",
+				"vl_setor_public_outro": "0"
+			},
+			"vl_acao_judic": "0",
+			"vl_proprd_marca_patent": "0"
+		},
+		"passiv": {
+			"vl_som_passiv": "0",
+			"passiv_valores": {
+				"vl_som_passiv_valores": "0",
+				"vl_pgto_curprz": "0",
+				"vl_pgto_lprazo": "0"
+			},
+			"passiv_posicoes": {
+				"vl_som_passiv_posicoes": "0",
+				"vl_pos_mant_vend": "0",
+				"vl_pos_mant_lanc": "0",
+				"vl_pos_mant_ajt_fut": "0",
+				"vl_pos_mant_swap_pagar": "0"
+			}
+		},
+		"patrliq": {
+			"vl_som_patrliq": "0",
+			"vl_patrim_liq": "0",
+			"vl_patrim_liq_medio": "0"
+		},
+		"compmt_dicred_aquis": {
+			"vl_som_prazo_venc": "0",
+			"vl_prazo_venc_30": "0",
+			"vl_prazo_venc_31_60": "0",
+			"vl_prazo_venc_61_90": "0",
+			"vl_prazo_venc_91_120": "0",
+			"vl_prazo_venc_121_150": "0",
+			"vl_prazo_venc_151_180": "0",
+			"vl_prazo_venc_181_360": "0",
+			"vl_prazo_venc_361_720": "0",
+			"vl_prazo_venc_721_1080": "0",
+			"vl_prazo_venc_1080": "0",
+			"vl_som_inad_venc": "0",
+			"vl_inad_venc_30": "0",
+			"vl_inad_venc_31_60": "0",
+			"vl_inad_venc_61_90": "0",
+			"vl_inad_venc_91_120": "0",
+			"vl_inad_venc_121_150": "0",
+			"vl_inad_venc_151_180": "0",
+			"vl_inad_venc_181_360": "0",
+			"vl_inad_venc_361_720": "0",
+			"vl_inad_venc_721_1080": "0",
+			"vl_inad_venc_1080": "0",
+			"vl_som_pago_antcp": "0",
+			"vl_pago_antcp_30": "0",
+			"vl_pago_antcp_31_60": "0",
+			"vl_pago_antcp_61_90": "0",
+			"vl_pago_antcp_91_120": "0",
+			"vl_pago_antcp_121_150": "0",
+			"vl_pago_antcp_151_180": "0",
+			"vl_pago_antcp_181_360": "0",
+			"vl_pago_antcp_361_720": "0",
+			"vl_pago_antcp_721_1080": "0",
+			"vl_pago_antcp_1080": "0"
+		},
+		"compmt_dicred_sem_aquis": {
+			"vl_som_prazo_venc": "0",
+			"vl_prazo_venc_30": "0",
+			"vl_prazo_venc_31_60": "0",
+			"vl_prazo_venc_61_90": "0",
+			"vl_prazo_venc_91_120": "0",
+			"vl_prazo_venc_121_150": "0",
+			"vl_prazo_venc_151_180": "0",
+			"vl_prazo_venc_181_360": "0",
+			"vl_prazo_venc_361_720": "0",
+			"vl_prazo_venc_721_1080": "0",
+			"vl_prazo_venc_1080": "0",
+			"vl_som_inad_venc": "0",
+			"vl_inad_venc_30": "0",
+			"vl_inad_venc_31_60": "0",
+			"vl_inad_venc_61_90": "0",
+			"vl_inad_venc_91_120": "0",
+			"vl_inad_venc_121_150": "0",
+			"vl_inad_venc_151_180": "0",
+			"vl_inad_venc_181_360": "0",
+			"vl_inad_venc_361_720": "0",
+			"vl_inad_venc_721_1080": "0",
+			"vl_inad_venc_1080": "0",
+			"vl_som_pago_antcp": "0",
+			"vl_pago_antcp_30": "0",
+			"vl_pago_antcp_31_60": "0",
+			"vl_pago_antcp_61_90": "0",
+			"vl_pago_antcp_91_120": "0",
+			"vl_pago_antcp_121_150": "0",
+			"vl_pago_antcp_151_180": "0",
+			"vl_pago_antcp_181_360": "0",
+			"vl_pago_antcp_361_720": "0",
+			"vl_pago_antcp_721_1080": "0",
+			"vl_pago_antcp_1080": "0"
+		},
+		"negoc_dicred_mes": {
+			"aquisicoes": {
+				"qt_dicred_aquis": "0",
+				"vl_dicred_aquis": "0"
+			},
+			"negoc_dicred_mes_aquis": {
+				"qt_dicred_aquis": "0",
+				"vl_dicred_aquis": "0"
+			},
+			"negoc_dicred_mes_sem_aquis": {
+				"qt_dicred_aquis": "0",
+				"vl_dicred_aquis": "0"
+			},
+			"negoc_dicred_mes_venc_adimpl": {
+				"qt_dicred_aquis": "0",
+				"vl_dicred_aquis": "0"
+			},
+			"negoc_dicred_mes_venc_inad": {
+				"qt_dicred_aquis": "0",
+				"vl_dicred_aquis": "0"
+			},
+			"negoc_dicred_mes_inad": {
+				"qt_dicred_aquis": "0",
+				"vl_dicred_aquis": "0"
+			},
+			"dicred_mes_alien": {
+				"qt_dicred_alien": "0",
+				"vl_dicred_alien": "0",
+				"vl_dicred_alien_contab": "0"
+			},
+			"dicred_mes_alien_cedent": {
+				"qt_dicred_alien": "0",
+				"vl_dicred_alien": "0",
+				"vl_dicred_alien_contab": "0"
+			},
+			"dicred_mes_alien_prest": {
+				"qt_dicred_alien": "0",
+				"vl_dicred_alien": "0",
+				"vl_dicred_alien_contab": "0"
+			},
+			"dicred_mes_alien_tercr": {
+				"qt_dicred_alien": "0",
+				"vl_dicred_alien": "0",
+				"vl_dicred_alien_contab": "0"
+			},
+			"dicred_mes_alien_subst": {
+				"qt_dicred_alien": "0",
+				"vl_dicred_alien": "0",
+				"vl_dicred_alien_contab": "0"
+			},
+			"dicred_mes_alien_recomp": {
+				"qt_dicred_alien": "0",
+				"vl_dicred_alien": "0",
+				"vl_dicred_alien_contab": "0"
+			}
+		},
+		"inform": {
+			"lista_dev_sacados": {
+				"dev_sacados": [
+					{
+						"nr_pf_pj_sacado_deved_1": "11222333000181",
+						"vl_sacado_deved_1": "0",
+						"pr_sacado_deved_1": "0"
+					}
+				],
+				"vl_som_lista_dev_sacados": "0",
+				"pr_som_lista_dev_sacados": "0"
+			}
+		},
+		"taxa_negoc_dicred_mes": {
+			"taxa_negoc_dicred_mes_aquis": {
+				"desc_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"desc_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				}
+			},
+			"taxa_negoc_dicred_mes_sem_aquis": {
+				"desc_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"desc_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				}
+			},
+			"taxa_negoc_dicred_mes_valor_mobili": {
+				"desc_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"desc_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				}
+			},
+			"taxa_negoc_dicred_mes_titpub_fed": {
+				"desc_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"desc_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				}
+			},
+			"taxa_negoc_dicred_mes_cdb": {
+				"desc_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"desc_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				}
+			},
+			"taxa_negoc_dicred_mes_ativ_rf": {
+				"desc_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"desc_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_compra": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				},
+				"juros_venda": {
+					"tx_min": "0",
+					"tx_medio": "0",
+					"tx_maximo": "0"
+				}
+			}
+		},
+		"outras_inform": {
+			"num_cotistas": {
+				"qt_total_cotistas": 0,
+				"qt_total_cotistas_senior": 0,
+				"qt_total_cotistas_subord": 0,
+				"qt_cotistas_subord": [
+					0
+				]
+			},
+			"desc_serie_classe_senior_serie": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"rent_mes": {
+				"pr_apurada_senior": [
+					"0"
+				],
+				"pr_apurada_subord": [
+					"0"
+				]
+			},
+			"capt_mes_senior_serie": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"resg_mes_senior_serie": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"resg_solic_senior_serie": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"amort_senior_serie": [
+				{
+					"vl_cota": "0",
+					"vl_total": "0"
+				}
+			],
+			"desc_serie_classe_subord": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"capt_mes_subord": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"resg_mes_subord": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"resg_solic_subord": [
+				{
+					"qt_cotas": "0",
+					"vl_cotas": "0"
+				}
+			],
+			"amort_subord": [
+				{
+					"vl_cota": "0",
+					"vl_total": "0"
+				}
+			],
+			"liquidez": {
+				"vl_ativ_liqdez": "0",
+				"vl_ativ_liqdez_30": "0",
+				"vl_ativ_liqdez_60": "0",
+				"vl_ativ_liqdez_90": "0",
+				"vl_ativ_liqdez_180": "0",
+				"vl_ativ_liqdez_360": "0",
+				"vl_ativ_liqdez_mais_360": "0"
+			},
+			"desemp_senior": [
+				{
+					"desemp_esp": "0",
+					"desemp_real": "0"
+				}
+			],
+			"desemp_subord": [
+				{
+					"desemp_esp": "0",
+					"desemp_real": "0"
+				}
+			]
+		}
+	}
+}

@@ -16,6 +16,16 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.inf_mensal_fidc_489 import (
+	AplicAtivo489,
+	Dicred489,
+	InfMensalFidc489Document,
+	InfMensalFidc489Header,
+	InfMensalFidc489Inform,
+	NumCotistas489,
+	OutrasInform489,
+	RentMes489,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -65,9 +75,11 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 
 
 __all__ = [
+	"AplicAtivo489",
 	"ClasseCotas",
 	"ClientCount",
 	"CotistCategory",
+	"Dicred489",
 	"DocumentHeader",
 	"ExtratoDocument",
 	"ExtratoHeader",
@@ -75,6 +87,9 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InfMensalFidc489Document",
+	"InfMensalFidc489Header",
+	"InfMensalFidc489Inform",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
@@ -102,13 +117,16 @@ __all__ = [
 	"ListaCotstCateg",
 	"NominalRiskBlock",
 	"NominalRiskFactor",
+	"NumCotistas489",
 	"OtcOperation",
+	"OutrasInform489",
 	"PatrimonyDistribution",
 	"PerfilMensalDocument",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
+	"RentMes489",
 	"VarOutros",
 	"VarPercValCota",
 ]

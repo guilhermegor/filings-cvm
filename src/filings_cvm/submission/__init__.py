@@ -108,6 +108,16 @@ from filings_cvm._internal.config.schemas.inf_mensal_fidc import (
 	TaxaValorMobili,
 	ValoresMob,
 )
+from filings_cvm._internal.config.schemas.inf_mensal_fidc_489 import (
+	AplicAtivo489,
+	Dicred489,
+	InfMensalFidc489Document,
+	InfMensalFidc489Header,
+	InfMensalFidc489Inform,
+	NumCotistas489,
+	OutrasInform489,
+	RentMes489,
+)
 from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioDocument,
 	InformeDiarioHeader,
@@ -171,6 +181,7 @@ from filings_cvm.submission.inf_fundo_157 import InfFundo157
 from filings_cvm.submission.inf_mensal_fidc import (
 	InfMensalFidc,
 )
+from filings_cvm.submission.inf_mensal_fidc_489 import InfMensalFidc489
 from filings_cvm.submission.informe_diario import (
 	InformeDiario,
 )
@@ -186,6 +197,7 @@ __all__ = [
 	"Amort",
 	"Amortizacao",
 	"AplicAtivo",
+	"AplicAtivo489",
 	"CadastroAtivos",
 	"CadastroAtivosDocument",
 	"CadastroAtivosHeader",
@@ -230,6 +242,7 @@ __all__ = [
 	"DesempClasse",
 	"DevSacado",
 	"Dicred",
+	"Dicred489",
 	"DocumentHeader",
 	"Extrato",
 	"ExtratoDocument",
@@ -241,6 +254,10 @@ __all__ = [
 	"InfFundo157Document",
 	"InfFundo157Header",
 	"InfMensalFidc",
+	"InfMensalFidc489",
+	"InfMensalFidc489Document",
+	"InfMensalFidc489Header",
+	"InfMensalFidc489Inform",
 	"InfMensalFidcDocument",
 	"InfMensalFidcHeader",
 	"InfMensalFidcInform",
@@ -285,9 +302,11 @@ __all__ = [
 	"NominalRiskBlock",
 	"NominalRiskFactor",
 	"NumCotistas",
+	"NumCotistas489",
 	"NumCotistasDesc",
 	"OtcOperation",
 	"OutrasInform",
+	"OutrasInform489",
 	"OutrosAtivos",
 	"Passiv",
 	"PassivPosicoes",
@@ -303,6 +322,7 @@ __all__ = [
 	"QtVl",
 	"RentClasse",
 	"RentMes",
+	"RentMes489",
 	"ResgMes",
 	"ResgSolic",
 	"SegmtComerc",
