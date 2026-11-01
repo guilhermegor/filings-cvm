@@ -5,7 +5,7 @@ serializador é reexportado no topo de `filings_cvm`:
 
 | o que | importe de |
 |---|---|
-| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **23 roots** do portal |
+| um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **24 roots** do portal |
 | um **serializador** (submission) | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
@@ -21,7 +21,7 @@ from filings_cvm import RetryPolicy
 > **portal root** que é dono do leitor — o mesmo agrupamento que a
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md), [Informe Mensal INR](submission/inr_mensal.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
+> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md), [Informe Trimestral V1](submission/informe_trimestral_v1.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md), [Informe Mensal INR](submission/inr_mensal.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
 
 ---
 
@@ -49,6 +49,19 @@ PerfilMensal().export(doc, output_path="perfil.xml")   # grava arquivo, retorna 
 ```
 
 Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
+
+### `PerfilMensalOriginal`
+
+`filings_cvm.submission.PerfilMensalOriginal`
+
+Serializa um `PerfilMensalOriginalDocument` (padrão Perfil Mensal original, `PadraoXMLPerfil.asp`).
+Layout próprio — não é o V4 nem derivado dele, e o cabeçalho **não tem `VERSAO`**. Veja
+[Perfil Mensal original](submission/perfil_mensal_original.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+Mesma semântica do `PerfilMensal.export` (gravação atômica em `windows-1252`), sem o parâmetro
+`versao`.
 
 ### `InfFundo157`
 
@@ -94,6 +107,15 @@ InformeDiario().export(doc, output_path="informe.xml")     # grava arquivo, reto
 ```
 
 O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `PerfilMensal`.
+
+### `InformeDiarioV3`
+
+`filings_cvm.submission.InformeDiarioV3`
+
+Serializa um `InformeDiarioV3Document` para XML do padrão Informe Diário V3 (`VERSAO` 3.0, só
+`CNPJ_FDO`). `export(doc, output_path=None) -> str | None`, mesma borda de I/O do `InformeDiario`.
+Modelos: `InformeDiarioV3Document`, `InformeDiarioV3Header`, `InformeDiarioV3Inform`. Veja
+[Informe Diário V3](submission/informe_diario_v3.md).
 
 ### `Extrato`
 
@@ -260,6 +282,24 @@ Modelos de schema (Pydantic): `InformeQuadrimestralDocument` (`DOC_ARQ`),
 `InformeQuadrimestralHeader` (`CAB_INFORM`), `InformeQuadrimestralInform` (`INFORM`),
 `ListaCotstCateg`, `CotistCategory` (`COTST_CATEG`), `ListaClasseCotas`, `ClasseCotas`
 (`CLASSE_COTAS`).
+
+### `InformeTrimestralV1`
+
+`filings_cvm.submission.InformeTrimestralV1`
+
+Serializa um `InformeTrimestralV1Document` validado para XML compatível com a CVM (Informe
+Trimestral V1, válido até 2017-06, namespace `urn:inftrim`). Detalhes em
+[Informe Trimestral V1](submission/informe_trimestral_v1.md).
+
+#### `export(doc, output_path=None) -> str | None`
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `doc` | `InformeTrimestralV1Document` | Documento totalmente validado. |
+| `output_path` | `str \| None` | Se informado, grava em `windows-1252` (arquivo temporário + `os.replace`) e retorna `None`. Caso contrário, retorna a `str` XML. |
+
+Modelos de schema (Pydantic): `InformeTrimestralV1Document` (`DOC_ARQ`),
+`InformeTrimestralV1Header` (`CAB_INFORM`), `InformeTrimestralV1Inform` (`INFORM`).
 
 ## Leitor (ingestion)
 
@@ -1634,6 +1674,40 @@ df_ = OfertaDistribuicaoReader().read()
 
 ---
 
+### `ProcessoSancionadorReader` · `ProcessoSancionadorAcusadoReader` (2 readers)
+
+`filings_cvm.ingestion.processo`
+
+Os **processos administrativos sancionadores** da CVM e seus acusados (`PROCESSO/SANCIONADOR`,
+`processo_sancionador.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
+`processo/`. Página completa em [Processo Sancionador](ingestion/processo_sancionador.md).
+
+- `ProcessoSancionadorReader` — `processo_sancionador.csv`, um processo por `NUP` (9 colunas, 2 date
+  cols: `Data_Abertura`, `Data_Ultima_Movimentacao`; 581 linhas).
+- `ProcessoSancionadorAcusadoReader` — `processo_sancionador_acusado.csv`, um acusado por processo
+  (4 colunas, 1 date col: `Data_Situacao`; 2.070 linhas). Dado pessoal (`Nome_Acusado`), sem
+  CPF/CNPJ.
+
+#### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
+
+**Sem `date_ref`** — retrato do estado atual numa URL fixa que a CVM sobrescreve no lugar. Os dois
+readers baixam o mesmo `processo_sancionador.zip`, então um `path_raw` de qualquer um serve o outro.
+
+#### `read(int_timeout_s=60) -> pd.DataFrame`
+
+As colunas `Data_*` viram `date`; o restante fica texto exato (o `NUP` de 17 dígitos é identificador,
+nunca número). Nenhuma coluna de CNPJ é validada — o dataset não publica documentos. Levanta
+`OSError`, `ContractError` ou `ValueError` (membro ausente).
+
+```python
+from filings_cvm.ingestion.processo import ProcessoSancionadorReader
+
+df_ = ProcessoSancionadorReader().read()
+# df_[["NUP", "Data_Abertura", "Fase_Atual", "Local_Atual"]]
+```
+
+---
+
 ### `CadastroCiaAbertaReader` (1 reader)
 
 `filings_cvm.ingestion.cia_aberta`
@@ -2084,7 +2158,8 @@ por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
 `MetaPerfilMensalFiReader` · `MetaCadCiaAbertaReader` · `MetaIpeCiaAbertaReader` ·
 `MetaVlmoCiaAbertaReader` · `MetaFcaCiaAbertaReader` · `MetaCgvnCiaAbertaReader` ·
 `MetaFreCiaAbertaReader` · `MetaDfpCiaAbertaReader` · `MetaItrCiaAbertaReader` ·
-`MetaRecompraAcoesReader`
+`MetaRecompraAcoesReader` ·
+`MetaProcessoSancionadorReader`
 
 #### `__init__(path_raw=None, retry_policy=None, cls_logger=None)`
 
@@ -2144,6 +2219,17 @@ armazenado sem máscara), `nr_client`, `total_recurs_exter`, `total_recurs_br`,
 | `OtcOperation` | `OPER_CURS_MERC_BALCAO` | Contraparte de balcão sem contraparte central (até 3). |
 | `PrivateCreditIssuer` | `EMISSORES_TIT_CRED_PRIV` | Emissor de título de crédito privado (até 3). |
 | `PerformanceFeeDetails` | `RESP_VED_REGUL_COBR_TAXA_PERFORM` | Data e valor da cota na última cobrança de taxa de performance. |
+
+### Perfil Mensal original — documento e blocos
+
+| Modelo | Tag XML | Papel |
+|--------|---------|-------|
+| `PerfilMensalOriginalDocument` | `DOC_ARQ` | Documento completo: `header` + `rows` (um fundo por linha, sem repetição). |
+| `PerfilMensalOriginalHeader` | `CAB_INFORM` | `COD_DOC=40`, `dt_compt` (`MM/AAAA`), `dt_gerac_arq` (`DD/MM/AAAA`); sem `VERSAO`. |
+| `PerfilMensalOriginalRow` | `ROW_PERFIL` | Perfil mensal de um fundo. Obrigatórios: `cnpj_fdo`, `nr_client`, `distr_patrim`, `perc_pl_maior_cotst`. |
+| `PerfilMensalOriginalClientCount` | `NR_CLIENT` | Contagem de clientes por tipo (14 campos, obrigatórios, ≥ 0). |
+| `PerfilMensalOriginalPatrimonyDistribution` | `DISTR_PATRIM` | Percentual do PL por tipo (14 campos, obrigatórios, 0 a 100). |
+| `PerfilMensalOriginalTradingDays` | `NR_DIAS_NEGOC` | Bloco opcional: prazo de liquidação de 50% / 100% dos ativos (em par) e `APRES_LIQDZ`. |
 
 ### Informe Diário — documento e blocos
 
