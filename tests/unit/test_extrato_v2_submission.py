@@ -150,3 +150,13 @@ def test_v2_export_leaves_no_temp_file_behind(tmp_path: Path) -> None:
 	"""The atomic write leaves only the destination in the directory."""
 	out = _export_to(tmp_path)[0]
 	assert list(tmp_path.iterdir()) == [out]
+
+
+def test_v2_export_keeps_the_mode_of_an_overwritten_file(tmp_path: Path) -> None:
+	"""Overwriting an existing file preserves its group/other permission bits."""
+	out = tmp_path / "extrato.xml"
+	out.write_bytes(b"old")
+	out.chmod(0o640)
+	doc = ExtratoV2Document(header=ExtratoV2Header(dt_gerac_arq="31/10/2026"), rows=[_row()])
+	ExtratoV2().export(doc, output_path=str(out))
+	assert out.stat().st_mode & 0o777 == 0o640

@@ -4,40 +4,10 @@ V2 differs from V3 only in ``VERSAO``, which the V2 header pins, so the serialis
 one (:func:`_build_payload`) reused as is.
 """
 
-import contextlib
-import os
-from pathlib import Path
-import tempfile
-
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.extrato_v2 import ExtratoV2Document
-from filings_cvm._internal.utils.typing import type_checker
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm.submission.extrato import _build_payload
-
-
-@type_checker
-def _write_atomic(path: Path, payload: bytes) -> None:
-	"""Write ``payload`` to ``path`` through a same-directory temp file and ``os.replace``.
-
-	A crash mid-write leaves the previous file intact. PR #330's ``atomic_write_bytes`` will
-	replace this once it is on main.
-
-	Parameters
-	----------
-	path : Path
-		Destination file.
-	payload : bytes
-		The encoded content.
-	"""
-	fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
-	try:
-		with os.fdopen(fd, "wb") as handle:
-			handle.write(payload)
-		os.replace(tmp, path)
-	except BaseException:
-		with contextlib.suppress(FileNotFoundError):
-			os.unlink(tmp)
-		raise
 
 
 class ExtratoV2(SubmissionWriter[ExtratoV2Document]):
@@ -78,5 +48,5 @@ class ExtratoV2(SubmissionWriter[ExtratoV2Document]):
 		xml_str, payload = _build_payload(doc.header, doc.rows)
 		if output_path is None:
 			return xml_str
-		_write_atomic(Path(output_path), payload)
+		atomic_write_bytes(output_path, payload)
 		return None
