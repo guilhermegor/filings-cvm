@@ -32,6 +32,10 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 		Serialize a validated document to a CVM-compliant XML string.
 	"""
 
+	# Decimal places of the Q13-Q15 sensitivity tags and VAL_PERCENT_OUTROS; the
+	# ICVM 739 standard states two where V3/V4 state four.
+	_sensitivity_places: int = 4
+
 	def export(
 		self,
 		doc: PerfilMensalDocument,
@@ -355,7 +359,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 		list[str]
 			XML lines for stress-scenario and DV01-style sensitivity fields.
 		"""
-		# Per the CVM V4 standard the stress field has 2 decimal places and Q13 to Q15 have 4.
+		# The stress field has 2 decimal places; Q13 to Q15 have _sensitivity_places.
 		pairs: list[tuple[str, Decimal | None, int]] = [
 			(
 				"VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS",
@@ -365,14 +369,18 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			(
 				"VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL",
 				row.var_diar_perc_patrim_fdo_var_n_taxa_anual,
-				4,
+				self._sensitivity_places,
 			),
 			(
 				"VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO",
 				row.var_diar_perc_patrim_fdo_var_n_taxa_cambio,
-				4,
+				self._sensitivity_places,
 			),
-			("VAR_PATRIM_FDO_N_PRECO_ACOES", row.var_patrim_fdo_n_preco_acoes, 4),
+			(
+				"VAR_PATRIM_FDO_N_PRECO_ACOES",
+				row.var_patrim_fdo_n_preco_acoes,
+				self._sensitivity_places,
+			),
 		]
 		return [
 			f"{ind}    <{tag}>{self._fmt_decimal(val, places)}</{tag}>"
@@ -401,7 +409,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			f"{saxutils.escape(vo.fator_risco_outros[:400])}"
 			f"</FATOR_RISCO_OUTROS>",
 			f"{ind}        <VAL_PERCENT_OUTROS>"
-			f"{self._fmt_decimal(vo.val_percent_outros, 4)}"
+			f"{self._fmt_decimal(vo.val_percent_outros, self._sensitivity_places)}"
 			f"</VAL_PERCENT_OUTROS>",
 			f"{ind}    </VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS>",
 		]

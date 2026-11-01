@@ -353,7 +353,7 @@ envio; é o registro do que foi entregue, não um informe):
   arquivo do `META/`** (medido pela listagem; as outras 3 grafias dão 404), com **107 campos = o header
   pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
   `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
-- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`) · original (`PadraoXMLPerfil.asp`)
+- ✅ Perfil Mensal — 739 (`PadraoXMLPerfil739.asp`, ICVM 739, vigente desde 01/07/2012) — `submission/perfil_mensal_739.py` (`PerfilMensal739`); schema `_internal/config/schemas/perfil_mensal_739.py`. Mesma sequência de tags do V3/V4 (medido nas 3 páginas), `VERSAO` 1.0, `DISTR_PATRIM` obrigatório (como o V3). ⚠️ **Escalas diferem do V3/V4:** as 3 sensibilidades (`VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL`/`_CAMBIO`, `VAR_PATRIM_FDO_N_PRECO_ACOES`) e `VAL_PERCENT_OUTROS` têm **2 casas** (V3/V4: 4) — copiar o V4 emitiria `1,2300` onde a página diz `1,23`; `MONTANTE_DISTRIB` e `INF_COMPL_PERFIL` **não existem** (o modelo os rejeita). ⬜ V3 (`PadraoXMLPerfilV3.asp`) · original (`PadraoXMLPerfil.asp`)
 - Extrato das Informações sobre o Fundo — ✅ **ingestion** dataset `FI/DOC/EXTRATO`, que publica
   **DOIS artefatos**: `extrato_fi_AAAA.csv` (**CSV solto anual**, 2015–2026, **toda** entrega do ano)
   e `extrato_fi.csv` (**URL fixa, sem ano**) — `ingestion/fi/doc/extrato/*` (`ExtratoFiReader` 117c
