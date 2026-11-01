@@ -41,6 +41,26 @@ _RE_DIGITS = re.compile(r"[0-9]+")
 
 
 @type_checker
+def _require(condition: bool, message: str) -> None:
+	"""Raise ``ValueError(message)`` unless ``condition`` holds.
+
+	Parameters
+	----------
+	condition : bool
+		The invariant being checked.
+	message : str
+		Error text used when it does not hold.
+
+	Raises
+	------
+	ValueError
+		If ``condition`` is false.
+	"""
+	if not condition:
+		raise ValueError(message)
+
+
+@type_checker
 def numeric_field(value: int | str, width: int) -> str:
 	"""Render a numeric (``9``) field: digits only, right-aligned, zero-filled.
 
@@ -62,10 +82,11 @@ def numeric_field(value: int | str, width: int) -> str:
 		If the value is negative, not all ASCII digits, or wider than the field.
 	"""
 	text = str(value)
-	if isinstance(value, bool) or _RE_DIGITS.fullmatch(text) is None:
-		raise ValueError(f"numeric field needs non-negative digits, got {value!r}")
-	if len(text) > width:
-		raise ValueError(f"value {text!r} does not fit a {width}-column field")
+	_require(
+		not isinstance(value, bool) and _RE_DIGITS.fullmatch(text) is not None,
+		f"numeric field needs non-negative digits, got {value!r}",
+	)
+	_require(len(text) <= width, f"value {text!r} does not fit a {width}-column field")
 	return text.zfill(width)
 
 
@@ -169,11 +190,12 @@ def amount_to_digits(value: Decimal) -> tuple[str, str]:
 	ValueError
 		If the value is not finite, has more places than the scale, or overflows 18 digits.
 	"""
-	if not value.is_finite():
-		raise ValueError(f"amount must be finite, got {value!r}")
+	_require(value.is_finite(), f"amount must be finite, got {value!r}")
 	scaled = value.scaleb(AMOUNT_SCALE)
-	if scaled != scaled.to_integral_value():
-		raise ValueError(f"amount {value} has more than {AMOUNT_SCALE} decimal places")
+	_require(
+		scaled == scaled.to_integral_value(),
+		f"amount {value} has more than {AMOUNT_SCALE} decimal places",
+	)
 	digits = numeric_field(int(abs(scaled)), AMOUNT_DIGITS)
 	return digits, "-" if value < 0 else "+"
 
@@ -200,14 +222,15 @@ def decimal_amount_input(value: Decimal | str | int | float | None) -> Decimal:
 	ValueError
 		If ``value`` is a ``float``, a ``bool`` or ``None``, or is not a finite decimal.
 	"""
-	if value is None or isinstance(value, bool | float):
-		raise ValueError(f"amount must be Decimal, str or int, never {type(value).__name__}")
+	_require(
+		not (value is None or isinstance(value, bool | float)),
+		f"amount must be Decimal, str or int, never {type(value).__name__}",
+	)
 	try:
-		amount = value if isinstance(value, Decimal) else Decimal(value)
+		amount = value if isinstance(value, Decimal) else Decimal(str(value))
 	except InvalidOperation as exc:
 		raise ValueError(f"invalid amount: {value!r}") from exc
-	if not amount.is_finite():
-		raise ValueError(f"amount must be finite, got {value!r}")
+	_require(amount.is_finite(), f"amount must be finite, got {value!r}")
 	return amount.quantize(Decimal(1).scaleb(-AMOUNT_SCALE), rounding=ROUND_DOWN)
 
 
@@ -234,10 +257,8 @@ def header_record(document_code: str, cnpj: str, competence: str) -> str:
 	ValueError
 		If a field has the wrong shape.
 	"""
-	if len(cnpj) != _CNPJ_LENGTH:
-		raise ValueError(f"CNPJ must have {_CNPJ_LENGTH} digits, got {cnpj!r}")
-	if len(competence) != len("MMAAAA"):
-		raise ValueError(f"competence must be MMAAAA, got {competence!r}")
+	_require(len(cnpj) == _CNPJ_LENGTH, f"CNPJ must have {_CNPJ_LENGTH} digits, got {cnpj!r}")
+	_require(len(competence) == len("MMAAAA"), f"competence must be MMAAAA, got {competence!r}")
 	record = (
 		"#C1"
 		+ numeric_field(document_code, 4)
@@ -274,8 +295,7 @@ def account_record(code: str, total: Decimal, up_to_90: Decimal, after_90: Decim
 	ValueError
 		If the code has a wrong check digit or an amount does not fit its column.
 	"""
-	if not is_valid_account_code(code):
-		raise ValueError(f"invalid account code: {code!r}")
+	_require(is_valid_account_code(code), f"invalid account code: {code!r}")
 	record = numeric_field(code, ACCOUNT_FIELD_WIDTH) + filler(4)
 	for amount in (total, up_to_90, after_90):
 		digits, sign = amount_to_digits(amount)
@@ -367,8 +387,9 @@ def write_file(content: str, output_path: str, encoding: str = "ascii") -> None:
 	ValueError
 		If ``encoding`` is unknown or ``content`` is not representable in it.
 	"""
-	if encoding not in _ENCODINGS:
-		raise ValueError(f"encoding must be one of {sorted(_ENCODINGS)}, got {encoding!r}")
+	_require(
+		encoding in _ENCODINGS, f"encoding must be one of {sorted(_ENCODINGS)}, got {encoding!r}"
+	)
 	try:
 		payload = content.encode(_ENCODINGS[encoding])
 	except UnicodeEncodeError as exc:

@@ -18,7 +18,7 @@ from filings_cvm._internal.utils.cofi_records import (
 )
 
 
-DOCUMENT_CODE = "4016"
+_DOCUMENT_CODE = "4016"
 
 
 class Balanco(SubmissionWriter[BalancoDocument]):
@@ -100,7 +100,7 @@ class Balanco(SubmissionWriter[BalancoDocument]):
 		list[str]
 			The header followed by one record per account.
 		"""
-		records = [header_record(DOCUMENT_CODE, fund.cnpj, competence)]
+		records = [header_record(_DOCUMENT_CODE, fund.cnpj, competence)]
 		records.extend(
 			account_record(account.conta, account.total, account.ate_90, account.apos_90)
 			for account in sorted(fund.contas, key=lambda account: account.conta)

@@ -1,0 +1,9 @@
+# Status checks main's ruleset requires (read 2026-10-31 from
+# `gh api repos/guilhermegor/filings-cvm/rules/branches/main`). One context per line.
+# bin/check_required_checks_sync.py fails when a name here is not emitted by a job that runs
+# unconditionally on every pull request — a required check nothing emits blocks every PR forever.
+# This file mirrors the ruleset; it never changes it. Edit both together.
+Run Automated Tests (ubuntu-latest)
+Run Automated Tests (macos-latest)
+Run Automated Tests (windows-latest)
+build

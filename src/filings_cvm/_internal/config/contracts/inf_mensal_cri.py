@@ -38,10 +38,10 @@ fixtures.
    (unlike CRA,
    which drops the contingency block — a quirk is a fact about an *artifact*, not a *family*).
 4. **``carteira_modificacao`` and ``responsavel`` are header-only in 2025** (zero data rows — a
-   modification event and the responsible officer are filed only in specific circumstances). A
-   member with no rows has no CNPJ to validate, so ``CNPJ_Emissora`` is deliberately left out of
-   *their* ``tuple_cnpj_cols`` (it stays a required column). Keeping it there would raise
-   ``ContractError`` on a legitimately empty member — the whole-member version of finding 3.
+   modification event and the responsible officer are filed only in specific circumstances). They
+   still declare ``CNPJ_Emissora`` (#320): the check passes an empty column since #317, and the
+   column is the issuer key — META ``varchar(18)``, the only CNPJ/CPF column of either member —
+   so the day CVM publishes rows a malformed issuer CNPJ fails instead of slipping through.
 
 **Deviation from "one contract per file" — deliberate**, exactly as for ``inf_mensal_cra.py`` /
 ``inf_mensal_ots.py`` / ``inf_mensal_fidc.py``. These 11 are the members of a **single input
@@ -326,10 +326,8 @@ INF_MENSAL_CRI_CARTEIRA_MODIFICACAO = FileContract(
 		"Valor",
 		"Justificativa",
 	),
-	# This member is header-only in the real 2025 file, since a modification is a rare event.
-	# With no rows there is no issuer id to validate, so this member declares no CNPJ column;
-	# the issuer column stays required but unchecked, following the geral-blank precedent above.
-	(),
+	# Header-only in 2025 (a modification is a rare event); an empty column passes since #317.
+	("CNPJ_Emissora",),
 )
 
 INF_MENSAL_CRI_DESEMBOLSO = FileContract(
@@ -445,7 +443,6 @@ INF_MENSAL_CRI_RESPONSAVEL = FileContract(
 		"Nome",
 		"Cargo",
 	),
-	# This member is header-only in 2025 like the modification member above. It declares no
-	# CNPJ column for the same reason — with no rows there is no issuer id to validate.
-	(),
+	# Header-only in 2025 like the modification member above; an empty column passes since #317.
+	("CNPJ_Emissora",),
 )

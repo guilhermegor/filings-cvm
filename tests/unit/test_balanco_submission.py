@@ -1,5 +1,7 @@
 """Unit tests for the COFI 4016 Balanço writer, record layer and CVM checks."""
 
+from collections.abc import Callable
+from contextlib import suppress
 from decimal import Decimal
 from pathlib import Path
 
@@ -32,33 +34,56 @@ def doc(contas: list[dict], competencia: str = "062026") -> BalancoDocument:
 BALANCED = [acc("3999999", "10", "10"), acc("9999999", "10", "10")]
 
 
+def test_plan_holds_479_accounts() -> None:
+	"""Plan holds 479 accounts."""
+	assert len(COFI_PLAN) == 479
+
+
 def test_check_digit_matches_every_account_of_the_plan() -> None:
 	"""Check digit matches every account of the plan."""
-	assert len(COFI_PLAN) == 479
 	assert all(rec.is_valid_account_code(c) for c in COFI_PLAN)
 
 
-def test_check_digit_rejects_bad_shapes() -> None:
+@pytest.mark.parametrize("bad", ["39999994", "3999999", "３9999993"])
+def test_check_digit_rejects_bad_shapes(bad: str) -> None:
 	"""Check digit rejects bad shapes."""
-	assert not rec.is_valid_account_code("39999994")
-	assert not rec.is_valid_account_code("3999999")
-	assert not rec.is_valid_account_code("３9999993")
+	assert not rec.is_valid_account_code(bad)
+
+
+def test_check_digit_needs_seven_digits() -> None:
+	"""Check digit needs seven digits."""
 	with pytest.raises(ValueError):
 		rec.account_check_digit("12")
 
 
-def test_every_record_is_71_columns_and_layout_positions() -> None:
-	"""Every record is 71 columns and layout positions."""
-	lines = Balanco().export(doc(BALANCED)).split("\r\n")[:-1]
+@pytest.fixture
+def lines() -> list[str]:
+	"""Return the exported lines of the balanced document."""
+	return Balanco().export(doc(BALANCED)).split("\r\n")[:-1]
+
+
+def test_every_record_is_71_columns(lines: list[str]) -> None:
+	"""Every record is 71 columns."""
 	assert [len(x) for x in lines] == [71] * 4
+
+
+def test_header_layout_positions(lines: list[str]) -> None:
+	"""Header layout positions."""
 	head = lines[0]
-	assert head[:3] == "#C1" and head[3:7] == "4016" and head[7:21] == CNPJ
-	assert head[21:29] == " " * 8 and head[29:35] == "062026" and head[35:] == " " * 36
+	fields = (head[:3], head[3:7], head[7:21], head[21:29], head[29:35], head[35:])
+	assert fields == ("#C1", "4016", CNPJ, " " * 8, "062026", " " * 36)
+
+
+def test_account_layout_positions(lines: list[str]) -> None:
+	"""Account layout positions."""
 	conta = lines[1]
-	assert conta[:10] == "00" + code("3999999") and conta[10:14] == "    "
-	assert conta[14:32] == "000000000000001000" and conta[32] == "+"
-	assert conta[33:51] == "000000000000001000" and conta[51] == "+"
-	assert conta[52:70] == "0" * 18 and conta[70] == "+"
+	one = "000000000000001000"
+	fields = (conta[:10], conta[10:14], conta[14:33], conta[33:52], conta[52:71])
+	assert fields == ("00" + code("3999999"), "    ", one + "+", one + "+", "0" * 18 + "+")
+
+
+def test_footer_layout_positions(lines: list[str]) -> None:
+	"""Footer layout positions."""
 	assert lines[3] == "@1000004" + " " * 63
 
 
@@ -87,17 +112,23 @@ def test_negative_amount_on_contra_account_gets_minus_sign() -> None:
 	assert (digits, sign) == ("0" * 15 + "105", "-")
 
 
-def test_amount_truncated_not_rounded_and_float_refused() -> None:
-	"""Amount truncated not rounded and float refused."""
-	assert BalancoAccount(
-		conta=code("3999999"), total="1.999", ate_90=0, apos_90=0
-	).total == Decimal("1.99")
+def test_amount_truncated_not_rounded() -> None:
+	"""Amount truncated not rounded."""
+	account = BalancoAccount(conta=code("3999999"), total="1.999", ate_90=0, apos_90=0)
+	assert account.total == Decimal("1.99")
+
+
+def test_float_amount_refused() -> None:
+	"""Float amount refused."""
 	with pytest.raises(ValidationError):
 		BalancoAccount(conta=code("3999999"), total=1.5, ate_90=0, apos_90=0)
+
+
+@pytest.mark.parametrize("amount", [Decimal("1.005"), Decimal(10) ** 17])
+def test_amount_to_digits_refuses_unrepresentable(amount: Decimal) -> None:
+	"""Amount to digits refuses unrepresentable."""
 	with pytest.raises(ValueError):
-		rec.amount_to_digits(Decimal("1.005"))
-	with pytest.raises(ValueError):
-		rec.amount_to_digits(Decimal(10) ** 17)
+		rec.amount_to_digits(amount)
 
 
 def test_account_rejects_bad_check_digit() -> None:
@@ -124,25 +155,26 @@ def test_competence_rejected(comp: str) -> None:
 		doc(BALANCED, competencia=comp)
 
 
-def fails(contas: list[dict], marker: str, comp: str = "062026") -> None:
-	"""Fails."""
-	with pytest.raises(ValidationError, match=rf"\[{marker}\]"):
+def message(contas: list[dict], comp: str = "062026") -> str:
+	"""Return the validation error text raised for ``contas``."""
+	with pytest.raises(ValidationError) as excinfo:
 		doc(contas, comp)
+	return str(excinfo.value)
 
 
 def test_d1_unknown_account() -> None:
 	"""D1 unknown account."""
-	fails([*BALANCED, acc("1999999", "0")], "D1")
+	assert "[D1]" in message([*BALANCED, acc("1999999", "0")])
 
 
 def test_d1_account_not_yet_valid_on_competence() -> None:
 	"""D1 account not yet valid on competence."""
-	fails(BALANCED, "D1", comp="062005")
+	assert "[D1]" in message(BALANCED, comp="062005")
 
 
 def test_d4_missing_superior() -> None:
 	"""D4 missing superior."""
-	fails([*BALANCED, acc("1100000", "0")], "D4")
+	assert "[D4]" in message([*BALANCED, acc("1100000", "0")])
 
 
 def test_d5_duplicate() -> None:
@@ -153,7 +185,7 @@ def test_d5_duplicate() -> None:
 
 def test_e1_negative_on_normal_account() -> None:
 	"""E1 negative on normal account."""
-	fails([acc("3999999", "-10", "-10"), acc("9999999", "-10", "-10")], "E1")
+	assert "[E1]" in message([acc("3999999", "-10", "-10"), acc("9999999", "-10", "-10")])
 
 
 def test_e4_parent_differs_from_children() -> None:
@@ -164,51 +196,61 @@ def test_e4_parent_differs_from_children() -> None:
 		acc("1100000", "3", "3"),
 		acc("9999999", "5", "5"),
 	]
-	fails(contas, "E4")
+	assert "[E4]" in message(contas)
 
 
 def test_g3_total_differs_from_group_sum() -> None:
 	"""G3 total differs from group sum."""
-	fails([acc("3999999", "9", "9"), acc("1000000", "5", "5"), acc("9999999", "9", "9")], "G3")
+	contas = [acc("3999999", "9", "9"), acc("1000000", "5", "5"), acc("9999999", "9", "9")]
+	assert "[G3]" in message(contas)
 
 
 def test_g1_assets_differ_from_liabilities() -> None:
 	"""G1 assets differ from liabilities."""
-	fails([acc("3999999", "10", "10"), acc("9999999", "11", "11")], "G1")
+	assert "[G1]" in message([acc("3999999", "10", "10"), acc("9999999", "11", "11")])
 
 
 def test_g2_missing_total() -> None:
 	"""G2 missing total."""
-	fails([acc("3999999", "10", "10")], "G2")
+	assert "[G2]" in message([acc("3999999", "10", "10")])
 
 
 def test_e5_compensation_accounts_differ() -> None:
 	"""E5 compensation accounts differ."""
-	fails([*BALANCED, acc("3000000", "4"), acc("9000000", "5")], "E5")
+	assert "[E5]" in message([*BALANCED, acc("3000000", "4"), acc("9000000", "5")])
 
 
 def test_ex_cc3023_par44() -> None:
 	"""Ex cc3023 par44."""
 	contas = [*BALANCED, acc("3033000", "4"), acc("3999999", "10", "10")]
 	contas = [c for c in contas if c["conta"] != code("3999999")] + [acc("3999999", "10", "10")]
-	fails(contas, "EX")
+	assert "[EX]" in message(contas)
 
 
-def test_duplicate_fund_and_empty_lists_rejected() -> None:
-	"""Duplicate fund and empty lists rejected."""
+def test_duplicate_fund_rejected() -> None:
+	"""Duplicate fund rejected."""
 	with pytest.raises(ValidationError):
 		BalancoDocument(
 			competencia="062026",
 			fundos=[{"cnpj": CNPJ, "contas": BALANCED}, {"cnpj": CNPJ, "contas": BALANCED}],
 		)
+
+
+def test_empty_fund_list_rejected() -> None:
+	"""Empty fund list rejected."""
 	with pytest.raises(ValidationError):
 		BalancoDocument(competencia="062026", fundos=[])
 
 
-def test_export_writes_bytes_and_returns_none(tmp_path: Path) -> None:
-	"""Export writes bytes and returns none."""
+def test_export_with_path_returns_none(tmp_path: Path) -> None:
+	"""Export with path returns none."""
+	assert Balanco().export(doc(BALANCED), str(tmp_path / "b.cvm")) is None
+
+
+def test_export_writes_the_ascii_bytes(tmp_path: Path) -> None:
+	"""Export writes the ascii bytes."""
 	out = tmp_path / "b.cvm"
-	assert Balanco().export(doc(BALANCED), str(out)) is None
+	Balanco().export(doc(BALANCED), str(out))
 	assert out.read_bytes() == Balanco().export(doc(BALANCED)).encode("ascii")
 
 
@@ -219,26 +261,34 @@ def test_ebcdic_header_identifier(tmp_path: Path) -> None:
 	assert out.read_bytes()[0] == 0x7B
 
 
+@pytest.mark.parametrize(("content", "encoding"), [("ação", "ascii"), ("x", "utf-16")])
+def test_failed_encoding_refused(tmp_path: Path, content: str, encoding: str) -> None:
+	"""Failed encoding refused."""
+	with pytest.raises(ValueError):
+		rec.write_file(content, str(tmp_path / "b.cvm"), encoding)
+
+
 def test_failed_encoding_does_not_touch_existing_file(tmp_path: Path) -> None:
 	"""Failed encoding does not touch existing file."""
 	out = tmp_path / "b.cvm"
 	out.write_bytes(b"keep")
-	with pytest.raises(ValueError):
+	with suppress(ValueError):  # the refusal itself is covered by the test above
 		rec.write_file("ação", str(out))
-	with pytest.raises(ValueError):
-		rec.write_file("x", str(out), "utf-16")
 	assert out.read_bytes() == b"keep"
 
 
-def test_record_builders_reject_bad_input() -> None:
+@pytest.mark.parametrize(
+	"build",
+	[
+		lambda: rec.header_record("4016", "123", "062026"),
+		lambda: rec.header_record("4016", CNPJ, "6"),
+		lambda: rec.footer_record(1_000_000),
+		lambda: rec.numeric_field("12a", 5),
+		lambda: rec.account_record("39999994", Decimal(0), Decimal(0), Decimal(0)),
+	],
+	ids=["cnpj", "competence", "footer", "digits", "account"],
+)
+def test_record_builders_reject_bad_input(build: Callable[[], str]) -> None:
 	"""Record builders reject bad input."""
 	with pytest.raises(ValueError):
-		rec.header_record("4016", "123", "062026")
-	with pytest.raises(ValueError):
-		rec.header_record("4016", CNPJ, "6")
-	with pytest.raises(ValueError):
-		rec.footer_record(1_000_000)
-	with pytest.raises(ValueError):
-		rec.numeric_field("12a", 5)
-	with pytest.raises(ValueError):
-		rec.account_record("39999994", Decimal(0), Decimal(0), Decimal(0))
+		build()

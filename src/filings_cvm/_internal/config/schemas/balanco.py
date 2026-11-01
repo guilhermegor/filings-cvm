@@ -208,6 +208,51 @@ class BalancoDocument(BaseModel):
 		month, year = int(self.competencia[:2]), int(self.competencia[2:])
 		return date(year, month, calendar.monthrange(year, month)[1])
 
+	def _duplicate_fund_errors(self) -> list[str]:
+		"""List the funds informed more than once.
+
+		Returns
+		-------
+		list[str]
+			One message per repeated CNPJ.
+		"""
+		cnpjs = [fund.cnpj for fund in self.fundos]
+		return [
+			f"fund {cnpj} informed more than once"
+			for cnpj in sorted(set(cnpjs))
+			if cnpjs.count(cnpj) > 1
+		]
+
+	def _size_errors(self) -> list[str]:
+		"""List the oversize violation, if any.
+
+		Returns
+		-------
+		list[str]
+			A one-item list when the footer counter would overflow, else empty.
+		"""
+		records = 1 + sum(1 + len(fund.contas) for fund in self.fundos)
+		return [
+			f"file would hold {records} records, the footer counts up to {MAX_RECORD_COUNT}"
+		] * (records > MAX_RECORD_COUNT)
+
+	def _account_errors(self) -> list[str]:
+		"""List every failed CVM account check, prefixed by fund.
+
+		Returns
+		-------
+		list[str]
+			One message per failed check.
+		"""
+		return [
+			f"fund {fund.cnpj}: {message}"
+			for fund in self.fundos
+			for message in check_fund_accounts(
+				{a.conta: (a.total, a.ate_90, a.apos_90) for a in fund.contas},
+				self.reference_date,
+			)
+		]
+
 	@model_validator(mode="after")
 	def _check_consistency(self) -> BalancoDocument:
 		"""Reject repeated funds, an oversized file, and any failed CVM check.
@@ -222,24 +267,7 @@ class BalancoDocument(BaseModel):
 		ValueError
 			Listing every violation found.
 		"""
-		errors: list[str] = []
-		cnpjs = [fund.cnpj for fund in self.fundos]
-		errors.extend(
-			f"fund {cnpj} informed more than once"
-			for cnpj in sorted(set(cnpjs))
-			if cnpjs.count(cnpj) > 1
-		)
-		records = 1 + sum(1 + len(fund.contas) for fund in self.fundos)
-		if records > MAX_RECORD_COUNT:
-			errors.append(
-				f"file would hold {records} records, the footer counts up to {MAX_RECORD_COUNT}"
-			)
-		for fund in self.fundos:
-			accounts = {a.conta: (a.total, a.ate_90, a.apos_90) for a in fund.contas}
-			errors.extend(
-				f"fund {fund.cnpj}: {message}"
-				for message in check_fund_accounts(accounts, self.reference_date)
-			)
+		errors = [*self._duplicate_fund_errors(), *self._size_errors(), *self._account_errors()]
 		if errors:
 			raise ValueError("; ".join(errors))
 		return self
