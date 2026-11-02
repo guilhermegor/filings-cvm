@@ -83,6 +83,21 @@ def test_read_table_rejects_column_names_that_collide_once_trimmed(tmp_path: Pat
 		read_table(path_csv, "", {"amount": "str"}, EXAMPLE_SOURCE)
 
 
+def test_read_table_rejects_padded_names_that_collide_once_trimmed(tmp_path: Path) -> None:
+	"""Two padded names that both trim to ``"code"`` are refused too.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		Pytest-provided throwaway directory for the CSV fixture.
+	"""
+	path_csv = tmp_path / "source.csv"
+	path_csv.write_text("code ; code ;amount\n007;008;10.50\n", encoding="utf-8")
+
+	with pytest.raises(ContractError, match="collide after trimming whitespace: code"):
+		read_table(path_csv, "", {"amount": "str"}, EXAMPLE_SOURCE)
+
+
 def test_read_table_coerces_declared_types_from_text(tmp_path: Path) -> None:
 	"""Declared non-text types still coerce cleanly from the text-first read.
 
