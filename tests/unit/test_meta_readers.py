@@ -199,11 +199,11 @@ def test_meta_source_keys_are_unique_across_every_reader() -> None:
 	assert len(list_keys) == len(set(list_keys))
 
 
-_PATH_CLAUDE_MD = Path(__file__).resolve().parents[2] / "CLAUDE.md"
+_PATH_AGENTS_MD = Path(__file__).resolve().parents[2] / "AGENTS.md"
 
-# Each claim in the root CLAUDE.md's META paragraph, keyed by what it counts. Anchored on the
+# Each claim in the root AGENTS.md's META paragraph, keyed by what it counts. Anchored on the
 # surrounding wording so the CVM-sourced figures ("41 campos", "19 membros") are never matched.
-_RE_CLAUDE_MD_COUNTS = {
+_RE_AGENTS_MD_COUNTS = {
 	"readers": re.compile(r"\*\*(\d+) readers\*\* \(`Meta\*Reader`\)"),
 	"factory": re.compile(r"\((\d+) instâncias de um factory"),
 	"txt_prose": re.compile(r"`\.txt` solto \((\d+)\)"),
@@ -215,8 +215,8 @@ _RE_CLAUDE_MD_COUNTS = {
 }
 
 
-def test_claude_md_meta_counts_match_the_real_numbers() -> None:
-	"""The root CLAUDE.md is read by the next agent as instruction, so its counts are gated too.
+def test_agents_md_meta_counts_match_the_real_numbers() -> None:
+	"""The root AGENTS.md is read by the next agent as instruction, so its counts are gated too.
 
 	#160 updated `docs/` to 38 while this file kept saying 37 and the whole suite stayed green
 	(#161). Every expected value is derived from the package, never hardcoded.
@@ -246,9 +246,9 @@ def test_claude_md_meta_counts_match_the_real_numbers() -> None:
 		"measured_zip": int_zip,
 		"contracts": int_contracts,
 	}
-	str_flat = " ".join(_PATH_CLAUDE_MD.read_text(encoding="utf-8").split())
-	for str_key, re_claim in _RE_CLAUDE_MD_COUNTS.items():
+	str_flat = " ".join(_PATH_AGENTS_MD.read_text(encoding="utf-8").split())
+	for str_key, re_claim in _RE_AGENTS_MD_COUNTS.items():
 		list_found = [int(s) for s in re_claim.findall(str_flat)]
 		# A regex that matches nothing checks nothing — reworded prose must fail loudly here.
-		assert list_found, f"CLAUDE.md META claim {str_key!r} not found — did its wording change?"
+		assert list_found, f"AGENTS.md META claim {str_key!r} not found — did its wording change?"
 		assert set(list_found) == {dict_expected[str_key]}, str_key
