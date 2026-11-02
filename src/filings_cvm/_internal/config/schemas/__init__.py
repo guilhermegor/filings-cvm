@@ -21,6 +21,11 @@ from filings_cvm._internal.config.schemas.informe_diario_v3 import (
 	InformeDiarioV3Header,
 	InformeDiarioV3Inform,
 )
+from filings_cvm._internal.config.schemas.informe_portabilidade import (
+	InformePortabilidadeDocument,
+	PortabilidadeHeader,
+	PortabilidadeInform,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -119,6 +124,7 @@ __all__ = [
 	"InformeDiarioV3Document",
 	"InformeDiarioV3Header",
 	"InformeDiarioV3Inform",
+	"InformePortabilidadeDocument",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
@@ -167,6 +173,8 @@ __all__ = [
 	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
+	"PortabilidadeHeader",
+	"PortabilidadeInform",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"RecursosEnvMesmoInvest",
