@@ -154,8 +154,12 @@ def test_real_docs_pass() -> None:
 	assert cds.stale_allowlist(_ROOT / "docs") == []
 
 
-def test_canonical_slugs_are_the_seven_required_pages() -> None:
-	"""Pinned literally: the other tests derive from the constant, so they cannot catch a drop."""
+def test_canonical_slugs_are_the_six_required_pages() -> None:
+	"""Pinned literally: the other tests derive from the constant, so they cannot catch a drop.
+
+	The name predates the BlueprintX layout (#371), which added ``examples`` and turned ``api``
+	into ``api/index`` (seven pages now); it is kept so the pinned test keeps its identity.
+	"""
 	assert set(cds.CANONICAL_SLUGS) == {
 		"index",
 		"usage",
