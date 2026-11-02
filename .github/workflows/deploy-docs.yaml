@@ -34,7 +34,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           # Full history so mike can read/extend the gh-pages branch and cz sees the tags.
           fetch-depth: 0

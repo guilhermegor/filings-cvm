@@ -107,6 +107,21 @@ duplicate `--cov-fail-under` literal in either place.
 - `review_retry` is a scheduled job because nothing fires when a rate limit clears. It only
   ever posts a review request, and it exits 0 even when it cannot act.
 
+## Repo-policy workflows imported from BlueprintX (#366) — and where they overlap
+
+| workflow (script) | job | decision |
+|---|---|---|
+| `branch-has-issue.yml` (`bin/check_pr_policy.sh branch`) | head branch is `<type>/<N>-<slug>` | take template |
+| `pr-title-conventional.yml` (`check_pr_policy.sh title`) | PR title is a Conventional Commit | take template; complements commitizen/gitlint, which only see commits, while a squash merge uses the PR title |
+| `pr-body-template.yml` (`check_pr_policy.sh body`) | body has every `## ` heading of `PULL_REQUEST_TEMPLATE.md` | take template (and its template, which adds the `Closes #N` guidance) |
+| `pr-self-assign.yml` | assigns the PR author | take template |
+| `close-linked-issues.yml` (`bin/close_linked_issues.sh`) | closes linked issues on the `closed`+merged event | **keep both** with `reconcile-merged-prs.yaml`: this one is the immediate path, the daily reconciler is the backstop for merges that fire no event (bot-merged). Different triggers, and closing is idempotent (an already-closed issue is skipped), so they cannot race |
+| `dependabot-auto-merge.yml` (`bin/dependabot_auto_merge.sh`) | arms auto-merge for patch/minor Dependabot PRs, majors wait for a review of HEAD | take template, **but** `pr_gate.py` also arms auto-merge for `deps` PRs and the template disarms majors: follow-up needed so `pr_gate.py` skips `dependabot[bot]` PRs |
+| `ISSUE_TEMPLATE/task.md` vs `feature_or_fix.md` | | **keep both**: `task.md` carries the `**Blocked by:**` field the board and the issue-template guard read |
+
+`SECURITY.md`, `dependabot.yml` and `PULL_REQUEST_TEMPLATE.md` follow the template, with the repo's
+library-specific scope, grouping and `ignore` rules kept on top.
+
 ## Recurrent (scheduled) workflows
 
 To run a workflow on a schedule, add an `on.schedule` trigger with a cron
