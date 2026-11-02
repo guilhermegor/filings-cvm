@@ -12,7 +12,6 @@ import pytest
 
 from filings_cvm.submission import (
 	ClientCount,
-	DocumentHeader,
 	NominalRiskBlock,
 	NominalRiskFactor,
 	OtcOperation,
@@ -20,6 +19,7 @@ from filings_cvm.submission import (
 	PerfilMensal,
 	PerfilMensal739,
 	PerfilMensal739Document,
+	PerfilMensal739Header,
 	PerfilMensal739Row,
 	PerfilMensalDocument,
 	PerformanceFeeDetails,
@@ -188,7 +188,7 @@ def _full_row() -> PerfilMensal739Row:
 
 def _document(row: PerfilMensal739Row) -> PerfilMensal739Document:
 	"""Wrap one row in a 739 document."""
-	header = DocumentHeader(dt_compt="01/2013", dt_gerac_arq="15/01/2013")
+	header = PerfilMensal739Header(dt_compt="01/2013", dt_gerac_arq="15/01/2013")
 	return PerfilMensal739Document(header=header, rows=[row])
 
 
@@ -223,6 +223,18 @@ def test_export_versao_is_one() -> None:
 def test_export_cod_doc_is_forty() -> None:
 	"""COD_DOC is 40 with no leading zeros."""
 	assert "<COD_DOC>40</COD_DOC>" in _xml(_row())
+
+
+def test_header_rejects_a_cod_doc_other_than_forty() -> None:
+	"""The 739 page defines only COD_DOC 40, so any other code is refused at construction."""
+	with pytest.raises(ValidationError):
+		PerfilMensal739Header(cod_doc=7, dt_compt="01/2013", dt_gerac_arq="15/01/2013")
+
+
+def test_export_rejects_a_control_character_xml_forbids() -> None:
+	"""A NUL in free text is refused instead of emitting a file no XML parser accepts."""
+	with pytest.raises(ValueError, match="control character"):
+		_xml(_row(res_delib="a\x00b"))
 
 
 def test_export_full_row_tag_order_matches_the_page_exactly() -> None:

@@ -95,6 +95,7 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 from filings_cvm._internal.config.schemas.perfil_mensal_739 import (
 	PatrimonyDistribution739,
 	PerfilMensal739Document,
+	PerfilMensal739Header,
 	PerfilMensal739Row,
 	VarOutros739,
 )
@@ -163,6 +164,7 @@ __all__ = [
 	"PatrimonyDistribution",
 	"PatrimonyDistribution739",
 	"PerfilMensal739Document",
+	"PerfilMensal739Header",
 	"PerfilMensal739Row",
 	"PerfilMensalDocument",
 	"PerfilMensalOriginalClientCount",

@@ -6,6 +6,7 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 """
 
 from decimal import Decimal
+import re
 import xml.sax.saxutils as saxutils
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
@@ -19,6 +20,19 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarPercValCota,
 )
 from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
+from filings_cvm._internal.utils.typing import type_checker
+
+
+# XML 1.0 forbids these C0 controls even when escaped; saxutils.escape passes them through.
+_XML_ILLEGAL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+@type_checker
+def _escape(value: str) -> str:
+	"""Escape ``value`` for XML text, refusing a control character XML 1.0 forbids."""
+	if _XML_ILLEGAL_RE.search(value):
+		raise ValueError(f"text holds a control character XML forbids: {value!r}")
+	return saxutils.escape(value)
 
 
 class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
@@ -156,7 +170,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 		if row.inf_compl_perfil is not None:
 			lines.append(
 				f"{ind}    <INF_COMPL_PERFIL>"
-				f"{saxutils.escape(row.inf_compl_perfil[:500])}"
+				f"{_escape(row.inf_compl_perfil[:500])}"
 				f"</INF_COMPL_PERFIL>"
 			)
 		lines.append(f"{ind}</ROW_PERFIL>")
@@ -266,7 +280,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			("JUST_SUM_VT_PROFRD", row.just_sum_vt_profrd, 4000),
 		]:
 			if val is not None:
-				lines.append(f"{ind}    <{tag}>{saxutils.escape(val[:max_len])}</{tag}>")
+				lines.append(f"{ind}    <{tag}>{_escape(val[:max_len])}</{tag}>")
 		if row.var_perc_pl is not None:
 			lines.append(
 				f"{ind}    <VAR_PERC_PL>{self._fmt_decimal(row.var_perc_pl, 4)}</VAR_PERC_PL>"
@@ -280,9 +294,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 				f"</PRAZ_MED_CART_TIT>"
 			)
 		if row.res_delib is not None:
-			lines.append(
-				f"{ind}    <RES_DELIB>{saxutils.escape(row.res_delib[:4000])}</RES_DELIB>"
-			)
+			lines.append(f"{ind}    <RES_DELIB>{_escape(row.res_delib[:4000])}</RES_DELIB>")
 		return lines
 
 	def _build_usd_flow_lines(self, row: PerfilMensalRow, ind: str) -> list[str]:
@@ -333,9 +345,9 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			lines += [
 				f"{ind}            <FATOR_PRIMIT_RISCO>",
 				f"{ind}                <NOME_FATOR_PRIMIT_RISCO>"
-				f"{saxutils.escape(fpr.nome_fator_primit_risco)}"
+				f"{_escape(fpr.nome_fator_primit_risco)}"
 				f"</NOME_FATOR_PRIMIT_RISCO>",
-				f"{ind}                <CEN_UTIL>{saxutils.escape(fpr.cen_util)}</CEN_UTIL>",
+				f"{ind}                <CEN_UTIL>{_escape(fpr.cen_util)}</CEN_UTIL>",
 				f"{ind}            </FATOR_PRIMIT_RISCO>",
 			]
 		lines += [
@@ -406,7 +418,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 		return [
 			f"{ind}    <VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS>",
 			f"{ind}        <FATOR_RISCO_OUTROS>"
-			f"{saxutils.escape(vo.fator_risco_outros[:400])}"
+			f"{_escape(vo.fator_risco_outros[:400])}"
 			f"</FATOR_RISCO_OUTROS>",
 			f"{ind}        <VAL_PERCENT_OUTROS>"
 			f"{self._fmt_decimal(vo.val_percent_outros, self._sensitivity_places)}"
@@ -440,7 +452,7 @@ class PerfilMensal(SubmissionWriter[PerfilMensalDocument]):
 			lines += [
 				f"{ind}            <FATOR_RISCO_NOC>",
 				f"{ind}                <NOME_FATOR_NOC>"
-				f"{saxutils.escape(fnoc.nome_fator_noc)}"
+				f"{_escape(fnoc.nome_fator_noc)}"
 				f"</NOME_FATOR_NOC>",
 				f"{ind}                <VAL_FATOR_RISCO_NOC_LONG>"
 				f"{fnoc.val_fator_risco_noc_long}"

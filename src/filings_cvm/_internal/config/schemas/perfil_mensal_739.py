@@ -13,6 +13,8 @@ deltas, measured against the V3 and V4 pages, are:
 * ``MONTANTE_DISTRIB`` and ``INF_COMPL_PERFIL`` do not exist yet.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from filings_cvm._internal.config.schemas.perfil_mensal import (
@@ -68,16 +70,23 @@ class PerfilMensal739Row(PerfilMensalRow, BaseModel):
 	inf_compl_perfil: None = Field(default=None, exclude=True)
 
 
+class PerfilMensal739Header(DocumentHeader, BaseModel):
+	"""CAB_INFORM (739) - pins COD_DOC to 40, the only code the 739 page defines."""
+
+	cod_doc: Literal[40] = 40
+
+
 class PerfilMensal739Document(PerfilMensalDocument, BaseModel):
 	"""DOC_ARQ (739) - complete CVM Monthly Profile ICVM 739 XML document."""
 
-	header: DocumentHeader
+	header: PerfilMensal739Header
 	rows: list[PerfilMensal739Row]  # type: ignore[assignment]
 
 
 __all__ = [
 	"PatrimonyDistribution739",
 	"PerfilMensal739Document",
+	"PerfilMensal739Header",
 	"PerfilMensal739Row",
 	"VarOutros739",
 ]

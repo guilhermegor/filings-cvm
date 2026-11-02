@@ -38,8 +38,8 @@ mudam os abaixo.
 
 ```python
 from filings_cvm.submission import (
-    ClientCount, DocumentHeader, PatrimonyDistribution739,
-    PerfilMensal739, PerfilMensal739Document, PerfilMensal739Row,
+    ClientCount, PatrimonyDistribution739, PerfilMensal739,
+    PerfilMensal739Document, PerfilMensal739Header, PerfilMensal739Row,
 )
 
 clientes = ClientCount(**{campo: 0 for campo in ClientCount.model_fields})
@@ -47,7 +47,7 @@ distribuicao = PatrimonyDistribution739(
     **{campo: "0" for campo in PatrimonyDistribution739.model_fields}
 )
 doc = PerfilMensal739Document(
-    header=DocumentHeader(dt_compt="07/2012", dt_gerac_arq="15/08/2012"),
+    header=PerfilMensal739Header(dt_compt="07/2012", dt_gerac_arq="15/08/2012"),
     rows=[
         PerfilMensal739Row(
             cnpj_fdo="11222333000181",

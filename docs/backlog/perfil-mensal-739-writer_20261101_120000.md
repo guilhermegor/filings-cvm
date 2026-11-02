@@ -18,3 +18,8 @@ Branch `feat/343-perfil-mensal-739-writer`. Spec: `PadraoXMLPerfil739.asp` (fetc
 - `DISTR_PATRIM`: mandatory, as in V3.
 - The tag table says `CNPJ_FUNDO`, the sample says `CNPJ_FDO`; the writer follows the sample.
 - No CVM validator was run.
+
+## Review follow-up (CodeRabbit, 2026-11-02)
+
+- [x] `COD_DOC` pinned to 40: new `PerfilMensal739Header` (`cod_doc: Literal[40]`), so `cod_doc=7` is refused at construction.
+- [x] XML-forbidden control characters (NUL etc.) refused at export, in the shared V4 writer's `_escape`, so V4 and 739 are both covered.
