@@ -25,8 +25,11 @@ deste repositório, e dois reconciliadores competiriam pelas mesmas issues e bra
 
 1. Compare o arquivo do template com o do repositório e leia o que mudou.
 2. Ajuste aos nomes deste projeto (`filings_cvm`, o `src/` e os caminhos reais).
-3. Rode o guard na árvore atual. Ele precisa passar sem afrouxar a regra; o que já existia no `main`
-   entra numa linha de base (`bin/quality_baseline.txt`), nunca o código novo.
+3. Rode o guard na árvore atual. Ele precisa passar sem afrouxar a regra. Só os guards envolvidos por
+   `bin/quality_ratchet.py` (function-length, complexity, dead-code, all-exports, one-assert) usam
+   `bin/quality_baseline.txt`: o que já existia no `main` entra nessa linha de base, nunca o código
+   novo. Os guards de documentação e de higiene não leem essa linha de base; corrija as violações
+   existentes antes de registrar o gate.
 4. Registre o gate em `.pre-commit-config.yaml` e em `.github/workflows/tests.yaml` no mesmo commit.
 5. Escreva só ASCII na saída dos scripts: o CI roda no Windows, cujo console falha ao imprimir
    símbolos como `✓`.

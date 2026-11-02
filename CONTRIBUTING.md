@@ -161,8 +161,9 @@ poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command
 
 ### Docs and Hygiene Guards
 
-Also vendored from BlueprintX `python-common`, each as a pre-commit hook and a CI step. All of
-them pass on the current tree, so none needs a baseline:
+Also vendored from BlueprintX `python-common`. Each guard is a pre-commit hook, and every guard
+except `check_clean_index.sh` also has a CI step. All of them pass on the current tree, so none
+needs a baseline:
 
 | Guard | Rule | Escape hatch |
 |---|---|---|

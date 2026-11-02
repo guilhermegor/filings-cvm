@@ -1,6 +1,7 @@
 # **Exemplos**
 
-Receitas curtas e autocontidas para tarefas comuns. Cada uma funciona sozinha: copie e ajuste.
+Receitas curtas para tarefas comuns. Os trechos podem depender de variáveis definidas em outras
+receitas (`df_`) ou em [Uso](usage.md) (`doc`); copie e ajuste.
 
 > **Veja também:** [Uso](usage.md) para a instalação e o conceito geral · [Referência da API](api.md)
 > para cada símbolo público.

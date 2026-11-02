@@ -165,10 +165,10 @@ no pre-commit e passo equivalente no CI): títulos sem emoji, marcadores `<!-- s
 nas seções obrigatórias e lista de autores com links do GitHub e do LinkedIn.
 
 Guards de documentação e higiene (importados do template BlueprintX), todos com hook no pre-commit
-e passo no CI: `check_docs_code_refs.py` (imports citados na documentação existem em `src/`),
-`check_docs_gap.py` (toda página publicada está no `nav`), `check_identifier_masking.py` (nenhum
-CPF/CNPJ mascarado comparado direto), `check_secrets.sh` (gitleaks) e `check_clean_index.sh`
-(pre-push: índice vazio). Detalhes e *escape hatches* no [guia de contribuição](CONTRIBUTING.md).
+e, exceto o último, passo no CI: `check_docs_code_refs.py` (imports citados na documentação
+existem em `src/`), `check_docs_gap.py` (toda página publicada está no `nav`),
+`check_identifier_masking.py` (nenhum CPF/CNPJ mascarado comparado direto), `check_secrets.sh`
+(gitleaks) e `check_clean_index.sh` (só pre-push, sem passo no CI: índice vazio). Detalhes e *escape hatches* no [guia de contribuição](CONTRIBUTING.md).
 
 <!-- slug: public-api -->
 ## API pública
