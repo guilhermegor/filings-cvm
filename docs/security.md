@@ -20,15 +20,16 @@ versão do Dependabot. A lacuna era só **um gate em CI que falhe diante de depe
 | Custo | Gratuito | Camada gratuita limitada; pago acima |
 | Conta / segredo | Nenhum | Conta + segredo `SNYK_TOKEN` |
 | Escopo | Dependências Python | Dependências, SAST, contêineres, IaC, licenças |
-| Base de vulnerabilidades | PyPA Advisory DB + OSV | Base própria da Snyk |
-| Dados enviados | Só consulta a base; nada é enviado | Envia o manifesto (e o código, no Snyk Code) |
+| Base de vulnerabilidades | Serviço padrão `pypi` (avisos da API JSON do PyPI) | Base própria da Snyk |
+| Dados enviados | Nome e versão de cada pacote, um `GET pypi.org/pypi/<nome>/<versão>/json` por pacote | Envia o manifesto (e o código, no Snyk Code) |
 | Gate | Código de saída (`--strict`) | Checagem de PR |
 | Sobreposição com o que existe | Nenhuma (preenche a lacuna) | SAST repete o CodeQL; alertas repetem o Dependabot |
 
-**Decisão: pip-audit.** Cobre exatamente a lacuna, sem conta, sem segredo e sem custo. O ganho extra
-da Snyk (base mais rica, PRs de correção) não compensa o token, a camada paga e o envio do
-manifesto. Reavaliar apenas se o projeto passar a precisar de SAST multilinguagem ou de varredura de
-contêineres/IaC.
+**Decisão: pip-audit.** Cobre exatamente a lacuna, sem conta, sem segredo e sem custo. O ganho
+extra da Snyk (base mais rica, PRs de correção) não compensa o token e a camada paga. Nomes e
+versões das dependências saem da máquina nas duas ferramentas; a Snyk envia ainda o manifesto
+inteiro e, no Snyk Code, o código. Reavaliar apenas se o projeto passar a precisar de SAST
+multilinguagem ou de varredura de contêineres/IaC.
 
 ## Como funciona
 

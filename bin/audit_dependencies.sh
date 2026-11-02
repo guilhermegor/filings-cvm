@@ -7,7 +7,8 @@
 # poetry.lock pins (export -> pip-audit -r), not whatever happens to be installed.
 #
 # --no-deps / --disable-pip: the export is already fully pinned, so pip-audit does no
-# resolution and builds no venv — it only queries the PyPA/OSV advisory DB.
+# resolution and builds no venv. The vulnerability source is pip-audit's default `pypi`
+# service: one request to pypi.org/pypi/<name>/<version>/json per pinned package.
 #
 # Accepting an advisory: add its ID to IGNORE_VULNS below WITH a written reason and a
 # tracking issue. An unexplained ignore is a silenced gate.
@@ -30,7 +31,10 @@ audit_lock() {
 	done
 
 	print_status "info" "pip-audit over poetry.lock (all groups)"
-	bash "$SCRIPT_DIR/poetry_exec.sh" export --with dev,docs -f requirements.txt \
+	# `run poetry export`, not `export`: poetry-plugin-export is a dev dependency, so it is
+	# loaded by the venv's own Poetry, never by the system one CI uses ("The requested
+	# command export does not exist").
+	bash "$SCRIPT_DIR/poetry_exec.sh" run poetry export --with dev,docs -f requirements.txt \
 		--without-hashes -o "$req_file"
 	bash "$SCRIPT_DIR/poetry_exec.sh" run pip-audit "${args[@]}"
 }
@@ -42,7 +46,7 @@ main() {
 	# shellcheck disable=SC2064
 	trap "rm -f '$req_file'" EXIT
 
-	cd "$SCRIPT_DIR/.."
+	cd "$SCRIPT_DIR/.." || exit 1
 	audit_lock "$req_file"
 	print_status "success" "pip-audit OK"
 }
