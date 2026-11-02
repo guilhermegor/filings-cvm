@@ -1,0 +1,19 @@
+# The docs skeleton this repo declares, in the format BlueprintX's python-common template reads
+# (required_pages / section_families). This repo's own gate, bin/check_docs_sections.py, keeps
+# the same two lists in code because it also carries the LEGACY_NONCOMPLIANT allowlist;
+# tests/unit/test_docs_skeleton_sync.py fails when the two disagree, so neither can drift.
+# Section labels are pt-BR, matching mkdocs.yml theme.language.
+required_pages:
+  - index.md
+  - usage.md
+  - api.md
+  - faq.md
+  - contributing.md
+  - changelog.md
+
+section_families:
+  "ingestion/*.md":
+    - Descrição
+    - Tipagem
+    - Política de retry
+    - Exemplos

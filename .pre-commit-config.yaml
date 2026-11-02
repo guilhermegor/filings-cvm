@@ -301,6 +301,48 @@ repos:
         pass_filenames: false
       # ---- END code- and test-quality guards (#294) ------------------------------------
 
+      # ---- BEGIN docs and hygiene guards (#295) ----------------------------------------
+      # Vendored from BlueprintX python-common. Each one has a matching CI step in the
+      # "docs and hygiene guards (#295)" block of .github/workflows/tests.yaml (gate parity).
+      # All five pass on the current tree, so none needs a baseline.
+      - id: check-docs-code-refs
+        name: docs code references (from-imports in docs resolve against src/)
+        entry: bash bin/poetry_exec.sh run python bin/check_docs_code_refs.py
+        language: system
+        files: ^(docs/|README\.md|src/|bin/check_docs_code_refs\.py)
+        pass_filenames: false
+
+      - id: check-docs-gap
+        name: docs gap (every published page is in the nav, nav ceiling)
+        entry: bash bin/poetry_exec.sh run python bin/check_docs_gap.py --root .
+        language: system
+        files: ^(mkdocs\.yml|docs/|bin/check_docs_gap\.py)
+        pass_filenames: false
+
+      - id: identifier-masking
+        name: identifier masking (masked CPF/CNPJ literal in a comparison)
+        entry: bash bin/poetry_exec.sh run python bin/check_identifier_masking.py
+        language: system
+        files: ^(src/.*\.(py|sql)|bin/check_identifier_masking\.py)$
+        pass_filenames: false
+
+      - id: check-secrets
+        name: secret scan (gitleaks, staged changes; skips locally without gitleaks)
+        entry: bash bin/check_secrets.sh --staged
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: check-clean-index
+        name: pre-push - index must be empty (a rejected commit leaves it populated)
+        entry: bash bin/check_clean_index.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages:
+          - pre-push
+      # ---- END docs and hygiene guards (#295) ------------------------------------------
+
       # `|| [ $? -eq 5 ]` tolerates pytest exit 5 ("no tests collected") so a
       # fresh project with an empty suite does not block every commit; real
       # failures (exit 1) still block.

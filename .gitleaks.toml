@@ -1,0 +1,18 @@
+title = "filings-cvm gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "narrow, reasoned entries only"
+
+paths = [
+  '''\.gitleaks\.toml''',
+  '''poetry\.lock''',
+]
+
+stopwords = [
+  "your-key-here",
+  "your-secret-here",
+  "your-token-here",
+]
