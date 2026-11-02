@@ -56,7 +56,7 @@ source "$SCRIPT_DIR/lib/bootstrap.sh"
 `get_corporate_ca.sh` is the **manual** generator for `bin/corporate_ca.pem` — it
 disables TLS verification *on purpose* to capture a TLS-inspecting proxy's CA,
 so run it only on such a network. The pem is git-ignored; its mere presence
-opts a project into corporate-SSL mode on the next `poe venv` / `poe run`.
+opts a project into corporate-SSL mode on the next `poe venv`.
 
 ## Resolve Poetry — never call a bare `poetry`
 

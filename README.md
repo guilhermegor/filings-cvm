@@ -92,8 +92,8 @@ poetry add filings-cvm
 ```bash
 git clone https://github.com/guilhermegor/filings-cvm.git
 cd filings-cvm
-poe init            # cria a .venv e instala os hooks de pre-commit
-                     #
+bash bin/venv.sh     # cria a .venv (traz o poe)
+poe init            # instala os hooks de pre-commit e prepara o repo (com a .venv ativa; ou: bash bin/poe_exec.sh init)
 ```
 
 <!-- slug: usage -->
@@ -157,7 +157,7 @@ filings-cvm/
 poe unit_tests      # pytest tests/unit/
 poe test_cov        # cobertura + badge (coverage.svg)
 poe lint            # ruff, codespell, pydocstyle, check_docstrings
-poe help            # lista todos os comandos disponíveis
+poe --help          # lista todos os comandos disponíveis
 ```
 
 O `README.md` em si é validado por `bin/check_readme_structure.sh` (hook `readme-structure`

@@ -18,7 +18,7 @@ sequence = [
 help = "Whole-tree HTML coverage report at htmlcov/index.html"
 
 [tool.poe.tasks.test_cov_serve]
-shell = "cd htmlcov && python3 -m http.server ${PORT:-8000}"
+shell = "cd htmlcov && python -m http.server ${PORT:-8000}"
 help = "Serve the HTML coverage report (PORT=8000 by default)"
 
 [tool.poe.tasks.test_slowest]

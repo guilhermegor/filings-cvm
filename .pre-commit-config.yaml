@@ -10,7 +10,7 @@ repos:
       - id: check-merge-conflict
       # Online default. Offline scaffolds (no GitHub remote) swap this for the
       # local `protect-branch` hook via apply_offline_mode, which points the user
-      # at `poe precommit`. Online projects also get gh server-side protection.
+      # at `git switch -c <branch>`. Online projects also get gh server-side protection.
       - id: no-commit-to-branch
         args:
           - --branch=main

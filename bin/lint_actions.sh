@@ -2,8 +2,8 @@
 #
 # lint_actions.sh — actionlint over the repository's GitHub Actions workflows.
 #
-# Single source of truth for WORKFLOW SCHEMA linting: called by `poe lint_actions` /
-# `., the pre-commit `lint-actions` hook, and the CI step.
+# Single source of truth for WORKFLOW SCHEMA linting: called by `bin/lint.sh`,
+# the pre-commit `lint-actions` hook, and the CI step.
 #
 # WHY THIS EXISTS, AND WHY yamllint IS NOT IT. yamllint validates YAML; it says nothing
 # about whether the document is a workflow GitHub will run. Measured in #217: a `on:`

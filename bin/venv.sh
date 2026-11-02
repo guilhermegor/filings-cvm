@@ -117,7 +117,7 @@ try_install_playwright_browsers() {
 		print_status "success" "Playwright browsers installed"
 	else
 		print_status "warning" \
-			"Could not install Playwright browsers — init continues; run 'playwright install' later if you need them"
+			"Could not install Playwright browsers — init continues; run 'poetry run playwright install chromium' later if you need them"
 	fi
 }
 
