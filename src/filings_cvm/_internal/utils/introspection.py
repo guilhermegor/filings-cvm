@@ -1,7 +1,7 @@
 """Enumerate the package's public ingestion readers, grouped by CVM portal root.
 
 Since the readers stopped being re-exported into one flat namespace, "every public reader" is no
-longer a single ``__all__`` to read — it is the union of the 22 portal-root packages' own
+longer a single ``__all__`` to read — it is the union of the 24 portal-root packages' own
 ``__all__``. Several gates need exactly that set (the retry-policy sweep, the META roster, the
 contract-drift registry), so it is defined **once** here rather than re-derived in each.
 

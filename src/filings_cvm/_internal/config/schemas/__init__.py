@@ -16,6 +16,16 @@ from filings_cvm._internal.config.schemas.inf_fundo_157 import (
 	InfFundo157Document,
 	InfFundo157Header,
 )
+from filings_cvm._internal.config.schemas.informe_diario_v3 import (
+	InformeDiarioV3Document,
+	InformeDiarioV3Header,
+	InformeDiarioV3Inform,
+)
+from filings_cvm._internal.config.schemas.informe_portabilidade import (
+	InformePortabilidadeDocument,
+	PortabilidadeHeader,
+	PortabilidadeInform,
+)
 from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	ClasseCotas,
 	CotistCategory,
@@ -24,6 +34,11 @@ from filings_cvm._internal.config.schemas.informe_quadrimestral import (
 	InformeQuadrimestralInform,
 	ListaClasseCotas,
 	ListaCotstCateg,
+)
+from filings_cvm._internal.config.schemas.informe_trimestral_v1 import (
+	InformeTrimestralV1Document,
+	InformeTrimestralV1Header,
+	InformeTrimestralV1Inform,
 )
 from filings_cvm._internal.config.schemas.inr_mensal import (
 	Aplicacoes,
@@ -77,6 +92,14 @@ from filings_cvm._internal.config.schemas.perfil_mensal import (
 	VarOutros,
 	VarPercValCota,
 )
+from filings_cvm._internal.config.schemas.perfil_mensal_original import (
+	PerfilMensalOriginalClientCount,
+	PerfilMensalOriginalDocument,
+	PerfilMensalOriginalHeader,
+	PerfilMensalOriginalPatrimonyDistribution,
+	PerfilMensalOriginalRow,
+	PerfilMensalOriginalTradingDays,
+)
 
 
 __all__ = [
@@ -92,9 +115,16 @@ __all__ = [
 	"InfFundo157Cotista",
 	"InfFundo157Document",
 	"InfFundo157Header",
+	"InformeDiarioV3Document",
+	"InformeDiarioV3Header",
+	"InformeDiarioV3Inform",
+	"InformePortabilidadeDocument",
 	"InformeQuadrimestralDocument",
 	"InformeQuadrimestralHeader",
 	"InformeQuadrimestralInform",
+	"InformeTrimestralV1Document",
+	"InformeTrimestralV1Header",
+	"InformeTrimestralV1Inform",
 	"InrMensalDocument",
 	"InrMensalHeader",
 	"LaminaAntesInic2",
@@ -126,8 +156,16 @@ __all__ = [
 	"Participante",
 	"PatrimonyDistribution",
 	"PerfilMensalDocument",
+	"PerfilMensalOriginalClientCount",
+	"PerfilMensalOriginalDocument",
+	"PerfilMensalOriginalHeader",
+	"PerfilMensalOriginalPatrimonyDistribution",
+	"PerfilMensalOriginalRow",
+	"PerfilMensalOriginalTradingDays",
 	"PerfilMensalRow",
 	"PerformanceFeeDetails",
+	"PortabilidadeHeader",
+	"PortabilidadeInform",
 	"PrimitiveRiskFactor",
 	"PrivateCreditIssuer",
 	"RecursosEnvMesmoInvest",

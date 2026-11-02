@@ -115,28 +115,29 @@ def block_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatc
 	)
 
 
-LIST_GIT_REPOSITORY_POINTERS = (
+_GIT_HOOK_ENV = (
 	"GIT_DIR",
 	"GIT_WORK_TREE",
 	"GIT_INDEX_FILE",
-	"GIT_COMMON_DIR",
-	"GIT_PREFIX",
 	"GIT_OBJECT_DIRECTORY",
 	"GIT_ALTERNATE_OBJECT_DIRECTORIES",
+	"GIT_COMMON_DIR",
+	"GIT_PREFIX",
+	"GIT_CONFIG_PARAMETERS",
 )
 
 
 @pytest.fixture(autouse=True)
 def isolate_git_environment(monkeypatch: pytest.MonkeyPatch) -> None:
-	"""Drop the repository pointers git exports to hooks so a test never touches the host repo.
+	"""Drop the ``GIT_*`` variables a git hook exports, so a test's scratch repo stays its own.
 
-	Applied automatically to every test. Under pre-commit, ``GIT_DIR`` and
-	``GIT_INDEX_FILE`` name the calling repository, so a test that runs ``git init`` or
-	``git commit`` would otherwise write there instead of in its temporary directory.
+	Under ``pre-commit`` the process inherits ``GIT_INDEX_FILE`` (and friends) pointing at the
+	real repository. A test that runs ``git init`` / ``git add`` in a ``tmp_path`` would then write
+	its scratch index over the real one, staging the deletion of the whole tree.
 
 	Parameters
 	----------
 	monkeypatch : pytest.MonkeyPatch
-		Pytest's patcher; restores the variables at teardown.
+		Removes each variable for the duration of the test.
 	"""
-	list(map(partial(monkeypatch.delenv, raising=False), LIST_GIT_REPOSITORY_POINTERS))
+	tuple(map(partial(monkeypatch.delenv, raising=False), _GIT_HOOK_ENV))
