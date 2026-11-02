@@ -1094,7 +1094,10 @@ def file_problems(
     if str_new is None or str_old is None:
         return []
 
-    fn_analyzer = _DICT_DISPATCH.get(pathlib.Path(str_path).name)
+    str_name = pathlib.Path(str_path).name
+    fn_analyzer = _DICT_DISPATCH.get(str_name)
+    if str_name == ".review-bots.yaml" and str_path != str_name:
+        fn_analyzer = None  # only the root roster is the review policy
     if fn_analyzer is None and RE_WORKFLOW_PATH.search(str_path):
         fn_analyzer = workflow_problems
     list_problems = fn_analyzer(str_old, str_new, str_path) if fn_analyzer else []

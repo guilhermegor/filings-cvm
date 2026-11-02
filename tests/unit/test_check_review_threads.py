@@ -3877,6 +3877,31 @@ def _base_checkout(tmp_path: Path) -> Path:
 	return tmp_path
 
 
+@pytest.fixture(autouse=True)
+def _no_inherited_base_ref(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""Drop a runner-inherited ``GITHUB_BASE_REF`` so tests never need a real ``origin/main``."""
+	monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+
+
+def test_policy_root_roster_exists_but_unreadable_fails_closed(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A roster listed on the base but failing ``git show`` raises, not reads as absent."""
+	cls_gate = _load_gate()
+	monkeypatch.setenv("GITHUB_BASE_REF", "main")
+	cls_gate.policy_root.cache_clear()
+	list_replies = [
+		Mock(returncode=0, stdout=""),
+		Mock(returncode=0, stdout=""),
+		Mock(returncode=0, stdout=".review-bots.yaml\n"),
+		Mock(returncode=1, stdout=""),
+	]
+	monkeypatch.setattr(cls_gate, "_git", Mock(side_effect=list_replies))
+	with pytest.raises(RuntimeError):
+		cls_gate.policy_root()
+	cls_gate.policy_root.cache_clear()
+
+
 def test_policy_root_pr_edited_roster_cannot_add_its_author_as_a_bot(
 	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -212,9 +212,15 @@ def policy_root() -> pathlib.Path:
 			f"to judge the PR by a roster its own checkout supplies."
 		)
 	path_dir = pathlib.Path(tempfile.mkdtemp(prefix="review-bots-base-"))
+	cls_tree = _git("ls-tree", "--name-only", str_ref, "--", _ROSTER_FILE)
+	if cls_tree.returncode != 0:
+		raise RuntimeError(f"cannot list {_ROSTER_FILE} on {str_ref} — refusing to guess.")
+	if not cls_tree.stdout.strip():
+		return path_dir  # confirmed absent on the base: the gate is not adopted there
 	cls_show = _git("show", f"{str_ref}:{_ROSTER_FILE}")
-	if cls_show.returncode == 0:
-		(path_dir / _ROSTER_FILE).write_text(cls_show.stdout, encoding="utf-8")
+	if cls_show.returncode != 0:
+		raise RuntimeError(f"{_ROSTER_FILE} exists on {str_ref} but could not be read.")
+	(path_dir / _ROSTER_FILE).write_text(cls_show.stdout, encoding="utf-8")
 	return path_dir
 
 
