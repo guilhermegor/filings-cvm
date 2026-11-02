@@ -47,18 +47,35 @@ def atomic_write_bytes(path: str | Path, payload: bytes) -> None:
 	flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_BINARY", 0)
 	fd = os.open(path_tmp, flags, 0o666)
 	try:
+		_apply_dest_mode(path_tmp, path_dest)
 		with os.fdopen(fd, "wb") as file_tmp:
 			file_tmp.write(payload)
 			file_tmp.flush()
 			os.fsync(file_tmp.fileno())
-		with contextlib.suppress(FileNotFoundError):
-			os.chmod(path_tmp, os.stat(path_dest).st_mode & 0o7777)
 		os.replace(path_tmp, path_dest)
 	except BaseException:
 		with contextlib.suppress(FileNotFoundError):
 			os.unlink(path_tmp)
 		raise
 	_fsync_dir(path_dest.parent)
+
+
+@type_checker
+def _apply_dest_mode(path_tmp: Path, path_dest: Path) -> None:
+	"""Give the still-empty temp file the existing destination's permission bits.
+
+	Runs before any payload byte is written, so the payload is never readable under a wider
+	mode than the final file. A missing destination leaves the ``0o666``-minus-umask default.
+
+	Parameters
+	----------
+	path_tmp : Path
+		Temp file, opened but not yet written.
+	path_dest : Path
+		Final destination, which may not exist yet.
+	"""
+	with contextlib.suppress(FileNotFoundError):
+		os.chmod(path_tmp, os.stat(path_dest).st_mode & 0o7777)
 
 
 @type_checker
