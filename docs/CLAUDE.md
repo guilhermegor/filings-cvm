@@ -58,7 +58,7 @@ updated in the same commit as the reader that changes them:
   claims.
 
 `meta.md` is the one that gets forgotten: adding a reader means touching `api.md`,
-`index.md`, the `nav`, and the root `CLAUDE.md`, and `meta.md` is not on that
+`index.md`, the `nav`, and the root `AGENTS.md`, and `meta.md` is not on that
 reflex list. It sat at "30 readers" through **seven** consecutive reader PRs while
 `api.md` correctly said 37 — nothing looked inconsistent, because no gate compared
 either page to the package.
