@@ -4,7 +4,7 @@ Leitura (← CVM) do dump mensal de *open-data* do **Demonstrativo de Composiç�
 das Aplicações** (`cda_fi_AAAAMM`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FI/DOC/CDA/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---

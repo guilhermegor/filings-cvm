@@ -7,7 +7,7 @@ no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/). Estes read
 > Sexta fatia da **Wave 3** do #41 e o **primeiro root de 5 membros** — degrau acima do padrão de 2
 > membros do [AUDITOR](auditor.md) / [INVNR](invnr.md) / [INTERMED](intermed.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

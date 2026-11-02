@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Informe Quadrimestral V2** (antigo Informe Trimestral, FIP)
 ([`PadraoXMLInfoTrimV2.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp)).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md)
 
 ---
 

@@ -4,7 +4,7 @@ Envio (→ CVM) do padrão **Informe Trimestral V1**, válido até 2017-06 (FMIE
 FUNCINE) ([`PadraoXMLInfoTrim.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp)).
 Substituto: [Informe Quadrimestral V2](informe_quadrimestral.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md)
 
 ---
 

@@ -5,7 +5,7 @@ Leitura (← CVM) do **Informe Mensal das Operações de Securitização** não-
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/SECURIT/DOC/INF_MENSAL_OTS/DADOS/).
 Segunda fatia da **Wave 2** do #41 (Securitização).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

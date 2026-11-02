@@ -4,7 +4,7 @@ Leitura (← CVM) dos **META** — a *especificação que a própria CVM publica
 [portal de dados abertos](https://dados.cvm.gov.br/dados/). Um reader por dataset, **53 no total**,
 todos sob `.../<DATASET>/META/`.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) · [Proveniência](index.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) · [Proveniência](index.md).
 
 ---
 

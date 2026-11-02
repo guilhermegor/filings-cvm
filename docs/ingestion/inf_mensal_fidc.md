@@ -4,7 +4,7 @@ Leitura (← CVM) do **Informe Mensal dos FIDC** (`inf_mensal_fidc_AAAAMM.zip`),
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FIDC/DOC/INF_MENSAL/DADOS/).
 Inaugura o *portal root* `fidc/` da biblioteca (irmão de `fi/`).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

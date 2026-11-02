@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Atualização do Cadastro de Ativos**
 ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp)).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md)
 
 ---
 

@@ -9,7 +9,7 @@ Leitura (← CVM) do cadastro das **plataformas eletrônicas de investimento par
 > [COORD_OFERTA](coord_oferta.md) / [INTERMED](intermed.md), com os satélites sem data do
 > [ADM_CART](adm_cart.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 
