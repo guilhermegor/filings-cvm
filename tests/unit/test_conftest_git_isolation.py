@@ -20,6 +20,7 @@ _EXPECTED_HIDDEN = (
 	"GIT_ALTERNATE_OBJECT_DIRECTORIES",
 	"GIT_COMMON_DIR",
 	"GIT_PREFIX",
+	"GIT_CONFIG_PARAMETERS",
 )
 
 _INNER = "import os\ndef test_inner():\n\tassert os.environ.get({name!r}) is None\n"
