@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Sourced lib — shared Poetry/bootstrap/pip-fallback helpers for venv.sh and run.sh.
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
 	echo "bin/lib/pip_fallback.sh is meant to be sourced, not executed." >&2
@@ -19,6 +18,7 @@ source "$PIP_FALLBACK_LIB_DIR/common.sh"
 source "$PIP_FALLBACK_LIB_DIR/bootstrap.sh"
 
 PIP_FALLBACK_ARGS=()
+PIP_FALLBACK_USER_ARGS=()
 
 pip_fallback_project_venv_python() {
 	if [[ "$OS_TYPE" == "windows" ]]; then
@@ -26,6 +26,17 @@ pip_fallback_project_venv_python() {
 	else
 		echo "$PROJECT_ROOT/.venv/bin/python"
 	fi
+}
+
+pip_fallback_recreate_project_venv() {
+	if running_inside_project_venv; then
+		print_status "error" "Refusing to recreate .venv from inside it — that would delete the interpreter in use"
+		print_status "error" "Run 'bash bin/venv.sh' from a shell outside 'poetry run', 'poe' and any activated virtualenv"
+		return 1
+	fi
+
+	rm -rf "$PROJECT_ROOT/.venv"
+	"$PYTHON" -m venv "$PROJECT_ROOT/.venv"
 }
 
 pip_fallback_normalize_path_for_compare() {
@@ -68,6 +79,11 @@ pip_fallback_populate_pip_args() {
 	if [[ -n "${PIP_CERT:-}" ]]; then
 		PIP_FALLBACK_ARGS+=(--cert "$PIP_CERT")
 	fi
+
+	PIP_FALLBACK_USER_ARGS=(--user)
+	if python_in_venv "$PYTHON"; then
+		PIP_FALLBACK_USER_ARGS=()
+	fi
 }
 
 pip_fallback_ensure_toml_reader() {
@@ -81,7 +97,7 @@ pip_fallback_ensure_toml_reader() {
 
 	pip_fallback_populate_pip_args
 	print_status "info" "Installing tomli for pyproject fallback parsing..."
-	"$PYTHON" -m pip install "${PIP_FALLBACK_ARGS[@]}" --user tomli
+	"$PYTHON" -m pip install "${PIP_FALLBACK_ARGS[@]}" ${PIP_FALLBACK_USER_ARGS[@]+"${PIP_FALLBACK_USER_ARGS[@]}"} tomli
 }
 
 pip_fallback_ensure_project_poetry() {
@@ -91,10 +107,9 @@ pip_fallback_ensure_project_poetry() {
 	str_poetry_spec="$(pip_fallback_poetry_spec_from_requirements)"
 
 	print_status "info" "Ensuring Poetry matches spec: $str_poetry_spec"
-	"$PYTHON" -m pip install "${PIP_FALLBACK_ARGS[@]}" --upgrade --user "$str_poetry_spec"
+	"$PYTHON" -m pip install "${PIP_FALLBACK_ARGS[@]}" --upgrade ${PIP_FALLBACK_USER_ARGS[@]+"${PIP_FALLBACK_USER_ARGS[@]}"} "$str_poetry_spec"
 
 	if "$PYTHON" -m poetry --version >/dev/null 2>&1; then
-		# POETRY_CMD is consumed by run_poetry (defined in the sourced bootstrap.sh).
 		# shellcheck disable=SC2034
 		POETRY_CMD=("$PYTHON" -m poetry)
 		print_status "info" "Poetry found: $(run_poetry --version 2>&1 | head -n1)"
@@ -131,177 +146,142 @@ pip_fallback_poetry_env_is_local() {
 pip_fallback_emit_pip_requirements_from_pyproject() {
 	local str_groups_csv="$1"
 
-	PROJECT_ROOT="$PROJECT_ROOT" BX_GROUPS="$str_groups_csv" "$PYTHON" - <<'PYEOF'
-from __future__ import annotations
-
-import os
-from pathlib import Path
-
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
-
-
-def parse_version_parts(raw: str) -> list[int]:
-    parts = raw.strip().split(".")
-    numbers: list[int] = []
-
-    for part in parts:
-        digits = ""
-        for char in part:
-            if char.isdigit():
-                digits += char
-            else:
-                break
-        numbers.append(int(digits or "0"))
-
-    return numbers
-
-
-def caret_to_range(raw: str) -> str:
-    base = raw[1:].strip()
-    parts = parse_version_parts(base)
-
-    while len(parts) < 3:
-        parts.append(0)
-
-    major, minor, patch = parts[:3]
-
-    if major > 0:
-        upper = f"{major + 1}.0.0"
-    elif minor > 0:
-        upper = f"0.{minor + 1}.0"
-    else:
-        upper = f"0.0.{patch + 1}"
-
-    return f">={base},<{upper}"
-
-
-def tilde_to_range(raw: str) -> str:
-    base = raw[1:].strip()
-    parts_raw = base.split(".")
-    parts = parse_version_parts(base)
-
-    while len(parts) < 3:
-        parts.append(0)
-
-    major, minor, _patch = parts[:3]
-
-    if len(parts_raw) <= 1:
-        upper = f"{major + 1}.0.0"
-    else:
-        upper = f"{major}.{minor + 1}.0"
-
-    return f">={base},<{upper}"
-
-
-def normalize_version_spec(spec: str) -> str:
-    spec = str(spec).strip()
-
-    if spec in {"", "*"}:
-        return ""
-
-    if spec.startswith("^"):
-        return caret_to_range(spec)
-
-    if spec.startswith("~") and not spec.startswith("~="):
-        return tilde_to_range(spec)
-
-    if spec.startswith((">=", "<=", "==", "!=", ">", "<", "~=")) or "," in spec:
-        return spec
-
-    return f"=={spec}"
-
-
-def build_requirement(name: str, spec) -> str | None:
-    if name.lower() == "python":
-        return None
-
-    if isinstance(spec, str):
-        version = normalize_version_spec(spec)
-        return f"{name}{version}"
-
-    if isinstance(spec, dict):
-        if spec.get("optional"):
-            return None
-
-        for unsupported_key in ("path", "git", "url"):
-            if unsupported_key in spec:
-                raise SystemExit(
-                    f"Unsupported dependency type for pip fallback: {name} -> {unsupported_key}"
-                )
-
-        extras = spec.get("extras") or []
-        extras_part = f"[{','.join(extras)}]" if extras else ""
-        version = normalize_version_spec(spec.get("version", ""))
-        markers = spec.get("markers", "")
-
-        requirement = f"{name}{extras_part}{version}"
-        if markers:
-            requirement = f"{requirement} ; {markers}"
-
-        return requirement
-
-    raise SystemExit(f"Unsupported dependency format for {name}: {spec!r}")
-
-
-project_root = Path(os.environ["PROJECT_ROOT"])
-groups = [group for group in os.environ.get("BX_GROUPS", "main").split(",") if group]
-pyproject = tomllib.loads(project_root.joinpath("pyproject.toml").read_text(encoding="utf-8"))
-
-requirements: list[str] = []
-
-project_table = pyproject.get("project") or {}
-if "main" in groups and project_table.get("dependencies"):
-    requirements.extend(project_table.get("dependencies", []))
-    groups = [group for group in groups if group != "main"]
-
-    optional_dependencies = project_table.get("optional-dependencies", {})
-    for group in groups:
-        requirements.extend(optional_dependencies.get(group, []))
-else:
-    poetry_table = pyproject.get("tool", {}).get("poetry", {})
-
-    if "main" in groups:
-        for dep_name, dep_spec in poetry_table.get("dependencies", {}).items():
-            line = build_requirement(dep_name, dep_spec)
-            if line:
-                requirements.append(line)
-
-    group_table = poetry_table.get("group", {})
-    for group in groups:
-        for dep_name, dep_spec in group_table.get(group, {}).get("dependencies", {}).items():
-            line = build_requirement(dep_name, dep_spec)
-            if line:
-                requirements.append(line)
-
-seen: set[str] = set()
-for requirement in requirements:
-    if requirement not in seen:
-        print(requirement)
-        seen.add(requirement)
-PYEOF
+	PROJECT_ROOT="$PROJECT_ROOT" BX_GROUPS="$str_groups_csv" \
+		"$PYTHON" "$(dirname "${BASH_SOURCE[0]}")/pip_requirements.py"
 }
 
 pip_fallback_write_requirements_file() {
 	local str_groups_csv="$1"
 	local str_req_file="$2"
 
-	pip_fallback_ensure_toml_reader
-	pip_fallback_emit_pip_requirements_from_pyproject "$str_groups_csv" >"$str_req_file"
+	pip_fallback_ensure_toml_reader || return 1
+	pip_fallback_emit_pip_requirements_from_pyproject "$str_groups_csv" >"$str_req_file" ||
+		return 1
+	pip_fallback_prune_unused_db_drivers "$str_req_file" || return 1
+}
+
+pip_fallback_requirement_name() {
+	local str_req="$1"
+
+	str_req="${str_req%%;*}"
+	str_req="${str_req%%[*}"
+	str_req="${str_req%%[<>=!~]*}"
+	str_req="${str_req#"${str_req%%[![:space:]]*}"}"
+	str_req="${str_req%"${str_req##*[![:space:]]}"}"
+
+	printf '%s\n' "$str_req"
+}
+
+pip_fallback_backends_needing_driver() {
+	case "$1" in
+	psycopg) echo "postgresql" ;;
+	oracledb) echo "oracle" ;;
+	pyodbc) echo "mssql" ;;
+	mysql-connector-python) echo "mysql mariadb" ;;
+	*) echo "" ;;
+	esac
+}
+
+pip_fallback_resolve_db_backend() {
+	local str_backend
+
+	str_backend="$(ENV_FILE="$PROJECT_ROOT/.env" _read_env_var DB_BACKEND 2>/dev/null || true)"
+	str_backend="${str_backend//$'\r'/}"
+	str_backend="${str_backend//[[:space:]]/}"
+
+	printf '%s\n' "${str_backend:-sqlite}" | tr '[:upper:]' '[:lower:]'
+}
+
+pip_fallback_prune_unused_db_drivers() {
+	local str_req_file="$1"
+	local str_backend
+	local str_req
+	local str_name
+	local str_backends
+	local str_pruned
+	local -a arr_keep=()
+	local -a arr_dropped=()
+
+	[[ -s "$str_req_file" ]] || return 0
+
+	str_backend="$(pip_fallback_resolve_db_backend)"
+
+	while IFS= read -r str_req; do
+		str_name="$(pip_fallback_requirement_name "$str_req")"
+		str_backends="$(pip_fallback_backends_needing_driver "$str_name")"
+
+		if [[ -n "$str_backends" && " $str_backends " != *" $str_backend "* ]]; then
+			arr_dropped+=("$str_name")
+			continue
+		fi
+
+		arr_keep+=("$str_req")
+	done <"$str_req_file"
+
+	if ((${#arr_dropped[@]} == 0)); then
+		return 0
+	fi
+
+	printf '%s\n' "${arr_keep[@]}" >"$str_req_file"
+	str_pruned="$(
+		IFS=', '
+		echo "${arr_dropped[*]}"
+	)"
+	print_status "config" "DB_BACKEND=$str_backend — skipping unused DB drivers: $str_pruned"
 }
 
 pip_fallback_install_requirements_file_into_venv() {
 	local str_venv_python="$1"
 	local str_req_file="$2"
+	local str_req
+	local str_failed
+	local -a arr_failed=()
 
 	if [[ ! -s "$str_req_file" ]]; then
 		print_status "warning" "No dependencies were generated from pyproject.toml for pip fallback"
 		return 0
 	fi
 
-	"$str_venv_python" -m pip install "${PIP_FALLBACK_ARGS[@]}" -r "$str_req_file"
+	if "$str_venv_python" -m pip install "${PIP_FALLBACK_ARGS[@]}" -r "$str_req_file"; then
+		return 0
+	fi
+
+	print_status "warning" "Batch install failed — retrying one requirement at a time to isolate it"
+
+	while IFS= read -r str_req; do
+		[[ -n "$str_req" && "$str_req" != \#* ]] || continue
+
+		if ! "$str_venv_python" -m pip install "${PIP_FALLBACK_ARGS[@]}" "$str_req"; then
+			arr_failed+=("$str_req")
+			print_status "warning" "Index refused: $str_req"
+		fi
+	done <"$str_req_file"
+
+	if ((${#arr_failed[@]} == 0)); then
+		print_status "success" "All requirements installed individually"
+		return 0
+	fi
+
+	str_failed="$(
+		IFS=', '
+		echo "${arr_failed[*]}"
+	)"
+	print_status "error" "The package index refused: $str_failed"
+	print_status "error" "An HTTP 403 here means the index ALLOWLIST rejected the package, not that the network is down — the remedies are opposite. Ask for it to be allowlisted, or vendor it (an offline wheelhouse is tracked in blueprintx#127)."
+	return 1
+}
+
+pip_fallback_verify_importable() {
+	local str_venv_python="$1"
+	local str_req_file="$2"
+
+	if "$str_venv_python" "$PIP_FALLBACK_LIB_DIR/verify_venv_imports.py" "$str_req_file"; then
+		return 0
+	fi
+
+	print_status "error" "pip reported the install as done, but the target venv cannot import what was declared"
+	print_status "error" "This is the silent-empty-venv failure tracked in blueprintx#127 — a blocked package index can report success with nothing usable installed."
+	return 1
 }
 
 pip_fallback_install_groups_in_venv() {
@@ -314,10 +294,27 @@ pip_fallback_install_groups_in_venv() {
 	str_req_file="$(mktemp "${TMPDIR:-/tmp}/bx_pip_fallback.XXXXXX.txt")"
 
 	print_status "info" "Installing $str_label with pip fallback..."
-	pip_fallback_write_requirements_file "$str_groups_csv" "$str_req_file"
+	if ! pip_fallback_write_requirements_file "$str_groups_csv" "$str_req_file"; then
+		print_status "error" "Could not build the pip requirements for $str_label."
+		rm -f "$str_req_file"
+		return 1
+	fi
 
-	"$str_venv_python" -m pip install "${PIP_FALLBACK_ARGS[@]}" --upgrade pip setuptools wheel
-	pip_fallback_install_requirements_file_into_venv "$str_venv_python" "$str_req_file"
+	if ! "$str_venv_python" -m pip install "${PIP_FALLBACK_ARGS[@]}" --upgrade pip setuptools wheel; then
+		print_status "error" "Could not upgrade pip/setuptools/wheel in the target venv."
+		rm -f "$str_req_file"
+		return 1
+	fi
+
+	if ! pip_fallback_install_requirements_file_into_venv "$str_venv_python" "$str_req_file"; then
+		rm -f "$str_req_file"
+		return 1
+	fi
+
+	if ! pip_fallback_verify_importable "$str_venv_python" "$str_req_file"; then
+		rm -f "$str_req_file"
+		return 1
+	fi
 
 	rm -f "$str_req_file"
 	print_status "success" "$str_label installed with pip fallback"

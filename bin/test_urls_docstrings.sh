@@ -1,6 +1,4 @@
 #!/bin/bash
-# Pre-commit hook: scan Python docstrings for URLs and validate reachability.
-# Results are cached for 1 week to avoid repeated network calls.
 
 set -euo pipefail
 
@@ -8,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 
 CACHE_DIR=".url_check_cache"
-CACHE_TTL=$((60 * 60 * 24 * 7)) # 1 week in seconds
+CACHE_TTL=$((60 * 60 * 24 * 7))
 
 get_cache() {
 	local url="$1"
@@ -41,139 +39,176 @@ clean_cache() {
 	find "$CACHE_DIR" -type f -mtime +$((CACHE_TTL / 60 / 60 / 24)) -delete 2>/dev/null
 }
 
-check_url() {
-	local url="$1"
-	local str_status_code
+STR_URL_USER_AGENT="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+LIST_URL_ALLOWLIST=(
+	"platform.openai.com"
+	"openai.com"
+	"stackoverflow.com"
+	"reuters.com"
+	"investing.com"
+	"code.activestate.com"
+	"geeksforgeeks.org"
+	"towardsdatascience.com"
+	"udemy.com"
+)
 
-	if str_status_code=$(get_cache "$url"); then
-		echo "$str_status_code"
-		return
-	fi
+url_is_allowlisted() {
+	local str_url="$1"
+	local str_domain str_host
 
-	local str_user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+	[[ "$str_url" =~ ^https?:// ]] || return 1
+	str_host="${str_url#*://}"
+	str_host="${str_host##*@}"
+	str_host="${str_host%%/*}"
+	str_host="${str_host%%\?*}"
+	str_host="${str_host%%#*}"
+	str_host="${str_host%%:*}"
 
-	local problematic_domains=(
-		"platform.openai.com"
-		"openai.com"
-		"stackoverflow.com"
-		"reuters.com"
-		"investing.com"
-		"code.activestate.com"
-		"geeksforgeeks.org"
-		"towardsdatascience.com"
-		"udemy.com"
-	)
-
-	for domain in "${problematic_domains[@]}"; do
-		if [[ "$url" == *"$domain"* ]] && [[ "$url" =~ ^https?:// ]]; then
-			set_cache "$url" "200"
-			echo "200"
-			return
+	for str_domain in "${LIST_URL_ALLOWLIST[@]}"; do
+		if [[ "$str_host" == "$str_domain" || "$str_host" == *".$str_domain" ]]; then
+			return 0
 		fi
 	done
+	return 1
+}
 
-	# Method 1: HEAD request
+probe_url_status() {
+	local str_url="$1"
+	local str_status_code
+	local -a list_headers=(
+		-H "User-Agent: $STR_URL_USER_AGENT"
+		-H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+		-H "Accept-Language: en-US,en;q=0.5"
+		-H "Connection: keep-alive"
+	)
+
 	str_status_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 --head \
-		-H "User-Agent: $str_user_agent" \
-		-H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
-		-H "Accept-Language: en-US,en;q=0.5" \
-		-H "Connection: keep-alive" \
-		"$url" 2>/dev/null)
+		"${list_headers[@]}" "$str_url" 2>/dev/null)
 
-	# Method 2: GET if HEAD returns 403/405
 	if [[ -z "$str_status_code" || "$str_status_code" -eq 403 || "$str_status_code" -eq 405 ]]; then
 		str_status_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
-			-H "User-Agent: $str_user_agent" \
-			-H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
-			-H "Accept-Language: en-US,en;q=0.5" \
-			-H "Connection: keep-alive" \
-			-H "Upgrade-Insecure-Requests: 1" \
-			"$url" 2>/dev/null)
+			"${list_headers[@]}" -H "Upgrade-Insecure-Requests: 1" "$str_url" 2>/dev/null)
 	fi
 
-	# Method 3: wget fallback for persistent 403s
 	if [[ "$str_status_code" -eq 403 ]]; then
-		if wget --spider --timeout=10 --user-agent="$str_user_agent" "$url" >/dev/null 2>&1; then
+		if wget --spider --timeout=10 --user-agent="$STR_URL_USER_AGENT" "$str_url" >/dev/null 2>&1; then
 			str_status_code="200"
 		fi
 	fi
 
-	if [[ "$str_status_code" =~ ^2 ]]; then
-		set_cache "$url" "$str_status_code"
+	echo "$str_status_code"
+}
+
+check_url() {
+	local str_url="$1"
+	local str_status_code
+
+	if str_status_code=$(get_cache "$str_url"); then
+		echo "$str_status_code"
+		return
 	fi
 
+	if url_is_allowlisted "$str_url"; then
+		set_cache "$str_url" "200"
+		echo "200"
+		return
+	fi
+
+	str_status_code=$(probe_url_status "$str_url")
+	if [[ "$str_status_code" =~ ^2 ]]; then
+		set_cache "$str_url" "$str_status_code"
+	fi
 	echo "$str_status_code"
+}
+
+declare -A DICT_PROCESSED_URLS=()
+INT_URL_ERRORS=0
+
+report_url_status() {
+	local str_file="$1" int_line_num="$2" str_url="$3" str_status_code="$4"
+
+	if [[ -z "$str_status_code" ]]; then
+		print_status "error" "Failed to access URL in $str_file (line $int_line_num): $str_url"
+	elif [[ "$str_status_code" =~ ^[34] ]]; then
+		print_status "error" "URL issue ($str_status_code) in $str_file (line $int_line_num): $str_url"
+	elif [[ ! "$str_status_code" =~ ^2 ]]; then
+		print_status "error" "URL problem ($str_status_code) in $str_file (line $int_line_num): $str_url"
+	else
+		return 0
+	fi
+	INT_URL_ERRORS=1
+}
+
+check_urls_in_line() {
+	local str_file="$1" int_line_num="$2" str_line="$3"
+	local str_url str_status_code
+
+	while [[ "$str_line" =~ (https?://[a-zA-Z0-9./?=_%:-]+[a-zA-Z0-9./?=_%:-]) ]]; do
+		str_url="${BASH_REMATCH[1]}"
+		str_line="${str_line#*"$str_url"}"
+
+		[[ -n "${DICT_PROCESSED_URLS[$str_url]:-}" ]] && continue
+		DICT_PROCESSED_URLS["$str_url"]=1
+
+		[[ "$str_url" =~ (https?://[^/]+)$ ]] && continue
+
+		str_status_code=$(check_url "$str_url")
+		report_url_status "$str_file" "$int_line_num" "$str_url" "$str_status_code"
+	done
+}
+
+toggle_docstring_state() {
+	local str_line="$1" str_quote="$2" bool_in_docstring="$3"
+	local str_after_open="${str_line#*"$str_quote"}"
+
+	if [[ "$bool_in_docstring" == false && "$str_after_open" == *"$str_quote"* ]]; then
+		echo "false"
+	elif [[ "$bool_in_docstring" == true ]]; then
+		echo "false"
+	else
+		echo "true"
+	fi
+}
+
+scan_file_for_urls() {
+	local str_file="$1"
+	local int_line_num=0
+	local bool_in_docstring=false
+	local str_line
+
+	while IFS= read -r str_line; do
+		((int_line_num++))
+
+		if [[ "$str_line" == *'"""'* ]]; then
+			check_urls_in_line "$str_file" "$int_line_num" "$str_line"
+			bool_in_docstring="$(toggle_docstring_state "$str_line" '"""' "$bool_in_docstring")"
+			continue
+		fi
+		if [[ "$str_line" == *"'''"* ]]; then
+			check_urls_in_line "$str_file" "$int_line_num" "$str_line"
+			bool_in_docstring="$(toggle_docstring_state "$str_line" "'''" "$bool_in_docstring")"
+			continue
+		fi
+
+		[[ "$bool_in_docstring" == true ]] && check_urls_in_line "$str_file" "$int_line_num" "$str_line"
+	done <"$str_file"
 }
 
 process_python_files() {
 	clean_cache
 
 	local str_root_dir="${1:-.}"
-	declare -A processed_urls
-	local has_errors=0
+	local str_file
+	DICT_PROCESSED_URLS=()
+	INT_URL_ERRORS=0
 
 	print_status "info" "Scanning Python docstrings for URLs in '$str_root_dir'..."
 
-	while IFS= read -r -d '' file; do
-		local int_line_num=0
-		local bool_in_docstring=false
-
-		while IFS= read -r line; do
-			((int_line_num++))
-
-			if [[ "$line" =~ ^[[:space:]]*\"\"\" ]]; then
-				local str_after_open="${line#*\"\"\"}"
-				if [[ "$bool_in_docstring" == false && "$str_after_open" == *\"\"\"* ]]; then
-					continue
-				fi
-				[[ "$bool_in_docstring" == true ]] && bool_in_docstring=false || bool_in_docstring=true
-				continue
-			fi
-			if [[ "$line" =~ ^[[:space:]]*\'\'\' ]]; then
-				local str_after_open="${line#*\'\'\'}"
-				if [[ "$bool_in_docstring" == false && "$str_after_open" == *\'\'\'* ]]; then
-					continue
-				fi
-				[[ "$bool_in_docstring" == true ]] && bool_in_docstring=false || bool_in_docstring=true
-				continue
-			fi
-
-			if [[ "$bool_in_docstring" == true ]]; then
-				while [[ "$line" =~ (https?://[a-zA-Z0-9./?=_%:-]+[a-zA-Z0-9./?=_%:-]) ]]; do
-					local url="${BASH_REMATCH[1]}"
-
-					if [[ -n "${processed_urls[$url]:-}" ]]; then
-						line="${line#*$url}"
-						continue
-					fi
-					processed_urls["$url"]=1
-
-					if [[ "$url" =~ (https?://[^/]+)$ ]]; then
-						line="${line#*$url}"
-						continue
-					fi
-
-					local str_status_code
-					str_status_code=$(check_url "$url")
-
-					if [[ -z "$str_status_code" ]]; then
-						print_status "error" "Failed to access URL in $file (line $int_line_num): $url"
-						has_errors=1
-					elif [[ "$str_status_code" =~ ^[34] ]]; then
-						print_status "error" "URL issue ($str_status_code) in $file (line $int_line_num): $url"
-						has_errors=1
-					elif [[ ! "$str_status_code" =~ ^2 ]]; then
-						print_status "error" "URL problem ($str_status_code) in $file (line $int_line_num): $url"
-						has_errors=1
-					fi
-
-					line="${line#*$url}"
-				done
-			fi
-		done <"$file"
+	while IFS= read -r -d '' str_file; do
+		scan_file_for_urls "$str_file"
 	done < <(find "$str_root_dir" -type f -name "*.py" -print0)
 
-	if [[ $has_errors -eq 0 ]]; then
+	if [[ $INT_URL_ERRORS -eq 0 ]]; then
 		print_status "success" "All docstring URLs are reachable"
 		return 0
 	fi

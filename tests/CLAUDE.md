@@ -66,12 +66,20 @@ re-touched them" — and the anti-tautology test would then validate against a f
 
 ## No test touches the real network
 
-`conftest.py` installs an **autouse** guard that replaces the socket primitives with versions
+`conftest.py` (the BlueprintX template's, verbatim) installs an **autouse** guard that replaces the
+connection primitives (`socket.socket.connect`/`connect_ex`, `socket.create_connection`; bare DNS
+resolution is allowed) with versions
 raising `NetworkAccessError`, so any reader that reaches a real socket fails loudly instead of
 hitting CVM (and risking a ban). Mock the **download boundary** in the reader's own module
 (`monkeypatch.setattr("...._base_..._reader.download_file", _fake)`), never the network itself. A
 test that genuinely must reach the network opts in with `@pytest.mark.allow_network` — rare, and
-never in a unit test.
+never in a unit test. No test carries `allow_network` today.
+
+## Warnings are errors
+
+`pytest.ini` promotes `ResourceWarning` (unclosed files/sockets) and
+`PytestUnraisableExceptionWarning` to failures, so a leaked handle fails the test that leaked it.
+Close files and sockets (use `with`) rather than adding an `ignore:` filter.
 
 ## Loading a `bin/` script under test
 

@@ -1,8 +1,6 @@
 # Per-file ratchet for the BlueprintX quality guards (see bin/quality_ratchet.py).
 # <guard> <count> <path>. A count may only go DOWN; regenerate a guard's rows with
 # `python bin/quality_ratchet.py <guard> --write-baseline <guard command>`.
-function-length 1 bin/lib/pip_fallback.sh
-function-length 2 bin/test_urls_docstrings.sh
 function-length 1 tasks.sh
 function-length 1 tests/unit/test_lamina_submission.py
 function-length 1 tests/unit/test_perfil_mensal_submission.py
@@ -40,7 +38,6 @@ complexity 2 src/filings_cvm/submission/informe_diario.py
 complexity 2 src/filings_cvm/submission/informe_quadrimestral.py
 complexity 2 src/filings_cvm/submission/lamina.py
 complexity 5 src/filings_cvm/submission/perfil_mensal.py
-complexity 1 tests/conftest.py
 complexity 3 tests/integration/test_bin_scripts.py
 complexity 6 tests/unit/test_adm_cart_ingestion.py
 complexity 4 tests/unit/test_agente_auton_ingestion.py

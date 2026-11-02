@@ -1,13 +1,11 @@
 [run]
 source = src/
-# The private _internal/ helpers are vendored from python-common (tested there); keep them
-# out of the library's own coverage number.
+branch = True
 omit =
     src/*/_internal/*
 
 [report]
-# Single source of truth for the coverage floor — read by pytest-cov in both the
-# pre-commit `coverage-check` hook and the CI coverage gate (no duplicated literal).
+# Coverage floor: single source of truth, read by pytest-cov in the pre-commit hook and the CI gate.
 fail_under = 80
 exclude_lines =
     pragma: no cover

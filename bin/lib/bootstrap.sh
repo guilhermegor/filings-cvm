@@ -1,14 +1,9 @@
 #!/bin/bash
-# Sourced lib — cross-platform environment resolution for venv.sh and run.sh.
-# Provides OS/interpreter/Poetry resolution, a pyenv-preferred / system-Python
-# fallback, and optional corporate-CA wiring. Definitions only — no work runs on
-# source; the caller invokes `bootstrap_init` then the helpers it needs.
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
 	echo "bin/lib/bootstrap.sh is meant to be sourced, not executed." >&2
 	exit 1
 fi
 
-# Idempotency guard — safe to source multiple times.
 [ "${_BX_BOOTSTRAP_LOADED:-}" = "1" ] && return 0
 _BX_BOOTSTRAP_LOADED=1
 
@@ -17,10 +12,8 @@ BOOTSTRAP_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=bin/lib/common.sh
 source "$BOOTSTRAP_LIB_DIR/common.sh"
 
-# Poetry invocation as an array so a "python -m poetry" fallback stays quotable.
 POETRY_CMD=()
 
-# ── detect_os ─────────────────────────────────────────────────────────────────
 detect_os() {
 	case "$(uname -s)" in
 	Linux*) echo "linux" ;;
@@ -30,8 +23,6 @@ detect_os() {
 	esac
 }
 
-# ── resolve_abs_path ──────────────────────────────────────────────────────────
-# Resolve a path to an absolute POSIX path.
 resolve_abs_path() {
 	local str_path="$1"
 	local str_dir
@@ -43,10 +34,6 @@ resolve_abs_path() {
 	printf '%s/%s\n' "$str_dir" "$str_base"
 }
 
-# ── to_native_path ────────────────────────────────────────────────────────────
-# Convert a POSIX path to the native OS path when needed. On Git Bash / MINGW
-# this turns /a/foo/bar into A:/foo/bar (via cygpath); elsewhere it is a no-op.
-# Shell-only — no Python subprocess — and strips stray CR/LF.
 to_native_path() {
 	local str_path="$1"
 	local str_abs
@@ -66,8 +53,6 @@ to_native_path() {
 	printf '%s\n' "$str_native"
 }
 
-# ── resolve_python ────────────────────────────────────────────────────────────
-# Echo the first working interpreter (python3 → python → py). Fail if none.
 resolve_python() {
 	local str_candidate
 	for str_candidate in python3 python py; do
@@ -81,8 +66,51 @@ resolve_python() {
 	return 1
 }
 
-# ── resolve_poetry ────────────────────────────────────────────────────────────
-# Populate POETRY_CMD. Return 1 when Poetry is unavailable.
+python_in_venv() {
+	"$1" -c 'import sys; sys.exit(sys.prefix == sys.base_prefix)' >/dev/null 2>&1
+}
+
+running_inside_project_venv() {
+	local str_venv="$PROJECT_ROOT/.venv"
+
+	if [[ -n "${VIRTUAL_ENV:-}" && "$VIRTUAL_ENV" -ef "$str_venv" ]]; then
+		return 0
+	fi
+	[[ ":$PATH:" == *":$str_venv/bin:"* || ":$PATH:" == *":$str_venv/Scripts:"* ]]
+}
+
+path_without_active_venvs() {
+	local str_dir
+	local str_clean=""
+	local -a arr_dirs
+
+	IFS=: read -ra arr_dirs <<<"$PATH"
+	for str_dir in "${arr_dirs[@]}"; do
+		case "$str_dir" in
+		"$PROJECT_ROOT/.venv"/* | "${VIRTUAL_ENV:-/nonexistent}"/*) continue ;;
+		esac
+		str_clean+="${str_clean:+:}$str_dir"
+	done
+
+	printf '%s\n' "$str_clean"
+}
+
+resolve_base_python() {
+	local str_candidate
+	local str_found
+	local str_path_clean
+
+	str_path_clean="$(path_without_active_venvs)"
+	for str_candidate in python3 python py; do
+		str_found="$(PATH="$str_path_clean" command -v "$str_candidate" 2>/dev/null)" || continue
+		if "$str_found" --version >/dev/null 2>&1 && ! python_in_venv "$str_found"; then
+			printf '%s\n' "$str_found"
+			return 0
+		fi
+	done
+	return 1
+}
+
 resolve_poetry() {
 	if command -v poetry >/dev/null 2>&1; then
 		POETRY_CMD=(poetry)
@@ -95,13 +123,10 @@ resolve_poetry() {
 	return 1
 }
 
-# ── run_poetry ────────────────────────────────────────────────────────────────
 run_poetry() {
 	"${POETRY_CMD[@]}" "$@"
 }
 
-# ── ensure_poetry ─────────────────────────────────────────────────────────────
-# Resolve Poetry, installing the pinned version via pip when absent.
 ensure_poetry() {
 	if resolve_poetry; then
 		print_status "info" "Poetry found: $(run_poetry --version 2>&1 | head -n1)"
@@ -123,9 +148,6 @@ ensure_poetry() {
 	return 1
 }
 
-# ── bootstrap_init ────────────────────────────────────────────────────────────
-# Resolve and export OS_TYPE, PYTHON, PROJECT_ROOT, BIN_DIR, CORPORATE_CA_PEM,
-# PY_VERSION. Call this once before the other helpers.
 bootstrap_init() {
 	BIN_DIR="$(cd "$BOOTSTRAP_LIB_DIR/.." && pwd)"
 	PROJECT_ROOT="$(cd "$BOOTSTRAP_LIB_DIR/../.." && pwd)"
@@ -137,6 +159,9 @@ bootstrap_init() {
 	print_status "info" "Detected OS: $OS_TYPE"
 
 	PYTHON="$(resolve_python)"
+	if python_in_venv "$PYTHON"; then
+		PYTHON="$(resolve_base_python)" || PYTHON="$(resolve_python)"
+	fi
 	export PYTHON
 	print_status "info" "Python binary: $PYTHON ($("$PYTHON" --version 2>&1))"
 
@@ -144,10 +169,6 @@ bootstrap_init() {
 	export PY_VERSION
 }
 
-# ── ensure_python_version ─────────────────────────────────────────────────────
-# Prefer pyenv (pin the project version); fall back to the system interpreter
-# with a version-mismatch warning when pyenv is unavailable (e.g. locked-down
-# corporate hosts that forbid installing it).
 ensure_python_version() {
 	if command -v pyenv >/dev/null 2>&1; then
 		print_status "info" "pyenv found — pinning Python $PY_VERSION"
@@ -165,41 +186,16 @@ ensure_python_version() {
 	fi
 }
 
-# ── append_ca_to_certifi ──────────────────────────────────────────────────────
-# Append the corporate CA to the certifi bundle so httpx/requests trust it too.
-# Idempotent — keyed on the cert's base64 body, not its shared BEGIN header.
-append_ca_to_certifi() {
+build_union_ca_bundle() {
 	local str_cert="$1"
 
-	if ! "$PYTHON" -c "import certifi" >/dev/null 2>&1; then
-		print_status "config" "Installing certifi..."
-		if ! "$PYTHON" -m pip install --quiet certifi; then
-			print_status "warning" "Could not install certifi — skipping bundle merge"
-			return 0
-		fi
-	fi
+	CA_BUNDLE_PEM="$BIN_DIR/ca_bundle.pem"
+	export CA_BUNDLE_PEM
 
-	local str_bundle str_marker
-	str_bundle="$("$PYTHON" -c 'import certifi; print(certifi.where())')"
-	str_bundle="${str_bundle//$'\r'/}"
-	str_bundle="${str_bundle//$'\n'/}"
-	str_marker="$(sed -n '2p' "$str_cert")"
-
-	if [[ -z "$str_marker" || ! -f "$str_bundle" ]]; then
-		return 0
-	fi
-	if grep -qF "$str_marker" "$str_bundle" 2>/dev/null; then
-		print_status "info" "Corporate CA already in certifi bundle"
-		return 0
-	fi
-	cat "$str_cert" >>"$str_bundle"
-	print_status "config" "Corporate CA appended to certifi bundle"
+	BX_CA_CORPORATE="$str_cert" BX_CA_OUT="$CA_BUNDLE_PEM" \
+		"$PYTHON" "$(dirname "${BASH_SOURCE[0]}")/ca_bundle.py"
 }
 
-# ── wire_corporate_ca ─────────────────────────────────────────────────────────
-# Wire the corporate CA into the SSL toolchain — but only if bin/corporate_ca.pem
-# exists. Absent the pem this is a no-op, so non-corporate setups keep full TLS
-# verification. Run `make corporate_ca` to generate the pem.
 wire_corporate_ca() {
 	if [[ ! -f "$CORPORATE_CA_PEM" ]]; then
 		print_status "debug" "No corporate CA at $CORPORATE_CA_PEM — using standard SSL"
@@ -208,22 +204,25 @@ wire_corporate_ca() {
 
 	print_status "config" "Corporate CA found: $CORPORATE_CA_PEM"
 
-	# Resolve the absolute (Windows-safe) path in the shell via to_native_path —
-	# one less Python subprocess, and cygpath handles Git Bash drive mapping.
-	local str_cert_abs
+	local str_cert_abs str_bundle_abs str_count
+
 	str_cert_abs="$(to_native_path "$CORPORATE_CA_PEM")"
 
-	export REQUESTS_CA_BUNDLE="$str_cert_abs"
-	export SSL_CERT_FILE="$str_cert_abs"
-	export CURL_CA_BUNDLE="$str_cert_abs"
-	export PIP_CERT="$str_cert_abs"
-	export PIP_TRUSTED_HOST="pypi.org files.pythonhosted.org pypi.python.org"
-	print_status "config" "SSL bundle: $str_cert_abs"
+	if ! str_count="$(build_union_ca_bundle "$str_cert_abs")"; then
+		print_status "error" "Could not build the union CA bundle — leaving TLS settings untouched"
+		print_status "error" "Pointing them at the corporate CA alone would NARROW the trust store and break every other TLS connection."
+		return 1
+	fi
 
-	append_ca_to_certifi "$str_cert_abs"
+	str_bundle_abs="$(to_native_path "$CA_BUNDLE_PEM")"
 
-	# Point Poetry's resolver at the cert too (best-effort).
+	export REQUESTS_CA_BUNDLE="$str_bundle_abs"
+	export SSL_CERT_FILE="$str_bundle_abs"
+	export CURL_CA_BUNDLE="$str_bundle_abs"
+	export PIP_CERT="$str_bundle_abs"
+	print_status "config" "SSL bundle (union, ${str_count} certs): $str_bundle_abs"
+
 	if resolve_poetry; then
-		run_poetry config certificates.pypi.cert "$str_cert_abs" 2>/dev/null || true
+		run_poetry config certificates.pypi.cert "$str_bundle_abs" 2>/dev/null || true
 	fi
 }
