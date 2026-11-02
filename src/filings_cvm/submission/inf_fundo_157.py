@@ -5,13 +5,13 @@ declares its fields in XML order and named after their tag, so the serialiser is
 Pure logic plus file I/O at the edges — no network.
 """
 
-from pathlib import Path
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from pydantic import BaseModel
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.inf_fundo_157 import InfFundo157Document
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm._internal.utils.typing import type_checker
 
 
@@ -89,5 +89,5 @@ class InfFundo157(SubmissionWriter[InfFundo157Document]):
 			raise ValueError(f"document cannot be serialised as {_ENCODING} XML: {exc}") from exc
 		if output_path is None:
 			return xml_str
-		Path(output_path).write_bytes(payload)
+		atomic_write_bytes(output_path, payload)
 		return None

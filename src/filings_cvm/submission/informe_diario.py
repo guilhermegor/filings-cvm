@@ -6,7 +6,6 @@ the *sending* half of the standard; parsing CVM files back into models lives in 
 """
 
 from decimal import Decimal
-from pathlib import Path
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.informe_diario import (
@@ -14,6 +13,7 @@ from filings_cvm._internal.config.schemas.informe_diario import (
 	InformeDiarioInform,
 	SignificantShareholder,
 )
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 
 
 class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
@@ -55,7 +55,7 @@ class InformeDiario(SubmissionWriter[InformeDiarioDocument]):
 		"""
 		xml_str = self._build_xml_str(doc, versao=versao)
 		if output_path is not None:
-			Path(output_path).write_text(xml_str, encoding="windows-1252")
+			atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
 			return None
 		return xml_str
 

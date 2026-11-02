@@ -7,13 +7,13 @@ Pure logic plus file I/O at the edges — no network.
 """
 
 from decimal import Decimal
-from pathlib import Path
 from xml.etree import ElementTree as ET  # noqa: S405  # builds XML, never parses untrusted input
 
 from pydantic import BaseModel
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.extrato import ExtratoDocument
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 from filings_cvm._internal.utils.typing import type_checker
 
 
@@ -125,5 +125,5 @@ class Extrato(SubmissionWriter[ExtratoDocument]):
 			raise ValueError(f"file is {len(payload)} bytes; the page allows at most 1 MB")
 		if output_path is None:
 			return xml_str
-		Path(output_path).write_bytes(payload)
+		atomic_write_bytes(output_path, payload)
 		return None

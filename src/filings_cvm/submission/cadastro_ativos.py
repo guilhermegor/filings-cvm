@@ -4,7 +4,6 @@ Produces CVM-compliant asset-register update XML (``COD_DOC=2``, no namespace) f
 validated schema models. Pure logic plus file I/O at the edges — no network.
 """
 
-from pathlib import Path
 from xml.etree import ElementTree as ET
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
@@ -12,6 +11,7 @@ from filings_cvm._internal.config.schemas.cadastro_ativos import (
 	CadastroAtivosDocument,
 	CadastroAtivosRow,
 )
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 
 
 class CadastroAtivos(SubmissionWriter[CadastroAtivosDocument]):
@@ -56,7 +56,7 @@ class CadastroAtivos(SubmissionWriter[CadastroAtivosDocument]):
 		)
 		if output_path is not None:
 			# Bytes first, so an unencodable char cannot truncate an existing file.
-			Path(output_path).write_bytes(xml_str.encode("windows-1252"))
+			atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
 			return None
 		return xml_str
 

@@ -7,7 +7,6 @@ Pure logic plus file I/O at the edges — no network.
 """
 
 from decimal import Decimal
-from pathlib import Path
 from typing import get_args
 from xml.sax.saxutils import escape
 
@@ -16,6 +15,7 @@ from pydantic.fields import FieldInfo
 
 from filings_cvm._internal.config.ports.submission_writer import SubmissionWriter
 from filings_cvm._internal.config.schemas.inf_mensal_fidc import InfMensalFidcDocument
+from filings_cvm._internal.utils.atomic_write import atomic_write_bytes
 
 
 _INDENT = "    "
@@ -54,7 +54,7 @@ class InfMensalFidc(SubmissionWriter[InfMensalFidcDocument]):
 		lines.append("</DOC_ARQ>")
 		xml_str = "\n".join(lines)
 		if output_path is not None:
-			Path(output_path).write_text(xml_str, encoding="windows-1252")
+			atomic_write_bytes(output_path, xml_str.encode("windows-1252"))
 			return None
 		return xml_str
 

@@ -41,7 +41,7 @@ def test_every_public_name_in_a_root_resolves_to_a_reader() -> None:
 	assert ALL_READERS, "no readers discovered — the introspection is broken, not the readers"
 	# A root that stopped exporting, or a root list that emptied, must fail loudly rather than
 	# quietly parametrising this whole module to nothing.
-	assert len(iter_root_packages()) == 23
+	assert len(iter_root_packages()) == 24
 	assert len(ALL_READERS) > 200
 
 
