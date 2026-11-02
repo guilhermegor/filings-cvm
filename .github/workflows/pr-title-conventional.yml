@@ -1,0 +1,23 @@
+name: PR title conventional
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Require a Conventional Commit title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: bash bin/check_pr_policy.sh title
