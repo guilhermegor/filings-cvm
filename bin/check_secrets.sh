@@ -12,7 +12,11 @@ parse_args() {
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
 		--root)
-			STR_ROOT="${2:-.}"
+			if [[ $# -lt 2 ]]; then
+				print_status "error" "--root needs a directory"
+				exit 2
+			fi
+			STR_ROOT="$2"
 			shift 2
 			;;
 		--staged)

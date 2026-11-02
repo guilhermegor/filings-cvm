@@ -12,10 +12,7 @@ paths = [
 ]
 
 stopwords = [
-  "example",
-  "placeholder",
   "your-key-here",
   "your-secret-here",
   "your-token-here",
-  "changeme",
 ]
