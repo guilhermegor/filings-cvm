@@ -123,3 +123,11 @@ def test_missing_pyproject_is_a_noop(tmp_path: Path) -> None:
 		Pytest-provided empty directory.
 	"""
 	assert gate.main(["--root", str(tmp_path)]) == 0
+
+
+def test_quoted_toml_keys_are_the_same_keys_as_bare_ones() -> None:
+	"""``[tool."poetry-dynamic-versioning"]`` and ``"enable" = true`` must still arm the gate."""
+	str_text = (
+		'[tool.poetry]\nversion = "1.0.0"\n\n[tool."poetry-dynamic-versioning"]\n"enable" = true\n'
+	)
+	assert "1.0.0" in gate.find_problem(str_text)

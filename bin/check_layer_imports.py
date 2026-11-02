@@ -99,12 +99,20 @@ def load_policy(path_root: pathlib.Path) -> dict | None:
 	path_policy = path_root / _POLICY_FILE
 	if yaml is None or not path_policy.is_file():
 		return None
-	return (
+	dict_policy = (
 		yaml.load(  # noqa: S506 — SafeLoader-derived; it only ADDS a duplicate-key check
 			path_policy.read_text(encoding="utf-8"), Loader=_StrictLoader
 		)
 		or None
 	)
+	for str_layer, dict_layer in ((dict_policy or {}).get("layers") or {}).items():
+		for str_vendor, str_reason in ((dict_layer or {}).get("allow") or {}).items():
+			if not str(str_reason or "").strip():
+				raise ValueError(
+					f"{_POLICY_FILE}: '{str_layer}'.allow['{str_vendor}'] has no written "
+					f"reason — every allowed vendor needs one."
+				)
+	return dict_policy
 
 
 def first_party_roots(path_src: pathlib.Path, dict_policy: dict) -> set[str]:
@@ -151,6 +159,7 @@ def annotation_node_ids(cls_tree: ast.Module) -> set[int]:
 		``id()`` of each node reachable from an annotation or a TYPE_CHECKING block.
 	"""
 	set_ids: set[int] = set()
+	bool_bound = _binds_type_checking(cls_tree)
 
 	def _mark(cls_node: ast.AST | None) -> None:
 		if cls_node is None:
@@ -161,13 +170,37 @@ def annotation_node_ids(cls_tree: ast.Module) -> set[int]:
 	for cls_node in ast.walk(cls_tree):
 		_mark(getattr(cls_node, "annotation", None))
 		_mark(getattr(cls_node, "returns", None))
-		if isinstance(cls_node, ast.If) and _is_type_checking_test(cls_node.test):
+		if isinstance(cls_node, ast.If) and _is_type_checking_test(cls_node.test, bool_bound):
 			for cls_stmt in cls_node.body:
 				_mark(cls_stmt)
 	return set_ids
 
 
-def _is_type_checking_test(cls_test: ast.expr) -> bool:
+def _binds_type_checking(cls_tree: ast.Module) -> bool:
+	"""Return whether the module imports ``TYPE_CHECKING`` from ``typing``.
+
+	A module that assigns ``TYPE_CHECKING = True`` itself runs its guarded body at runtime, so a
+	bare-name guard is trusted only when the name really comes from ``typing``.
+
+	Parameters
+	----------
+	cls_tree : ast.Module
+		The parsed module.
+
+	Returns
+	-------
+	bool
+		``True`` when ``from typing import TYPE_CHECKING`` (or ``typing_extensions``) is present.
+	"""
+	return any(
+		isinstance(cls_node, ast.ImportFrom)
+		and cls_node.module in {"typing", "typing_extensions"}
+		and any(a.name == "TYPE_CHECKING" and a.asname is None for a in cls_node.names)
+		for cls_node in ast.walk(cls_tree)
+	)
+
+
+def _is_type_checking_test(cls_test: ast.expr, bool_bound: bool = False) -> bool:
 	"""Return whether an ``if`` test is exactly the TYPE_CHECKING guard.
 
 	⚠️ Matched STRUCTURALLY, never as a substring of ``ast.dump``. The substring form also
@@ -179,18 +212,55 @@ def _is_type_checking_test(cls_test: ast.expr) -> bool:
 	----------
 	cls_test : ast.expr
 		The ``if`` statement's test expression.
+	bool_bound : bool, optional
+		Whether the module imports ``TYPE_CHECKING`` from ``typing``; the bare name is trusted
+		only then, so a module-local ``TYPE_CHECKING = True`` cannot hide a runtime body.
 
 	Returns
 	-------
 	bool
-		``True`` only for bare ``TYPE_CHECKING`` or ``<module>.TYPE_CHECKING``.
+		``True`` only for a typing-bound ``TYPE_CHECKING`` or ``typing.TYPE_CHECKING``.
 	"""
 	if isinstance(cls_test, ast.Name):
-		return cls_test.id == "TYPE_CHECKING"
-	return isinstance(cls_test, ast.Attribute) and cls_test.attr == "TYPE_CHECKING"
+		return bool_bound and cls_test.id == "TYPE_CHECKING"
+	return (
+		isinstance(cls_test, ast.Attribute)
+		and cls_test.attr == "TYPE_CHECKING"
+		and isinstance(cls_test.value, ast.Name)
+		and cls_test.value.id in {"typing", "typing_extensions", "t"}
+	)
 
 
-def imported_names(cls_node: ast.Import | ast.ImportFrom) -> list[tuple[str, str]]:
+def _dynamic_import_target(cls_call: ast.Call) -> str | None:
+	"""Return the literal module name of ``importlib.import_module(...)`` / ``__import__(...)``.
+
+	Parameters
+	----------
+	cls_call : ast.Call
+		A call expression.
+
+	Returns
+	-------
+	str or None
+		The module string, or ``None`` when the call is something else or the name is not a
+		string literal (a computed name cannot be judged statically).
+	"""
+	cls_func = cls_call.func
+	bool_dynamic = (isinstance(cls_func, ast.Name) and cls_func.id == "__import__") or (
+		isinstance(cls_func, ast.Attribute)
+		and cls_func.attr == "import_module"
+		and isinstance(cls_func.value, ast.Name)
+		and cls_func.value.id == "importlib"
+	)
+	if not (bool_dynamic and cls_call.args):
+		return None
+	cls_arg = cls_call.args[0]
+	if isinstance(cls_arg, ast.Constant) and isinstance(cls_arg.value, str):
+		return cls_arg.value
+	return None
+
+
+def imported_names(cls_node: ast.Import | ast.ImportFrom | ast.Call) -> list[tuple[str, str]]:
 	"""Return ``(root_module, local_alias)`` for each name an import statement binds.
 
 	Parameters
@@ -204,6 +274,9 @@ def imported_names(cls_node: ast.Import | ast.ImportFrom) -> list[tuple[str, str
 		One entry per bound name; the alias is what the module body refers to.
 	"""
 	list_out: list[tuple[str, str]] = []
+	if isinstance(cls_node, ast.Call):
+		str_dynamic = _dynamic_import_target(cls_node)
+		return [(str_dynamic.split(".")[0], "<dynamic>")] if str_dynamic else list_out
 	if isinstance(cls_node, ast.Import):
 		for cls_alias in cls_node.names:
 			str_local = cls_alias.asname or cls_alias.name.split(".")[0]
@@ -244,7 +317,11 @@ def resolve_layer(tuple_rel: tuple, dict_policy: dict) -> str:
 	"""
 	str_broad = tuple_rel[0] if len(tuple_rel) > 1 else _ROOT_LAYER
 	tuple_dirs = tuple_rel[:-1]
-	list_keys = [str_key for str_key in (dict_policy.get("layers") or {}) if "*" in str_key]
+	list_keys = [
+		str_key
+		for str_key in (dict_policy.get("layers") or {})
+		if "*" in str_key or "/" in str_key
+	]
 
 	for int_depth in range(len(tuple_dirs), 0, -1):
 		str_prefix = "/".join(tuple_dirs[:int_depth])
@@ -365,7 +442,7 @@ def disallowed_import_problems(
 	set_reported: set[tuple[int, str]] = set()
 
 	for cls_node in ast.walk(cls_tree):
-		if not isinstance(cls_node, ast.Import | ast.ImportFrom):
+		if not isinstance(cls_node, ast.Import | ast.ImportFrom | ast.Call):
 			continue
 		for str_root, str_alias in imported_names(cls_node):
 			if (
@@ -588,13 +665,16 @@ def direction_problems(
 		for str_target in [relative_import_target(tuple_pkg_parts, cls_node)]
 		if str_target is not None
 	]
-	return [
-		f"{path_file}:{cls_node.lineno}: layer '{str_layer}' must not import "
-		f"'{str_target}'. {dict_deny[str_key]}"
-		for cls_node, str_target in list_targets
-		for str_key in [_matching_deny_key(str_target, dict_deny)]
-		if str_key is not None
-	]
+	dict_found: dict[tuple[int, str], str] = {}
+	for cls_node, str_target in list_targets:
+		str_key = _matching_deny_key(str_target, dict_deny)
+		if str_key is not None:
+			dict_found.setdefault(
+				(cls_node.lineno, str_key),
+				f"{path_file}:{cls_node.lineno}: layer '{str_layer}' must not import "
+				f"'{str_target}'. {dict_deny[str_key]}",
+			)
+	return list(dict_found.values())
 
 
 def imported_modules(cls_node: ast.AST) -> list[str]:
@@ -614,8 +694,12 @@ def imported_modules(cls_node: ast.AST) -> list[str]:
 	"""
 	if isinstance(cls_node, ast.Import):
 		return [cls_alias.name for cls_alias in cls_node.names]
-	if isinstance(cls_node, ast.ImportFrom) and not cls_node.level:
-		return [cls_node.module] if cls_node.module else []
+	if isinstance(cls_node, ast.ImportFrom) and not cls_node.level and cls_node.module:
+		return [cls_node.module] + [
+			f"{cls_node.module}.{cls_alias.name}"
+			for cls_alias in cls_node.names
+			if cls_alias.name != "*"
+		]
 	return []
 
 

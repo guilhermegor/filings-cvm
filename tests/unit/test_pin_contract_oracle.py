@@ -48,3 +48,30 @@ def test_read_header_rejects_a_file_without_a_header(tmp_path: Path) -> None:
 	path_blank.write_text("\n\n", encoding="utf-8")
 	with pytest.raises(ValueError, match="no non-empty header line"):
 		_load_tool().read_header(path_blank, ";", "utf-8")
+
+
+def test_write_keeps_a_crlf_header_verbatim(tmp_path: Path) -> None:
+	"""A CRLF header with spaces around the delimiter is copied byte for byte, not rebuilt."""
+	path_src = tmp_path / "src.csv"
+	path_src.write_bytes(b"A ; B\r\n1;2\r\n")
+	path_out = tmp_path / "out.csv"
+	_load_tool().main([str(path_src), "--write", str(path_out)])
+	assert path_out.read_bytes() == b"A ; B\r\n"
+
+
+def test_write_refuses_to_overwrite_the_artifact(tmp_path: Path) -> None:
+	"""``--write`` naming the artifact itself would truncate it, so it is rejected."""
+	path_src = tmp_path / "src.csv"
+	path_src.write_text("A;B\n1;2\n", encoding="utf-8")
+	with pytest.raises(SystemExit):
+		_load_tool().main([str(path_src), "--write", str(path_src)])
+
+
+def test_printed_tuple_escapes_a_quote_in_a_column_name(
+	tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""A column containing ``"`` still prints a valid Python literal."""
+	path_src = tmp_path / "src.csv"
+	path_src.write_text('A"B;C\n', encoding="utf-8")
+	_load_tool().main([str(path_src), "--encoding", "utf-8"])
+	assert '"A\\"B"' in capsys.readouterr().out

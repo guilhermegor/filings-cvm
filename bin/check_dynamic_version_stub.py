@@ -55,6 +55,38 @@ def read_key_lines(str_text: str) -> dict:
 	return dict_sections
 
 
+def _parse_with_tomllib(str_text: str) -> tuple[bool, list[str]] | None:
+	"""Read the gate's two facts with a real TOML parser, when one is available.
+
+	A line scan cannot see that ``[tool."poetry-dynamic-versioning"]`` and ``"enable" = true``
+	are the same keys as their bare spellings, so a quoted header would disarm the gate. The
+	scan stays only as the Python 3.10 fallback (no ``tomllib``) and for text that is not TOML.
+
+	Parameters
+	----------
+	str_text : str
+		Raw ``pyproject.toml`` contents.
+
+	Returns
+	-------
+	tuple or None
+		``(dynamic_versioning_enabled, [version, ...])``, or ``None`` when ``tomllib`` is
+		unavailable or the text does not parse.
+	"""
+	try:
+		import tomllib
+	except ModuleNotFoundError:  # Python 3.10
+		return None
+	try:
+		dict_toml = tomllib.loads(str_text)
+	except tomllib.TOMLDecodeError:
+		return None
+	dict_tool = dict_toml.get("tool", {})
+	bool_enabled = dict_tool.get("poetry-dynamic-versioning", {}).get("enable") is True
+	str_version = dict_tool.get("poetry", {}).get("version")
+	return bool_enabled, [str_version] if isinstance(str_version, str) else []
+
+
 def find_problem(str_text: str) -> str:
 	"""Return the gate's finding for one ``pyproject.toml``, or ``""`` when it is clean.
 
@@ -68,15 +100,20 @@ def find_problem(str_text: str) -> str:
 	str
 		A finding message, empty when the project is a no-op or carries the stub.
 	"""
-	dict_sections = read_key_lines(str_text)
-	list_dynamic = dict_sections.get(STR_DYNAMIC_SECTION, [])
-	if not any(RE_ENABLE.match(str_line) for str_line in list_dynamic):
+	tuple_parsed = _parse_with_tomllib(str_text)
+	if tuple_parsed is not None:
+		bool_enabled, list_versions = tuple_parsed
+	else:
+		dict_sections = read_key_lines(str_text)
+		list_dynamic = dict_sections.get(STR_DYNAMIC_SECTION, [])
+		bool_enabled = any(RE_ENABLE.match(str_line) for str_line in list_dynamic)
+		list_versions = [
+			re_match.group(1)
+			for re_match in map(RE_VERSION.match, dict_sections.get(STR_POETRY_SECTION, []))
+			if re_match
+		]
+	if not bool_enabled:
 		return ""
-	list_versions = [
-		re_match.group(1)
-		for re_match in map(RE_VERSION.match, dict_sections.get(STR_POETRY_SECTION, []))
-		if re_match
-	]
 	if list_versions == [STR_STUB]:
 		return ""
 	str_found = list_versions[0] if list_versions else "<missing>"

@@ -86,6 +86,8 @@ def parse_yaml_scalar(str_raw: str) -> str:
 		if match_quoted is None:
 			raise UnreadableDescriptionError(str_raw)
 		str_value, str_rest = match_quoted.group(1).replace("''", "'"), match_quoted.group(2)
+	elif str_raw[:1] in ("|", ">"):
+		raise UnreadableDescriptionError(str_raw)
 	else:
 		str_value, str_rest = str_raw.split(" #", 1)[0].rstrip(), ""
 	if str_rest.strip() and not str_rest.strip().startswith("#"):

@@ -629,3 +629,50 @@ def test_a_dotted_deny_also_catches_the_RELATIVE_form(tmp_path: Path) -> None:
 	(tmp_path / ".layer-policy.yaml").write_text(_STR_SUBLAYER_POLICY, encoding="utf-8")
 
 	assert "chassis.db_schema" in _output_at(_run_main(tmp_path), 1)
+
+
+def test_a_runtime_type_checking_shadow_does_not_hide_a_vendor_call(tmp_path: Path) -> None:
+	"""A module-local ``TYPE_CHECKING = True`` runs its body, so it is not an annotation guard."""
+	str_source = (
+		"import pandas as pd\nTYPE_CHECKING = True\nif TYPE_CHECKING:\n\tpd.read_csv('x')\n"
+	)
+	assert any("call/attribute use" in str_p for str_p in _problems(tmp_path, str_source))
+
+
+def test_a_dynamic_import_of_a_disallowed_vendor_is_judged(tmp_path: Path) -> None:
+	"""``importlib.import_module("requests")`` is an import like any other."""
+	str_source = "import importlib\nmod = importlib.import_module('requests')\n"
+	assert "'requests' is not allowed" in _sole(_problems(tmp_path, str_source))
+
+
+def test_a_dunder_import_of_a_disallowed_vendor_is_judged(tmp_path: Path) -> None:
+	"""``__import__("requests")`` is an import like any other."""
+	assert "'requests' is not allowed" in _sole(
+		_problems(tmp_path, "m = __import__('requests')\n")
+	)
+
+
+def test_an_allow_entry_without_a_reason_is_refused(tmp_path: Path) -> None:
+	"""A vendor allowed with an empty reason stops the run before any import is judged."""
+	(tmp_path / ".layer-policy.yaml").write_text(
+		'layers:\n  utils:\n    allow:\n      pandas: ""\n', encoding="utf-8"
+	)
+	with pytest.raises(ValueError, match="no written reason"):
+		_load_gate().load_policy(tmp_path)
+
+
+def test_from_package_import_submodule_matches_a_dotted_deny_key(tmp_path: Path) -> None:
+	"""``from chassis import db_schema`` reaches ``chassis.db_schema`` like the dotted form."""
+	assert "chassis.db_schema" in _sublayer_case(tmp_path, "from chassis import db_schema\n")[1]
+
+
+def test_a_sibling_of_the_utils_layer_does_not_inherit_its_pandas_allowance() -> None:
+	"""The policy's two ``_internal/utils`` keys must not sweep in ``utils_old``."""
+	import yaml
+
+	dict_policy = yaml.safe_load(
+		(Path(__file__).resolve().parents[2] / ".layer-policy.yaml").read_text()
+	)
+	assert (
+		_load_gate().resolve_layer(("_internal", "utils_old", "x.py"), dict_policy) == "_internal"
+	)

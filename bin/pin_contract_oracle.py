@@ -23,6 +23,7 @@ encoding so it stays the verbatim header bytes (``tests/CLAUDE.md``).
 """
 
 import argparse
+import json
 import pathlib
 import sys
 
@@ -82,16 +83,23 @@ def main(list_argv: list[str] | None = None) -> int:
 		help="also write the header line verbatim to this fixture path",
 	)
 	args = parser.parse_args(list_argv)
+	if args.write is not None and args.write.resolve() == args.artifact.resolve():
+		parser.error("--write must not name the artifact path")
 
 	tuple_header = read_header(args.artifact, args.sep, args.encoding)
 	print("tuple_required = (")
 	for str_col in tuple_header:
-		print(f'    "{str_col}",')
+		print(f"    {json.dumps(str_col, ensure_ascii=False)},")
 	print(")")
 
 	if args.write is not None:
 		args.write.parent.mkdir(parents=True, exist_ok=True)
-		args.write.write_text(args.sep.join(tuple_header) + "\n", encoding=args.encoding)
+		bytes_header = next(
+			bytes_line
+			for bytes_line in args.artifact.read_bytes().splitlines(keepends=True)
+			if bytes_line.strip()
+		)
+		args.write.write_bytes(bytes_header)
 		print(f"\nWrote header fixture: {args.write}", file=sys.stderr)
 	return 0
 
