@@ -1,0 +1,33 @@
+[tool.poe.tasks.unit_tests]
+cmd = "pytest tests/unit/"
+help = "Run the unit suite"
+
+[tool.poe.tasks.integration_tests]
+cmd = "pytest tests/integration/"
+help = "Run the integration suite (where the bin/*.sh seams are actually executed)"
+
+[tool.poe.tasks.test_cov]
+cmd = "bash bin/test_cov.sh"
+help = "Run unit tests with coverage and regenerate the coverage badge"
+
+[tool.poe.tasks.test_cov_report]
+sequence = [
+	{ cmd = "pytest tests/unit/ --cov=src --cov-report=term-missing --cov-report=html" },
+	{ cmd = "echo 'HTML coverage report at htmlcov/index.html'" },
+]
+help = "Whole-tree HTML coverage report at htmlcov/index.html"
+
+[tool.poe.tasks.test_cov_serve]
+shell = "cd htmlcov && python3 -m http.server ${PORT:-8000}"
+help = "Serve the HTML coverage report (PORT=8000 by default)"
+
+[tool.poe.tasks.test_slowest]
+sequence = [
+	{ cmd = "echo 'Running tests to identify the 20 slowest tests...'" },
+	{ cmd = "pytest tests/unit/ --durations=20 --tb=short" },
+]
+help = "Report the 20 slowest unit tests"
+
+[tool.poe.tasks.test_urls_docstrings]
+cmd = "bash bin/test_urls_docstrings.sh"
+help = "Validate the URLs appearing in docstrings (1-week cache)"

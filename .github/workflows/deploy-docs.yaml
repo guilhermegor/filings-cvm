@@ -2,7 +2,7 @@ name: Deploy Versioned Docs (mike)
 
 # Publish the versioned documentation with mike (https://github.com/jimporter/mike).
 # mike commits the built site to the `gh-pages` branch under an `X.Y` version and moves the
-# `latest` alias to it; GitHub Pages serves that branch (set once via `make enable_pages`).
+# `latest` alias to it; GitHub Pages serves that branch (set once via `poe enable_pages`).
 # The push uses the built-in GITHUB_TOKEN (`contents: write`) — no external credential, no OIDC
 # needed, since it writes a branch in this same repo.
 #

@@ -8,7 +8,7 @@ name: Docs - Build Check
 #
 # There is deliberately no `pages`/`id-token` permission and no deploy job: this workflow only
 # proves the site compiles. GitHub Pages serves from the `gh-pages` branch (set once via
-# `make enable_pages`), fed exclusively by mike from the release workflow.
+# `poe enable_pages`), fed exclusively by mike from the release workflow.
 on:
   push:
     branches:

@@ -5,7 +5,7 @@ Shell-script conventions for every `*.sh` in this directory.
 ## Shebang
 
 - `#!/usr/bin/env bash` — user-facing scripts and any script that must be
-  `$PATH`-portable (e.g. `venv.sh`, `run.sh`).
+  `$PATH`-portable (e.g. `venv.sh`).
 - `#!/bin/bash` — all other scripts (pre-commit hooks, CI helpers,
   internal utilities).
 
@@ -16,7 +16,7 @@ set -euo pipefail
 ```
 
 Use `set -e` (without `-u`/`-o pipefail`) only when the script reads
-environment values that may be unset (e.g. `db.sh`, which loads `.env` values
+environment values that may be unset (e.g. a script that loads `.env` values
 via `_read_env_var` before applying defaults).
 
 ## Boilerplate (every script)
@@ -30,7 +30,7 @@ source "$SCRIPT_DIR/lib/common.sh"
 ## Cross-platform env resolution (`lib/bootstrap.sh`)
 
 `lib/bootstrap.sh` is a sourced lib (like `lib/common.sh`) holding the
-cross-platform setup logic shared by `venv.sh`, `run.sh`, and
+cross-platform setup logic shared by `venv.sh` and
 `get_corporate_ca.sh`. It runs no work on source — the caller invokes
 `bootstrap_init` first, then the helpers it needs:
 
@@ -56,7 +56,7 @@ source "$SCRIPT_DIR/lib/bootstrap.sh"
 `get_corporate_ca.sh` is the **manual** generator for `bin/corporate_ca.pem` — it
 disables TLS verification *on purpose* to capture a TLS-inspecting proxy's CA,
 so run it only on such a network. The pem is git-ignored; its mere presence
-opts a project into corporate-SSL mode on the next `make venv` / `make run`.
+opts a project into corporate-SSL mode on the next `poe venv` / `poe run`.
 
 ## Resolve Poetry — never call a bare `poetry`
 
@@ -67,8 +67,8 @@ must route through the resolver.** How each surface routes:
 
 | Surface | How it calls Poetry |
 |---------|---------------------|
-| `Makefile` / `tasks.sh` / `.pre-commit-config.yaml` | `bash bin/poetry_exec.sh <args>` — the wrapper resolves+`exec`s Poetry, routing resolution status to **stderr** so `$(… version -s)` stays clean |
-| sourcing `bin/*.sh` that needs Poetry (`db.sh`, `fix_playwright.sh`, `precommit.sh`) | source `lib/bootstrap.sh`, `bootstrap_init` + `ensure_poetry`, then `run_poetry run …` |
+| `poe_tasks*.toml` / `.pre-commit-config.yaml` | `bash bin/poetry_exec.sh <args>` — the wrapper resolves+`exec`s Poetry, routing resolution status to **stderr** so `$(… version -s)` stays clean |
+| sourcing `bin/*.sh` that needs Poetry (`precommit.sh`) | source `lib/bootstrap.sh`, `bootstrap_init` + `ensure_poetry`, then `run_poetry run …` |
 | optional-linter `bin/*.sh` (`lint_sql.sh`, `lint_yaml.sh`, `lint_shell.sh`) | **resolve, don't install**: `resolve_python` → `resolve_poetry \|\| skip (exit 0)` → `run_poetry run …`. Never guard on `command -v poetry` (it misses a `python -m poetry`-only box and skips silently) |
 
 **Pip-vendored lint CLIs (`shellcheck`, `shfmt`) resolve via `poetry run`, not bare
@@ -76,8 +76,8 @@ PATH.** `shellcheck-py`/`shfmt-py` are dev-deps that vendor their binaries into 
 venv (incl. `win_amd64` wheels), so `lint_shell.sh` tries `poetry run <tool>` first
 (found wherever the venv lives, incl. a Windows UNC/mapped `A:` drive), then a system
 binary, then skips — probing with `--version` so a real lint failure is never mistaken
-for "absent". A bare-PATH `command -v` would silently skip both linters when `make lint`
-runs outside the venv. `bin/install_shell_linters.sh` (`make install_shell_linters`) is
+for "absent". A bare-PATH `command -v` would silently skip both linters when `poe lint`
+runs outside the venv. `bin/install_shell_linters.sh` (`poe install_shell_linters`) is
 an **optional** system-binary installer (choco/scoop/brew/apt) for boxes whose venv drive
 blocks executing the vendored binary; the pip route is primary.
 

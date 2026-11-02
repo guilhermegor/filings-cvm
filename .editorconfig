@@ -20,13 +20,7 @@ indent_style = tab
 indent_size = 4
 tab_width = 4
 
-# Makefiles require real tabs for recipe lines.
-[Makefile]
-indent_style = tab
 
-# Included make fragments (make/*.mk) are Makefile syntax — recipe lines need real tabs.
-[*.mk]
-indent_style = tab
 
 # Shell scripts: the scripts use tabs and shfmt's default indent is tabs, so the editor,
 # shfmt and the existing code all agree (no format-on-save vs lint tug-of-war).

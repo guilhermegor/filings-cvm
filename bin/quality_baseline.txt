@@ -3,7 +3,6 @@
 # `python bin/quality_ratchet.py <guard> --write-baseline <guard command>`.
 function-length 1 bin/lib/pip_fallback.sh
 function-length 2 bin/test_urls_docstrings.sh
-function-length 1 tasks.sh
 function-length 1 tests/unit/test_lamina_submission.py
 function-length 1 tests/unit/test_perfil_mensal_submission.py
 dead-code 1 src/filings_cvm/_internal/utils/http_downloader.py

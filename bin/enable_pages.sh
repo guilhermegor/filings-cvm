@@ -6,12 +6,12 @@
 # from "Deploy from a branch -> gh-pages", NOT from the "GitHub Actions" artifact source.
 # Switching the source is a repo-settings change, and the docs deploy runs in CI where the
 # workflow's GITHUB_TOKEN (a GitHub App installation token) CANNOT change Pages settings or
-# create a Pages site. A maintainer running `make init` / `tasks.sh init` has repo-admin via
+# create a Pages site. A maintainer running `poe init` has repo-admin via
 # `gh auth`, so this one-time call belongs here, not in CI.
 #
 # NO 404 WINDOW: we switch the source ONLY once the `gh-pages` branch actually exists (the
 # first `mike deploy` in the release workflow creates it). Until then Pages is left exactly as
-# it is, so the live site is never pointed at an empty branch. Re-run `make enable_pages` after
+# it is, so the live site is never pointed at an empty branch. Re-run `poe enable_pages` after
 # the first release if it was skipped for that reason.
 #
 # Idempotent + non-blocking: an already-correct source no-ops; missing gh / no auth / no
@@ -29,7 +29,7 @@ require_gh() {
 		return 1
 	fi
 	if ! gh auth status >/dev/null 2>&1; then
-		print_status "warning" "gh not authenticated — skipping Pages setup (run 'gh auth login', then 'make enable_pages')"
+		print_status "warning" "gh not authenticated — skipping Pages setup (run 'gh auth login', then 'poe enable_pages')"
 		return 1
 	fi
 	return 0
@@ -57,7 +57,7 @@ point_pages_at_gh_pages() {
 		return 0
 	fi
 
-	print_status "warning" "Could not set the gh-pages source for $str_repo (needs repo-admin rights) — a maintainer must run 'make enable_pages' or set it in Settings -> Pages"
+	print_status "warning" "Could not set the gh-pages source for $str_repo (needs repo-admin rights) — a maintainer must run 'poe enable_pages' or set it in Settings -> Pages"
 	return 0
 }
 
@@ -72,7 +72,7 @@ enable_pages() {
 	# Guard: never point Pages at gh-pages before that branch has content — that would 404 the
 	# live site. The first `mike deploy` (release workflow) creates it; re-run this afterwards.
 	if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
-		print_status "info" "gh-pages branch not created yet — leaving Pages as-is (the first release's mike deploy creates it; re-run 'make enable_pages' after that)"
+		print_status "info" "gh-pages branch not created yet — leaving Pages as-is (the first release's mike deploy creates it; re-run 'poe enable_pages' after that)"
 		return 0
 	fi
 
