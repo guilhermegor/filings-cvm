@@ -104,6 +104,14 @@ jobs:
             exit 1
           fi
 
+      # Dependency-vulnerability gate (#90). One leg only: pip-audit evaluates the export's
+      # environment markers against the running interpreter, so every leg would audit the same
+      # advisory DB with a different slice of the lock. 3.12 is the slice the docs build uses;
+      # the 3.10 slice is a documented residual (docs/security.md).
+      - name: Run Dependency Vulnerability Audit (pip-audit)
+        if: runner.os == 'Linux' && matrix.python-version == '3.12'
+        run: bash bin/audit_dependencies.sh
+
       - name: Run Docstring Type Consistency Check
         if: runner.os == 'Linux'
         run: |
