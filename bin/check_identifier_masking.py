@@ -45,6 +45,7 @@ own test suite are what prove discovery actually works.
 from __future__ import annotations
 
 import ast
+import collections
 import pathlib
 import re
 import sys
@@ -59,7 +60,7 @@ _RE_MASKED_CNPJ = re.compile(
 )
 
 _RE_TEXT_COMPARE = re.compile(
-    r"\b(\w*(?:cpf|cnpj)\w*)\s*(?:==|=)\s*['\"]([0-9A-Za-z./-]+)['\"]", re.IGNORECASE
+    r"\b(\w*(?:cpf|cnpj)\w*)[\"`]?\s*(?:==|=)\s*['\"]([0-9A-Za-z./-]+)['\"]", re.IGNORECASE
 )
 _RE_IDENT_NAME = re.compile(r"cpf|cnpj", re.IGNORECASE)
 
@@ -205,7 +206,11 @@ def _string_literal_problems(
 
     Same segment-walking approach as the sibling gate's ``NOLOCK`` check: matched against
     the literal's SOURCE segment (implicit concatenation can hide a newline that the parsed
-    value does not carry), per match rather than per constant.
+    value does not carry), per match rather than per constant. The parsed value is matched
+    too, because the source text can hide a comparison the other way: adjacent literals put
+    ``" "`` between ``=`` and the value, and an escaped quote (``\\"cpf\\"``) sits between the
+    identifier and ``=``. A parsed-value match the source pass already reported is skipped, so
+    each literal yields one finding; the rest are reported at the literal's first line.
 
     Parameters
     ----------
@@ -227,7 +232,14 @@ def _string_literal_problems(
         if not (isinstance(cls_node, ast.Constant) and isinstance(cls_node.value, str)):
             continue
         str_segment = ast.get_source_segment(str_source, cls_node) or ""
-        for int_line, str_value in _text_problems(str_segment, path_file, cls_node.lineno):
+        list_found = _text_problems(str_segment, path_file, cls_node.lineno)
+        counter_seen = collections.Counter(str_value for _, str_value in list_found)
+        for int_line, str_value in _text_problems(cls_node.value, path_file, cls_node.lineno):
+            if counter_seen[str_value] > 0:
+                counter_seen[str_value] -= 1
+                continue
+            list_found.append((int_line, str_value))
+        for int_line, str_value in list_found:
             if _line_allowed(list_lines, int_line):
                 continue
             list_problems.append(_mask_message(path_file, int_line, str_value))
@@ -252,6 +264,34 @@ def _orm_name(cls_node: ast.expr) -> str | None:
     if isinstance(cls_node, ast.Name):
         return cls_node.id
     return None
+
+
+def _equality_runs(cls_node: ast.Compare) -> list[list[ast.expr]]:
+    """Split a chained comparison into runs of operands linked by ``==``/``!=``.
+
+    ``a == b != c`` is one run: equality is transitive, so ``c`` is effectively compared
+    with ``a`` too. Any other operator (``<``, ``in``, ``is``, ...) ends the run, because it
+    says nothing about equality - ``row.cpf < other == "<masked>"`` never compares the
+    identifier with the literal.
+
+    Parameters
+    ----------
+    cls_node : ast.Compare
+        The comparison to split.
+
+    Returns
+    -------
+    list of list of ast.expr
+        The operand runs, in source order.
+    """
+    list_operands = [cls_node.left, *cls_node.comparators]
+    list_runs = [[list_operands[0]]]
+    for cls_op, cls_right in zip(cls_node.ops, list_operands[1:], strict=True):
+        if isinstance(cls_op, ast.Eq | ast.NotEq):
+            list_runs[-1].append(cls_right)
+        else:
+            list_runs.append([cls_right])
+    return list_runs
 
 
 def _compare_problems(
@@ -279,17 +319,22 @@ def _compare_problems(
             continue
         if not any(isinstance(cls_op, ast.Eq | ast.NotEq) for cls_op in cls_node.ops):
             continue
-        list_operands = [cls_node.left, *cls_node.comparators]
-        list_names = [_orm_name(cls_op) for cls_op in list_operands]
-        list_values = [
-            cls_op.value
-            for cls_op in list_operands
-            if isinstance(cls_op, ast.Constant) and isinstance(cls_op.value, str)
-        ]
-        bool_ident = any(str_name and _RE_IDENT_NAME.search(str_name) for str_name in list_names)
-        list_masked = [str_v for str_v in list_values if _is_masked_value(str_v)]
-        if bool_ident and list_masked and not _line_allowed(list_lines, cls_node.lineno):
-            list_problems.append(_mask_message(path_file, cls_node.lineno, list_masked[0]))
+        for list_run in _equality_runs(cls_node):
+            list_names = [_orm_name(cls_op) for cls_op in list_run]
+            list_values = [
+                cls_op.value
+                for cls_op in list_run
+                if isinstance(cls_op, ast.Constant) and isinstance(cls_op.value, str)
+            ]
+            bool_ident = any(
+                str_name and _RE_IDENT_NAME.search(str_name) for str_name in list_names
+            )
+            list_masked = [str_v for str_v in list_values if _is_masked_value(str_v)]
+            if not (bool_ident and list_masked):
+                continue
+            if not _line_allowed(list_lines, cls_node.lineno):
+                list_problems.append(_mask_message(path_file, cls_node.lineno, list_masked[0]))
+            break
     return list_problems
 
 

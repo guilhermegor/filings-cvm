@@ -60,6 +60,7 @@ Every finding is a hard error (exit 1).
 """
 
 import ast
+import os
 import pathlib
 import re
 import sys
@@ -84,7 +85,7 @@ _TUPLE_KNOWN_LAYER_NAMES = (
 _RE_FENCE_OPEN = re.compile(r"^```python\s*$")
 _RE_FENCE_CLOSE = re.compile(r"^```\s*$")
 _RE_ESCAPE_HATCH = re.compile(r"^\s*<!--\s*docs-refs-ok:\s*(\S.*?)\s*-->\s*$")
-_RE_ABS_IMPORT = re.compile(r"^from ([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*) import (.+)$")
+_RE_ABS_IMPORT = re.compile(r"^from\s+([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s+import\s+(.+)$")
 
 
 def first_party_roots(path_src: pathlib.Path) -> set[str]:
@@ -186,6 +187,32 @@ def _all_entries(cls_assign: ast.Assign) -> list[str]:
     ]
 
 
+def _bound_names(cls_node: ast.stmt) -> set[str]:
+    """Return the names one top-level statement binds.
+
+    Parameters
+    ----------
+    cls_node : ast.stmt
+        A top-level statement of a module.
+
+    Returns
+    -------
+    set of str
+        The ``def``/``class`` name, imported (or ``*``) names, or assignment targets.
+    """
+    if isinstance(cls_node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+        return {cls_node.name}
+    if isinstance(cls_node, ast.Import):
+        return {cls_alias.asname or cls_alias.name.split(".")[0] for cls_alias in cls_node.names}
+    if isinstance(cls_node, ast.ImportFrom):
+        return {cls_alias.asname or cls_alias.name for cls_alias in cls_node.names}
+    if isinstance(cls_node, ast.Assign):
+        return {cls_t.id for cls_t in cls_node.targets if isinstance(cls_t, ast.Name)}
+    if isinstance(cls_node, ast.AnnAssign) and isinstance(cls_node.target, ast.Name):
+        return {cls_node.target.id}
+    return set()
+
+
 def defined_names(path_module: pathlib.Path) -> set[str] | None:
     """Return every top-level name a module defines, exports, or re-exports.
 
@@ -198,9 +225,12 @@ def defined_names(path_module: pathlib.Path) -> set[str] | None:
     -------
     set of str or None
         Top-level ``def``/``class``/assignment targets, re-exported import names, and any
-        ``__all__`` string entries. ``None`` when the file cannot be parsed — a defect for
-        a different gate (ruff/the syntax itself) to catch, not this one; the caller must
-        then skip level-2 checking rather than report a false symbol mismatch.
+        ``__all__`` string entries - the latter only when the module star-imports, because
+        then a name may be bound where this gate cannot see it; with no star-import an
+        ``__all__`` entry that nothing binds is stale and is not a defined name. ``None``
+        when the file cannot be parsed - a defect for a different gate (ruff/the syntax
+        itself) to catch, not this one; the caller must then skip level-2 checking rather
+        than report a false symbol mismatch.
     """
     try:
         cls_tree = ast.parse(path_module.read_text(encoding="utf-8"), filename=str(path_module))
@@ -209,23 +239,11 @@ def defined_names(path_module: pathlib.Path) -> set[str] | None:
 
     set_names: set[str] = set()
     for cls_node in cls_tree.body:
-        if isinstance(cls_node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
-            set_names.add(cls_node.name)
-        elif isinstance(cls_node, ast.Import):
-            set_names.update(
-                cls_alias.asname or cls_alias.name.split(".")[0] for cls_alias in cls_node.names
-            )
-        elif isinstance(cls_node, ast.ImportFrom):
-            set_names.update(cls_alias.asname or cls_alias.name for cls_alias in cls_node.names)
-        elif isinstance(cls_node, ast.Assign):
-            set_names.update(
-                cls_target.id
-                for cls_target in cls_node.targets
-                if isinstance(cls_target, ast.Name)
-            )
-            set_names.update(_all_entries(cls_node))
-        elif isinstance(cls_node, ast.AnnAssign) and isinstance(cls_node.target, ast.Name):
-            set_names.add(cls_node.target.id)
+        set_names |= _bound_names(cls_node)
+    if "*" in set_names:
+        for cls_node in cls_tree.body:
+            if isinstance(cls_node, ast.Assign):
+                set_names.update(_all_entries(cls_node))
     return set_names
 
 
@@ -395,6 +413,40 @@ def candidate_problem(
     return None
 
 
+def _walk_markdown(path_docs: pathlib.Path) -> list[pathlib.Path]:
+    """Return every ``*.md`` under ``path_docs``, descending into directory symlinks.
+
+    MkDocs walks ``docs/`` with ``followlinks=True``, so a page behind a directory symlink
+    is published; ``Path.rglob`` does not descend into one and would leave it unchecked. A
+    directory whose real path is an ancestor on its own branch is pruned so a symlink loop
+    terminates (``check_docs_gap.py`` is the gate that reports the loop).
+
+    Parameters
+    ----------
+    path_docs : pathlib.Path
+        The docs directory.
+
+    Returns
+    -------
+    list of pathlib.Path
+        Markdown files, unsorted.
+    """
+    list_found: list[pathlib.Path] = []
+    dict_ancestors: dict[str, frozenset[str]] = {str(path_docs): frozenset()}
+    for str_dir, list_dirs, list_names in os.walk(path_docs, followlinks=True):
+        str_real = os.path.realpath(str_dir)
+        set_ancestors = dict_ancestors[str_dir]
+        if str_real in set_ancestors:
+            list_dirs.clear()
+            continue
+        for str_sub in list_dirs:
+            dict_ancestors[os.path.join(str_dir, str_sub)] = set_ancestors | {str_real}
+        list_found.extend(
+            pathlib.Path(str_dir) / str_name for str_name in list_names if str_name.endswith(".md")
+        )
+    return list_found
+
+
 def doc_files(path_root: pathlib.Path) -> list[pathlib.Path]:
     """Return every markdown file this gate scans: ``docs/**/*.md`` plus a root ``README.md``.
 
@@ -409,7 +461,7 @@ def doc_files(path_root: pathlib.Path) -> list[pathlib.Path]:
         Sorted markdown files, empty when the project ships neither.
     """
     path_docs = path_root / "docs"
-    list_files = sorted(path_docs.rglob("*.md")) if path_docs.is_dir() else []
+    list_files = sorted(_walk_markdown(path_docs)) if path_docs.is_dir() else []
     path_readme = path_root / "README.md"
     if path_readme.is_file():
         list_files.append(path_readme)

@@ -144,3 +144,99 @@ def test_identifier_masking_rejects_a_bare_marker(
 	(tmp_path / "src" / "m.py").write_text(str_line, encoding="utf-8")
 	monkeypatch.chdir(tmp_path)
 	assert mask.main() == 1
+
+
+@pytest.mark.parametrize(
+	"str_import",
+	["from pkg.real  import gone", "from pkg.real\timport gone", "from  pkg.real import gone"],
+)
+def test_docs_code_refs_checks_imports_with_irregular_whitespace(
+	tmp_path: Path, str_import: str
+) -> None:
+	"""Python accepts any whitespace around ``import``, so the gate must too."""
+	path_root = _project(tmp_path, f"```python\n{str_import}\n```\n")
+	assert refs.main(["--root", str(path_root)]) == 1
+
+
+def test_docs_code_refs_rejects_a_stale_all_entry(tmp_path: Path) -> None:
+	"""An ``__all__`` name nothing binds is not a defined name."""
+	path_root = _project(tmp_path, "```python\nfrom pkg.real import Old\n```\n")
+	(path_root / "src" / "pkg" / "real.py").write_text('__all__ = ["Old"]\n', "utf-8")
+	assert refs.main(["--root", str(path_root)]) == 1
+
+
+def test_docs_code_refs_trusts_all_when_the_module_star_imports(tmp_path: Path) -> None:
+	"""A star-import binds names the gate cannot see, so ``__all__`` is accepted there."""
+	path_root = _project(tmp_path, "```python\nfrom pkg.real import Lazy\n```\n")
+	(path_root / "src" / "pkg" / "real.py").write_text(
+		'from os.path import *\n__all__ = ["Lazy"]\n', "utf-8"
+	)
+	assert refs.main(["--root", str(path_root)]) == 0
+
+
+def test_docs_code_refs_scans_pages_behind_a_directory_symlink(tmp_path: Path) -> None:
+	"""MkDocs follows directory symlinks, so a broken import behind one must fail."""
+	path_root = _project(tmp_path, "# clean\n")
+	(tmp_path / "elsewhere").mkdir()
+	(tmp_path / "elsewhere" / "page.md").write_text(
+		"```python\nfrom pkg.gone import x\n```\n", encoding="utf-8"
+	)
+	(path_root / "docs" / "linked").symlink_to(tmp_path / "elsewhere", target_is_directory=True)
+	assert refs.main(["--root", str(path_root)]) == 1
+
+
+def _masking_exit(tmp_path: Path, str_source: str, monkeypatch: pytest.MonkeyPatch) -> int:
+	"""Run the masking gate over one source file and return its exit code."""
+	(tmp_path / "src").mkdir()
+	(tmp_path / "src" / "m.py").write_text(str_source, encoding="utf-8")
+	monkeypatch.chdir(tmp_path)
+	return mask.main()
+
+
+@pytest.mark.parametrize(
+	"str_source",
+	[
+		'query = """SELECT 1 WHERE "cpf" = \'123.456.789-01\'"""\n',
+		'query = "SELECT 1 WHERE \\"cnpj\\" = \'12.345.678/0001-95\'"\n',
+		"query = ('WHERE cpf = ' '\\'123.456.789-01\\'')\n",
+		"query = ('WHERE cpf = '\n\t'\"123.456.789-01\"')\n",
+	],
+)
+def test_identifier_masking_rejects_quoted_and_adjacent_literals(
+	tmp_path: Path, str_source: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A quoted identifier or split-up string literal still matches zero rows."""
+	assert _masking_exit(tmp_path, str_source, monkeypatch) == 1
+
+
+def test_identifier_masking_reports_a_literal_once(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+	"""The source and parsed passes must not both report the same literal."""
+	str_source = "query = \"WHERE cpf = '123.456.789-01'\"\n"
+	int_exit = _masking_exit(tmp_path, str_source, monkeypatch)
+	assert (int_exit, capsys.readouterr().out.count("masked identifier literal")) == (1, 1)
+
+
+def test_identifier_masking_honours_the_hatch_on_a_parsed_literal(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""The ``identifier-mask-ok`` marker suppresses the parsed-value pass too."""
+	str_source = "query = ('WHERE cpf = ' '\\'123.456.789-01\\'')  # identifier-mask-ok: fixture\n"
+	assert _masking_exit(tmp_path, str_source, monkeypatch) == 0
+
+
+@pytest.mark.parametrize(
+	("str_source", "int_expected"),
+	[
+		('ok = row.cpf == other == "123.456.789-01"\n', 1),
+		('ok = row.cpf == other != "123.456.789-01"\n', 1),
+		('ok = row.cpf < other == "123.456.789-01"\n', 0),
+		('ok = row.cpf == other < "123.456.789-01"\n', 0),
+	],
+)
+def test_identifier_masking_links_operands_only_through_equality(
+	tmp_path: Path, str_source: str, int_expected: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""``==``/``!=`` chains compare the identifier with the literal; ordering ops do not."""
+	assert _masking_exit(tmp_path, str_source, monkeypatch) == int_expected
