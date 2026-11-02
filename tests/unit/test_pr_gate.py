@@ -35,6 +35,7 @@ _SPEC.loader.exec_module(pr_gate)
 		([".github/workflows/tests.yaml"], "ci"),
 		(["bin/pr_gate.py"], "ci"),
 		(["Makefile"], "ci"),
+		(["poe_tasks.lint.toml"], "ci"),
 		(["poetry.lock"], "deps"),
 		(["pyproject.toml"], "deps"),
 		(["tests/unit/test_cda_ingestion.py"], "tests"),

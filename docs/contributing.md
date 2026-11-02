@@ -184,7 +184,7 @@ escrito. Por isso a classificação é por **caminho**:
 | Classe | Caminhos | Auto-merge? |
 |---|---|---|
 | `docs` | `docs/**`, `*.md`, `mkdocs.yml` | ✅ |
-| `ci` | `.github/**`, `bin/**`, configs de lint | ✅ |
+| `ci` | `.github/**`, `bin/**`, `poe_tasks*.toml`, configs de lint | ✅ |
 | `deps` | `poetry.lock`, `pyproject.toml` | ✅ (os testes são o gate) |
 | `tests` | `tests/**` | ❌ — definem o que "passar" significa |
 | `src` | `src/filings_cvm/**` | ❌ **nunca**, em nenhum tamanho |
