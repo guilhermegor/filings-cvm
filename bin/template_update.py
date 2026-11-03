@@ -13,7 +13,9 @@ Dry run by default. ``--apply`` creates ``chore/template-update-<short-sha>`` (n
 current branch), writes the files and rewrites ``blueprintx_commit`` in the stamp only when
 every file applied cleanly. Nothing is committed. A conflict or an unmergeable file makes
 ``--apply`` exit 1; a self-skip (no stamp, no checkout, no usable commit) prints why and
-exits 0, like the reporter. Rationale: ``docs/template-updates.md``.
+exits 0, like the reporter. Files the template shipped at the stamped commit and no longer
+ships are listed, with their successor, in both modes and never deleted. Rationale:
+``docs/template-updates.md``.
 """
 
 import argparse
@@ -445,6 +447,9 @@ def _apply(
         return 1
     path_stamp = path_root / drift._PROVENANCE_FILENAME
     str_stamp = path_stamp.read_text(encoding="utf-8")
+    str_scaffold = drift.read_scaffold_commit(path_root)
+    if str_scaffold and "scaffold_commit:" not in str_stamp:
+        str_stamp = f"{str_stamp.rstrip()}\nscaffold_commit: {str_scaffold}\n"
     path_stamp.write_text(_RE_STAMP_COMMIT.sub(f"blueprintx_commit: {str_full}", str_stamp))
     print(
         f"\nApplied on branch {str_branch}; blueprintx_commit is now {str_full}. "
@@ -495,7 +500,7 @@ def main(list_argv: list) -> int:
             0 for a dry run, a self-skip or a clean apply; 1 when ``--apply`` could not finish.
     """
     path_root, path_blueprintx, bool_apply = _parse_args(list_argv)
-    _, dict_sources, str_skip = drift.managed_sources(path_root, path_blueprintx)
+    str_tier, dict_sources, str_skip = drift.managed_sources(path_root, path_blueprintx)
     if str_skip is not None:
         print(str_skip)
         return 0
@@ -509,6 +514,7 @@ def main(list_argv: list) -> int:
         return 0
     dict_plan = build_plan(path_root, path_blueprintx, str_commit, dict_sources)
     _print_plan(dict_plan)
+    drift._report_removed(path_root, path_blueprintx, str_tier, dict_sources)
     if not dict_plan:
         print("Template files are up to date.")
         return 0

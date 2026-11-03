@@ -10,13 +10,19 @@ The checkouts here are synthetic and their lib is a stand-in speaking the same c
 
 import fnmatch
 import importlib.util
+import io
 import os
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
 from types import ModuleType
 
 import pytest
+
+
+_BIN = Path(__file__).resolve().parents[2] / "bin"
+_COMMON = "templates/python-common"
 
 
 @pytest.fixture(autouse=True)
@@ -27,10 +33,6 @@ def _isolate_env(monkeypatch: pytest.MonkeyPatch) -> None:
 	these tests build would write to the real index.
 	"""
 	list(map(monkeypatch.delenv, fnmatch.filter(os.environ, "GIT_*")))
-
-
-_BIN = Path(__file__).resolve().parents[2] / "bin"
-_COMMON = "templates/python-common"
 
 
 def _load(str_name: str) -> ModuleType:
@@ -105,7 +107,7 @@ def _checkout(
 	path_lib = path_tmp / gate._SCAFFOLD_LIB_RELPATH
 	path_lib.parent.mkdir(parents=True, exist_ok=True)
 	path_lib.write_text(
-		f'case "$*" in\n*"--roster true"*) cat <<\'X\'\n{str_on}\nX\n;;\n'
+		f'case "$*" in\n*"--list-copies"*"--roster true"*) cat <<\'X\'\n{str_on}\nX\n;;\n'
 		f"*) cat <<'X'\n{str_off}\nX\n;;\nesac\n",
 		encoding="utf-8",
 	)
@@ -419,7 +421,9 @@ def test_lib_minimal_reads_its_own_scaffold_entry_not_the_shared_lib(
 	path_root = _checkout(tmp_path / "bx", [], list_files=(f"{_COMMON}/a.txt",))
 	path_entry = path_root / gate._TIER_LIST_SCRIPTS["lib-minimal"]
 	path_entry.parent.mkdir(parents=True, exist_ok=True)
-	path_entry.write_text(f"printf 'COPY\\tfile\\t{_COMMON}/a.txt\\ta.txt\\n'\n", encoding="utf-8")
+	path_entry.write_text(
+		f"# --list-copies\nprintf 'COPY\\tfile\\t{_COMMON}/a.txt\\ta.txt\\n'\n", encoding="utf-8"
+	)
 	path_project = _project(tmp_path, "tier: lib-minimal\n")
 
 	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
@@ -443,7 +447,7 @@ def _versioned_checkout(path_tmp: Path) -> tuple[Path, str]:
 	path_root = _checkout(
 		path_tmp / "bx", [_copy(f"{_COMMON}/a.txt", "a.txt")], list_files=(f"{_COMMON}/a.txt",)
 	)
-	(path_root / _COMMON / "a.txt").write_text("base\n", encoding="utf-8")
+	(path_root / _COMMON / "a.txt").write_bytes(b"base\n")
 	_git(path_root, "init", "-q")
 	_git(path_root, "add", "-A")
 	_git(
@@ -488,10 +492,11 @@ def _drift_output(
 			Everything the reporter printed.
 	"""
 	path_root, str_sha = _versioned_checkout(path_tmp)
-	(path_root / _COMMON / "a.txt").write_text(str_theirs, encoding="utf-8")
+	# Bytes, because Windows text mode would turn the CRLF a test asks for into CR CR LF.
+	(path_root / _COMMON / "a.txt").write_bytes(str_theirs.encode())
 	str_commit_line = f"blueprintx_commit: {str_sha}\n" if bool_stamp_commit else ""
 	path_project = _project(path_tmp, f"tier: mvc-service-native-db\n{str_commit_line}")
-	(path_project / "a.txt").write_text(str_ours, encoding="utf-8")
+	(path_project / "a.txt").write_bytes(str_ours.encode())
 	capsys.readouterr()
 	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
 	return capsys.readouterr().out
@@ -531,6 +536,335 @@ def test_a_stamp_without_a_commit_skips_content_drift_loudly(
 	str_out = _drift_output(tmp_path, capsys, "base\n", "new\n", bool_stamp_commit=False)
 
 	assert "SKIPPED content drift" in str_out
+
+
+def _write_files(path_root: Path, dict_files: dict[str, str]) -> None:
+	"""Write text files under ``path_root``, creating parent directories.
+
+	Parameters
+	----------
+	path_root : pathlib.Path
+		The directory the paths are relative to.
+	dict_files : dict[str, str]
+		Relative path to content.
+
+	Returns
+	-------
+	None
+	"""
+	list_paths = [path_root / str_rel for str_rel in dict_files]
+	list(map(lambda path_f: path_f.parent.mkdir(parents=True, exist_ok=True), list_paths))
+	list(map(Path.write_text, list_paths, dict_files.values()))
+
+
+def _commit_all(path_root: Path, str_message: str) -> str:
+	"""Stage everything, commit without signing and return the new commit.
+
+	Parameters
+	----------
+	path_root : pathlib.Path
+		The repository directory.
+	str_message : str
+		The commit message.
+
+	Returns
+	-------
+	str
+			The full sha of the new commit.
+	"""
+	_git(path_root, "add", "-A")
+	_git(
+		path_root,
+		*("-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"),
+		*("commit", "-q", "-m", str_message),
+	)
+	cls_head = subprocess.run(  # noqa: S603
+		["git", "-C", str(path_root), "rev-parse", "HEAD"],  # noqa: S607
+		capture_output=True,
+		encoding="utf-8",
+		check=True,
+	)
+	return cls_head.stdout.strip()
+
+
+def _copy_lines(dict_files: dict[str, str]) -> list[str]:
+	"""Return the dry-run COPY lines for template files named like their project paths.
+
+	Parameters
+	----------
+	dict_files : dict[str, str]
+		Project-relative path to content.
+
+	Returns
+	-------
+	list of str
+			One COPY line per path.
+	"""
+	return [_copy(f"{_COMMON}/{str_rel}", str_rel) for str_rel in dict_files]
+
+
+def _removal_output(
+	path_tmp: Path,
+	capsys: pytest.CaptureFixture,
+	dict_then: dict[str, str],
+	dict_now: dict[str, str],
+	tuple_deleted: tuple[str, ...] = (),
+) -> str:
+	"""Run the reporter for a project scaffolded from ``dict_then`` against ``dict_now``.
+
+	The checkout commits ``dict_then`` (with a dry run listing it), then commits ``dict_now``
+	(with a dry run listing that); the project holds every ``dict_then`` file except
+	``tuple_deleted`` and is stamped with the first commit.
+
+	Parameters
+	----------
+	path_tmp : pathlib.Path
+		A temporary directory to build under.
+	capsys : pytest.CaptureFixture
+		Captures the printed report.
+	dict_then : dict[str, str]
+		Template files, by project path, at the stamped commit.
+	dict_now : dict[str, str]
+		Template files, by project path, at the current commit.
+	tuple_deleted : tuple[str, ...]
+		Project paths the project owner deleted.
+
+	Returns
+	-------
+	str
+			Everything the reporter printed.
+	"""
+	path_root = path_tmp / "bx"
+	path_tpl = path_root / _COMMON
+	_checkout(path_root, _copy_lines(dict_then))
+	_write_files(path_tpl, dict_then)
+	_git(path_root, "init", "-q")
+	str_sha = _commit_all(path_root, "base")
+	list(map(lambda str_rel: (path_tpl / str_rel).unlink(), set(dict_then) - set(dict_now)))
+	_write_files(path_tpl, dict_now)
+	_checkout(path_root, _copy_lines(dict_now))
+	_commit_all(path_root, "template moves on")
+	path_project = _project(
+		path_tmp, f"tier: mvc-service-native-db\nblueprintx_commit: {str_sha}\n"
+	)
+	_write_files(path_project, dict_then)
+	list(map(lambda str_rel: (path_project / str_rel).unlink(), tuple_deleted))
+	capsys.readouterr()
+	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
+	return capsys.readouterr().out
+
+
+_KEPT = {"a.txt": "kept\n" * 8}
+_DROPPED = {"dropped.txt": "dropped\n" * 8}
+_RENAMED = {"old_name.txt": "renamed\n" * 8}
+
+
+def test_a_file_the_template_dropped_is_reported_as_removed(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""The template stopped shipping it and the project still has it."""
+	str_out = _removal_output(tmp_path, capsys, _KEPT | _DROPPED | _RENAMED, _KEPT)
+
+	assert "removed: dropped.txt" in str_out
+
+
+def test_a_file_the_template_renamed_names_its_successor(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""A git rename between the two commits is the successor."""
+	dict_now = _KEPT | {"new_name.txt": _RENAMED["old_name.txt"]}
+
+	str_out = _removal_output(tmp_path, capsys, _KEPT | _RENAMED, dict_now)
+
+	assert "replaced by new_name.txt: old_name.txt" in str_out
+
+
+@pytest.mark.parametrize(
+	("str_old", "str_new"),
+	[
+		("Makefile", "poe_tasks.toml"),
+		("tasks.sh", "poe_tasks.toml"),
+		("make/library.mk", "poe_tasks.library.toml"),
+	],
+)
+def test_a_known_non_rename_successor_comes_from_the_rule_table(
+	tmp_path: Path, capsys: pytest.CaptureFixture, str_old: str, str_new: str
+) -> None:
+	"""The make-to-poe move is a rewrite, not a rename, so git cannot name the successor."""
+	str_out = _removal_output(
+		tmp_path, capsys, _KEPT | {str_old: "old\n" * 8}, _KEPT | {str_new: "[tool.poe]\n" * 8}
+	)
+
+	assert f"replaced by {str_new}: {str_old}" in str_out
+
+
+def test_a_rule_table_successor_the_template_no_longer_ships_is_only_removed(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""The table is consulted only for a successor the current copy list really holds."""
+	str_out = _removal_output(tmp_path, capsys, _KEPT | {"Makefile": "old\n" * 8}, _KEPT)
+
+	assert "removed: Makefile" in str_out
+
+
+def test_a_dropped_file_the_project_already_deleted_is_not_reported(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""Only files that still exist in the project are drift."""
+	str_out = _removal_output(tmp_path, capsys, _KEPT | _DROPPED, _KEPT, ("dropped.txt",))
+
+	assert "dropped.txt" not in str_out
+
+
+def test_a_stamped_commit_whose_dry_run_cannot_be_made_is_skipped_loudly(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""A commit predating ``--list-copies`` has no copy list, which is not 'nothing removed'."""
+	path_root = tmp_path / "bx"
+	_write_files(path_root / _COMMON, _KEPT)
+	_git(path_root, "init", "-q")
+	str_sha = _commit_all(path_root, "before the dry run existed")
+	_checkout(path_root, _copy_lines(_KEPT))
+	_commit_all(path_root, "dry run added")
+	path_project = _project(
+		tmp_path, f"tier: mvc-service-native-db\nblueprintx_commit: {str_sha}\n"
+	)
+	capsys.readouterr()
+
+	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
+
+	assert "SKIPPED removed-file check" in capsys.readouterr().out
+
+
+def test_a_lib_that_predates_list_copies_is_never_executed(tmp_path: Path) -> None:
+	"""An entry script without the flag would run its interactive main, so it is not run."""
+	path_lib = tmp_path / gate._SCAFFOLD_LIB_RELPATH
+	path_lib.parent.mkdir(parents=True)
+	path_lib.write_text(f"touch {tmp_path}/ran\necho COPY\n", encoding="utf-8")
+
+	gate.required_sources(tmp_path, "mvc-service-native-db")
+
+	assert not (tmp_path / "ran").exists()
+
+
+def test_a_source_kept_but_copied_to_a_new_path_names_its_successor(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""No git rename exists when only the destination moved, so the same source is the link."""
+	list_then = [_copy(f"{_COMMON}/shared.txt", "old/shared.txt")]
+	path_root = tmp_path / "bx"
+	_checkout(path_root, list_then)
+	_write_files(path_root / _COMMON, {"shared.txt": "shared\n" * 8})
+	_git(path_root, "init", "-q")
+	str_sha = _commit_all(path_root, "base")
+	_checkout(path_root, [_copy(f"{_COMMON}/shared.txt", "new/shared.txt")])
+	_commit_all(path_root, "destination moves")
+	path_project = _project(
+		tmp_path, f"tier: mvc-service-native-db\nblueprintx_commit: {str_sha}\n"
+	)
+	_write_files(path_project, {"old/shared.txt": "shared\n" * 8})
+	capsys.readouterr()
+
+	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
+
+	assert "replaced by new/shared.txt: old/shared.txt" in capsys.readouterr().out
+
+
+def test_a_skipped_removed_check_is_not_summed_up_as_a_clean_run(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""A check that did not run must not leave a bare 'No template drift detected'."""
+	path_root = tmp_path / "bx"
+	_write_files(path_root / _COMMON, _KEPT)
+	_checkout(path_root, _copy_lines(_KEPT))
+	path_lib = path_root / gate._SCAFFOLD_LIB_RELPATH
+	path_lib.write_text("exit 0\n", encoding="utf-8")
+	_git(path_root, "init", "-q")
+	str_sha = _commit_all(path_root, "base predates the flag")
+	_checkout(path_root, _copy_lines(_KEPT))
+	_commit_all(path_root, "flag added")
+	path_project = _project(
+		tmp_path, f"tier: mvc-service-native-db\nblueprintx_commit: {str_sha}\n"
+	)
+	_write_files(path_project, _KEPT)
+	capsys.readouterr()
+
+	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
+
+	assert "(not every check ran)" in capsys.readouterr().out
+
+
+def test_a_stamp_without_scaffold_commit_falls_back_to_the_stamped_commit(
+	tmp_path: Path,
+) -> None:
+	"""Projects scaffolded before the field existed still have a measuring point."""
+	path_project = _project(tmp_path, "tier: lib-minimal\nblueprintx_commit: abc123\n")
+
+	assert gate.read_scaffold_commit(path_project) == "abc123"
+
+
+def test_the_removed_summary_counts_the_orphans(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""The count line says how many files the template no longer ships."""
+	str_out = _removal_output(tmp_path, capsys, _KEPT | _DROPPED | _RENAMED, _KEPT)
+
+	assert "2 file(s) the template no longer ships" in str_out
+
+
+def test_a_removal_is_not_summed_up_as_no_drift(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""Orphans alone suppress the clean-run line."""
+	str_out = _removal_output(tmp_path, capsys, _KEPT | _DROPPED, _KEPT)
+
+	assert "No template drift detected" not in str_out
+
+
+def test_a_non_ascii_rename_names_its_successor(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""NUL-separated output keeps unusual paths intact, so the rename is still found."""
+	dict_old = {"ação.txt": "renamed\n" * 8}
+	dict_now = _KEPT | {"action.txt": dict_old["ação.txt"]}
+
+	str_out = _removal_output(tmp_path, capsys, _KEPT | dict_old, dict_now)
+
+	assert "replaced by action.txt: ação.txt" in str_out
+
+
+def test_an_archive_member_outside_the_destination_is_not_written(tmp_path: Path) -> None:
+	"""A traversal path in the tarball is skipped."""
+	cls_buf = io.BytesIO()
+	with tarfile.open(fileobj=cls_buf, mode="w") as cls_tar:
+		cls_info = tarfile.TarInfo("../escaped.txt")
+		cls_info.size = 1
+		cls_tar.addfile(cls_info, io.BytesIO(b"x"))
+
+	gate._unpack_archive(cls_buf.getvalue(), tmp_path / "dest")
+
+	assert not (tmp_path / "escaped.txt").exists()
+
+
+def test_a_scaffold_commit_the_checkout_does_not_know_is_skipped_loudly(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""A usable but unreachable scaffold commit must say why the check did not run."""
+	path_root = tmp_path / "bx"
+	_write_files(path_root / _COMMON, _KEPT)
+	_checkout(path_root, _copy_lines(_KEPT))
+	_git(path_root, "init", "-q")
+	str_sha = _commit_all(path_root, "base")
+	path_project = _project(
+		tmp_path,
+		f"tier: mvc-service-native-db\nblueprintx_commit: {str_sha}\n"
+		f"scaffold_commit: {'0' * 40}\n",
+	)
+	capsys.readouterr()
+
+	gate.main(["--root", str(path_project), "--blueprintx-root", str(path_root)])
+
+	assert "SKIPPED removed-file check: the scaffold_commit" in capsys.readouterr().out
 
 
 def test_a_crlf_checkout_of_an_untouched_file_is_template_changed_not_both(

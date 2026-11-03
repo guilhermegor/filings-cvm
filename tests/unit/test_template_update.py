@@ -5,16 +5,25 @@ moving on) and a project stamped with the base commit, then runs the updater aga
 The checkout's scaffold lib is a stand-in speaking the ``--list-copies`` contract.
 """
 
+from collections.abc import Callable
 import fnmatch
 import importlib.util
 import os
 from pathlib import Path
+import re
 import shutil
+import stat
 import subprocess
 import sys
 from types import ModuleType
 
 import pytest
+
+
+_BIN = Path(__file__).resolve().parents[2] / "bin"
+_COMMON = "templates/python-common"
+_TIER = "mvc-service-native-db"
+_LIB = "bin/lib/scaffold_python_templates.sh"
 
 
 @pytest.fixture(autouse=True)
@@ -25,12 +34,6 @@ def _isolate_env(monkeypatch: pytest.MonkeyPatch) -> None:
 	these tests build would write to the real index.
 	"""
 	list(map(monkeypatch.delenv, fnmatch.filter(os.environ, "GIT_*")))
-
-
-_BIN = Path(__file__).resolve().parents[2] / "bin"
-_COMMON = "templates/python-common"
-_TIER = "mvc-service-native-db"
-_LIB = "bin/lib/scaffold_python_templates.sh"
 
 
 def _load(str_name: str) -> ModuleType:
@@ -187,7 +190,14 @@ def _scenario(
 	_commit_all(path_bx, "base")
 	str_base = _git(path_bx, "rev-parse", "HEAD")
 	_write_all(path_bx / _COMMON, dict_theirs)
-	_write(path_bx, _LIB, "cat <<'X'\n" + "\n".join(map(_copy_line, dict_theirs)) + "\nX\n")
+	_write(
+		path_bx,
+		_LIB,
+		'[[ "$1" == --list-copies ]] || exit 2\n'
+		+ "cat <<'X'\n"
+		+ "\n".join(map(_copy_line, dict_theirs))
+		+ "\nX\n",
+	)
 	_commit_all(path_bx, "template moves on")
 	path_project = path_tmp / "project"
 	_git(path_tmp, "init", "-q", str(path_project))
@@ -457,6 +467,147 @@ def test_rerunning_with_markers_still_left_keeps_the_stamp(tmp_path: Path) -> No
 	assert drift.read_commit(path_project) == str_before
 
 
+def _removal_scenario(
+	path_tmp: Path, dict_then: dict[str, str], dict_now: dict[str, str]
+) -> tuple[Path, Path]:
+	"""Build a checkout whose copy list changes between two commits, and a project from the first.
+
+	Parameters
+	----------
+	path_tmp : pathlib.Path
+		A temporary directory to build under.
+	dict_then : dict[str, str]
+		Template files, by project path, at the stamped commit.
+	dict_now : dict[str, str]
+		Template files, by project path, at the current commit.
+
+	Returns
+	-------
+	tuple of (pathlib.Path, pathlib.Path)
+			The project root and the checkout root.
+	"""
+	path_bx = path_tmp / "bx"
+	path_tpl = path_bx / _COMMON
+	_git(path_tmp, "init", "-q", str(path_bx))
+	_write_all(path_tpl, dict_then)
+	_write(
+		path_bx,
+		_LIB,
+		'[[ "$1" == --list-copies ]] || exit 2\n'
+		+ "cat <<'X'\n"
+		+ "\n".join(map(_copy_line, dict_then))
+		+ "\nX\n",
+	)
+	_commit_all(path_bx, "base")
+	str_base = _git(path_bx, "rev-parse", "HEAD")
+	list(map(lambda str_rel: (path_tpl / str_rel).unlink(), set(dict_then) - set(dict_now)))
+	_write_all(path_tpl, dict_now)
+	_write(
+		path_bx,
+		_LIB,
+		'[[ "$1" == --list-copies ]] || exit 2\n'
+		+ "cat <<'X'\n"
+		+ "\n".join(map(_copy_line, dict_now))
+		+ "\nX\n",
+	)
+	_commit_all(path_bx, "template moves on")
+	path_project = path_tmp / "project"
+	_git(path_tmp, "init", "-q", str(path_project))
+	_write(
+		path_project,
+		drift._PROVENANCE_FILENAME,
+		f"tier: {_TIER}\nblueprintx_commit: {str_base}\nscaffold_commit: {str_base}\n",
+	)
+	_write_all(path_project, dict_then)
+	_commit_all(path_project, "scaffold")
+	return path_project, path_bx
+
+
+_REMOVAL_THEN = {"a.txt": "kept\n" * 8, "dropped.txt": "dropped\n" * 8, "old.txt": "moved\n" * 8}
+_REMOVAL_NOW = {"a.txt": "kept\n" * 8, "new.txt": "moved\n" * 8}
+
+
+@pytest.mark.parametrize("tuple_flags", [(), ("--apply",)])
+@pytest.mark.parametrize("str_line", ["removed: dropped.txt", "replaced by new.txt: old.txt"])
+def test_removed_files_are_named_in_the_dry_run_and_in_apply(
+	tmp_path: Path, capsys: pytest.CaptureFixture, tuple_flags: tuple[str, ...], str_line: str
+) -> None:
+	"""The class is listed with its successor in both modes."""
+	path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, _REMOVAL_NOW)
+
+	_update(path_project, path_bx, *tuple_flags)
+
+	assert str_line in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("str_rel", ["dropped.txt", "old.txt"])
+def test_apply_never_deletes_a_file_the_template_removed(tmp_path: Path, str_rel: str) -> None:
+	"""Removing a project file stays a human decision."""
+	path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, _REMOVAL_NOW)
+
+	_update(path_project, path_bx, "--apply")
+
+	assert (path_project / str_rel).is_file()
+
+
+def test_removed_files_are_listed_when_nothing_else_needs_updating(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""An otherwise up-to-date project still hears about its orphans."""
+	dict_now = {"a.txt": _REMOVAL_THEN["a.txt"]}
+	path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, dict_now)
+
+	_update(path_project, path_bx)
+
+	assert "removed: dropped.txt" in capsys.readouterr().out
+
+
+def test_orphans_are_still_listed_after_an_apply_moved_the_stamp(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""The stamp moves on apply, but the scaffold commit it is measured from does not."""
+	path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, _REMOVAL_NOW)
+	_update(path_project, path_bx, "--apply")
+	capsys.readouterr()
+
+	_update(path_project, path_bx)
+
+	assert "removed: dropped.txt" in capsys.readouterr().out
+
+
+def test_orphans_survive_an_apply_on_a_stamp_without_scaffold_commit(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""An old stamp gains the baseline on apply instead of losing it to the moved stamp."""
+	path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, _REMOVAL_NOW)
+	path_stamp = path_project / drift._PROVENANCE_FILENAME
+	str_stamp = path_stamp.read_text()
+	path_stamp.write_text(re.sub(r"scaffold_commit: .*\n", "", str_stamp))
+	_update(path_project, path_bx, "--apply")
+	capsys.readouterr()
+
+	_update(path_project, path_bx)
+
+	assert "removed: dropped.txt" in capsys.readouterr().out
+
+
+def test_update_says_why_when_the_scaffold_commit_is_unknown_to_the_checkout(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""The reporter's accurate skip message reaches the update output too."""
+	path_project, path_bx = _removal_scenario(tmp_path, _REMOVAL_THEN, _REMOVAL_NOW)
+	path_stamp = path_project / drift._PROVENANCE_FILENAME
+	str_stamp = path_stamp.read_text()
+	path_stamp.write_text(
+		re.sub(r"scaffold_commit: \w+", f"scaffold_commit: {'0' * 40}", str_stamp)
+	)
+	capsys.readouterr()
+
+	_update(path_project, path_bx)
+
+	assert "SKIPPED removed-file check: the scaffold_commit" in capsys.readouterr().out
+
+
 def test_a_signal_killed_merge_is_unmergeable_not_a_conflict(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -489,12 +640,49 @@ def test_a_crlf_copy_of_an_untouched_file_is_fast_forwarded(tmp_path: Path) -> N
 	assert (path_project / "a.txt").read_text(encoding="utf-8") == "new\n"
 
 
+def _clear_readonly_and_retry(func: Callable[[str], object], str_path: str, _exc: object) -> None:
+	"""Retry a failed removal after clearing the read-only bit (git objects on Windows).
+
+	Parameters
+	----------
+	func : Callable[[str], object]
+		The ``os`` function that failed (``unlink`` or ``rmdir``).
+	str_path : str
+		The path it failed on.
+	_exc : object
+		The exception (``onexc``) or its ``exc_info`` triple (``onerror``); unused.
+
+	Returns
+	-------
+	None
+	"""
+	os.chmod(str_path, stat.S_IWRITE)
+	func(str_path)
+
+
+def _rmtree_force(path_dir: Path) -> None:
+	"""Remove a tree even when it holds read-only files, as ``.git/objects`` does on Windows.
+
+	Parameters
+	----------
+	path_dir : pathlib.Path
+		The directory to remove.
+
+	Returns
+	-------
+	None
+	"""
+	# The keyword was renamed in 3.12 and the old one warns, yet the floor here is 3.10.
+	str_kw = "onexc" if sys.version_info >= (3, 12) else "onerror"
+	shutil.rmtree(path_dir, **{str_kw: _clear_readonly_and_retry})
+
+
 def test_a_project_that_is_not_a_work_tree_root_leaves_the_enclosing_repository_alone(
 	tmp_path: Path,
 ) -> None:
 	"""``git switch`` inside an enclosing repository would move that repository's HEAD."""
 	path_project, path_bx, _ = _scenario(tmp_path, _BASE, _BASE, {"a.txt": "new\n"})
-	shutil.rmtree(path_project / ".git")
+	_rmtree_force(path_project / ".git")
 	_git(tmp_path, "init", "-q")
 
 	_update(path_project, path_bx, "--apply")

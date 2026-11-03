@@ -48,6 +48,46 @@ publicação) ainda não são policiadas. Um arquivo ausente no commit carimbado
 por conta própria é reportado como "ambos mudaram", a menos que o conteúdo já seja igual ao template
 atual, caso em que é "igual".
 
+## Arquivos que o template removeu
+
+Uma terceira classe cobre o sentido oposto: um arquivo que o template entregava no commit
+carimbado, não entrega mais, e que o projeto ainda tem. Sem ela ficaria invisível, porque todas as
+outras classes partem da lista de cópias atual. Um projeto gerado antes de uma remoção guarda o
+órfão (`Makefile`, `tasks.sh`, `docs/api.md`) e nada avisa. Cada um é reportado como `removed` ou
+`replaced by <substituto>`:
+
+```text
+🗑️ removed: docs/api.md
+🔁 replaced by poe_tasks.toml: Makefile
+```
+
+A lista de cópias carimbada é calculada com o mesmo `--list-copies` em modo simulado, executado no
+commit carimbado: `git archive` exporta `bin/` e `templates/` desse commit para um diretório
+temporário e a entrada de scaffold dele responde ali. Um caminho que está nessa lista, não está na
+atual e existe no projeto é removido. O substituto vem só de duas fontes:
+
+- **Um rename do git.** `git diff -M` entre o commit carimbado e o checkout mapeia a fonte antiga
+  do template para o novo caminho, e o substituto é cada caminho do projeto que a lista atual entrega
+  a partir dela.
+- **Uma tabela explícita de regras.** Reescrita não é rename, então o git não diz que `Makefile` e
+  `tasks.sh` viraram `poe_tasks.toml`, nem que `make/library.mk` virou `poe_tasks.library.toml`.
+  `_SUCCESSOR_RULES` em `bin/check_template_drift.py` lista esses pares. Uma regra só vale quando o
+  substituto está na lista atual, de modo que a tabela nunca nomeia um arquivo que o template não
+  entrega.
+
+Sem nenhuma das duas, o arquivo é apenas `removed`. Um substituto chutado seria pior que nenhum.
+
+Quando o commit carimbado não consegue listar as suas cópias (é anterior ao `--list-copies`, ou a
+exportação falha) a seção imprime `SKIPPED removed-file check` e diz o motivo, como a seção de
+conteúdo. Nada é reportado como removido a partir de uma comparação que não rodou.
+
+`python bin/template_update.py` imprime as mesmas linhas, na simulação e em `--apply`, e nunca apaga
+nem move uma: remover um arquivo do projeto continua sendo decisão humana. O carimbo
+`blueprintx_commit` ainda avança quando os demais arquivos foram aplicados sem pendências, porque
+um órfão não é conflito. Os órfãos são medidos a partir de `scaffold_commit`, que `--apply` nunca
+move, e por isso continuam listados até você apagá-los. Um carimbo escrito antes desse campo existir
+usa `blueprintx_commit`.
+
 ## Por que ele se auto-ignora
 
 Cada pré-requisito que falta tem a sua própria saída, e nenhuma delas é um veredito limpo:
@@ -132,9 +172,6 @@ carimbo registra.
 
 ### Limites conhecidos
 
-- As ferramentas reportam apenas arquivos que o template ainda entrega. Não listam arquivos que o
-  projeto tem e que o template removeu ou substituiu (`Makefile`, `tasks.sh`, `bin/db.sh`,
-  `docs/api.md`).
 - Arquivos renderizados (`pyproject.toml`, `README.md`, `mkdocs.yml`, `SECURITY.md`, `LICENSE`) e as
   cópias de `bin/ci/` ficam fora da comparação.
 - A árvore do pacote vendorizado aparece sob o nome de espaço reservado do tier, `src/project/...`;
