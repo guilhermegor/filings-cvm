@@ -2,8 +2,8 @@
 #
 # lint_shell.sh — shellcheck + shfmt over the project's shell scripts.
 #
-# Single source of truth for shell linting: called by both `make lint` /
-# `./tasks.sh lint` and the pre-commit `lint-shell` hook.
+# Single source of truth for shell linting: called by both `poe lint` /
+# `. and the pre-commit `lint-shell` hook.
 #
 # Both tools are pip-installable dev-deps (shellcheck-py / shfmt-py vendor their
 # binaries, incl. win_amd64 wheels), so each is resolved PREFERABLY through the Poetry
@@ -18,7 +18,7 @@
 # install (matches lint_yaml.sh / lint_sql.sh).
 #
 # Modes:
-#   (default)  shfmt -w  — format in place (matches `ruff format` in `make lint`).
+#   (default)  shfmt -w  — format in place (matches `ruff format` in `poe lint`).
 #   --check    shfmt -d  — diff only, non-mutating (used by the pre-commit gate).
 
 set -euo pipefail
@@ -107,7 +107,6 @@ main() {
 
 	# The shell files to lint: the task runner, the bin scripts and the shared libs.
 	mapfile -t list_files < <(
-		printf '%s\n' tasks.sh
 		find bin -name '*.sh' -type f
 	)
 

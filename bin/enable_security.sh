@@ -18,7 +18,7 @@
 # in .github/dependabot.yml, which needs no API call — GitHub reads it from the default branch.
 #
 # THIS IS REPO-SETTINGS WORK: CI's GITHUB_TOKEN (a GitHub App installation token) cannot flip
-# these; a maintainer running `make init` / `tasks.sh init` has repo-admin via `gh auth`, so it
+# these; a maintainer running `poe init` has repo-admin via `gh auth`, so it
 # belongs here, not in CI.
 #
 # Idempotent + non-blocking: each PUT is safe to re-run; missing gh / no auth / no repo-admin all
@@ -36,7 +36,7 @@ require_gh() {
 		return 1
 	fi
 	if ! gh auth status >/dev/null 2>&1; then
-		print_status "warning" "gh not authenticated — skipping security setup (run 'gh auth login', then 'make enable_security')"
+		print_status "warning" "gh not authenticated — skipping security setup (run 'gh auth login', then 'poe enable_security')"
 		return 1
 	fi
 	return 0
@@ -57,7 +57,7 @@ enable_toggle() {
 		print_status "success" "$str_label enabled"
 		return 0
 	fi
-	print_status "warning" "Could not enable $str_label on $str_repo (needs repo-admin rights) — a maintainer must run 'make enable_security' or set it in Settings -> Security"
+	print_status "warning" "Could not enable $str_label on $str_repo (needs repo-admin rights) — a maintainer must run 'poe enable_security' or set it in Settings -> Security"
 	return 0
 }
 

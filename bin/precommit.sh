@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install the pre-commit hooks (commit-msg + pre-push) for `make init` / `tasks.sh init`.
+# Install the pre-commit hooks (commit-msg + pre-push) for `poe init`.
 #
 # pre-commit writes hooks into .git/hooks, so `pre-commit install` requires (a) git
 # on PATH and (b) a git work tree. On a runtime/deploy box — e.g. a shipped zip
@@ -19,7 +19,7 @@
 #
 # Shared / network checkout: when the tree lives on a network share (Windows UNC mapped
 # to a drive) the first person to check it out OWNS it, so any other domain user running
-# `make init` trips git's "dubious ownership" guard — which blocks EVERY repo op and makes
+# `poe init` trips git's "dubious ownership" guard — which blocks EVERY repo op and makes
 # `pre-commit install` die the same way. ensure_safe_directory self-heals that by
 # registering a per-user safe.directory BEFORE the work-tree probe (which would otherwise
 # also fail under the guard and wrongly conclude "no repo").

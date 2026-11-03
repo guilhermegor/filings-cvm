@@ -10,7 +10,7 @@ repos:
       - id: check-merge-conflict
       # Online default. Offline scaffolds (no GitHub remote) swap this for the
       # local `protect-branch` hook via apply_offline_mode, which points the user
-      # at `make new_branch`. Online projects also get gh server-side protection.
+      # at `git switch -c <branch>`. Online projects also get gh server-side protection.
       - id: no-commit-to-branch
         args:
           - --branch=main
@@ -180,7 +180,7 @@ repos:
           - python
         pass_filenames: false
 
-      # Non-Python lint gates share a single wrapper with `make lint` (one home,
+      # Non-Python lint gates share a single wrapper with `poe lint` (one home,
       # zero drift). Each wrapper skips gracefully when its tool is absent.
       - id: lint-shell
         name: shellcheck + shfmt (shell lint)

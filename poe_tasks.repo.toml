@@ -1,0 +1,37 @@
+[tool.poe.tasks.enable_pages]
+cmd = "bash bin/enable_pages.sh"
+help = "Enable GitHub Pages with the source this project's docs model needs (admin, idempotent)"
+
+[tool.poe.tasks.enable_repo_rules]
+cmd = "bash bin/enable_repo_rules.sh"
+help = "Provision the pr-quality-gate ruleset and the repo settings the PR gate needs"
+
+[tool.poe.tasks.enable_security]
+cmd = "bash bin/enable_security.sh"
+help = "Enable private vulnerability reporting, Dependabot alerts and security updates"
+
+[tool.poe.tasks.bump_version]
+shell = """
+cz bump --yes --no-verify --git-output-to-stderr
+echo "Version bumped to $(cz version --project 2>/dev/null || bash bin/poetry_exec.sh version -s)"
+"""
+help = "Bump the version from Conventional Commits and tag it (offline tiers only)"
+
+[tool.poe.tasks.changelog]
+sequence = [
+	{ cmd = "cz changelog" },
+	{ cmd = "echo 'CHANGELOG.md regenerated'" },
+]
+help = "Regenerate CHANGELOG.md from git tags (preview only)"
+
+[tool.poe.tasks.get_corporate_ca]
+cmd = "bash bin/get_corporate_ca.sh"
+help = "Extract a TLS-inspecting proxy's CA into bin/corporate_ca.pem (manual, never automatic)"
+
+[tool.poe.tasks.export_context]
+cmd = "bash bin/export_repo_content.sh"
+help = "Flatten the repo into repo_context.txt for pasting into a web-UI LLM"
+
+[tool.poe.tasks.template_update]
+cmd = "python bin/template_update.py"
+help = "Three-way merge template fixes into this project; dry run unless --apply (needs --blueprintx-root or BLUEPRINTX_TEMPLATE_ROOT)"

@@ -1,0 +1,26 @@
+[tool.poe.tasks.init]
+sequence = ["ensure_env", "venv", "precommit", "enable_pages", "enable_repo_rules", "enable_security"]
+default_item_type = "ref"
+help = "Bootstrap everything: .env, venv, pre-commit hooks, GitHub Pages/rules/security (run 'bash bin/venv.sh' once first so poe exists)"
+
+[tool.poe.tasks.ensure_env]
+shell = "bash bin/ensure_env.sh || true"
+help = "Seed .env from .env.example (no-op when .env already exists)"
+
+[tool.poe.tasks.venv]
+cmd = "bash bin/venv.sh"
+help = "Bootstrap the Poetry venv (pyenv-preferred, system-Python and pip fallbacks)"
+
+[tool.poe.tasks.update_venv]
+sequence = [
+	{ cmd = "bash bin/poetry_exec.sh update" },
+	{ cmd = "echo 'Poetry project updated'" },
+]
+help = "Update locked dependencies (poetry update)"
+
+[tool.poe.tasks.precommit]
+cmd = "bash bin/precommit.sh"
+help = "Install the pre-commit, commit-msg and pre-push hooks"
+
+[tool.poe]
+include = ["poe_tasks.test.toml", "poe_tasks.lint.toml", "poe_tasks.repo.toml", "poe_tasks.docs.toml", "poe_tasks.library.toml"]

@@ -59,9 +59,9 @@ Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de
 ## Início rápido
 
 ```bash
-make init          # cria o virtualenv e instala os hooks de pre-commit
-make unit_tests    # executa a suíte de testes
-make docs_server   # serve esta documentação em http://0.0.0.0:8000
+poe init          # cria o virtualenv e instala os hooks de pre-commit
+poe unit_tests    # executa a suíte de testes
+poe docs_serve   # serve esta documentação em http://0.0.0.0:8000
 ```
 
 Instalação como dependência:

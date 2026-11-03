@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Resolve Poetry by whichever invocation strategy works on THIS machine, then exec
-# it with the passed arguments. The single Poetry entrypoint for every Makefile /
-# tasks.sh recipe — so no recipe ever depends on a bare `poetry` being on PATH.
+# it with the passed arguments. The single Poetry entrypoint for every poe task and
+# pre-commit hook — so no recipe ever depends on a bare `poetry` being on PATH.
 #
 # Why this exists: venv.sh may install Poetry with `pip install --user`, leaving it
 # reachable only as `python -m poetry` (the user-scripts dir is not on PATH on Git

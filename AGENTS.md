@@ -958,7 +958,7 @@ placebo.
   so adding a hook does not cover CI — add the matching step in the same commit, or a
   hook-skipping contributor (or branch-protection CI) bypasses it. Full rationale + canonical
   set + current open drift: `.github/CLAUDE.md` ("Gate parity").
-- **Tests**: `pytest` — `make unit_tests` (`poetry run pytest tests/unit/`). Write
+- **Tests**: `pytest` — `poe unit_tests` (`poetry run pytest tests/unit/`). Write
   pytest-style functions with fixtures, not `unittest.TestCase`.
 - **Explicit column typing & Brazilian identifiers** — if the library touches pandas, type
   every DataFrame on load via `apply_dtypes` (`_internal.utils.dtypes`, never pandas'
