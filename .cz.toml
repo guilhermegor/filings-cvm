@@ -1,0 +1,8 @@
+[tool.commitizen]
+# Conventional-commit driven changelog. The version comes from the git tag
+# (poetry-dynamic-versioning); `cz changelog` (via `make changelog`) groups commits by tag.
+# Releases are cut by the CI release workflows (tag -> build -> publish), not a hand-run bump.
+name = "cz_conventional_commits"
+version_provider = "poetry"
+tag_format = "v$version"
+update_changelog_on_bump = true
