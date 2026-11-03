@@ -9,7 +9,7 @@ from filings_cvm._internal.utils.frames import concat_frames, frame_from_records
 def test_frame_from_records_keeps_column_order_and_values() -> None:
 	"""Records land under the given columns in order."""
 	df_ = frame_from_records([("a", "1"), ("b", "2")], ("K", "V"))
-	assert df_.to_dict("list") == {"K": ["a", "b"], "V": ["1", "2"]}
+	assert list(df_.to_dict("list").items()) == [("K", ["a", "b"]), ("V", ["1", "2"])]
 
 
 def test_frame_from_records_without_records_keeps_the_columns() -> None:

@@ -10,6 +10,7 @@ distinction (annotation vs API) that a blunter rule would flatten.
 """
 
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -264,7 +265,8 @@ def _run_main(path_root: Path) -> tuple[int, str]:
 		],
 		cwd=path_root,
 		capture_output=True,
-		text=True,
+		encoding="utf-8",
+		env={**os.environ, "PYTHONUTF8": "1"},
 		check=False,
 	)
 	return cls_run.returncode, cls_run.stdout + cls_run.stderr

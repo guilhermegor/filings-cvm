@@ -94,11 +94,10 @@ def main(list_argv: list[str] | None = None) -> int:
 
 	if args.write is not None:
 		args.write.parent.mkdir(parents=True, exist_ok=True)
-		bytes_header = next(
-			bytes_line
-			for bytes_line in args.artifact.read_bytes().splitlines(keepends=True)
-			if bytes_line.strip()
-		)
+		with args.artifact.open("rb") as file_artifact:
+			bytes_header = next(
+				bytes_line for bytes_line in file_artifact if bytes_line.strip()
+			)
 		args.write.write_bytes(bytes_header)
 		print(f"\nWrote header fixture: {args.write}", file=sys.stderr)
 	return 0

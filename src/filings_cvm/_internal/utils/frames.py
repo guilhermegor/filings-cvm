@@ -7,7 +7,7 @@ Readers therefore go through these helpers instead of ``pd.DataFrame`` / ``pd.co
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 import pandas as pd
 
@@ -16,14 +16,14 @@ from filings_cvm._internal.utils.typing import type_checker
 
 @type_checker
 def frame_from_records(
-	list_records: Sequence[Sequence[object]], tuple_columns: Sequence[str]
+	list_records: Sequence[Sequence[object] | Mapping[str, object]], tuple_columns: Sequence[str]
 ) -> pd.DataFrame:
 	"""Build a frame from row records under an explicit column order.
 
 	Parameters
 	----------
-	list_records : Sequence[Sequence[object]]
-		One sequence of cell values per row.
+	list_records : Sequence[Sequence[object] | Mapping[str, object]]
+		One sequence (or column-keyed mapping) of cell values per row.
 	tuple_columns : Sequence[str]
 		The column names, in the order the cells appear in each record.
 

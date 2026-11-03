@@ -76,7 +76,10 @@ def _parse_with_tomllib(str_text: str) -> tuple[bool, list[str]] | None:
 	try:
 		import tomllib
 	except ModuleNotFoundError:  # Python 3.10
-		return None
+		try:
+			import tomli as tomllib  # type: ignore[no-redef]
+		except ModuleNotFoundError:
+			return None
 	try:
 		dict_toml = tomllib.loads(str_text)
 	except tomllib.TOMLDecodeError:
