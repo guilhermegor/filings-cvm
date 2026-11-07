@@ -23,7 +23,7 @@ STR_FORM_TITLE = "Cut 1.0.0"
 INT_PAGE_SIZE = 100
 INT_TIMEOUT_S = 30
 RE_MAJOR = re.compile(r"^v?(\d+)\.")
-RE_FINAL = re.compile(r"^\d+(\.\d+)*$")
+RE_FINAL = re.compile(r"^\d+(\.\d+)*(\.post\d+)?$")
 
 
 class GateError(Exception):
@@ -54,16 +54,25 @@ def read_major(str_version: str) -> int:
 	return int(cls_match.group(1))
 
 
+def _sort_key(str_version: str) -> tuple[tuple[int, ...], int]:
+	"""Order final and post releases per PEP 440 (``1.0.0.post1`` sorts above ``1.0.0``)."""
+	str_base, _, str_post = str_version.partition(".post")
+	tuple_nums = [int(str_part) for str_part in str_base.split(".")]
+	while tuple_nums and tuple_nums[-1] == 0:
+		tuple_nums.pop()
+	return tuple(tuple_nums), int(str_post) if str_post else -1
+
+
 def latest_final(dict_releases: dict) -> str:
 	"""Return the newest final, non-yanked release from a PyPI ``releases`` map.
 
-	Prereleases (``1.0.0rc1``) and fully yanked releases are ignored, so neither can hide
-	the 0.x to 1.0.0 jump from the gate.
+	Post releases count; prereleases (``1.0.0rc1``) and fully yanked releases are ignored,
+	so neither can hide the 0.x to 1.0.0 jump from the gate.
 
 	Parameters
 	----------
 	dict_releases : dict
-		The ``releases`` object of ``https://pypi.org/pypi/<name>/json``.
+		The ``releases`` object of the PyPI project JSON API.
 
 	Returns
 	-------
@@ -77,7 +86,7 @@ def latest_final(dict_releases: dict) -> str:
 		and list_files
 		and not all(dict_file.get("yanked") for dict_file in list_files)
 	]
-	return max(list_ok, key=lambda str_ver: tuple(map(int, str_ver.split("."))), default="0.0.0")
+	return max(list_ok, key=_sort_key, default="0.0.0")
 
 
 def previous_version(cls_args: argparse.Namespace) -> str:
@@ -96,7 +105,10 @@ def previous_version(cls_args: argparse.Namespace) -> str:
 	if cls_args.previous_version:
 		return cls_args.previous_version
 	dict_pypi = json.loads(Path(cls_args.pypi_json).read_text(encoding="utf-8"))
-	return latest_final(dict_pypi.get("releases") or {})
+	dict_releases = dict_pypi.get("releases")
+	if not isinstance(dict_releases, dict):
+		raise GateError("malformed PyPI JSON: no 'releases' object")
+	return latest_final(dict_releases)
 
 
 def gate_applies(str_new: str, str_previous: str) -> bool:

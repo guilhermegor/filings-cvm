@@ -67,10 +67,11 @@ jobs:
         run: |
           # 404 means the package is not published yet; any other failure must stop the release
           code=$(curl -sS -o pypi.json -w '%{http_code}' https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json)
-          if [ "$code" = "404" ]; then echo '{}' > pypi.json
+          if [ "$code" = "404" ]; then echo '{"releases":{}}' > pypi.json
           elif [ "$code" != "200" ]; then echo "PyPI answered HTTP $code"; exit 1; fi
+          jq -e '.releases | type == "object"' pypi.json > /dev/null || { echo "malformed PyPI payload"; exit 1; }
           cat > "$RUNNER_TEMP/pep440_max.sh" <<'EOS'
-          pep440_max() { sed -E 'h; s/\.?dev([0-9]+)/~~dev\1/; s/([0-9])(a|b|rc)([0-9]+)/\1~\2\3/; G; s/\n/\t/' | sort -t "$(printf '\t')" -k1,1V | tail -n 1 | cut -f2; }
+          pep440_max() { sed -E 'h; s/\.?dev([0-9]+)/~~dev\1/; s/([0-9])(a|b|rc)([0-9]+)/\1~\2\3/; s/(\.0)+(\$|~)/\2/; G; s/\n/\t/' | sort -t "$(printf '\t')" -k1,1V | tail -n 1 | cut -f2; }
           EOS
           . "$RUNNER_TEMP/pep440_max.sh"
           latest_previous_version=$(jq -r '.releases // {} | keys[]' pypi.json | pep440_max)
@@ -111,8 +112,9 @@ jobs:
           # The gate compares against the latest FINAL, non-yanked release: a prerelease
           # (1.0.0rc1) or a yanked 1.x must not hide the 0.x -> 1.0.0 jump.
           code=$(curl -sS -o pypi.json -w '%{http_code}' https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json)
-          if [ "$code" = "404" ]; then echo '{}' > pypi.json
+          if [ "$code" = "404" ]; then echo '{"releases":{}}' > pypi.json
           elif [ "$code" != "200" ]; then echo "PyPI answered HTTP $code"; exit 1; fi
+          jq -e '.releases | type == "object"' pypi.json > /dev/null || { echo "malformed PyPI payload"; exit 1; }
           python3 bin/check_release_gate.py --new-version "$NEW_VERSION" --pypi-json pypi.json
 
   setup_and_build:

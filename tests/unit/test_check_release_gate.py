@@ -59,8 +59,8 @@ def _fake_urlopen(
 def _api(monkeypatch: pytest.MonkeyPatch, *list_responses: object) -> list:
 	"""Fake ``urlopen`` with queued responses; return the requested URLs."""
 	list_urls: list = []
-	fake = functools.partial(_fake_urlopen, list(list_responses), list_urls)
-	monkeypatch.setattr(gate.urllib.request, "urlopen", fake)
+	fn_fake = functools.partial(_fake_urlopen, list(list_responses), list_urls)
+	monkeypatch.setattr(gate.urllib.request, "urlopen", fn_fake)
 	return list_urls
 
 
@@ -88,7 +88,7 @@ def _run(
 
 
 @pytest.mark.parametrize(
-	("body", "code", "needle"),
+	("list_body", "int_code", "str_needle"),
 	[
 		(_OPEN, 1, "#7"),
 		(_DEFERRED, 0, "gate passed"),
@@ -100,14 +100,14 @@ def _run(
 def test_zero_x_to_one_zero_gates_on_open_issues(
 	monkeypatch: pytest.MonkeyPatch,
 	capsys: pytest.CaptureFixture,
-	body: list,
-	code: int,
-	needle: str,
+	list_body: list,
+	int_code: int,
+	str_needle: str,
 ) -> None:
 	"""A 0.x to 1.0.0 jump passes only when every open issue is deferred."""
-	_api(monkeypatch, _ok(body))
+	_api(monkeypatch, _ok(list_body))
 	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
-	assert (int_got, needle in str_out) == (code, True)
+	assert (int_got, str_needle in str_out) == (int_code, True)
 
 
 @pytest.mark.parametrize(
@@ -149,7 +149,9 @@ def test_issues_are_paginated(
 	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
 ) -> None:
 	"""A full page of deferred issues makes the gate read the next page."""
-	list_full = [{"number": n, "title": "x", "labels": [{"name": "post-1.0"}]} for n in range(100)]
+	list_full = [
+		{"number": int_n, "title": "x", "labels": [{"name": "post-1.0"}]} for int_n in range(100)
+	]
 	list_urls = _api(
 		monkeypatch, _ok(list_full), _ok([{"number": 500, "title": "Late", "labels": []}])
 	)
@@ -167,10 +169,20 @@ _YANKED = [{"yanked": True}]
 		({"0.9.0": _FILE, "1.0.0rc1": _FILE}, "0.9.0"),
 		({"0.9.0": _FILE, "1.2.0": _YANKED}, "0.9.0"),
 		({"0.9.0": _FILE, "0.10.0": _FILE}, "0.10.0"),
+		({"0.9.0": _FILE, "1.0.0": _FILE, "1.0.0.post1": _FILE}, "1.0.0.post1"),
+		({"0.9.0": _FILE, "1.0": _FILE, "1.0.0.post1": _YANKED}, "1.0"),
 		({"0.9.0": []}, "0.0.0"),
 		({}, "0.0.0"),
 	],
-	ids=["prerelease-ignored", "yanked-ignored", "numeric-order", "no-files", "empty"],
+	ids=[
+		"prerelease-ignored",
+		"yanked-ignored",
+		"numeric-order",
+		"post-release",
+		"post-yanked",
+		"no-files",
+		"empty",
+	],
 )
 def test_latest_final_ignores_prereleases_and_yanked(dict_releases: dict, expected: str) -> None:
 	"""The previous version comes from final, non-yanked releases only."""
@@ -202,7 +214,9 @@ def test_second_page_failure_fails_closed(
 	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
 ) -> None:
 	"""A failing page 2 blocks the release instead of passing on page 1 alone."""
-	list_full = [{"number": n, "title": "x", "labels": [{"name": "post-1.0"}]} for n in range(100)]
+	list_full = [
+		{"number": int_n, "title": "x", "labels": [{"name": "post-1.0"}]} for int_n in range(100)
+	]
 	_api(monkeypatch, _ok(list_full), _fail(urllib.error.URLError("boom")))
 	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
 	assert (int_got, "failed closed" in str_out) == (1, True)
@@ -222,5 +236,25 @@ def test_issue_title_cannot_inject_workflow_commands(
 ) -> None:
 	"""Newlines in a title are escaped so they cannot start a second workflow command."""
 	_api(monkeypatch, _ok([{"number": 1, "title": "a\n::warning::x", "labels": []}]))
-	_, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
-	assert "\n::warning::x" not in str_out
+	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
+	assert (
+		int_got,
+		"open issue #1 blocks 1.0.0: a%0A::warning::x" in str_out,
+		"\n::warning::x" in str_out,
+	) == (1, True, False)
+
+
+@pytest.mark.parametrize("dict_payload", [{}, {"releases": None}, {"releases": []}])
+def test_malformed_pypi_json_fails_closed(
+	monkeypatch: pytest.MonkeyPatch,
+	capsys: pytest.CaptureFixture,
+	tmp_path: Path,
+	dict_payload: dict,
+) -> None:
+	"""A PyPI payload without a ``releases`` object blocks instead of reading as 0.0.0."""
+	path_json = tmp_path / "pypi.json"
+	path_json.write_text(json.dumps(dict_payload))
+	int_got, str_out = _run_argv(
+		monkeypatch, capsys, ["--new-version", "1.0.0", "--pypi-json", str(path_json)]
+	)
+	assert (int_got, "failed closed" in str_out) == (1, True)

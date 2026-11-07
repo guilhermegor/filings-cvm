@@ -20,7 +20,7 @@ fáceis de errar à mão: o backlog está concluído e a documentação descreve
 ## O portão de release
 
 O workflow de release executa `bin/check_release_gate.py` antes de publicar. Ele só se aplica
-quando o MAJOR pedido é pelo menos 1 e a última versão publicada é 0.x. Nesse caso lista as
+quando o MAJOR pedido é pelo menos 1 e a última versão final publicada (sem pré-releases nem releases retiradas) é 0.x. Nesse caso lista as
 issues abertas e falha enquanto alguma não tiver o rótulo `post-1.0`, nomeando cada uma.
 
 - Pull requests não contam, nem a própria issue **Cut 1.0.0**.
