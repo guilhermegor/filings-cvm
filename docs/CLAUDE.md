@@ -4,43 +4,20 @@ Guidance for working inside this project's `docs/` directory.
 
 ## Published vs non-published
 
-MkDocs **builds every `.md` under `docs/` into the site**, even files absent from
-`nav:` (they are merely unlisted, still reachable by URL). So a backlog, spec, or
-internal note dropped at the `docs/` root *will* ship to readers and can mislead
-them.
+`docs/` is solely for **published documentation**. MkDocs builds every `.md` under it into
+the site, so a backlog, spec, plan or internal note dropped here *will* ship to readers and
+can mislead them. Working material lives in `.specs/` (see `.specs/CLAUDE.md`):
 
-Keep such working documents under a folder that is excluded from the build via
-`exclude_docs` in `mkdocs.yml`:
+- `.specs/features/<feature>/{design,plan,tasks}.md` — per-feature specs, plans and trackers.
+- `.specs/backlog/<kebab-topic>_YYYYMMDD_HHMMSS.md` — flat trackers for work spanning no single
+  feature; the per-branch work ledger required by `bin/check_backlog_ledger.py` for any `src`/`ci`
+  change. Never deleted: on completion add a "Completed — kept as a record" note.
+- Bot-authored PRs are exempt from the ledger gate, keyed on the PR author read from the event
+  payload (never `GITHUB_ACTOR`).
 
-```yaml
-exclude_docs: |
-  backlog/        # work-to-do backlogs, follow-up notes — never published
-```
-
-- `docs/backlog/` — work-to-do backlogs and follow-up notes. **Not** added to
-  `nav:`, **not** part of the published site. For any non-trivial branch, keep a
-  **per-branch work ledger** here at `docs/backlog/<kebab-topic>_YYYYMMDD_HHMMSS.md`
-  (timestamped filename, set at creation, never renamed) recording **what was done**
-  and **what remains / is open**, updated as the work proceeds. Track each item as a
-  Markdown checkbox (`- [ ]` open, `- [x]` done), not a bare `-` bullet. Tracked in git
-  but excluded from the site, so knowledge survives across sessions. Distinct from
-  generalizable lessons: the ledger is *this branch's* state. **Keep it on completion —
-  never delete:** when every box is `[x]`, tick the last one, add a short "Completed —
-  kept as a record" note, and leave the file as the permanent record of what was done.
-- ⚠️ **Bot-authored branches are exempt** (`bin/check_backlog_ledger.py`, `is_bot_actor`): when the
-  **PR's author** ends in `[bot]` the gate is a no-op. The author arrives as `LEDGER_PR_AUTHOR`
-  (`github.event.pull_request.user.login`), **not** `GITHUB_ACTOR` — that one names whoever
-  *triggered the run*, so a human re-running or updating a bot's PR would cancel the exemption
-  exactly when it is needed (measured on #167; fixed in #176). A ledger records a *human's* reasoning —
-  what was done, what is open, why a shortcut was taken — and an automated dependency bump has
-  none to record: the diff is the whole message. Without the exemption every Dependabot PR
-  touching `.github/workflows/**` (risk class `ci`) is **permanently red and unmergeable**, which
-  only teaches people to reach for `--admin` — a worse habit than the gate prevents. This was
-  measured, not theorised: PR #167 sat blocked for days (#174).
-  **The exemption keys on the author, never on the path** — a *human* branch touching a workflow
-  still owes a ledger, and a unit test asserts both directions so the exemption cannot quietly
-  become a hole for everyone.
-- Any new non-published folder must be added to `exclude_docs` in the same commit.
+`bin/check_docs_boundary.sh` (hook `docs-boundary` + CI step) fails on `backlog/`, lessons,
+`design.md`/`plan.md`, security pages and `.superpowers*` under `docs/`. Files that are git-ignored
+or merely unlisted (`exclude_docs` in `mkdocs.yml`) stay out of the site.
 
 ## Published pages
 

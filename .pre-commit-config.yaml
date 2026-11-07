@@ -161,6 +161,20 @@ repos:
           - python
         pass_filenames: false
 
+      - id: specs-structure
+        name: .specs/ structure guard
+        entry: bash bin/check_specs_structure.sh --root .
+        language: system
+        files: ^\.specs/|^bin/check_specs_structure\.sh$
+        pass_filenames: false
+
+      - id: docs-boundary
+        name: docs/ boundary guard (working material belongs in .specs/)
+        entry: bash bin/check_docs_boundary.sh --root .
+        language: system
+        pass_filenames: false
+        always_run: true
+
       - id: check-backlog-ledger
         name: every non-trivial (src/ci) branch keeps a work ledger
         entry: bash bin/poetry_exec.sh run python bin/check_backlog_ledger.py

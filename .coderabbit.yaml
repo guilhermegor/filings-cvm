@@ -359,8 +359,8 @@ reviews:
 
     - path: "docs/**"
       instructions: >-
-        Everything under docs/ is published by MkDocs except folders listed in `exclude_docs`
-        (docs/backlog/), so a working note dropped at the docs/ root ships to readers. New
+        Everything under docs/ is published by MkDocs except files listed in `exclude_docs`, so
+        a working note dropped at the docs/ root ships to readers (trackers live in .specs/). New
         published pages are registered in mkdocs.yml `nav:` in the same commit. Any count or
         roster restated in prose is derived knowledge that rots silently — when correcting one,
         RE-MEASURE from the code, never increment.

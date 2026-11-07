@@ -52,7 +52,6 @@ complexity 4 tests/unit/test_cad_fi_hist_ingestion.py
 complexity 2 tests/unit/test_cadastro_fi_ingestion.py
 complexity 2 tests/unit/test_cda_ingestion.py
 complexity 5 tests/unit/test_cgvn_cia_aberta_ingestion.py
-complexity 1 tests/unit/test_check_backlog_ledger.py
 complexity 11 tests/unit/test_check_contract_drift.py
 complexity 1 tests/unit/test_check_docs_sections.py
 complexity 1 tests/unit/test_check_portal_completeness.py
@@ -120,7 +119,6 @@ one-assert 8 tests/unit/test_cadastro_fi_ingestion.py
 one-assert 7 tests/unit/test_cda_ingestion.py
 one-assert 18 tests/unit/test_cda_submission.py
 one-assert 9 tests/unit/test_cgvn_cia_aberta_ingestion.py
-one-assert 2 tests/unit/test_check_backlog_ledger.py
 one-assert 17 tests/unit/test_check_contract_drift.py
 one-assert 5 tests/unit/test_check_docs_sections.py
 one-assert 4 tests/unit/test_check_docstrings.py
