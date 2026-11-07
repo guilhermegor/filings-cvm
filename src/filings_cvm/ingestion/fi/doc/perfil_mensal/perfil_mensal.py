@@ -5,9 +5,9 @@ regime — `202312` onward, **107 columns**, keyed by `TP_FUNDO_CLASSE` + `CNPJ_
 `201901`–`202311` use :class:`PerfilMensalPre175Reader`, whose 106-column header predates the
 fund/class split.
 
-This is the reading side of the `PerfilMensal` submission writer: the same regulatory standard, a
-**different artifact** (CVM's flat open-data dump, not the submission XML), so it declares its own
-`FileContract` rather than reusing the writer's Pydantic schema.
+This is the reading side of the Perfil Mensal standard (the submission writer now lives in the
+separate `layouts-cvm` package): a **different artifact** (CVM's flat open-data dump, not the
+submission XML), so it declares its own `FileContract`.
 
 ⚠️ Only `CNPJ_FUNDO_CLASSE` is a CNPJ column. The six `CPF_CNPJ_*` fields
 (`COMITENTE_1..3`, `EMISSOR_1..3`) hold a **CPF or a CNPJ** — each has a sibling `PF_PJ_*` column

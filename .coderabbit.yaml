@@ -187,7 +187,7 @@ reviews:
     satisfy the same rules as a commit subject here: Conventional Commits
     (`<type>(<scope>): <subject>`) with type one of feat, fix, chore, docs, refactor, test; at
     most 72 characters; imperative mood; lowercase after the colon; no trailing period. Scope is
-    the area touched (`ci`, `ingestion`, `submission`, `docs`). Describe the CHANGE, not the
+    the area touched (`ci`, `ingestion`, `docs`). Describe the CHANGE, not the
     file. Write it in the same language as the repository's recent commit subjects.
 
   # ── Walkthrough content ───────────────────────────────────────────────────────────────────
@@ -272,16 +272,13 @@ reviews:
         `filings_cvm/__init__.py` nor in `ingestion/__init__.py`; its contract also needs adding
         to `_internal/config/contracts/__init__.py`, which nothing fails to catch on its own.
 
-    # The DOCS half of a reader/writer PR, which is the half that gets forgotten. Advisory on
+    # The DOCS half of a reader PR, which is the half that gets forgotten. Advisory on
     # purpose: whether a given change needs a doc edit is a JUDGEMENT (a private-helper rename
     # needs none), and a mechanical "touched src/ ⇒ must touch docs/" rule would be satisfied by
     # a whitespace edit while missing real drift — measured: 107 of 290 public readers are absent
     # from docs/api.md today, and every one of those PRs did touch docs/.
     #
-    # ⚠️ SPLIT PER DIRECTION, because the two halves of this library do NOT share a registration
-    # path — and a single glob over `{ingestion,submission}` asserted the reader's rules over the
-    # writers, where they are simply false (caught in review, #227). A writer is re-exported
-    # straight from `submission/__init__.py` and has no ingestion `FileContract` at all.
+    # The submission (writer) section moved to the separate layouts-cvm package; this repo only reads.
     - path: "src/filings_cvm/ingestion/**"
       instructions: >-
         A new or renamed PUBLIC reader is only half-delivered without its documentation. Check, and
@@ -297,22 +294,6 @@ reviews:
         made only to satisfy a gate). Silence is not a conclusion. This applies to every matched
         change, public or internal.
 
-    - path: "src/filings_cvm/submission/**"
-      instructions: >-
-        A new or renamed PUBLIC writer is only half-delivered without its documentation. Check, and
-        say which apply: an entry in `docs/api.md`; the standard's own page under
-        `docs/submission/`; the catalog and Layout tree in the root `CLAUDE.md`; `docs/index.md`;
-        and `mkdocs.yml` `nav:` when a page is added.
-        ⚠️ The registration path here is NOT the reader one: a writer is re-exported directly from
-        `filings_cvm/submission/__init__.py` (there is no portal-root chain), and it has no
-        ingestion `FileContract` — its shared, direction-neutral Pydantic schema lives in
-        `_internal/config/schemas/`, and `submission/__init__.py` also re-exports the model types
-        that `export(doc, output_path)` takes as its argument. Check that a new writer AND its
-        schema types are exported there.
-        ⚠️ Always end with an explicit conclusion about documentation — either which documents this
-        change requires, or that it requires none AND why. Silence is not a conclusion. This applies
-        to every matched change, public or internal.
-
     - path: "src/**/*.py"
       instructions: >-
         A number whose fractional part carries meaning is NEVER a binary float: `float64` cannot
@@ -321,7 +302,7 @@ reviews:
         class per module, named after the file; a private/shared base gets its own `_`-prefixed
         file. Runtime type checking is mandatory: every class declares a checker metaclass from
         `_internal.utils.typing` and every standalone function uses `@type_checker` — private
-        helpers included; the only exemptions are Pydantic models, the typing engine itself, and
+        helpers included; the only exemptions are the typing engine itself and
         dunders. NumPy docstrings, tabs, 99 columns, double quotes. Absolute imports only. Prefer
         a dict dispatch over an if/elif chain that merely selects a value, and guard clauses over
         nesting.

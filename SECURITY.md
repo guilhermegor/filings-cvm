@@ -45,7 +45,7 @@ contractual. Please allow a reasonable window before any public disclosure.
 ## Scope
 
 This is a **read-only ingestion / file-standard library**: it downloads and parses public CVM
-open-data artifacts (`.zip`/`.csv`/`.xlsx`) and serialises submission XML. Security-relevant
+open-data artifacts (`.zip`/`.csv`/`.xlsx`). Security-relevant
 issues therefore include:
 
 - **In scope** — parser-level flaws reachable from an untrusted CVM artifact: zip-bomb /

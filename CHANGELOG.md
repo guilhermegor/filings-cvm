@@ -1,5 +1,14 @@
 ## Unreleased
 
+### BREAKING CHANGE
+
+- **submission**: the whole submission section is removed (#389) — `filings_cvm.submission`
+  (all 15 XML writers and their document models), the Pydantic schemas, the `SubmissionWriter`
+  port, the atomic-write and XML field helpers and the submission docs. It lives on in the
+  separate `layouts-cvm` package; there is no shim, no re-export and no dependency on it.
+  Migration: `from filings_cvm.submission import X` becomes an import from `layouts-cvm`.
+  The `pydantic` dependency is dropped.
+
 ### Feat
 
 - **ingestion**: FII INF_ANUAL readers (12 members) — fii/ root complete (#63)

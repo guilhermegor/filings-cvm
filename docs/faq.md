@@ -3,7 +3,7 @@
 Respostas para dúvidas comuns de uso e desenvolvimento. Adicione entradas específicas do projeto
 conforme surgirem nas issues.
 
-> **Veja também:** [Uso](usage.md) · [Envio](submission/perfil_mensal.md) · [Contribuindo](contributing.md).
+> **Veja também:** [Uso](usage.md) · [Leitura](ingestion/index.md) · [Contribuindo](contributing.md).
 
 ---
 
@@ -15,36 +15,15 @@ pip install filings-cvm
 
 Requer Python **>= 3.10**.
 
-## Quais padrões da CVM já estão implementados?
+## Quais conjuntos da CVM já estão implementados?
 
-Apenas o **Perfil Mensal V4** (envio), por enquanto. O catálogo completo — Informe Diário, CDA,
-Lâmina, Informe Mensal FIDC, entre outros — está listado no `CLAUDE.md` do repositório, com o
-status de cada padrão. A fonte da verdade é a
-[página de padrões da CVM](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp).
+Os leitores de `ingestion` cobrem os dumps de *open-data* do portal
+<https://dados.cvm.gov.br/dados/>; veja a [Leitura](ingestion/index.md).
 
-## Qual a diferença entre `submission` e `ingestion`?
+## Onde foi parar a seção `submission`?
 
-`submission` **monta e serializa** um arquivo para *enviar* à CVM (envio). `ingestion` **lê e
-interpreta** um arquivo *baixado* da CVM de volta para modelos tipados (leitura). A seção
-`ingestion` é criada quando o primeiro padrão de leitura for implementado.
-
-## Por que devo passar valores decimais como string?
-
-`float` binário (IEEE 754) não representa a maioria das frações decimais com exatidão, e os erros
-se acumulam silenciosamente. Passe `"10.5"` (string) ou `Decimal("10.5")` — nunca `10.5`. A
-biblioteca ainda **trunca** o excesso de casas em direção a zero, para não inflar o valor
-reportado.
-
-## Por que meu CNPJ foi recusado?
-
-O CNPJ é validado pelos **dígitos verificadores**, não apenas pelo formato. Um número com dígitos
-inválidos levanta `ValidationError` na construção do modelo. O valor é armazenado sem máscara
-(apenas os 14 caracteres).
-
-## Em qual codificação o arquivo é gravado?
-
-Quando você passa `output_path`, o arquivo é gravado em **`windows-1252`**, conforme exigência da
-CVM. Sem `output_path`, o método retorna a string XML (UTF-8 em memória).
+Foi removida desta biblioteca e vive no pacote separado `layouts-cvm`, que monta e serializa os
+arquivos XML de *envio* à CVM. `filings-cvm` agora só **lê** (`ingestion`) e não depende dele.
 
 ## Como adiciono ou atualizo uma dependência?
 

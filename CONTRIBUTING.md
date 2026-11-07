@@ -144,7 +144,7 @@ Each guard runs as a pre-commit hook and as a CI step (`.github/workflows/tests.
 | `check_fixture_scope.py` | a non-function fixture scope needs a written reason | `# fixture-scope-ok: <reason>` |
 | `check_assertion_weakening.py` | a PR must not loosen a test silently | `test-change-ok: <reason>` in the PR body |
 | `check_gate_integrity.py` | a PR must not weaken a check silently | `gate-change-ok: <reason>` in the PR body |
-| `check_coverage_floor.py` | `.coveragerc` `omit` never swallows `ingestion/`/`submission/` code | narrow the glob |
+| `check_coverage_floor.py` | `.coveragerc` `omit` never swallows `ingestion/` code | narrow the glob |
 | `check_required_checks_sync.py` | every context in `bin/required-checks.txt` is emitted by a job running on every PR | edit both together |
 
 The first five predate much of this tree, so they run through `bin/quality_ratchet.py` against
