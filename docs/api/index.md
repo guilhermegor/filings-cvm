@@ -2,8 +2,13 @@
 
 <script>
   // Links profundos antigos (`/<versão>/api/#PerfilMensal`) apontavam para a página única `api.md`;
-  // os símbolos agora vivem em `reference/`, com as mesmas âncoras.
-  if (location.hash) location.replace("reference/" + location.hash);
+  // os símbolos agora vivem em `reference/`, com as mesmas âncoras. As âncoras desta própria
+  // página (`#paginas`) ficam aqui.
+  document.addEventListener("DOMContentLoaded", () => {
+    if (location.hash && !document.getElementById(location.hash.slice(1))) {
+      location.replace("reference/" + location.hash);
+    }
+  });
 </script>
 
 A interface pública, agrupada pela divisão de topo do próprio código: `filings_cvm.submission`
