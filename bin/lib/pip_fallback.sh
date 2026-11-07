@@ -258,6 +258,10 @@ pip_fallback_install_requirements_file_into_venv() {
 	done <"$str_req_file"
 
 	if ((${#arr_failed[@]} == 0)); then
+		if ! "$str_venv_python" -m pip check; then
+			print_status "error" "Individually installed requirements conflict (pip check failed) — see above"
+			return 1
+		fi
 		print_status "success" "All requirements installed individually"
 		return 0
 	fi

@@ -157,6 +157,30 @@ def normalize_version_spec(str_spec: str) -> str:
     return f"=={str_spec}"
 
 
+def reject_or_constraint(str_name: str, str_spec: str) -> None:
+    """Refuse a Poetry ``||`` (OR) constraint, which PEP 508 cannot express.
+
+    Splitting on ``||`` would not help: pip applies every requirement line for a package, so
+    the alternatives would become a conjunction instead of a choice.
+
+    Parameters
+    ----------
+    str_name : str
+        The dependency name, for the message.
+    str_spec : str
+        Its version constraint.
+
+    Raises
+    ------
+    SystemExit
+        If the constraint contains ``||``.
+    """
+    if "||" in str_spec:
+        raise SystemExit(
+            f"Unsupported '||' version constraint for pip fallback: {str_name} -> {str_spec}"
+        )
+
+
 def build_requirement(str_name: str, union_spec: str | dict) -> str | None:
     """Render one Poetry dependency declaration as a pip requirement line.
 
@@ -183,11 +207,13 @@ def build_requirement(str_name: str, union_spec: str | dict) -> str | None:
         return None
 
     if isinstance(union_spec, str):
+        reject_or_constraint(str_name, union_spec)
         return f"{str_name}{normalize_version_spec(union_spec)}"
 
     if isinstance(union_spec, dict):
         if union_spec.get("optional"):
             return None
+        reject_or_constraint(str_name, str(union_spec.get("version", "")))
         for str_key in TUPLE_UNSUPPORTED_KEYS:
             if str_key in union_spec:
                 raise SystemExit(
@@ -283,9 +309,43 @@ def select_requirements(dict_pyproject: dict, list_groups: list) -> list:
         Requirement lines from whichever layout the project actually uses.
     """
     dict_project = dict_pyproject.get("project") or {}
-    if dict_project.get("dependencies") or dict_project.get("optional-dependencies"):
-        return pep621_requirements(dict_project, list_groups)
-    return poetry_requirements(dict_pyproject.get("tool", {}).get("poetry", {}), list_groups)
+    dict_poetry = dict_pyproject.get("tool", {}).get("poetry", {})
+    if not (dict_project.get("dependencies") or dict_project.get("optional-dependencies")):
+        return poetry_requirements(dict_poetry, list_groups)
+    # Poetry 2 lets [project] carry runtime deps while dev/docs live in [tool.poetry.group];
+    # each group comes from whichever table declares it.
+    list_pep621 = pep621_requirements(dict_project, list_groups)
+    list_poetry_only = [
+        str_group
+        for str_group in list_groups
+        if str_group != "main" and str_group not in dict_project.get("optional-dependencies", {})
+    ]
+    return list_pep621 + poetry_requirements(dict_poetry, list_poetry_only)
+
+
+def undeclared_groups(dict_pyproject: dict, list_groups: list) -> list:
+    """Return the requested non-``main`` groups that no table declares.
+
+    Parameters
+    ----------
+    dict_pyproject : dict
+        The parsed ``pyproject.toml``.
+    list_groups : list of str
+        Requested groups.
+
+    Returns
+    -------
+    list of str
+        Groups absent from both ``[project.optional-dependencies]`` and
+        ``[tool.poetry.group]``.
+    """
+    dict_optional = (dict_pyproject.get("project") or {}).get("optional-dependencies", {})
+    dict_group = dict_pyproject.get("tool", {}).get("poetry", {}).get("group", {})
+    return [
+        str_group
+        for str_group in list_groups
+        if str_group != "main" and str_group not in dict_optional and str_group not in dict_group
+    ]
 
 
 def main() -> int:
@@ -303,6 +363,14 @@ def main() -> int:
     dict_pyproject = tomllib.loads(
         path_root.joinpath("pyproject.toml").read_text(encoding="utf-8")
     )
+
+    list_missing = undeclared_groups(dict_pyproject, list_groups)
+    if list_missing:
+        raise SystemExit(
+            f"Dependency group(s) {','.join(list_missing)} are not declared in "
+            f"{path_root / 'pyproject.toml'} under [project.optional-dependencies] or "
+            f"[tool.poetry.group]."
+        )
 
     list_requirements = select_requirements(dict_pyproject, list_groups)
 

@@ -18,14 +18,19 @@ import sys
 path_out = pathlib.Path(os.environ["BOOTSTRAP_CERT_OUT"])
 list_pem: list[str] = []
 set_seen: set[bytes] = set()
+STR_SERVER_AUTH_OID = "1.3.6.1.5.5.7.3.1"
 
 for str_store in ("ROOT", "CA"):
     try:
         list_certs = ssl.enum_certificates(str_store)
     except (AttributeError, OSError) as exc:
+        # A store we cannot read may hold the proxy root; a partial bundle would fail TLS later.
         print(f"Cannot read the {str_store} store: {exc}", file=sys.stderr)
-        continue
-    for bytes_der, _str_encoding, _obj_trust in list_certs:
+        sys.exit(1)
+    for bytes_der, _str_encoding, obj_trust in list_certs:
+        # obj_trust is True (all purposes) or the set of OIDs Windows trusts it for.
+        if obj_trust is not True and STR_SERVER_AUTH_OID not in obj_trust:
+            continue
         if bytes_der in set_seen:
             continue
         set_seen.add(bytes_der)

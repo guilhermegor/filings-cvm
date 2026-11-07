@@ -106,7 +106,7 @@ try_install_playwright_browsers() {
 		print_status "success" "Playwright browsers installed"
 	else
 		print_status "warning" \
-			"Could not install Playwright browsers — init continues; run 'poe fix_playwright' later if you need them"
+			"Could not install Playwright browsers — init continues; run 'make fix_playwright' later if you need them"
 	fi
 }
 

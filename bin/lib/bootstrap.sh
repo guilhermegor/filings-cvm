@@ -76,7 +76,15 @@ running_inside_project_venv() {
 	if [[ -n "${VIRTUAL_ENV:-}" && "$VIRTUAL_ENV" -ef "$str_venv" ]]; then
 		return 0
 	fi
-	[[ ":$PATH:" == *":$str_venv/bin:"* || ":$PATH:" == *":$str_venv/Scripts:"* ]]
+	local str_dir
+	local -a arr_dirs
+	IFS=: read -ra arr_dirs <<<"$PATH"
+	for str_dir in "${arr_dirs[@]}"; do
+		if [[ "$str_dir" -ef "$str_venv/bin" || "$str_dir" -ef "$str_venv/Scripts" ]]; then
+			return 0
+		fi
+	done
+	return 1
 }
 
 path_without_active_venvs() {
@@ -189,9 +197,6 @@ ensure_python_version() {
 build_union_ca_bundle() {
 	local str_cert="$1"
 
-	CA_BUNDLE_PEM="$BIN_DIR/ca_bundle.pem"
-	export CA_BUNDLE_PEM
-
 	BX_CA_CORPORATE="$str_cert" BX_CA_OUT="$CA_BUNDLE_PEM" \
 		"$PYTHON" "$(dirname "${BASH_SOURCE[0]}")/ca_bundle.py"
 }
@@ -207,6 +212,11 @@ wire_corporate_ca() {
 	local str_cert_abs str_bundle_abs str_count
 
 	str_cert_abs="$(to_native_path "$CORPORATE_CA_PEM")"
+
+	# Set here, not inside build_union_ca_bundle: that runs in a $(...) subshell, so an
+	# assignment made there never reaches this shell.
+	CA_BUNDLE_PEM="$BIN_DIR/ca_bundle.pem"
+	export CA_BUNDLE_PEM
 
 	if ! str_count="$(build_union_ca_bundle "$str_cert_abs")"; then
 		print_status "error" "Could not build the union CA bundle — leaving TLS settings untouched"

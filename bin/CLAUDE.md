@@ -105,7 +105,7 @@ must route through the resolver.** How each surface routes:
 
 | Surface | How it calls Poetry |
 |---------|---------------------|
-| a `poe_tasks.toml` task / `.pre-commit-config.yaml` | `bash bin/poetry_exec.sh <args>` — the wrapper resolves+`exec`s Poetry, routing resolution status to **stderr** so `$(… version -s)` stays clean |
+| a `Makefile` / `tasks.sh` target / `.pre-commit-config.yaml` | `bash bin/poetry_exec.sh <args>` — the wrapper resolves+`exec`s Poetry, routing resolution status to **stderr** so `$(… version -s)` stays clean |
 | sourcing `bin/*.sh` that needs Poetry (`db.sh`, `fix_playwright.sh`, `precommit.sh`) | source `lib/bootstrap.sh`, `bootstrap_init` + `ensure_poetry`, then `run_poetry run …` |
 | optional-linter `bin/*.sh` (`lint_sql.sh`, `lint_yaml.sh`, `lint_shell.sh`) | **resolve, don't install**: `resolve_python` → `resolve_poetry \|\| skip (exit 0)` → `run_poetry run …`. Never guard on `command -v poetry` (it misses a `python -m poetry`-only box and skips silently) |
 
@@ -113,20 +113,12 @@ must route through the resolver.** How each surface routes:
 PATH.** `shellcheck-py`/`shfmt-py` are dev-deps that vendor their binaries into the
 venv (incl. `win_amd64` wheels), so `lint_shell.sh` tries `poetry run <tool>` first
 (found wherever the venv lives, incl. a Windows UNC/mapped `A:` drive), then a system
-binary, then skips — probing with `--version` so a real lint failure is never mistaken
-for "absent". A bare-PATH `command -v` would silently skip both linters when `poe lint`
+binary (found by `command -v` alone, so a real lint failure is never mistaken for
+"absent"), then skips; only the Poetry path is probed with `--version`. A bare-PATH `command -v` would silently skip both linters when `poe lint`
 runs outside the venv. `bin/install_shell_linters.sh` (`poe install_shell_linters`) is
 an **optional** system-binary installer (choco/scoop/brew/apt) for boxes whose venv drive
 blocks executing the vendored binary; the pip route is primary.
 
-`bin/export_deps.sh` (`poe export_deps`) exports the locked set to `requirements-lock.txt`
-for pip-only hosts. It is the reference for the **diagnostic half** of this rule: it captures
-the export output instead of discarding it, re-prints Poetry's own words on failure, and names
-the remedy against `${POETRY_CMD[*]}` — never a bare `poetry`, which may not be the install
-that failed. `export` is a *plugin* subcommand, so `requirements.txt` pins
-`poetry-plugin-export` beside Poetry: the audit question is never "is Poetry installed?" but
-"which install resolves when `.venv/bin` is NOT on `PATH`, and does that one have the
-subcommand?".
 
 `bin/ensure_env.sh` seeds `.env` from `.env.example` for `init` (no-op if `.env`
 exists; an info-line no-op when the tier ships no template). `bin/precommit.sh` installs the

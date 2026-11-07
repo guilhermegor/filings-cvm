@@ -121,14 +121,15 @@ def top_level_imports(str_name: str) -> list[str]:
     Returns
     -------
     list of str
-        One or more top-level module names to import.
+        One or more top-level module names to import; empty for a distribution that ships
+        nothing importable (a command-only package such as ``shfmt-py``), which then passes
+        on being installed.
     """
     cls_dist = importlib.metadata.distribution(str_name)
     str_text = cls_dist.read_text("top_level.txt")
     if str_text:
         return [str_line.strip() for str_line in str_text.splitlines() if str_line.strip()]
-    list_from_files = top_level_from_files(cls_dist)
-    return list_from_files or [str_name.replace("-", "_")]
+    return top_level_from_files(cls_dist)
 
 
 def requirement_is_active(str_line: str) -> bool:

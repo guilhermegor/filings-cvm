@@ -20,6 +20,7 @@ resolves *and* connects, so the hostname path is still caught there.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import partial
 import socket
 from typing import NoReturn
@@ -93,26 +94,32 @@ class _BlockedSocket(socket.socket):
 
 
 @pytest.fixture(autouse=True)
-def block_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+def block_network(request: pytest.FixtureRequest) -> Iterator[None]:
 	"""Swap the socket primitives so no test can open a real connection.
 
 	Applied automatically to every test. A test marked ``allow_network`` is left
-	untouched. ``monkeypatch`` restores the real primitives after the test.
+	untouched. The patches live in a private ``MonkeyPatch.context()``, so a test that calls
+	the shared ``monkeypatch.undo()`` cannot lift the guard.
 
 	Parameters
 	----------
 	request : pytest.FixtureRequest
 		The active test request; inspected for the ``allow_network`` opt-out marker.
-	monkeypatch : pytest.MonkeyPatch
-		Pytest's patcher; restores the real primitives at teardown.
+
+	Yields
+	------
+	None
+		Control returns to the test; the real primitives are restored afterwards.
 	"""
 	bool_allowed = request.node.get_closest_marker("allow_network") is not None
-	monkeypatch.setattr(socket, "socket", socket.socket if bool_allowed else _BlockedSocket)
-	monkeypatch.setattr(
-		socket,
-		"create_connection",
-		socket.create_connection if bool_allowed else _blocked,
-	)
+	with pytest.MonkeyPatch.context() as monkeypatch:
+		monkeypatch.setattr(socket, "socket", socket.socket if bool_allowed else _BlockedSocket)
+		monkeypatch.setattr(
+			socket,
+			"create_connection",
+			socket.create_connection if bool_allowed else _blocked,
+		)
+		yield
 
 
 _GIT_HOOK_ENV = (

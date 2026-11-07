@@ -16,7 +16,7 @@ resolve_linter_mode() {
 		printf 'poetry'
 		return 0
 	fi
-	if command -v "$str_tool" >/dev/null 2>&1 && "$str_tool" --version >/dev/null 2>&1; then
+	if command -v "$str_tool" >/dev/null 2>&1; then
 		printf 'system'
 		return 0
 	fi
@@ -77,6 +77,7 @@ main() {
 	fi
 
 	mapfile -t list_files < <(find bin -name '*.sh' -type f)
+	list_files+=(tasks.sh)
 
 	run_shellcheck
 	run_shfmt

@@ -23,6 +23,7 @@ from __future__ import annotations
 import os
 import pathlib
 import re
+import ssl
 import sys
 
 
@@ -55,6 +56,12 @@ def collect_sources(str_corporate: str, path_out: pathlib.Path) -> list:
         str_existing = os.environ.get(str_var, "")
         if str_existing and pathlib.Path(str_existing) != path_out:
             list_sources.append(str_existing)
+
+    # SSL_CERT_FILE (set to this union) replaces OpenSSL's compiled-in default CA file, so the
+    # default must be carried into the union or the host's own roots are silently dropped.
+    str_default = ssl.get_default_verify_paths().openssl_cafile
+    if str_default and pathlib.Path(str_default) != path_out:
+        list_sources.append(str_default)
 
     try:
         import certifi
@@ -116,6 +123,14 @@ def main() -> int:
 
     if not list_blocks:
         print("No certificates found for the union bundle", file=sys.stderr)
+        return 1
+
+    if len(list_blocks) == int_non_corporate:
+        print(
+            "The corporate CA file holds no PEM certificate: the bundle would lack the proxy "
+            "root while claiming to include it.",
+            file=sys.stderr,
+        )
         return 1
 
     if int_non_corporate == 0:
