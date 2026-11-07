@@ -1,5 +1,11 @@
 # **Referência da API**
 
+<script>
+  // Links profundos antigos (`/<versão>/api/#PerfilMensal`) apontavam para a página única `api.md`;
+  // os símbolos agora vivem em `reference/`, com as mesmas âncoras.
+  if (location.hash) location.replace("reference/" + location.hash);
+</script>
+
 A interface pública, agrupada pela divisão de topo do próprio código: `filings_cvm.submission`
 (envio → CVM) e `filings_cvm.ingestion` (leitura ← CVM).
 
