@@ -96,8 +96,8 @@ def _run(
 ) -> tuple[int, str]:
 	"""Chdir into a project, run the gate, and return ``(exit_code, stderr)``."""
 	monkeypatch.chdir(path_root)
-	code = _load_gate().main()
-	return code, capsys.readouterr().err
+	int_code = _load_gate().main()
+	return int_code, capsys.readouterr().err
 
 
 @pytest.fixture
@@ -170,6 +170,17 @@ def test_function_free_module_is_never_in_the_must_cover_set(tmp_path: Path) -> 
 	_module(path_root, "ingestion", "class Status:\n\tOPEN = 1\n")
 	path_module = path_root / "src" / "pkg" / "ingestion" / "service.py"
 	assert cls_gate.defines_a_function(path_module) is False
+
+
+def test_discovery_keeps_function_bearing_and_drops_function_free_modules(
+	tmp_path: Path,
+) -> None:
+	"""``must_stay_covered`` filters on behaviour: only the function-bearing module stays."""
+	path_root = _project(tmp_path, "")
+	_module(path_root, "ingestion", "class Status:\n\tOPEN = 1\n")
+	path_keep = path_root / "src" / "pkg" / "submission" / "service.py"
+	_module(path_root, "submission", _SRC_FUNC)
+	assert _load_gate().must_stay_covered(path_root / "src") == [path_keep]
 
 
 def test_internal_modules_are_not_in_the_must_cover_set(tmp_path: Path) -> None:

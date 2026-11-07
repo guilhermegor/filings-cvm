@@ -709,6 +709,32 @@ def test_a_pr_past_the_declared_window_is_re_asked(
 	)
 
 
+def test_an_old_marker_does_not_override_a_refusal_inside_the_declared_window(
+	cls_retry: ModuleType, cls_gate: ModuleType
+) -> None:
+	"""Our marker is past the cooldown, but the reviewer's 35-minute wait is still open.
+
+	Parameters
+	----------
+	cls_retry : types.ModuleType
+		The retry module.
+	cls_gate : types.ModuleType
+		The gate module.
+	"""
+	list_comments = [
+		_comment("guilhermegor", cls_retry._STR_REQUEST, int_min_ago=45),
+		_comment("coderabbitai", _STR_RATE_LIMITED_35, int_min_ago=20),
+	]
+	dict_pr = _pr(list_comments, [])
+
+	assert (
+		cls_retry.pr_needs_retry(
+			dict_pr, list_comments, {"coderabbitai"}, cls_gate, "guilhermegor", _DT_NOW
+		)
+		is False
+	)
+
+
 def test_the_declared_window_is_measured_from_the_notice_not_from_our_marker(
 	cls_retry: ModuleType,
 ) -> None:
@@ -832,7 +858,9 @@ def test_account_blocked_until_reads_the_newest_refusal_across_all_waiting_prs(
 		_comment("coderabbitai", _STR_RATE_LIMITED_35, int_min_ago=5),
 	]
 
-	assert cls_retry.account_blocked_until(list_notices, _DT_NOW) is not None
+	assert cls_retry.account_blocked_until(list_notices, _DT_NOW) == _DT_NOW + timedelta(
+		minutes=30
+	)
 
 
 def test_account_blocked_until_takes_the_LATEST_deadline_not_the_latest_notice(

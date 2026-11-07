@@ -320,6 +320,17 @@ def test_two_assertion_contexts_in_one_with_are_two_sites(tmp_path: Path) -> Non
 	assert _run(tmp_path, []) == 1
 
 
+def test_the_two_assertion_contexts_are_counted_as_two_sites() -> None:
+	"""The exit status alone could be 1 for another reason; the count itself must be two."""
+	cls_tree = ast.parse(
+		"import pytest\n\n\ndef test_x() -> None:\n"
+		"\twith pytest.raises(ValueError), pytest.warns(UserWarning):\n\t\tpass\n"
+	)
+	cls_fn = next(n for n in ast.walk(cls_tree) if isinstance(n, ast.FunctionDef))
+
+	assert len(gate._assertion_sites(cls_fn)) == 2
+
+
 def test_the_hatch_also_exempts_a_zero_assertion_test(tmp_path: Path) -> None:
 	"""The same hatch covers the zero-assertion check, not only the cap."""
 	_write_test_file(tmp_path, "def test_x() -> None:\n\tpass  # one-assert-ok: smoke test\n")

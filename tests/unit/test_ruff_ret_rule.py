@@ -14,7 +14,9 @@ import shutil
 import subprocess
 
 import pytest
-import tomllib
+
+
+tomllib = pytest.importorskip("tomllib", reason="tomllib is stdlib only from Python 3.11")
 
 
 _BAD_SOURCE = "def choose(flag: bool) -> int:\n\tif flag:\n\t\treturn 1\n\telse:\n\t\treturn 2\n"
@@ -87,6 +89,7 @@ def test_ret505_stays_silent_on_an_early_return(tmp_path: Path) -> None:
 
 @pytest.mark.xfail(
 	reason="ruff.toml does not select RET yet; adoption is owned by #373",
+	raises=AssertionError,
 	strict=True,
 )
 def test_shipped_config_selects_ret() -> None:

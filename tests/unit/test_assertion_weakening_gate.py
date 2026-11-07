@@ -279,6 +279,7 @@ def test_the_report_fails_a_flagged_diff_with_no_justification(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
 	"""No ``test-change-ok`` trailer anywhere means the weakening blocks the PR."""
+	monkeypatch.setattr(gate, "pr_body_text", lambda: "")
 	monkeypatch.setattr(gate, "_git", lambda _args: "fix: unrelated commit body\n")
 
 	assert gate.report(["some finding"], "base-sha", 1) == 1
@@ -286,6 +287,7 @@ def test_the_report_fails_a_flagged_diff_with_no_justification(
 
 def test_a_bare_marker_with_no_reason_does_not_justify(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""The reason is REQUIRED, matching ``gate-change-ok:``'s convention."""
+	monkeypatch.setattr(gate, "pr_body_text", lambda: "")
 	monkeypatch.setattr(gate, "_git", lambda _args: "test-change-ok:\n")
 
 	assert gate.report(["some finding"], "base-sha", 1) == 1

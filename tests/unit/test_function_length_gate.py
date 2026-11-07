@@ -127,6 +127,14 @@ def test_a_function_at_the_ceiling_is_accepted(tmp_path: Path) -> None:
 	assert gate.file_problems(path_file) == []
 
 
+def test_a_function_one_line_over_the_ceiling_is_reported(tmp_path: Path) -> None:
+	"""One line past the inclusive ceiling produces exactly one finding."""
+	str_body = "\n".join(f"\tint_x = {i}" for i in range(gate.INT_MAX_LINES))
+	path_file = _python_file(tmp_path, f"def f() -> None:\n{str_body}\n")
+
+	assert len(gate.file_problems(path_file)) == 1
+
+
 def test_a_long_docstring_does_not_count_towards_the_limit(tmp_path: Path) -> None:
 	"""A short, heavily documented function passes.
 
@@ -142,6 +150,17 @@ def test_a_long_docstring_does_not_count_towards_the_limit(tmp_path: Path) -> No
 	)
 
 	assert gate.file_problems(path_file) == []
+
+
+def test_an_over_ceiling_nested_function_is_reported_by_name(tmp_path: Path) -> None:
+	"""Nested definitions are discovered, so a long closure is named in its own finding."""
+	str_body = "\n".join(f"\t\tint_x = {i}" for i in range(gate.INT_MAX_LINES))
+	path_file = _python_file(
+		tmp_path,
+		f"def outer() -> None:\n\tdef inner() -> None:\n{str_body}\n\treturn inner\n",
+	)
+
+	assert "inner()" in "\n".join(gate.file_problems(path_file))
 
 
 def test_a_nested_function_docstring_does_not_count_either(tmp_path: Path) -> None:
