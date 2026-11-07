@@ -16,8 +16,8 @@ down *why* in the workflow file.**
 
 Every lint, static-analysis, and test gate must be wired into **both** the local
 `.pre-commit-config.yaml` **and** the CI workflow (`.github/workflows/tests.yaml`).
-They must stay in sync — the same discipline as the poe-task parity
-rule. When you add, rename, or remove a gate in one place, make the identical
+They must stay in sync, with one canonical script per gate called by both the hook
+and the CI step (the poe tasks reuse the same scripts). When you add, rename, or remove a gate in one place, make the identical
 change in the other **in the same commit**.
 
 **Why both, never one:**

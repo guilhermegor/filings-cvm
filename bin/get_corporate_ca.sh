@@ -2,7 +2,7 @@
 # Generate bin/corporate_ca.pem from the certificate your corporate TLS-inspecting
 # proxy presents for pypi.org. Run this only on a network behind such a proxy; on
 # a normal network you do not need it. The generated pem is git-ignored and picked
-# up automatically by `poe venv` / `poe run` (see lib/bootstrap.sh).
+# up automatically by `poe venv` (see lib/bootstrap.sh).
 
 set -euo pipefail
 

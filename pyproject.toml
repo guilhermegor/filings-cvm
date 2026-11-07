@@ -70,7 +70,7 @@ coverage = ">=7.6.0"
 # pkg_resources and breaks on setuptools >= 81).
 genbadge = {extras = ["coverage"], version = ">=1.1.0"}
 # Static type-checker + non-Python lint gates (mirrored in .pre-commit-config and
-# `make lint`). shellcheck + shfmt are pip dev-deps (shellcheck-py/shfmt-py); lint_shell.sh resolves them via poetry run, falls back to a system binary, then skips.
+# `poe lint`). shellcheck + shfmt are pip dev-deps (shellcheck-py/shfmt-py); lint_shell.sh resolves them via poetry run, falls back to a system binary, then skips.
 mypy = ">=1.8.0"
 sqlfluff = ">=3.0.0"
 yamllint = ">=1.35.0"

@@ -4,8 +4,8 @@
 # If .env is already present, do nothing. Otherwise seed it from .env.example
 # so a fresh checkout starts with a working config skeleton. When .env.example
 # itself is missing there is nothing to copy: report the error and abort THIS
-# script with a non-zero status. The init task invokes it with a leading '-' so
-# make ignores that failure and still runs the remaining init steps (venv,
+# script with a non-zero status. The poe ensure_env task runs it with '|| true' so
+# init ignores that failure and still runs the remaining init steps (venv,
 # precommit) — the missing template blocks only the env-seeding step.
 
 set -euo pipefail
