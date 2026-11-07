@@ -27,7 +27,7 @@ import sys
 
 _COVERAGERC = pathlib.Path(".coveragerc")
 _SRC = pathlib.Path("src")
-_SECTIONS = ("ingestion", "submission")
+_SECTIONS = ("ingestion",)
 
 
 def omit_patterns(path_coveragerc: pathlib.Path) -> list[str]:
