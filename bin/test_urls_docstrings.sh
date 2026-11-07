@@ -157,40 +157,58 @@ check_urls_in_line() {
 	done
 }
 
-toggle_docstring_state() {
-	local str_line="$1" str_quote="$2" bool_in_docstring="$3"
-	local str_after_open="${str_line#*"$str_quote"}"
+STR_DOC_QUOTE=""
+STR_DOC_TEXT=""
+readonly STR_DQ='"""'
+readonly STR_SQ="'''"
 
-	if [[ "$bool_in_docstring" == false && "$str_after_open" == *"$str_quote"* ]]; then
-		echo "false"
-	elif [[ "$bool_in_docstring" == true ]]; then
-		echo "false"
+# Pick the delimiter that appears first in a line, or empty when it has neither.
+first_delimiter() {
+	local str_line="$1"
+	local str_dq_head="${str_line%%"$STR_DQ"*}"
+	local str_sq_head="${str_line%%"$STR_SQ"*}"
+
+	if [[ "$str_line" != *"$STR_DQ"* && "$str_line" != *"$STR_SQ"* ]]; then
+		return 0
+	elif [[ "$str_line" != *"$STR_SQ"* ]] || [[ "$str_line" == *"$STR_DQ"* && ${#str_dq_head} -lt ${#str_sq_head} ]]; then
+		printf '%s' "$STR_DQ"
 	else
-		echo "true"
+		printf '%s' "$STR_SQ"
+	fi
+}
+
+# Advance the docstring state by one line. Sets STR_DOC_QUOTE (the delimiter that opened the
+# docstring still in progress, or empty) and STR_DOC_TEXT (only the part of the line that is
+# docstring text, so a URL outside the delimiters is never probed). Only the opening
+# delimiter can close the docstring.
+advance_docstring_state() {
+	local str_rest="$1"
+
+	STR_DOC_TEXT=""
+	if [[ -z "$STR_DOC_QUOTE" ]]; then
+		STR_DOC_QUOTE="$(first_delimiter "$str_rest")"
+		[[ -n "$STR_DOC_QUOTE" ]] || return 0
+		str_rest="${str_rest#*"$STR_DOC_QUOTE"}"
+	fi
+
+	if [[ "$str_rest" == *"$STR_DOC_QUOTE"* ]]; then
+		STR_DOC_TEXT="${str_rest%%"$STR_DOC_QUOTE"*}"
+		STR_DOC_QUOTE=""
+	else
+		STR_DOC_TEXT="$str_rest"
 	fi
 }
 
 scan_file_for_urls() {
 	local str_file="$1"
 	local int_line_num=0
-	local bool_in_docstring=false
 	local str_line
 
+	STR_DOC_QUOTE=""
 	while IFS= read -r str_line; do
 		((int_line_num++))
-
-		if [[ "$str_line" == *'"""'* ]]; then
-			check_urls_in_line "$str_file" "$int_line_num" "$str_line"
-			bool_in_docstring="$(toggle_docstring_state "$str_line" '"""' "$bool_in_docstring")"
-			continue
-		fi
-		if [[ "$str_line" == *"'''"* ]]; then
-			check_urls_in_line "$str_file" "$int_line_num" "$str_line"
-			bool_in_docstring="$(toggle_docstring_state "$str_line" "'''" "$bool_in_docstring")"
-			continue
-		fi
-
-		[[ "$bool_in_docstring" == true ]] && check_urls_in_line "$str_file" "$int_line_num" "$str_line"
+		advance_docstring_state "$str_line"
+		[[ -z "$STR_DOC_TEXT" ]] || check_urls_in_line "$str_file" "$int_line_num" "$STR_DOC_TEXT"
 	done <"$str_file"
 }
 
