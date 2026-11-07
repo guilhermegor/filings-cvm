@@ -67,6 +67,7 @@ yamllint = ">=1.35.0"
 shfmt-py = ">=3.7.0"
 shellcheck-py = ">=0.10.0"
 pyyaml = ">=6.0"
+tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = ">=1.6.0"

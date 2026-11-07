@@ -9,58 +9,32 @@ Conditional by construction: a project without dynamic versioning enabled (the s
 whose ``cz bump`` / ``release.yaml`` write a real static version, and offline-mode libraries)
 is a no-op and exits 0.
 
-``pyproject.toml`` is parsed with ``tomllib`` (or ``tomli`` on Python 3.10); only when neither
-is importable, or the text is not TOML, does a line scan stand in.
+``pyproject.toml`` is parsed with ``tomllib`` (``tomli`` on Python 3.10, a dev dependency).
 
 Usage: ``python bin/check_dynamic_version_stub.py [--root DIR]``
 """
 
 import argparse
 import pathlib
-import re
 import sys
+
+
+if sys.version_info >= (3, 11):
+	import tomllib
+else:
+	import tomli as tomllib
 
 
 STR_STUB = "0.0.0"
 STR_DYNAMIC_SECTION = "tool.poetry-dynamic-versioning"
 STR_POETRY_SECTION = "tool.poetry"
 
-RE_SECTION = re.compile(r"^\s*\[([^\[\]]+)\]\s*(?:#.*)?$")
-RE_ENABLE = re.compile(r"^\s*enable\s*=\s*true\s*(?:#.*)?$")
-RE_VERSION = re.compile(r"""^\s*version\s*=\s*["']([^"']*)["']\s*(?:#.*)?$""")
 
-
-def read_key_lines(str_text: str) -> dict:
-	"""Group the lines of a TOML document by their ``[section]`` header.
-
-	Parameters
-	----------
-	str_text : str
-		Raw ``pyproject.toml`` contents.
-
-	Returns
-	-------
-	dict
-		Section name to the list of lines under it (the preamble is keyed ``""``).
-	"""
-	dict_sections: dict = {"": []}
-	str_current = ""
-	for str_line in str_text.splitlines():
-		re_match = RE_SECTION.match(str_line)
-		if re_match:
-			str_current = re_match.group(1).strip()
-			dict_sections.setdefault(str_current, [])
-		else:
-			dict_sections[str_current].append(str_line)
-	return dict_sections
-
-
-def _parse_with_tomllib(str_text: str) -> tuple[bool, list[str]] | None:
-	"""Read the gate's two facts with a real TOML parser, when one is available.
+def _read_facts(str_text: str) -> tuple[bool, list[str]]:
+	"""Read the gate's two facts with a real TOML parser.
 
 	A line scan cannot see that ``[tool."poetry-dynamic-versioning"]`` and ``"enable" = true``
-	are the same keys as their bare spellings, so a quoted header would disarm the gate. The
-	scan stays only as the Python 3.10 fallback (no ``tomllib``) and for text that is not TOML.
+	are the same keys as their bare spellings, so a quoted header would disarm the gate.
 
 	Parameters
 	----------
@@ -69,22 +43,15 @@ def _parse_with_tomllib(str_text: str) -> tuple[bool, list[str]] | None:
 
 	Returns
 	-------
-	tuple or None
-		``(dynamic_versioning_enabled, [version, ...])``, or ``None`` when ``tomllib`` is
-		unavailable or the text does not parse.
+	tuple
+		``(dynamic_versioning_enabled, [version, ...])``.
+
+	Raises
+	------
+	tomllib.TOMLDecodeError
+		When the text is not valid TOML (a broken pyproject must fail loudly, not pass).
 	"""
-	try:
-		import tomllib
-	except ModuleNotFoundError:  # Python 3.10
-		try:
-			import tomli as tomllib  # type: ignore[no-redef]
-		except ModuleNotFoundError:
-			return None
-	try:
-		dict_toml = tomllib.loads(str_text)
-	except tomllib.TOMLDecodeError:
-		return None
-	dict_tool = dict_toml.get("tool", {})
+	dict_tool = tomllib.loads(str_text).get("tool", {})
 	bool_enabled = dict_tool.get("poetry-dynamic-versioning", {}).get("enable") is True
 	str_version = dict_tool.get("poetry", {}).get("version")
 	return bool_enabled, [str_version] if isinstance(str_version, str) else []
@@ -103,18 +70,7 @@ def find_problem(str_text: str) -> str:
 	str
 		A finding message, empty when the project is a no-op or carries the stub.
 	"""
-	tuple_parsed = _parse_with_tomllib(str_text)
-	if tuple_parsed is not None:
-		bool_enabled, list_versions = tuple_parsed
-	else:
-		dict_sections = read_key_lines(str_text)
-		list_dynamic = dict_sections.get(STR_DYNAMIC_SECTION, [])
-		bool_enabled = any(RE_ENABLE.match(str_line) for str_line in list_dynamic)
-		list_versions = [
-			re_match.group(1)
-			for re_match in map(RE_VERSION.match, dict_sections.get(STR_POETRY_SECTION, []))
-			if re_match
-		]
+	bool_enabled, list_versions = _read_facts(str_text)
 	if not bool_enabled:
 		return ""
 	if list_versions == [STR_STUB]:
