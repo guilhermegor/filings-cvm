@@ -3,10 +3,9 @@
 Downloads the monthly CVM open-data dump of *fundos de investimento* daily reports
 (``inf_diario_fi_AAAAMM.zip`` from the CVM open-data portal), extracts its CSV, and
 returns it as a typed, contract-validated :class:`pandas.DataFrame`. This is the
-*reading* half of the standard; building the file to *send* to CVM lives in the
-``submission`` section (``submission/informe_diario.py``) — and note the two touch
-**different artifacts**: submission produces the ``DOC_ARQ`` XML, while this reader
-consumes the flat open-data CSV export.
+*reading* half of the standard; building the file to *send* to CVM lives in the separate
+``layouts-cvm`` package — and note the two touch **different artifacts**: that package
+produces the ``DOC_ARQ`` XML, while this reader consumes the flat open-data CSV export.
 
 Network, unzip, and CSV parsing are delegated to this library's own ``_internal.utils``
 seams (``http_downloader``, ``zip_extractor``, ``tabular_reader``) — never a vendor

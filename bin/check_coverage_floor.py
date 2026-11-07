@@ -7,8 +7,8 @@ accurate — and ``omit`` is a hand-declared list nobody can contradict. Widen o
 ``fail_under`` still reads 80, the suite is still green, and the code is no longer measured.
 
 The template derives its floor from ``src/capabilities/*/{domain,application}``; this repo has
-no capabilities. Its equivalent is the two public sections, ``ingestion/`` and ``submission/``
-(the root ``AGENTS.md``: "every solution lives in one of them"). ``_internal/`` is the one
+no capabilities. Its equivalent is the one public section, ``ingestion/``
+(the root ``AGENTS.md``: "every solution lives in ``ingestion/``"). ``_internal/`` is the one
 declared, deliberate exclusion. The floor is CODE-derived: every module under a section that
 defines at least one function (read via ``ast``) must stay in the denominator. Any such module
 matched by an ``omit`` pattern is a finding.
@@ -84,7 +84,7 @@ def must_stay_covered(path_src: pathlib.Path) -> list[pathlib.Path]:
 	Returns
 	-------
 	list of pathlib.Path
-		Modules under ``<package>/ingestion`` or ``<package>/submission`` defining a function.
+		Modules under ``<package>/ingestion`` defining a function.
 	"""
 	return [
 		path_module
@@ -161,7 +161,7 @@ def main() -> int:
 		return 1
 
 	print(
-		f"coverage floor OK: {len(list_must_stay_covered)} ingestion/submission module(s) "
+		f"coverage floor OK: {len(list_must_stay_covered)} ingestion module(s) "
 		f"stay in the coverage denominator."
 	)
 	return 0

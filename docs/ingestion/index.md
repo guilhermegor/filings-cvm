@@ -1,7 +1,7 @@
 # **Leitura (← CVM)**
 
 A seção `filings_cvm.ingestion` analisa e interpreta arquivos **recebidos/baixados** da CVM de
-volta para modelos tipados — a contraparte do [Envio](../submission/perfil_mensal.md).
+volta para modelos tipados — a contraparte do envio, que vive no pacote separado `layouts-cvm`.
 
 > **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
 
@@ -244,14 +244,14 @@ São **24 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `ato_d
   os 7 datasets `DOC/` + `EVENTOS/` virão como readers próprios.
 
 Cada padrão de leitura ganha a sua própria página, com **Descrição** e **Exemplos**, no mesmo
-formato das páginas de [Envio](../submission/informe_diario.md).
+formato das demais páginas.
 
 ## Forma de um leitor
 
 Todo leitor implementa o **port** `read() -> pd.DataFrame` (o contrato compartilhado, privado, em
 `_internal/config/ports`) e devolve um `DataFrame` cujas colunas são tipadas explicitamente — nunca pela
 inferência do pandas. Leitores de *open-data* (CSV) declaram o seu próprio contrato de colunas e
-**não** reaproveitam o schema Pydantic de submissão, pois consomem um artefato distinto do XML.
+consomem o CSV aberto, um artefato distinto do XML de envio.
 Consulte o catálogo completo de padrões (implementados e pendentes) no `CLAUDE.md` do repositório.
 
 ## Colunas de proveniência
@@ -318,8 +318,7 @@ Todo leitor aceita um `path_raw: Path | None = None` no construtor:
 - **Um caminho** — o artefato **bruto e intacto** (`.zip`, `.csv`, `.html`, `.xlsx`, …) é gravado
   ali e **mantido**, *antes* de qualquer parsing. O diretório é criado junto com os pais.
 
-É o espelho, na leitura, do `output_path` dos serializadores de [Envio](../submission/perfil_mensal.md):
-`None` mantém tudo em memória, um caminho grava em disco.
+Sem caminho tudo fica em memória; com caminho o artefato é gravado em disco.
 
 Guardar o artefato bruto é o que torna a camada *bronze* de um *datalake* autoritativa: quando a
 fonte muda o contrato dos dados e a transformação quebra, os bytes exatos que causaram a falha

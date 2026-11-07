@@ -85,9 +85,10 @@ repo-specific decision.
 - **`zip_extractor.py`, `logs.py`** — template factors out a `_require_zip` guard and a
   `_close_handlers` helper. Deferred: both lower/raise a ratcheted complexity baseline in
   `bin/quality_baseline.txt`. **Taken:** `find_member` lists the available members.
-- **Repo-only modules (keep):** `atomic_write`, `introspection`, `meta_parser`,
-  `xml_fields`, `inr_mensal_fields`; `config/ports/{ingestion_reader,submission_writer}`
-  replace the template's `example_port`; `config/CLAUDE.md` describes `schemas/`.
+- **Repo-only modules (keep):** `introspection`, `meta_parser`;
+  `config/ports/ingestion_reader` replaces the template's `example_port`. (`atomic_write`,
+  `xml_fields`, `inr_mensal_fields` and `config/schemas/` left with the submission section,
+  now the separate `layouts-cvm` package.)
 - **Template modules not imported** (examples or unused by any reader/writer here):
   `daily_cache`, `regime_adapter`, `regime_registry`, `regime_window`,
   `sidecar_metadata`, `spec_gap_registry`, `xml_reader`, `typing/policy.py`,
