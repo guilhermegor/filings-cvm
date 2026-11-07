@@ -14,12 +14,15 @@ Two traps avoided:
   nothing (a parametrised gate over zero members is green and checks nothing).
 """
 
+import importlib
 import inspect
+import pkgutil
 
 import pytest
 
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.introspection import iter_public_readers, iter_root_packages
+from filings_cvm._internal.utils.introspection import iter_public_readers
+import filings_cvm.ingestion as pkg_ingestion
 
 
 _FAMILY = iter_public_readers()
@@ -30,14 +33,34 @@ def test_the_discovered_family_is_not_empty() -> None:
 	assert _FAMILY, "the family must not be empty"
 
 
-def test_discovery_matches_the_declared_surface() -> None:
-	"""Every name a portal root declares in ``__all__`` is a discovered member, none extra.
+def test_discovery_matches_the_readers_defined_on_disk() -> None:
+	"""The exported family equals the concrete readers found by walking the modules.
 
-	Split from the non-empty guard above: "found something" and "found exactly what was
-	declared" are different failures with different causes.
+	The walk ignores ``__all__`` entirely (and skips ``_``-prefixed modules, where the private
+	bases live), so a reader a root forgot to export shows up as a difference.
 	"""
-	int_declared = sum(len(module_root.__all__) for module_root in iter_root_packages().values())
-	assert len(_FAMILY) == int_declared
+	list_names = [
+		info.name
+		for info in pkgutil.walk_packages(pkg_ingestion.__path__, f"{pkg_ingestion.__name__}.")
+	]
+	list_public = list(filter(lambda str_name: "._" not in str_name, list_names))
+	list_modules = list(map(importlib.import_module, list_public))
+	list_pairs = [
+		(str_attr, obj) for module in list_modules for str_attr, obj in vars(module).items()
+	]
+	set_defined = set(
+		str_attr
+		for str_attr, obj in filter(
+			lambda tuple_pair: (
+				inspect.isclass(tuple_pair[1])
+				and not tuple_pair[0].startswith(("_", "Base"))
+				and issubclass(tuple_pair[1], IngestionReader)
+				and not inspect.isabstract(tuple_pair[1])
+			),
+			list_pairs,
+		)
+	)
+	assert set(_FAMILY) == set_defined
 
 
 @pytest.mark.parametrize("str_name", sorted(_FAMILY))

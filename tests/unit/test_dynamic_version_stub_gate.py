@@ -131,3 +131,14 @@ def test_quoted_toml_keys_are_the_same_keys_as_bare_ones() -> None:
 		'[tool.poetry]\nversion = "1.0.0"\n\n[tool."poetry-dynamic-versioning"]\n"enable" = true\n'
 	)
 	assert "1.0.0" in gate.find_problem(str_text)
+
+
+def test_find_problem_without_toml_parser_line_scan_flags_hand_bump(
+	monkeypatch: pytest.MonkeyPatch,
+) -> None:
+	"""With no TOML parser available, the line scan still flags a plain-key hand-bump."""
+	monkeypatch.setattr(gate, "_parse_with_tomllib", lambda str_text: None)
+	str_text = (
+		'[tool.poetry]\nversion = "1.0.0"\n\n[tool.poetry-dynamic-versioning]\nenable = true\n'
+	)
+	assert "1.0.0" in gate.find_problem(str_text)

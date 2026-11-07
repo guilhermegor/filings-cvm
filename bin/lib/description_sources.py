@@ -24,7 +24,7 @@ INT_EXIT_NO_MANIFEST = 3
 INT_EXIT_NO_MKDOCS = 4
 INT_EXIT_UNREADABLE = 5
 
-RE_SITE_DESCRIPTION = re.compile(r"^site_description:\s*(.*?)\s*$", re.MULTILINE)
+RE_SITE_DESCRIPTION = re.compile(r"^site_description:[ \t]*(.*?)[ \t]*$", re.MULTILINE)
 RE_SINGLE_QUOTED = re.compile(r"'((?:[^']|'')*)'(.*)$")
 
 

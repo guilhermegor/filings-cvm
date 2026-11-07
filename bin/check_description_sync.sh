@@ -7,12 +7,14 @@ source "$SCRIPT_DIR/lib/common.sh"
 
 ROOT="${1:-.}"
 
+PYTHON_BIN="$(command -v python || command -v python3)"
+
 manifest_description() {
-	python3 "$SCRIPT_DIR/lib/description_sources.py" manifest "$ROOT"
+	"$PYTHON_BIN" "$SCRIPT_DIR/lib/description_sources.py" manifest "$ROOT"
 }
 
 mkdocs_description() {
-	python3 "$SCRIPT_DIR/lib/description_sources.py" mkdocs "$ROOT/mkdocs.yml"
+	"$PYTHON_BIN" "$SCRIPT_DIR/lib/description_sources.py" mkdocs "$ROOT/mkdocs.yml"
 }
 
 github_about() {
