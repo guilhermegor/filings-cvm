@@ -62,28 +62,27 @@ jobs:
   check_pypi:
     needs: details
     runs-on: ubuntu-latest
-    outputs:
-      latest_previous_version: ${{ steps.pypi.outputs.latest_previous_version }}
     steps:
       - name: Fetch Information from PyPI
-        id: pypi
         run: |
+          # 404 means the package is not published yet; any other failure must stop the release
+          code=$(curl -sS -o pypi.json -w '%{http_code}' https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json)
+          if [ "$code" = "404" ]; then echo '{}' > pypi.json
+          elif [ "$code" != "200" ]; then echo "PyPI answered HTTP $code"; exit 1; fi
+          cat > "$RUNNER_TEMP/pep440_max.sh" <<'EOS'
           pep440_max() { sed -E 'h; s/\.?dev([0-9]+)/~~dev\1/; s/([0-9])(a|b|rc)([0-9]+)/\1~\2\3/; G; s/\n/\t/' | sort -t "$(printf '\t')" -k1,1V | tail -n 1 | cut -f2; }
-          response=$(curl -s https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json || echo "{}")
-          latest_previous_version=$(echo "$response" | jq -r '.releases // {} | keys[]' 2>/dev/null | pep440_max)
+          EOS
+          . "$RUNNER_TEMP/pep440_max.sh"
+          latest_previous_version=$(jq -r '.releases // {} | keys[]' pypi.json | pep440_max)
           if [ -z "$latest_previous_version" ]; then
             echo "Package not found on PyPI."
             latest_previous_version="0.0.0"
           fi
           echo "Latest version on PyPI: $latest_previous_version"
           echo "latest_previous_version=$latest_previous_version" >> $GITHUB_ENV
-          echo "latest_previous_version=$latest_previous_version" >> "$GITHUB_OUTPUT"
 
-      - name: Compare Versions - Exit When Not Greater
-        run: |
           NEW_VERSION=${{ needs.details.outputs.new_version }}
           LATEST_VERSION=$latest_previous_version
-          pep440_max() { sed -E 'h; s/\.?dev([0-9]+)/~~dev\1/; s/([0-9])(a|b|rc)([0-9]+)/\1~\2\3/; G; s/\n/\t/' | sort -t "$(printf '\t')" -k1,1V | tail -n 1 | cut -f2; }
           if [ "$(printf '%s\n' "$LATEST_VERSION" "$NEW_VERSION" | pep440_max)" != "$NEW_VERSION" ] || [ "$NEW_VERSION" == "$LATEST_VERSION" ]; then
             echo "The new version $NEW_VERSION is not greater than the latest version $LATEST_VERSION on PyPI."
             exit 1
@@ -100,7 +99,7 @@ jobs:
       issues: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -108,8 +107,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           NEW_VERSION: ${{ needs.details.outputs.new_version }}
-          PREVIOUS_VERSION: ${{ needs.check_pypi.outputs.latest_previous_version }}
-        run: python3 bin/check_release_gate.py --new-version "$NEW_VERSION" --previous-version "$PREVIOUS_VERSION"
+        run: |
+          # The gate compares against the latest FINAL, non-yanked release: a prerelease
+          # (1.0.0rc1) or a yanked 1.x must not hide the 0.x -> 1.0.0 jump.
+          code=$(curl -sS -o pypi.json -w '%{http_code}' https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json)
+          if [ "$code" = "404" ]; then echo '{}' > pypi.json
+          elif [ "$code" != "200" ]; then echo "PyPI answered HTTP $code"; exit 1; fi
+          python3 bin/check_release_gate.py --new-version "$NEW_VERSION" --pypi-json pypi.json
 
   setup_and_build:
     needs: [details, check_pypi, release_gate, run_tests]

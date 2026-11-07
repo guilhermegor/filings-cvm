@@ -5,6 +5,7 @@ The template's test ran a local HTTP server; the suite's autouse guard forbids s
 """
 
 import functools
+import http.client
 import importlib.util
 import io
 import json
@@ -63,19 +64,27 @@ def _api(monkeypatch: pytest.MonkeyPatch, *list_responses: object) -> list:
 	return list_urls
 
 
+def _run_argv(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture, list_argv: list
+) -> tuple[int, str]:
+	"""Run the gate's ``main`` with ``list_argv`` and return its exit code and output."""
+	monkeypatch.setenv("GITHUB_API_URL", "")
+	monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
+	monkeypatch.setenv("GITHUB_TOKEN", "t")
+	int_code = gate.main(list_argv)
+	cls_out = capsys.readouterr()
+	return int_code, cls_out.out + cls_out.err
+
+
 def _run(
 	monkeypatch: pytest.MonkeyPatch,
 	capsys: pytest.CaptureFixture,
 	str_previous: str,
 	str_new: str,
 ) -> tuple[int, str]:
-	"""Run the gate's ``main`` and return its exit code and combined output."""
-	monkeypatch.setenv("GITHUB_API_URL", "")
-	monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
-	monkeypatch.setenv("GITHUB_TOKEN", "t")
-	int_code = gate.main(["--previous-version", str_previous, "--new-version", str_new])
-	cls_out = capsys.readouterr()
-	return int_code, cls_out.out + cls_out.err
+	"""Run the gate with an explicit previous and new version."""
+	list_argv = ["--previous-version", str_previous, "--new-version", str_new]
+	return _run_argv(monkeypatch, capsys, list_argv)
 
 
 @pytest.mark.parametrize(
@@ -146,3 +155,72 @@ def test_issues_are_paginated(
 	)
 	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
 	assert (int_got, "#500" in str_out, len(list_urls)) == (1, True, 2)
+
+
+_FILE = [{"yanked": False}]
+_YANKED = [{"yanked": True}]
+
+
+@pytest.mark.parametrize(
+	("dict_releases", "expected"),
+	[
+		({"0.9.0": _FILE, "1.0.0rc1": _FILE}, "0.9.0"),
+		({"0.9.0": _FILE, "1.2.0": _YANKED}, "0.9.0"),
+		({"0.9.0": _FILE, "0.10.0": _FILE}, "0.10.0"),
+		({"0.9.0": []}, "0.0.0"),
+		({}, "0.0.0"),
+	],
+	ids=["prerelease-ignored", "yanked-ignored", "numeric-order", "no-files", "empty"],
+)
+def test_latest_final_ignores_prereleases_and_yanked(dict_releases: dict, expected: str) -> None:
+	"""The previous version comes from final, non-yanked releases only."""
+	assert gate.latest_final(dict_releases) == expected
+
+
+def test_prerelease_on_pypi_does_not_bypass_the_gate(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture, tmp_path: Path
+) -> None:
+	"""With only 0.9.0 final and 1.0.0rc1 published, releasing 1.0.0 is still gated."""
+	path_json = tmp_path / "pypi.json"
+	path_json.write_text(json.dumps({"releases": {"0.9.0": _FILE, "1.0.0rc1": _FILE}}))
+	_api(monkeypatch, _ok(_OPEN))
+	int_got, _ = _run_argv(
+		monkeypatch, capsys, ["--new-version", "1.0.0", "--pypi-json", str(path_json)]
+	)
+	assert int_got == 1
+
+
+def test_malformed_version_fails_closed(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+	"""A version the gate cannot read blocks the release."""
+	int_got, str_out = _run(monkeypatch, capsys, "garbage", "1.0.0")
+	assert (int_got, "failed closed" in str_out) == (1, True)
+
+
+def test_second_page_failure_fails_closed(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+	"""A failing page 2 blocks the release instead of passing on page 1 alone."""
+	list_full = [{"number": n, "title": "x", "labels": [{"name": "post-1.0"}]} for n in range(100)]
+	_api(monkeypatch, _ok(list_full), _fail(urllib.error.URLError("boom")))
+	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
+	assert (int_got, "failed closed" in str_out) == (1, True)
+
+
+def test_incomplete_read_is_annotated(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+	"""A truncated response is reported as a failed-closed annotation, not a traceback."""
+	_api(monkeypatch, _fail(http.client.IncompleteRead(b"")))
+	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
+	assert (int_got, "failed closed" in str_out) == (1, True)
+
+
+def test_issue_title_cannot_inject_workflow_commands(
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+	"""Newlines in a title are escaped so they cannot start a second workflow command."""
+	_api(monkeypatch, _ok([{"number": 1, "title": "a\n::warning::x", "labels": []}]))
+	_, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
+	assert "\n::warning::x" not in str_out

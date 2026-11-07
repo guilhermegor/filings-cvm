@@ -24,5 +24,5 @@ workflow refuses a 0.x to 1.0.0 jump while an open issue lacks the `post-1.0` la
 - [ ] **Docs audit against the code:** README, CONTRIBUTING, SECURITY, CHANGELOG, everything under `docs/` (minus historical ledgers), every `CLAUDE.md` and `AGENTS.md`, issue and PR templates, the docs-site nav and the public-API docstrings. Every count, path, import example and status mark is re-measured from the code, never incremented by hand
 - [ ] **Runnable examples:** each README and usage example runs, or is covered by a doctest or a test
 - [ ] **SECURITY.md** gains a supported-versions table for 1.x
-- [ ] **Release:** rehearsal, then publish, then install-verify (Test PyPI then PyPI; npm `--dry-run` then publish), with the tag present and the release not a draft
+- [ ] **Release:** rehearsal, then publish, then install-verify (Test PyPI then PyPI), with the tag present and the release not a draft
 - [ ] **Post-release:** switch the documented version policy from 0.x rules to full semver
