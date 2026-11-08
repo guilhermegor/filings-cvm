@@ -22,11 +22,12 @@ Biblioteca Python **tipada** para ler os arquivos abertos da
 [CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários): baixa o dump publicado em
 <https://dados.cvm.gov.br/dados/> e devolve um `DataFrame` tipado e validado por contrato.
 
-Valores decimais seguem a regra do projeto: nada de `float` onde a precisão importa, e casas
-em excesso são **truncadas em direção a zero** (`ROUND_DOWN`), nunca arredondadas.
+Valores decimais seguem a regra do projeto: nada de `float` onde a precisão importa. Colunas
+numéricas voltam como **texto exato da fonte**, sem truncar nem arredondar — a escala e o
+`Decimal` ficam a cargo de quem consome.
 
 > **Migração:** a seção de **envio** (`filings_cvm.submission`, modelo validado → XML) foi
-> removida e vive no pacote separado `layouts-cvm`. Esta biblioteca não depende dele.
+> removida e vive no pacote separado `layouts-cvm` (`from layouts_cvm import PerfilMensal`). Esta biblioteca não depende dele.
 
 > **Fonte da verdade:** nomes de coluna e tipos vêm dos arquivos reais publicados no portal de
 > dados abertos da CVM — <https://dados.cvm.gov.br/dados/> — não desta documentação.

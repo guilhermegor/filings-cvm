@@ -73,11 +73,7 @@ Status marks the `ingestion` direction. The submission (XML envio) standards mov
 
 **Fundos**
 - Informe Diário — ✅ **V4** ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py`
-- ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
 - Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py`
-- ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
-- ⬜ Balanço (`PadraoXMLBalanco.asp`)
-- ⬜ Balancete (`PadraoXMLBalancete.asp`)
 - Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **18
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
@@ -336,7 +332,6 @@ envio; é o registro do que foi entregue, não um informe):
   arquivo do `META/`** (medido pela listagem; as outras 3 grafias dão 404), com **107 campos = o header
   pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
   `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
-- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`)
 - Extrato das Informações sobre o Fundo — ✅ **ingestion** dataset `FI/DOC/EXTRATO`, que publica
   **DOIS artefatos**: `extrato_fi_AAAA.csv` (**CSV solto anual**, 2015–2026, **toda** entrega do ano)
   e `extrato_fi.csv` (**URL fixa, sem ano**) — `ingestion/fi/doc/extrato/*` (`ExtratoFiReader` 117c
@@ -763,12 +758,6 @@ Sob `CIA_ABERTA/CAD/`:
   META = `meta_cia_aberta_recompra_acoes.zip`, **medida 2 formas** (HEAD 200 + listagem do `META/`,
   onde é o único arquivo); as outras 5 grafias dão 404, inclusive o infixo `_txt` que é o correto do
   DFP/ITR **neste mesmo root**
-
-**Investidores Não Residentes**
-- ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
-
-**Escriturador de Valores Mobiliários**
-- ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)
 
 ## Layout
 

@@ -318,8 +318,6 @@ Todo leitor aceita um `path_raw: Path | None = None` no construtor:
 - **Um caminho** — o artefato **bruto e intacto** (`.zip`, `.csv`, `.html`, `.xlsx`, …) é gravado
   ali e **mantido**, *antes* de qualquer parsing. O diretório é criado junto com os pais.
 
-Sem caminho tudo fica em memória; com caminho o artefato é gravado em disco.
-
 Guardar o artefato bruto é o que torna a camada *bronze* de um *datalake* autoritativa: quando a
 fonte muda o contrato dos dados e a transformação quebra, os bytes exatos que causaram a falha
 continuam reproduzíveis em disco, em vez de perdidos num novo *download* de uma fonte já alterada.
