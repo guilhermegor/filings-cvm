@@ -312,8 +312,6 @@ def select_requirements(dict_pyproject: dict, list_groups: list) -> list:
     dict_poetry = dict_pyproject.get("tool", {}).get("poetry", {})
     if not (dict_project.get("dependencies") or dict_project.get("optional-dependencies")):
         return poetry_requirements(dict_poetry, list_groups)
-    # Poetry 2 lets [project] carry runtime deps while dev/docs live in [tool.poetry.group];
-    # each group comes from whichever table declares it.
     list_pep621 = pep621_requirements(dict_project, list_groups)
     list_poetry_only = [
         str_group

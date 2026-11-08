@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Informe Mensal INR**
 ([`PadraoXMLInfoMensalINR.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp)).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---

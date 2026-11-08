@@ -3,7 +3,7 @@
 Leitura (← CVM) do **log de alterações** do cadastro legado de fundos (`cad_fi_hist.zip`),
 publicado no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FI/CAD/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) · o retrato do estado
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) · o retrato do estado
 > atual em [Cadastro de Fundos (CAD/FI)](cadastro_fi.md).
 
 ---

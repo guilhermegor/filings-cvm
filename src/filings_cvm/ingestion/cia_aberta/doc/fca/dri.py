@@ -1,6 +1,6 @@
 """CVM FCA CIA_ABERTA (DRI) — ingestion (leitura) reader.
 
-The *Diretor de Relações com Investidores* and their contact details.
+The `Diretor de Relações com Investidores` and their contact details.
 
 ⚠️ Carries **personal data**: ``CPF_Responsavel`` holds 1,003 CPFs and 4 CNPJs in 2025 — a mixed
 person-or-company identifier. It is returned as exact source text and is **not** declared a CNPJ

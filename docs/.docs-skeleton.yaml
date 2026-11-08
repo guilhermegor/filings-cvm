@@ -1,0 +1,8 @@
+required_pages:
+  - index.md
+  - usage.md
+  - examples.md
+  - api/index.md
+  - faq.md
+  - contributing.md
+  - changelog.md
