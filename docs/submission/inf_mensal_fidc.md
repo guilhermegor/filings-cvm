@@ -4,7 +4,7 @@ Envio (→ CVM) do padrão **Informe Mensal FIDC**, vigente desde 2019-11-01
 ([`PadraoXMLMensalFIDC576.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLMensalFIDC576.asp)).
 O layout anterior (`PadraoXMLMensalFIDC489.asp`) está descontinuado e não é implementado.
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---

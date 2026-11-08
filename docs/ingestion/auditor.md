@@ -8,7 +8,7 @@ Leitura (← CVM) do cadastro dos **auditores independentes** supervisionados pe
 > multi-membro — base privada + `pf`/`pj` + Meta reader, contratos pinados aos headers publicados —
 > que os demais roots de prestadores (ADM_CART, AGENTE_AUTON, INTERMED, INVNR, …) reaproveitam.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

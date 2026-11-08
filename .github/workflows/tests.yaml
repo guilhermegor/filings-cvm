@@ -125,6 +125,24 @@ jobs:
         # url/updated_at/source_key/... columns. Explicit CI step (gate parity with pre-commit).
         run: poetry run python bin/check_provenance.py
 
+      - name: Layer Import Policy Enforcement
+        if: runner.os == 'Linux'
+        # Mirrors the `check-layer-imports` pre-commit hook: every src/ import is judged
+        # against .layer-policy.yaml (a vendor is reached through a seam in _internal/utils).
+        run: poetry run python bin/check_layer_imports.py
+
+      - name: Dynamic Version Stub Enforcement
+        if: runner.os == 'Linux'
+        # Mirrors the `dynamic-version-stub` pre-commit hook: with poetry-dynamic-versioning
+        # enabled, [tool.poetry] version must stay the 0.0.0 stub (the tag is the version).
+        run: poetry run python bin/check_dynamic_version_stub.py
+
+      - name: Description Sync Enforcement
+        if: runner.os == 'Linux'
+        # Mirrors the `check-description-sync` pre-commit hook: pyproject.toml and mkdocs.yml
+        # carry one description. The GitHub About comparison self-skips without GH_TOKEN.
+        run: poetry run bash bin/check_description_sync.sh
+
       - name: Run Schema-Model Enforcement
         if: runner.os == 'Linux'
         # Mirrors the `check-schemas` pre-commit hook: every class in a

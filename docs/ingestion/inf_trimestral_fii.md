@@ -3,7 +3,7 @@
 Leitura (← CVM) do **Informe Trimestral dos FII** (`inf_trimestral_fii_AAAA.zip`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FII/DOC/INF_TRIMESTRAL/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > o [Informe Mensal FII](inf_mensal_fii.md) e o [DFIN FII](dfin_fii.md).
 
 ---
