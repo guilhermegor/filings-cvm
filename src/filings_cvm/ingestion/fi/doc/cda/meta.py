@@ -1,7 +1,7 @@
 """CVM **META** for the FI CDA dataset (`FI/DOC/CDA`).
 
-The spec CVM publishes for the block-type members of `cda_fi_AAAAMM.zip` (the Demonstrativo de
-Composição e Diversificação das Aplicações) — the declared description, type and size of every
+The spec CVM publishes for the block-type members of `cda_fi_AAAAMM.zip` (the `Demonstrativo de
+Composição e Diversificação das Aplicações`) — the declared description, type and size of every
 field. Note the `_txt` infix in the archive name (`meta_cda_fi_txt.zip`), irregular against most
 other datasets' META filenames.
 """

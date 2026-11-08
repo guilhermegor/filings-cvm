@@ -4,7 +4,7 @@ Leitura (← CVM) dos **processos administrativos sancionadores** da CVM e de se
 publicados no [portal de dados abertos](https://dados.cvm.gov.br/dados/). Estes readers
 **inauguram** o *portal root* `processo/` (irmão de `oferta/`, `intermed/`, `fi/`, …).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

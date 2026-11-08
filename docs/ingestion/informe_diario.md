@@ -4,7 +4,7 @@ Leitura (← CVM) do dump mensal de *open-data* do **Informe Diário de fundos**
 (`inf_diario_fi_AAAAMM`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---

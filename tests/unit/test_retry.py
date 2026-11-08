@@ -124,6 +124,22 @@ def test_retry_policy_rejects_unknown_strategy() -> None:
 		RetryPolicy(str_strategy="fibonacci")
 
 
+@pytest.mark.parametrize(
+	("dict_kwargs", "str_field"),
+	[
+		({"float_base_wait_s": -1.0}, "float_base_wait_s"),
+		({"float_factor": float("inf")}, "float_factor"),
+		({"float_max_wait_s": float("nan")}, "float_max_wait_s"),
+	],
+)
+def test_retry_policy_rejects_waits_time_sleep_cannot_accept(
+	dict_kwargs: dict[str, float], str_field: str
+) -> None:
+	"""A negative or non-finite wait fails at construction, not inside the retry loop."""
+	with pytest.raises(ValueError, match=f"must be finite and >= 0: {str_field}"):
+		RetryPolicy(**dict_kwargs)
+
+
 def test_call_with_backoff_retries_then_succeeds(list_waits: list[float]) -> None:
 	"""The imperative executor retries a transient failure and returns fn's result."""
 	cls_flaky = _Flaky(int_failures=2)

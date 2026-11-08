@@ -1,7 +1,7 @@
 """Data contracts for the CVM open-data *CGVN CIA_ABERTA* CSVs (ingestion).
 
-`cgvn_cia_aberta_AAAA.zip` (dataset `CIA_ABERTA/DOC/CGVN`, *Informe sobre o Código Brasileiro de
-Governança Corporativa*) ships **two members** — an **index** and its **content**, the VLMO shape:
+`cgvn_cia_aberta_AAAA.zip` (dataset `CIA_ABERTA/DOC/CGVN`, `Informe sobre o Código Brasileiro de
+Governança Corporativa`) ships **two members** — an **index** and its **content**, the VLMO shape:
 
 - `cgvn_cia_aberta_AAAA.csv` (12 cols, 382 rows in 2025) — one row per informe filed, with a
   `Link_Download` returned as text and never followed.

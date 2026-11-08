@@ -8,7 +8,7 @@ Leitura (← CVM) do cadastro das **companhias abertas** registradas na CVM, pub
 > cadastro) + 7 sob `DOC/` (CGVN, DFP, FCA, FRE, IPE, ITR, VLMO — demonstrações financeiras, ZIPs
 > multi-membro) + `EVENTOS/RECOMPRA_ACOES`. Cada um ganha o seu próprio reader.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

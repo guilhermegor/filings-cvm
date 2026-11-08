@@ -7,7 +7,7 @@ publicados no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/).
 > Primeira fatia da **Wave 2** do #41 (Securitização). Os três dumps mensais multi-membro
 > (`INF_MENSAL_CRA/CRI/OTS`) chegam em PRs seguintes.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

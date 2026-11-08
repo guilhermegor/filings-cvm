@@ -4,7 +4,7 @@ Leitura (← CVM) dos **programas de recompra de ações** das companhias aberta
 (`cia_aberta_recompra_acoes.zip`), publicados no
 [portal de dados abertos](https://dados.cvm.gov.br).
 
-> **Ver também:** [Referência da API](../api.md) · [Uso](../usage.md) · os datasets `DOC` do mesmo
+> **Ver também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) · os datasets `DOC` do mesmo
 > root: [IPE](ipe_cia_aberta.md), [VLMO](vlmo_cia_aberta.md), [FCA](fca_cia_aberta.md),
 > [CGVN](cgvn_cia_aberta.md), [FRE](fre_cia_aberta.md), [DFP](dfp_cia_aberta.md),
 > [ITR](itr_cia_aberta.md).

@@ -8,7 +8,7 @@ Estes readers **inauguram** o *portal root* `coord_oferta/` (irmão de `intermed
 > do [INTERMED](intermed.md), não ao CSV solto de [CIA_ESTRANG](cia_estrang.md) /
 > [CIA_INCENT](cia_incent.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

@@ -5,7 +5,7 @@ de risco e de voto, agência de classificação de risco, meios de divulgação 
 cotista e prestadores de serviço. Fonte: `compl_fi_AAAAMM.zip`, do dataset
 [`FI/DOC/COMPL`](https://dados.cvm.gov.br/dataset/fi-doc-compl).
 
-> **Veja também:** [Referência da API](../api.md) · [META](meta.md) · [Proveniência](index.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [META](meta.md) · [Proveniência](index.md).
 
 ---
 
