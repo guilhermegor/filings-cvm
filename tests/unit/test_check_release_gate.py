@@ -33,19 +33,19 @@ _DEFERRED = [
 ]
 
 
-def _raise(error: Exception) -> None:
-	"""Raise ``error`` (a branch-free way for a fake response to fail)."""
-	raise error
+def _raise(cls_error: Exception) -> None:
+	"""Raise ``cls_error`` (a branch-free way for a fake response to fail)."""
+	raise cls_error
 
 
-def _ok(body: object) -> object:
-	"""Return a fake response that serves ``body`` as JSON."""
-	return lambda: io.BytesIO(json.dumps(body).encode())
+def _ok(cls_body: object) -> object:
+	"""Return a fake response that serves ``cls_body`` as JSON."""
+	return lambda: io.BytesIO(json.dumps(cls_body).encode())
 
 
-def _fail(error: Exception) -> object:
-	"""Return a fake response that raises ``error``."""
-	return lambda: _raise(error)
+def _fail(cls_error: Exception) -> object:
+	"""Return a fake response that raises ``cls_error``."""
+	return lambda: _raise(cls_error)
 
 
 def _fake_urlopen(

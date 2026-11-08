@@ -13,10 +13,6 @@ poetry_exec() {
 	bash "$SCRIPT_DIR/bin/poetry_exec.sh" "$@"
 }
 
-# -------------------
-# VIRTUAL ENVIRONMENT
-# -------------------
-
 ensure_env() {
 	bash "$SCRIPT_DIR/bin/ensure_env.sh"
 }
@@ -79,17 +75,9 @@ changelog() {
 	echo "CHANGELOG.md regenerated"
 }
 
-# -------------------
-# CORPORATE CA
-# -------------------
-
 get_corporate_ca() {
 	bash "$SCRIPT_DIR/bin/get_corporate_ca.sh"
 }
-
-# -------------------
-# TESTING
-# -------------------
 
 unit_tests() {
 	poetry_exec run pytest tests/unit/
@@ -136,10 +124,6 @@ fix_playwright() {
 	bash "$SCRIPT_DIR/bin/fix_playwright.sh"
 }
 
-# -------------------
-# LINTING
-# -------------------
-
 lint() {
 	poetry_exec run ruff check --fix .
 	poetry_exec run ruff format .
@@ -164,10 +148,6 @@ install_shell_linters() {
 	bash "$SCRIPT_DIR/bin/install_shell_linters.sh"
 }
 
-# -------------------
-# DATABASE
-# -------------------
-
 db_up() {
 	bash "$SCRIPT_DIR/bin/db.sh" up
 }
@@ -180,25 +160,14 @@ db_restore() {
 	bash "$SCRIPT_DIR/bin/db.sh" restore
 }
 
-# -------------------
-# RUN
-# -------------------
-
 run() {
 	bash "$SCRIPT_DIR/bin/run.sh"
 }
-
-# -------------------
-# SHIP
-# -------------------
 
 ship() {
 	bash "$SCRIPT_DIR/bin/ship.sh"
 }
 
-# -------------------
-# LIBRARY (defined only when scaffolded as a distributable library)
-# -------------------
 # install_dist_locally ships only for the library tier (make/library.mk present); it mirrors
 # the Makefile's -included library target. Defined only when the marker is there.
 
@@ -218,9 +187,6 @@ if [ -f "$SCRIPT_DIR/make/library.mk" ]; then
 	}
 fi
 
-# -------------------
-# OFFLINE (defined only when scaffolded without GitHub)
-# -------------------
 # new_branch, git_merge_to_main and the git_diff_* helpers substitute for the
 # GitHub branch/PR flow; they ship only in offline mode (their scripts live in
 # bin/ only then). Define each function only when its script is present.
@@ -239,26 +205,14 @@ if [ -f "$SCRIPT_DIR/bin/git_diff_export.sh" ]; then
 	git_diff_apply() { bash "$SCRIPT_DIR/bin/git_diff_apply.sh" "${1:-}"; }
 fi
 
-# -------------------
-# DOCS
-# -------------------
-
 docs_server() {
 	poetry_exec install --with docs
 	poetry_exec run mkdocs serve -a 0.0.0.0:8000 --livereload
 }
 
-# -------------------
-# CONTEXT
-# -------------------
-
 export_context() {
 	bash "$SCRIPT_DIR/bin/export_repo_content.sh" "${1:-}"
 }
-
-# -------------------
-# HELP
-# -------------------
 
 show_help() {
 	cat <<EOF
@@ -322,10 +276,6 @@ Offline (only present when scaffolded without GitHub)
 
 EOF
 }
-
-# -------------------
-# MAIN
-# -------------------
 
 case "${1:-help}" in
 init) init ;;

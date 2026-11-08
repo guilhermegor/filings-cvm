@@ -1,7 +1,7 @@
 """Data contracts for the CVM open-data *Cadastro de Representantes de INVNR* (INVNR/CAD).
 
 `cad_invnr_repres.zip` is a **current-state snapshot** of the registry of representatives of
-non-resident investors (investidores não residentes) CVM supervises — a ZIP of two members, not a
+non-resident investors (`investidores não residentes`) CVM supervises — a ZIP of two members, not a
 periodic dump, and not partitioned by reference date:
 
 - `cad_invnr_repres_pf.csv` — the natural-person (pessoa física) representatives: the name, the

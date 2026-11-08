@@ -4,9 +4,6 @@
 # Windows/Git Bash). Never call a bare `poetry` in a recipe.
 POETRY := bash bin/poetry_exec.sh
 
-# -------------------
-# VIRTUAL ENVIRONMENT
-# -------------------
 .PHONY: init ensure_env venv update_venv precommit enable_pages enable_repo_rules enable_security changelog
 
 init: ensure_env venv precommit enable_pages enable_repo_rules enable_security
@@ -59,17 +56,11 @@ changelog:
 	@$(POETRY) run cz changelog
 	@echo "CHANGELOG.md regenerated"
 
-# -------------------
-# CORPORATE CA
-# -------------------
 .PHONY: get_corporate_ca
 
 get_corporate_ca:
 	@bash bin/get_corporate_ca.sh
 
-# -------------------
-# TESTING
-# -------------------
 .PHONY: unit_tests integration_tests test_cov test_cov_report test_cov_serve test_slowest test_feat test_urls_docstrings fix_playwright
 
 unit_tests:
@@ -106,9 +97,6 @@ test_urls_docstrings:
 fix_playwright:
 	@bash bin/fix_playwright.sh
 
-# -------------------
-# LINTING
-# -------------------
 .PHONY: lint check_docstrings install_shell_linters
 
 # Optional: install shellcheck + shfmt as SYSTEM binaries (choco/scoop/brew/apt).
@@ -132,9 +120,6 @@ lint:
 check_docstrings:
 	@$(POETRY) run python bin/check_docstrings.py
 
-# -------------------
-# DATABASE
-# -------------------
 .PHONY: db_up db_backup db_restore
 
 db_up:
@@ -146,42 +131,27 @@ db_backup:
 db_restore:
 	@bash bin/db.sh restore
 
-# -------------------
-# RUN
-# -------------------
 .PHONY: run
 
 run:
 	@bash bin/run.sh
 
-# -------------------
-# CONTEXT
-# -------------------
 .PHONY: export_context
 
 export_context:
 	@bash bin/export_repo_content.sh
 
-# -------------------
-# SHIP
-# -------------------
 .PHONY: ship
 
 ship:
 	@bash bin/ship.sh
 
-# -------------------
-# DOCS
-# -------------------
 .PHONY: docs_server
 
 docs_server:
 	@$(POETRY) install --with docs
 	@$(POETRY) run mkdocs serve -a 0.0.0.0:8000 --livereload
 
-# -------------------
-# HELP
-# -------------------
 .PHONY: help
 
 help:
