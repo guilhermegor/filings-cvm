@@ -182,6 +182,9 @@ pertence a nenhuma delas. Tudo sob `_internal/` é privado.
 As versões saem pelos workflows `release-test-pypi.yaml` (ensaio no Test PyPI) e
 `release-pypi.yaml` (PyPI + GitHub Release) em `.github/workflows/`; a tag git é a versão.
 
+O caminho do 0.x ao 1.0.0, e o portão de release que o protege, está em
+[docs/releasing-1-0-0.md](docs/releasing-1-0-0.md).
+
 <!-- slug: contributing -->
 ## Contribuição
 
