@@ -9,7 +9,7 @@ Conditional by construction: a project without dynamic versioning enabled (the s
 whose ``cz bump`` / ``release.yaml`` write a real static version, and offline-mode libraries)
 is a no-op and exits 0.
 
-``pyproject.toml`` is parsed with ``tomllib`` (``tomli`` on Python 3.10, a dev dependency).
+``pyproject.toml`` is parsed with ``tomllib`` (stdlib).
 
 Usage: ``python bin/check_dynamic_version_stub.py [--root DIR]``
 """
@@ -17,12 +17,7 @@ Usage: ``python bin/check_dynamic_version_stub.py [--root DIR]``
 import argparse
 import pathlib
 import sys
-
-
-if sys.version_info >= (3, 11):
-	import tomllib
-else:
-	import tomli as tomllib
+import tomllib
 
 
 STR_STUB = "0.0.0"
