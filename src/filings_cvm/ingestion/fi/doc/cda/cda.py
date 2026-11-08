@@ -1,7 +1,7 @@
 """CVM CDA FIF — ingestion (leitura) reader.
 
-Downloads the monthly CVM open-data dump of the *Demonstrativo de Composição e
-Diversificação das Aplicações* (``cda_fi_AAAAMM.zip``), consolidates its asset blocks,
+Downloads the monthly CVM open-data dump of the `Demonstrativo de Composição e
+Diversificação das Aplicações` (``cda_fi_AAAAMM.zip``), consolidates its asset blocks,
 and returns them as a typed, contract-validated :class:`pandas.DataFrame`. This is the
 *reading* half of the standard; building the CDA file to *send* to CVM lives in the
 ``submission`` section — and the two touch **different artifacts**: submission produces

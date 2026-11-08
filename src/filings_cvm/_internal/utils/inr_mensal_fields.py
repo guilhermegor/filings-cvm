@@ -1,4 +1,4 @@
-r"""Strict field validators for the Informe Mensal de Investidor Não Residente schema.
+r"""Strict field validators for the ``Informe Mensal de Investidor Não Residente`` schema.
 
 Pure functions (no I/O) that ``schemas/inr_mensal.py`` composes into ``Annotated`` field types.
 They live here, not in a ``schemas/`` module, because that directory holds only Pydantic models
