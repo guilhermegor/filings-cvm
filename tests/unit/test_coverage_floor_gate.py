@@ -215,7 +215,22 @@ def test_absolute_omit_pattern_still_swallows_a_relative_module(
 
 	list_problems = cls_gate.swallowed_by_omit([path_module], [str_absolute_pattern])
 
-	assert len(list_problems) == 1
+	assert [
+		(path_module.as_posix() in str_msg, str_absolute_pattern in str_msg)
+		for str_msg in list_problems
+	] == [(True, True)]
+
+
+def test_absolute_omit_pattern_under_a_different_root_does_not_match(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Same pattern suffix, different absolute root: the module is not omitted."""
+	cls_gate = _load_gate()
+	path_root = _project(tmp_path, "")
+	path_module = _module(path_root, "ingestion", _SRC_FUNC)
+	monkeypatch.chdir(path_root)
+
+	assert cls_gate.swallowed_by_omit([path_module], ["/elsewhere/src/*/ingestion/*"]) == []
 
 
 def test_relative_omit_pattern_keeps_working(

@@ -16,9 +16,6 @@ import subprocess
 import pytest
 
 
-tomllib = pytest.importorskip("tomllib", reason="tomllib is stdlib only from Python 3.11")
-
-
 _BAD_SOURCE = "def choose(flag: bool) -> int:\n\tif flag:\n\t\treturn 1\n\telse:\n\t\treturn 2\n"
 _GOOD_SOURCE = "def choose(flag: bool) -> int:\n\tif flag:\n\t\treturn 1\n\treturn 2\n"
 
@@ -100,5 +97,6 @@ def test_shipped_config_selects_ret() -> None:
 	`"RET"` from ``[lint].select`` would disable the rule everywhere and leave both of them
 	green — the silent hole this assertion closes.
 	"""
+	tomllib = pytest.importorskip("tomllib", reason="tomllib is stdlib only from Python 3.11")
 	dict_config = tomllib.loads(_PATH_RUFF_TOML.read_text(encoding="utf-8"))
 	assert "RET" in dict_config["lint"]["select"]

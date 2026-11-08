@@ -655,8 +655,9 @@ def test_a_refusal_that_declares_no_wait_yields_no_number(cls_retry: ModuleType)
 	assert cls_retry.parse_declared_wait(_STR_RATE_LIMITED) is None
 
 
+@pytest.mark.parametrize("int_min_ago", [20, 31])
 def test_a_pr_inside_the_declared_window_is_not_re_asked(
-	cls_retry: ModuleType, cls_gate: ModuleType
+	cls_retry: ModuleType, cls_gate: ModuleType, int_min_ago: int
 ) -> None:
 	"""⚠️ The defect this issue exists for: asking inside the window burns a request.
 
@@ -671,8 +672,10 @@ def test_a_pr_inside_the_declared_window_is_not_re_asked(
 		The retry module.
 	cls_gate : types.ModuleType
 		The gate module.
+	int_min_ago : int
+		Minutes since the 35-minute notice; both leave the window still open.
 	"""
-	list_comments = [_comment("coderabbitai", _STR_RATE_LIMITED_35, int_min_ago=20)]
+	list_comments = [_comment("coderabbitai", _STR_RATE_LIMITED_35, int_min_ago=int_min_ago)]
 	dict_pr = _pr(list_comments, [])
 
 	assert (
@@ -901,6 +904,84 @@ def test_account_blocked_until_is_free_once_the_newest_refusal_elapses(
 	assert cls_retry.account_blocked_until(list_notices, _DT_NOW) is None
 
 
+def test_account_blocked_until_keeps_an_older_but_later_deadline(
+	cls_retry: ModuleType,
+) -> None:
+	"""An older 60-minute refusal outlasts a newer 35-minute one: the max deadline wins.
+
+	Parameters
+	----------
+	cls_retry : types.ModuleType
+		The retry module.
+	"""
+	str_sixty = _STR_RATE_LIMITED_35.replace("35 minutes", "60 minutes")
+	list_notices = [
+		_comment("coderabbitai", str_sixty, int_min_ago=20),
+		_comment("coderabbitai", _STR_RATE_LIMITED_35, int_min_ago=5),
+	]
+
+	assert cls_retry.account_blocked_until(list_notices, _DT_NOW) == _DT_NOW + timedelta(
+		minutes=40
+	)
+
+
+def test_choose_pr_to_retry_asks_nobody_while_another_pr_holds_a_declared_wait(
+	cls_retry: ModuleType, cls_gate: ModuleType
+) -> None:
+	"""The account-wide guard applies through ``choose_pr_to_retry``, not just its helper.
+
+	Parameters
+	----------
+	cls_retry : types.ModuleType
+		The retry module.
+	cls_gate : types.ModuleType
+		The gate module.
+	"""
+	list_eligible = [_comment("coderabbitai", _STR_RATE_LIMITED, int_min_ago=50)]
+	list_waiting = [_comment("coderabbitai", _STR_RATE_LIMITED_35, int_min_ago=5)]
+	list_candidates = [
+		_candidate(11, "2026-08-20T00:00:00Z", list_eligible, _pr(list_eligible, [])),
+		_candidate(22, "2026-08-21T00:00:00Z", list_waiting, _pr(list_waiting, [])),
+	]
+
+	assert (
+		cls_retry.choose_pr_to_retry(
+			[], list_candidates, {"coderabbitai"}, cls_gate, "guilhermegor", _DT_NOW
+		)
+		is None
+	)
+
+
+def test_a_built_candidate_is_selectable(
+	cls_retry: ModuleType, cls_gate: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""A record from ``build_candidate`` flows through the selector to its PR number.
+
+	Parameters
+	----------
+	cls_retry : types.ModuleType
+		The retry module.
+	cls_gate : types.ModuleType
+		The gate module.
+	monkeypatch : pytest.MonkeyPatch
+		Fixture used to stub both fetches.
+	"""
+	list_comments = [_comment("coderabbitai", _STR_RATE_LIMITED, int_min_ago=50)]
+	monkeypatch.setattr(cls_gate, "fetch_pull_request", Mock(return_value=_pr(list_comments, [])))
+	monkeypatch.setattr(cls_retry, "fetch_comments", Mock(return_value=list_comments))
+
+	dict_candidate = cls_retry.build_candidate(
+		"acme/widget", 7, "2026-08-24T00:00:00Z", {"coderabbitai"}, cls_gate
+	)
+
+	assert (
+		cls_retry.select_pr_for_retry(
+			[dict_candidate], {"coderabbitai"}, cls_gate, "guilhermegor", _DT_NOW
+		)
+		== 7
+	)
+
+
 def test_select_pr_for_retry_picks_the_oldest_of_several_waiting_prs(
 	cls_retry: ModuleType, cls_gate: ModuleType
 ) -> None:
@@ -1029,6 +1110,30 @@ def test_newest_roster_comment_ignores_a_user_typed_borrower(cls_retry: ModuleTy
 	"""
 	list_comments = [_comment("coderabbitai", _STR_RATE_LIMITED, str_type="User")]
 	assert cls_retry.newest_roster_comment(list_comments, {"coderabbitai"}, str) is None
+
+
+@pytest.mark.parametrize(
+	("str_reviewer_body", "str_bot_body"),
+	[(_STR_PERFORMED, _STR_RATE_LIMITED), (_STR_RATE_LIMITED, _STR_PERFORMED)],
+)
+def test_newest_roster_comment_ignores_a_newer_out_of_roster_bot(
+	cls_retry: ModuleType, str_reviewer_body: str, str_bot_body: str
+) -> None:
+	"""A newer bot outside the roster cannot flip the reviewer's last word either way.
+
+	Parameters
+	----------
+	cls_retry : types.ModuleType
+		The retry module.
+	str_reviewer_body : str
+		The roster reviewer's notice.
+	str_bot_body : str
+		The opposite notice, posted later by a bot outside the roster.
+	"""
+	dict_reviewer = _comment("coderabbitai", str_reviewer_body, int_min_ago=10)
+	list_comments = [dict_reviewer, _comment("other-bot", str_bot_body, int_min_ago=1)]
+
+	assert cls_retry.newest_roster_comment(list_comments, {"coderabbitai"}, str) == dict_reviewer
 
 
 def test_build_candidate_passes_the_roster_to_the_fetch(

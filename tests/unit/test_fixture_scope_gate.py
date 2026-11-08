@@ -135,6 +135,15 @@ def test_a_bare_fixture_decorator_is_accepted() -> None:
 	assert gate._decorator_call_name(node_dec) is None
 
 
+def test_a_file_with_an_imported_bare_fixture_has_no_findings(tmp_path: Path) -> None:
+	"""`from pytest import fixture` + bare `@fixture` goes through `file_problems` clean."""
+	path_file = _test_file(
+		tmp_path, "from pytest import fixture\n\n\n@fixture\ndef f():\n\treturn {}\n"
+	)
+
+	assert gate.file_problems(path_file) == []
+
+
 def test_the_default_function_scope_is_accepted(tmp_path: Path) -> None:
 	"""No `scope=` kwarg at all — the pytest default — passes clean."""
 	path_file = _test_file(tmp_path, "import pytest\n\n\n@pytest.fixture\ndef f():\n\treturn {}\n")
@@ -230,6 +239,25 @@ def test_audit_mode_passes_and_reports_the_count(
 
 	gate.main([])
 	assert "1 file(s) checked" in capsys.readouterr().out
+
+
+def test_audit_mode_reports_a_violation_without_the_success_line(
+	tmp_path: Path,
+	monkeypatch: pytest.MonkeyPatch,
+	capsys: pytest.CaptureFixture[str],
+) -> None:
+	"""A widened scope fails the gate and the output carries the finding, not the success count."""
+	path_tests = tmp_path / "tests" / "unit"
+	path_tests.mkdir(parents=True)
+	_test_file(
+		path_tests,
+		'import pytest\n\n\n@pytest.fixture(scope="module")\ndef shared():\n\treturn {}\n',
+	)
+	monkeypatch.setattr(gate, "PATH_ROOT", tmp_path)
+
+	int_code = gate.main([])
+	str_out = capsys.readouterr().out
+	assert (int_code, "shared()" in str_out, "file(s) checked" in str_out) == (1, True, False)
 
 
 def test_audit_mode_exits_zero_on_a_clean_tree(
