@@ -91,13 +91,8 @@ pip_fallback_ensure_toml_reader() {
 		return 0
 	fi
 
-	if "$PYTHON" -c "import tomli" >/dev/null 2>&1; then
-		return 0
-	fi
-
-	pip_fallback_populate_pip_args
-	print_status "info" "Installing tomli for pyproject fallback parsing..."
-	"$PYTHON" -m pip install "${PIP_FALLBACK_ARGS[@]}" ${PIP_FALLBACK_USER_ARGS[@]+"${PIP_FALLBACK_USER_ARGS[@]}"} tomli
+	print_status "error" "$PYTHON has no tomllib (Python >= 3.11 required)."
+	return 1
 }
 
 pip_fallback_ensure_project_poetry() {
