@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import importlib.util
 import io
 from pathlib import Path
@@ -224,16 +225,16 @@ def test_main_open_pr_read_failure_deletes_nothing(monkeypatch: pytest.MonkeyPat
 
 
 @pytest.mark.parametrize(
-	"cls_exc",
+	"fn_exc",
 	[
-		urllib.error.HTTPError("u", 500, "boom", {}, None),  # type: ignore[arg-type]
-		urllib.error.URLError("timed out"),
+		lambda: urllib.error.HTTPError("u", 500, "boom", {}, None),  # type: ignore[arg-type]
+		lambda: urllib.error.URLError("timed out"),
 	],
 )
 def test_main_delete_failure_skips_branch_and_still_reports(
 	monkeypatch: pytest.MonkeyPatch,
 	capsys: pytest.CaptureFixture[str],
-	cls_exc: Exception,
+	fn_exc: Callable[[], Exception],
 ) -> None:
 	"""A failed DELETE is counted, the next branch is still tried, and the summary prints."""
 	list_calls: list[str] = []
@@ -242,7 +243,7 @@ def test_main_delete_failure_skips_branch_and_still_reports(
 
 	def _api(str_method: str, str_url: str) -> Any:  # noqa: ANN401
 		if str_method == "DELETE" and str_url.endswith("feat/a"):
-			raise cls_exc
+			raise fn_exc()
 		return fn_fake(str_method, str_url)
 
 	monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")

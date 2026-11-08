@@ -2,8 +2,6 @@
 # <guard> <count> <path>. A count may only go DOWN; regenerate a guard's rows with
 # `python bin/quality_ratchet.py <guard> --write-baseline <guard command>`.
 dead-code 1 src/filings_cvm/_internal/utils/http_downloader.py
-function-length 1 bin/lib/pip_fallback.sh
-function-length 2 bin/test_urls_docstrings.sh
 function-length 1 tasks.sh
 complexity 1 bin/check_docs_sections.py
 complexity 1 bin/check_docstrings.py
@@ -22,7 +20,6 @@ complexity 5 src/filings_cvm/_internal/utils/zip_extractor.py
 complexity 1 src/filings_cvm/ingestion/_base_meta_reader.py
 complexity 2 src/filings_cvm/ingestion/fi/doc/cda/cda.py
 complexity 1 src/filings_cvm/ingestion/fi/doc/informe_diario/informe_diario.py
-complexity 1 tests/conftest.py
 complexity 3 tests/integration/test_bin_scripts.py
 complexity 6 tests/unit/test_adm_cart_ingestion.py
 complexity 4 tests/unit/test_agente_auton_ingestion.py
