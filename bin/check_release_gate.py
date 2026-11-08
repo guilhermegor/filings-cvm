@@ -164,7 +164,9 @@ def fetch_page(str_repo: str, int_page: int) -> list[dict]:
 			list_page = json.load(cls_response)
 	except (OSError, ValueError, http.client.HTTPException) as cls_error:
 		raise GateError(f"cannot read open issues from {str_url}: {cls_error}") from cls_error
-	if not isinstance(list_page, list) or not all(isinstance(d, dict) for d in list_page):
+	if not isinstance(list_page, list) or not all(
+		isinstance(dict_row, dict) for dict_row in list_page
+	):
 		raise GateError(f"unexpected response from {str_url}: {list_page!r}")
 	return list_page
 

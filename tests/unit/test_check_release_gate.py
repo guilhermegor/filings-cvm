@@ -111,27 +111,27 @@ def test_zero_x_to_one_zero_gates_on_open_issues(
 
 
 @pytest.mark.parametrize(
-	("previous", "new"), [("1.0.0", "1.0.1"), ("0.4.0", "0.5.0"), ("1.4.0", "2.0.0")]
+	("str_previous", "str_new"), [("1.0.0", "1.0.1"), ("0.4.0", "0.5.0"), ("1.4.0", "2.0.0")]
 )
 def test_other_bumps_are_unaffected_and_make_no_api_call(
-	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture, previous: str, new: str
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture, str_previous: str, str_new: str
 ) -> None:
 	"""Any bump other than 0.x to 1+ is not gated and never touches the API."""
 	list_urls = _api(monkeypatch)
-	int_got, str_out = _run(monkeypatch, capsys, previous, new)
+	int_got, str_out = _run(monkeypatch, capsys, str_previous, str_new)
 	assert (int_got, "not applicable" in str_out, list_urls) == (0, True, [])
 
 
 @pytest.mark.parametrize(
-	"response",
+	"fn_response",
 	[_fail(urllib.error.URLError("boom")), _ok({"message": "not a list"})],
 	ids=["read-error", "unexpected-payload"],
 )
 def test_unreadable_api_fails_closed(
-	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture, response: object
+	monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture, fn_response: object
 ) -> None:
 	"""An API error or a non-list payload blocks the release instead of guessing."""
-	_api(monkeypatch, response)
+	_api(monkeypatch, fn_response)
 	int_got, str_out = _run(monkeypatch, capsys, "0.9.0", "1.0.0")
 	assert (int_got, "failed closed" in str_out) == (1, True)
 
@@ -164,7 +164,7 @@ _YANKED = [{"yanked": True}]
 
 
 @pytest.mark.parametrize(
-	("dict_releases", "expected"),
+	("dict_releases", "str_expected"),
 	[
 		({"0.9.0": _FILE, "1.0.0rc1": _FILE}, "0.9.0"),
 		({"0.9.0": _FILE, "1.2.0": _YANKED}, "0.9.0"),
@@ -184,9 +184,11 @@ _YANKED = [{"yanked": True}]
 		"empty",
 	],
 )
-def test_latest_final_ignores_prereleases_and_yanked(dict_releases: dict, expected: str) -> None:
+def test_latest_final_ignores_prereleases_and_yanked(
+	dict_releases: dict, str_expected: str
+) -> None:
 	"""The previous version comes from final, non-yanked releases only."""
-	assert gate.latest_final(dict_releases) == expected
+	assert gate.latest_final(dict_releases) == str_expected
 
 
 def test_prerelease_on_pypi_does_not_bypass_the_gate(
