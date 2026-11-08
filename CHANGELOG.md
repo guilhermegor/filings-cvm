@@ -8,6 +8,7 @@
   separate `layouts-cvm` package; there is no shim, no re-export and no dependency on it.
   Migration: `from filings_cvm.submission import X` becomes `from layouts_cvm import X`
   (e.g. `from layouts_cvm import PerfilMensal, InformeDiario`; `pip install layouts-cvm`).
+  Document-model migration guide: <https://guilhermegor.github.io/layouts-cvm/>.
   The `pydantic` dependency is dropped.
 
 ### Feat

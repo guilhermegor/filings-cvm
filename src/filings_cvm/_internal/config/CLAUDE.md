@@ -14,7 +14,7 @@ Two sub-packages, one per kind of declaration:
 | `ports/` | the behavioural interface every reader implements | interface |
 
 `contracts/` is a pure declaration; `ports/` declares *behaviour* (an ABC), which
-is why it sits beside them rather than in `utils/` — both answer "what shape/contract must
+is why it sits beside it rather than in `utils/` — both answer "what shape/contract must
 this conform to?", while `utils/` answers "how is it done?".
 
 ## The `contracts/` sub-package
