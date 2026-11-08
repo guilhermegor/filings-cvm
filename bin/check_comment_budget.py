@@ -112,6 +112,8 @@ PATH_ALLOWLIST = pathlib.Path(__file__).resolve().parent / "comment_budget_allow
 STR_BASELINE_NAME = "comment_budget_baseline.txt"
 STR_ROUTING_NAME = "comment_budget_routing.txt"
 STR_SCOPE_ROW = "scope "
+STR_BASE_ROW = "base "
+STR_UNKNOWN_SHA = "unknown"
 INT_SCOPE = 2
 STR_WRITE_BASELINE = "--write-baseline"
 STR_ANYWHERE = "~"
@@ -897,6 +899,8 @@ def parse_baseline_text(str_text: str) -> tuple:
     for str_line in str_text.splitlines():
         if str_line.startswith(STR_SCOPE_ROW):
             int_scope = int(str_line[len(STR_SCOPE_ROW) :])
+        elif str_line.startswith(STR_BASE_ROW):
+            continue
         elif str_line.strip():
             dict_out.update(parse_baseline_row(str_line))
     return int_scope, dict_out
@@ -990,11 +994,43 @@ def write_baseline(dict_counts: dict) -> None:
     dict_counts : dict
         ``{relative_path: count}`` to record.
     """
-    str_rows = f"{STR_SCOPE_ROW}{INT_SCOPE}\n" + "".join(
+    str_sha = head_sha()
+    str_rows = f"{STR_SCOPE_ROW}{INT_SCOPE}\n{STR_BASE_ROW}{str_sha}\n" + "".join(
         f"{int_n} {str_path}\n" for str_path, int_n in sorted(dict_counts.items())
     )
     (PATH_ROOT / STR_BASELINE_NAME).write_text(str_rows, encoding="utf-8")
     print(f"wrote {len(dict_counts)} file(s), {sum(dict_counts.values())} comment line(s)")
+    print(f"baselined at {str_sha}")
+
+
+def head_sha() -> str:
+    """Return the commit the audit root is at, for the baseline's ``base`` row.
+
+    Returns
+    -------
+    str
+        The full ``HEAD`` sha, or ``unknown`` when git is absent or the root is no work tree.
+    """
+    return git_out("rev-parse", "HEAD").strip() or STR_UNKNOWN_SHA
+
+
+def baseline_sha() -> str:
+    """Return the commit recorded in the committed baseline's ``base`` row.
+
+    Returns
+    -------
+    str
+        The recorded sha, or ``unknown`` when the row is absent (an older baseline) or
+        the file is unreadable.
+    """
+    try:
+        str_text = (PATH_ROOT / STR_BASELINE_NAME).read_text(encoding="utf-8")
+    except OSError:
+        return STR_UNKNOWN_SHA
+    for str_line in str_text.splitlines():
+        if str_line.startswith(STR_BASE_ROW):
+            return str_line[len(STR_BASE_ROW) :].strip() or STR_UNKNOWN_SHA
+    return STR_UNKNOWN_SHA
 
 
 def git_out(*list_args: str) -> str:
@@ -1290,6 +1326,8 @@ def print_failure_help(int_findings: int) -> None:
         f"lowered with --write-baseline. QA suppressions (noqa, type: ignore, *-ok: markers) "
         f"are exempt by design (see comment_budget_allowlist.txt)."
     )
+    if (PATH_ROOT / STR_BASELINE_NAME).is_file():
+        print(f"baselined at {baseline_sha()}, HEAD is at {head_sha()}")
     list_routing = routing_lines()
     if list_routing:
         print("\nWhere the sentence goes instead:")

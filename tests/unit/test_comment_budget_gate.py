@@ -705,7 +705,7 @@ def test_write_baseline_records_counts_and_then_passes(
 	_run(tmp_path, capsys, "--write-baseline")
 	str_written = (tmp_path / gate.STR_BASELINE_NAME).read_text(encoding="utf-8")
 	assert (str_written, _run(tmp_path, capsys)[0]) == (
-		f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n2 a.py\n",
+		f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n{gate.STR_BASE_ROW}{gate.head_sha()}\n2 a.py\n",
 		0,
 	)
 
@@ -794,7 +794,7 @@ def test_write_baseline_lowers_an_existing_row(
 	_run(tmp_path, capsys, "--write-baseline")
 	assert (tmp_path / gate.STR_BASELINE_NAME).read_text(
 		encoding="utf-8"
-	) == f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n1 a.py\n"
+	) == f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n{gate.STR_BASE_ROW}{gate.head_sha()}\n1 a.py\n"
 
 
 def _git(path_root: Path, *list_args: str) -> None:
@@ -834,7 +834,7 @@ def test_a_git_detected_rename_regenerates(tmp_path: Path, capsys: pytest.Captur
 	_run(tmp_path, capsys, "--write-baseline")
 	assert (tmp_path / gate.STR_BASELINE_NAME).read_text(
 		encoding="utf-8"
-	) == f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n1 a.py\n"
+	) == f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n{gate.STR_BASE_ROW}{gate.head_sha()}\n1 a.py\n"
 
 
 def test_freed_budget_does_not_transfer_to_a_new_file(
@@ -1103,7 +1103,7 @@ def test_a_committed_rename_is_still_detected(
 	_run(tmp_path, capsys, "--write-baseline")
 	assert (tmp_path / gate.STR_BASELINE_NAME).read_text(
 		encoding="utf-8"
-	) == f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n1 a.py\n"
+	) == f"{gate.STR_SCOPE_ROW}{gate.INT_SCOPE}\n{gate.STR_BASE_ROW}{gate.head_sha()}\n1 a.py\n"
 
 
 _DICT_ALLOWED = {
@@ -1735,3 +1735,133 @@ def test_an_undecodable_file_is_a_finding(tmp_path: Path, capsys: pytest.Capture
 	(tmp_path / "bad.js").write_bytes(b"// \xff\xfe\n")
 	int_code, str_out = _run(tmp_path, capsys, "bad.js")
 	assert (int_code, "not valid UTF-8" in str_out) == (1, True)
+
+
+def _commit_tree(path_root: Path) -> str:
+	"""Make ``path_root`` a git repo with one commit and return that commit's sha.
+
+	Parameters
+	----------
+	path_root : pathlib.Path
+		The directory to initialise.
+
+	Returns
+	-------
+	str
+		The full sha of the new commit.
+	"""
+	_git(path_root, "init", "-q")
+	(path_root / "a.py").write_text("# one\nX = 1\n", encoding="utf-8")
+	_git(path_root, "add", "a.py")
+	_git(path_root, "commit", "-qm", "x")
+	return subprocess.run(  # noqa: S603 -- fixed git argv, no shell
+		["git", "-C", str(path_root), "rev-parse", "HEAD"],  # noqa: S607
+		check=True,
+		capture_output=True,
+		text=True,
+	).stdout.strip()
+
+
+def test_write_baseline_records_the_commit_it_measured(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""Should-fail witness: the written baseline names the sha of the tree it measured.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	capsys : pytest.CaptureFixture
+		Captures the gate's report.
+	"""
+	str_sha = _commit_tree(tmp_path)
+	_run(tmp_path, capsys, "--write-baseline")
+	str_written = (tmp_path / gate.STR_BASELINE_NAME).read_text(encoding="utf-8")
+	assert f"{gate.STR_BASE_ROW}{str_sha}\n" in str_written
+
+
+def test_write_baseline_prints_the_commit_it_measured(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""The stdout of ``--write-baseline`` also carries the measured sha.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	capsys : pytest.CaptureFixture
+		Captures the gate's report.
+	"""
+	str_sha = _commit_tree(tmp_path)
+	assert f"baselined at {str_sha}" in _run(tmp_path, capsys, "--write-baseline")[1]
+
+
+def test_write_baseline_without_git_records_unknown(
+	tmp_path: Path, capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""Failing soft: with git unavailable the row says ``unknown`` and nothing crashes.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	capsys : pytest.CaptureFixture
+		Captures the gate's report.
+	monkeypatch : pytest.MonkeyPatch
+		Patches the gate's git boundary to behave as an absent git.
+	"""
+	monkeypatch.setattr(gate, "git_out", lambda *args, **kwargs: "")
+	(tmp_path / "a.py").write_text("X = 1\n", encoding="utf-8")
+	_run(tmp_path, capsys, "--write-baseline")
+	str_written = (tmp_path / gate.STR_BASELINE_NAME).read_text(encoding="utf-8")
+	assert f"{gate.STR_BASE_ROW}{gate.STR_UNKNOWN_SHA}\n" in str_written
+
+
+def test_a_baseline_without_a_base_row_still_parses() -> None:
+	"""Backward compatibility: a baseline written before the ``base`` row is read as before."""
+	assert gate.parse_baseline_text("1 a.py\n") == (1, {"a.py": 1})
+
+
+def test_a_baseline_with_a_base_row_parses_to_the_same_rows() -> None:
+	"""The ``base`` row is metadata: it never becomes a path row nor changes the scope."""
+	str_text = f"{gate.STR_SCOPE_ROW}2\n{gate.STR_BASE_ROW}abc123\n1 a.py\n"
+	assert gate.parse_baseline_text(str_text) == (2, {"a.py": 1})
+
+
+def test_a_baseline_without_a_base_row_reports_unknown(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""The failure line for an older baseline says ``unknown`` rather than failing.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	monkeypatch : pytest.MonkeyPatch
+		Points the gate's audit root at the throwaway directory.
+	"""
+	_tree(tmp_path, "X = 1\n", "1 a.py\n")
+	monkeypatch.setattr(gate, "PATH_ROOT", tmp_path)
+	assert gate.baseline_sha() == gate.STR_UNKNOWN_SHA
+
+
+def test_a_failing_run_names_where_the_baseline_was_taken(
+	tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+	"""Should-fail witness: a red run prints ``baselined at <sha>, HEAD is at <sha>``.
+
+	Parameters
+	----------
+	tmp_path : pathlib.Path
+		A throwaway directory pytest provides per test.
+	capsys : pytest.CaptureFixture
+		Captures the gate's report.
+	"""
+	str_sha = _commit_tree(tmp_path)
+	_tree(tmp_path, "# one\n# two\nX = 1\n", f"{gate.STR_BASE_ROW}{str_sha}\n1 a.py\n")
+	int_code, str_output = _run(tmp_path, capsys)
+	assert (
+		int_code,
+		"a.py" in str_output,
+		f"baselined at {str_sha}, HEAD is at {str_sha}" in str_output,
+	) == (1, True, True)
