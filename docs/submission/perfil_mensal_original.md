@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Perfil Mensal original**
 ([`PadraoXMLPerfil.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp)).
 
-> **Veja também:** [Perfil Mensal V4](perfil_mensal.md) · [Referência da API](../api.md)
+> **Veja também:** [Perfil Mensal V4](perfil_mensal.md) · [Referência da API](../api/reference.md)
 
 ---
 

@@ -21,7 +21,7 @@ from filings_cvm import RetryPolicy
 > **portal root** que é dono do leitor — o mesmo agrupamento que a
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
-> **Veja também:** [Uso](usage.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Informe Quadrimestral](submission/informe_quadrimestral.md), [Informe Trimestral V1](submission/informe_trimestral_v1.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe de Fundo 157](submission/inf_fundo_157.md), [CDA V4](submission/cda.md), [Informe Mensal INR](submission/inr_mensal.md) · Leitura: [Informe Diário FIF](ingestion/informe_diario.md), [CDA FIF](ingestion/cda.md), [Lâmina carteira FIF](ingestion/lamina_carteira.md), [Lâmina FIF](ingestion/lamina.md), [CAD/FI](ingestion/cadastro_fi.md), [Registro RCVM 175](ingestion/registro.md), [CAD/FI histórico](ingestion/cad_fi_hist.md), [Informe Mensal FIDC](ingestion/inf_mensal_fidc.md), [Informe Mensal FII](ingestion/inf_mensal_fii.md), [DFIN FII](ingestion/dfin_fii.md), [Informe Trimestral FII](ingestion/inf_trimestral_fii.md), [Informe Anual FII](ingestion/inf_anual_fii.md), [Informes periódicos FIP](ingestion/inf_fip.md)
+> **Veja também:** [Uso](../usage.md) · Envio: [Perfil Mensal](../submission/perfil_mensal.md), [Informe Diário](../submission/informe_diario.md), [Informe Quadrimestral](../submission/informe_quadrimestral.md), [Informe Trimestral V1](../submission/informe_trimestral_v1.md), [Lâmina V3](../submission/lamina.md), [Extrato V3](../submission/extrato.md), [Informe de Fundo 157](../submission/inf_fundo_157.md), [CDA V4](../submission/cda.md), [Informe Mensal INR](../submission/inr_mensal.md) · Leitura: [Informe Diário FIF](../ingestion/informe_diario.md), [CDA FIF](../ingestion/cda.md), [Lâmina carteira FIF](../ingestion/lamina_carteira.md), [Lâmina FIF](../ingestion/lamina.md), [CAD/FI](../ingestion/cadastro_fi.md), [Registro RCVM 175](../ingestion/registro.md), [CAD/FI histórico](../ingestion/cad_fi_hist.md), [Informe Mensal FIDC](../ingestion/inf_mensal_fidc.md), [Informe Mensal FII](../ingestion/inf_mensal_fii.md), [DFIN FII](../ingestion/dfin_fii.md), [Informe Trimestral FII](../ingestion/inf_trimestral_fii.md), [Informe Anual FII](../ingestion/inf_anual_fii.md), [Informes periódicos FIP](../ingestion/inf_fip.md)
 
 ---
 
@@ -56,7 +56,7 @@ Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
 
 Serializa um `PerfilMensalOriginalDocument` (padrão Perfil Mensal original, `PadraoXMLPerfil.asp`).
 Layout próprio — não é o V4 nem derivado dele, e o cabeçalho **não tem `VERSAO`**. Veja
-[Perfil Mensal original](submission/perfil_mensal_original.md).
+[Perfil Mensal original](../submission/perfil_mensal_original.md).
 
 #### `export(doc, output_path=None) -> str | None`
 
@@ -83,7 +83,7 @@ xml = InfFundo157().export(doc)
 ```
 
 Namespace `urn:inffdo157`, `COD_DOC=55`. Modelos: `InfFundo157Document`, `InfFundo157Header`,
-`InfFundo157Cotista`. Decisões: veja [Informe de Fundo 157](submission/inf_fundo_157.md).
+`InfFundo157Cotista`. Decisões: veja [Informe de Fundo 157](../submission/inf_fundo_157.md).
 
 ### `InformeDiario`
 
@@ -115,7 +115,7 @@ O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `Perf
 Serializa um `InformeDiarioV3Document` para XML do padrão Informe Diário V3 (`VERSAO` 3.0, só
 `CNPJ_FDO`). `export(doc, output_path=None) -> str | None`, mesma borda de I/O do `InformeDiario`.
 Modelos: `InformeDiarioV3Document`, `InformeDiarioV3Header`, `InformeDiarioV3Inform`. Veja
-[Informe Diário V3](submission/informe_diario_v3.md).
+[Informe Diário V3](../submission/informe_diario_v3.md).
 
 ### `Extrato`
 
@@ -171,7 +171,7 @@ Modelos públicos: `LaminaDocument`, `LaminaHeader`, `LaminaInform` e os blocos
 `LaminaInforTabRentAnual`, `LaminaAntesInic2`, `LaminaListaTabRentAnual`, `LaminaTabRentAnual`,
 `LaminaListaTabRentMensal`, `LaminaTabRentMensal`, `LaminaTabVarDesemp`,
 `LaminaInformExemploComp`, `LaminaTabSimulDespesas`). Limites e decisões: veja
-[Lâmina V3](submission/lamina.md).
+[Lâmina V3](../submission/lamina.md).
 
 ### `Cda`
 
@@ -191,7 +191,7 @@ Modelos de entrada, todos em `filings_cvm.submission`: `CdaDocument`, `CdaHeader
 `CdaTitPub`, `CdaCotas`, `CdaSwap`, `CdaSwapAplic`, `CdaSwapPosFim`, `CdaDemaisCodif`,
 `CdaDepPrazoTitIf`, `CdaTitAgroCredPriv`, `CdaInvExt`, `CdaDemaisNCodif`, `CdaAplic`, `CdaNegoc`,
 `CdaPosFim`, `CdaAtivoExt`, `CdaEmitter`, `CdaBankEmitter`, `CdaPosFixIndex`, `CdaRiskRating`.
-Campos, escalas e regras em [CDA V4](submission/cda.md).
+Campos, escalas e regras em [CDA V4](../submission/cda.md).
 
 ---
 
@@ -210,7 +210,7 @@ Cadastro de Ativos, sem namespace, `COD_DOC=2`).
 | `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
 
 Modelos de entrada, em `filings_cvm.submission`: `CadastroAtivosDocument`, `CadastroAtivosHeader`,
-`CadastroAtivosRow`. Campos e regras em [Cadastro de Ativos](submission/cadastro_ativos.md).
+`CadastroAtivosRow`. Campos e regras em [Cadastro de Ativos](../submission/cadastro_ativos.md).
 
 ---
 
@@ -245,7 +245,7 @@ Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
 
 Serializa um `InrMensalDocument` validado para o XML do Informe Mensal de Investidor Não Residente
 (namespace `urn:infmensal`, `COD_DOC=477`). Os blocos e regras estão em
-[Informe Mensal INR](submission/inr_mensal.md).
+[Informe Mensal INR](../submission/inr_mensal.md).
 
 #### `export(doc, output_path=None) -> str | None`
 
@@ -269,7 +269,7 @@ InrMensal().export(doc, output_path="inr_mensal.xml")
 
 Serializa um `InformeQuadrimestralDocument` validado para XML compatível com a CVM (Informe
 Quadrimestral V2, namespace `urn:inftrim`). Detalhes em
-[Informe Quadrimestral](submission/informe_quadrimestral.md).
+[Informe Quadrimestral](../submission/informe_quadrimestral.md).
 
 #### `export(doc, output_path=None) -> str | None`
 
@@ -289,7 +289,7 @@ Modelos de schema (Pydantic): `InformeQuadrimestralDocument` (`DOC_ARQ`),
 
 Serializa um `InformeTrimestralV1Document` validado para XML compatível com a CVM (Informe
 Trimestral V1, válido até 2017-06, namespace `urn:inftrim`). Detalhes em
-[Informe Trimestral V1](submission/informe_trimestral_v1.md).
+[Informe Trimestral V1](../submission/informe_trimestral_v1.md).
 
 #### `export(doc, output_path=None) -> str | None`
 
@@ -308,7 +308,7 @@ Modelos de schema (Pydantic): `InformeTrimestralV1Document` (`DOC_ARQ`),
 `filings_cvm.submission.InformePortabilidade`
 
 Serializa um `InformePortabilidadeDocument` validado para o XML do Informe de Portabilidade
-(`COD_DOC=478`, namespace `urn:portab`). Detalhes em [Informe de Portabilidade](submission/informe_portabilidade.md).
+(`COD_DOC=478`, namespace `urn:portab`). Detalhes em [Informe de Portabilidade](../submission/informe_portabilidade.md).
 
 #### `export(doc, output_path=None) -> str | None`
 
@@ -492,7 +492,7 @@ Leem `fi_entrega_documento_AAAAMM.zip` (`FI/DOC/ENTREGA`) — o **índice das en
 dos fundos. **ZIP de 2 membros** (todos os documentos / só `DIÁRIO FUNDOS`), **mensal**, série
 `202501`→; 11 colunas idênticas nos dois. `date_ref` fora da série levanta `ValueError`. Datas de
 competência viram `date`; o resto é texto exato. Página completa em
-[Entrega FI](ingestion/entrega_fi.md).
+[Entrega FI](../ingestion/entrega_fi.md).
 
 ### `EventualFiReader`
 
@@ -500,7 +500,7 @@ competência viram `date`; o resto é texto exato. Página completa em
 
 Lê `eventual_fi_AAAA.csv` (`FI/DOC/EVENTUAL`) — o **índice dos documentos eventuais** entregues por
 fundos e classes. **CSV solto** (não ZIP), **particionado por ano**; 11 colunas, 186.453 linhas em
-2025. Página completa em [EVENTUAL FI](ingestion/eventual_fi.md).
+2025. Página completa em [EVENTUAL FI](../ingestion/eventual_fi.md).
 
 > ⚠️ **É um índice, não o documento.** `LINK_ARQ` aponta para o arquivo no portal *fundosweb* da
 > CVM e volta **como texto, não seguido**.
@@ -549,7 +549,7 @@ linha por conta. **ZIP de 1 membro**, **particionado por mês** (série `201501`
 2.191.291 linhas em 2026-09. **Dois schemas, corte medido em `202311`** (5 colunas com
 `CNPJ_FUNDO` antes; `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE` depois). Pedir o mês do outro regime
 levanta `ValueError` nomeando o irmão. `VL_SALDO_BALCTE` fica texto exato. Página completa em
-[Balancete FI](ingestion/balancete_fi.md).
+[Balancete FI](../ingestion/balancete_fi.md).
 
 ### `ComplFiReader` · `ComplFiInfReader` · `ComplFiInfCotstReader` · `ComplFiPrestReader`
 
@@ -558,7 +558,7 @@ levanta `ValueError` nomeando o irmão. `VL_SALDO_BALCTE` fica texto exato. Pág
 Leem os 4 membros de `compl_fi_AAAAMM.zip` (`FI/DOC/COMPL`) — informações complementares dos
 fundos. **Mensal**, série **fechada** `201801`–`201904`; cabeçalhos idênticos nos 16 meses (20/6/7/5
 colunas). Só `DT_COMPTC` é data; o resto é texto exato. `date_ref` fora da janela levanta
-`ValueError`. Página completa em [Complemento FI](ingestion/compl_fi.md).
+`ValueError`. Página completa em [Complemento FI](../ingestion/compl_fi.md).
 
 ### `PerfilMensalReader` · `PerfilMensalPre175Reader`
 
@@ -568,7 +568,7 @@ Leem `perfil_mensal_fi_AAAAMM.csv` (`FI/DOC/PERFIL_MENSAL`) — o **perfil mensa
 composição de cotistas por categoria, VaR e estresse, nocionais de derivativos e os blocos de
 concentração por comitente e por emissor. **CSV solto** (não ZIP), **particionado por mês**; 107
 colunas / 24.832 linhas / 13,19 MB em 2025-06. Página completa em
-[Perfil Mensal FI](ingestion/perfil_mensal_fi.md).
+[Perfil Mensal FI](../ingestion/perfil_mensal_fi.md).
 
 É o lado da **leitura** do writer `PerfilMensal` (submission, V4) — mesmo padrão regulatório,
 **artefato diferente** (o dump aberto, não o XML de envio), então declara o seu próprio
@@ -629,7 +629,7 @@ print(df_pre[["CNPJ_FUNDO", "DT_COMPTC", "PR_VAR_CARTEIRA"]].head())
 
 Leem o **Extrato das Informações sobre o Fundo** (`FI/DOC/EXTRATO`) — condições cadastrais, taxas,
 uso de derivativos e os limites `PR_*_MIN`/`PR_*_MAX` por tipo de ativo. Página completa em
-[Extrato FI](ingestion/extrato_fi.md).
+[Extrato FI](../ingestion/extrato_fi.md).
 
 > ⚠️⚠️ **O dataset publica DOIS artefatos.** `extrato_fi_AAAA.csv` (anual) traz **toda** entrega do
 > ano; `extrato_fi.csv` (URL fixa, sem ano) é um **snapshot**: **uma linha por fundo/classe**, o
@@ -721,7 +721,7 @@ ativos = df_[df_["SIT"] == "EM FUNCIONAMENTO NORMAL"]
 Lêem os três membros de `registro_fundo_classe.zip` — o cadastro pós-**Resolução CVM 175**, na
 hierarquia `fundo → classe → subclasse`. É onde estão os fundos **vivos** (o `registro_fundo` tinha
 ~34 mil `Em Funcionamento Normal`, contra 22 no `cad_fi.csv`). Página completa:
-[Registro RCVM 175](ingestion/registro.md).
+[Registro RCVM 175](../ingestion/registro.md).
 
 #### `RegistroFundoReader(path_raw=None, retry_policy=None, cls_logger=None)` (idem para Classe e Subclasse)
 
@@ -762,7 +762,7 @@ fc = classes.merge(fundos, on="ID_Registro_Fundo", suffixes=("_classe", "_fundo"
 
 Os 19 membros de `cad_fi_hist.zip` — o **log de alterações** de cada atributo mutável do cadastro
 CAD/FI legado (situação, denominação, taxas, gestor, …), um reader por membro. Página completa:
-[CAD/FI histórico](ingestion/cad_fi_hist.md).
+[CAD/FI histórico](../ingestion/cad_fi_hist.md).
 
 Todos têm a mesma assinatura, sem `date_ref` (retrato do estado atual), e baixam o **mesmo** ZIP:
 
@@ -793,7 +793,7 @@ janelas = sit[sit["SIT"] == "EM FUNCIONAMENTO NORMAL"]   # DT_INI_SIT / DT_FIM_S
 
 Os 18 membros de `inf_mensal_fidc_AAAAMM.zip` — as tabelas do **Informe Mensal FIDC** (Tabelas I–X
 mais as sub-tabelas de X), um reader por membro. Inaugura o *portal root* `fidc/`. Página completa:
-[Informe Mensal FIDC](ingestion/inf_mensal_fidc.md).
+[Informe Mensal FIDC](../ingestion/inf_mensal_fidc.md).
 
 Todos têm a mesma assinatura, **com `date_ref`** (dump particionado por mês), e baixam o **mesmo**
 ZIP mensal:
@@ -829,7 +829,7 @@ pl = InfMensalFidcTabIVReader(date_ref=date(2025, 6, 1), retry_policy=cls_retry_
 `filings_cvm.ingestion.InfMensalFii{Geral,AtivoPassivo,Complemento}Reader`
 
 Os 3 membros de `inf_mensal_fii_AAAA.zip` — o **Informe Mensal FII**, um reader por membro.
-Inaugura o *portal root* `fii/`. Página completa: [Informe Mensal FII](ingestion/inf_mensal_fii.md).
+Inaugura o *portal root* `fii/`. Página completa: [Informe Mensal FII](../ingestion/inf_mensal_fii.md).
 
 ⚠️ **O dump é particionado por ANO, não por mês**, apesar de ser o informe mensal: um
 `inf_mensal_fii_2025.zip` traz os doze meses de 2025. O `date_ref` seleciona o **ano** (mês e dia
@@ -864,7 +864,7 @@ junho = df_[df_["Data_Referencia"] == date(2025, 6, 1)]
 `filings_cvm.ingestion.DfinFiiReader`
 
 O **índice** das demonstrações financeiras dos FII (`dfin_fii_AAAA.csv`) — uma linha por documento
-entregue. Página completa: [DFIN FII](ingestion/dfin_fii.md).
+entregue. Página completa: [DFIN FII](../ingestion/dfin_fii.md).
 
 ⚠️ **É um índice, não uma demonstração.** A coluna `Link_Download` aponta para o documento no fnet
 da B3; o reader a **devolve como texto e não a segue**. É um **CSV solto** (não ZIP), particionado
@@ -899,7 +899,7 @@ df_ = DfinFiiReader(date_ref=date(2025, 6, 15)).read()   # o ANO de 2025
 `filings_cvm.ingestion.InfTrimestralFii{Geral,Complemento,Ativo,AtivoGarantiaRentabilidade,Direito,Imovel,ImovelDesempenho,ImovelRendaAcabadoContrato,ImovelRendaAcabadoInquilino,Terreno,AquisicaoImovel,AquisicaoTerreno,AlienacaoImovel,AlienacaoTerreno,RentabilidadeEfetiva,ResultadoContabilFinanceiro}Reader`
 
 Os 16 membros de `inf_trimestral_fii_AAAA.zip` — o **Informe Trimestral FII**, um reader por membro.
-Página completa: [Informe Trimestral FII](ingestion/inf_trimestral_fii.md).
+Página completa: [Informe Trimestral FII](../ingestion/inf_trimestral_fii.md).
 
 ⚠️ **Particionado por ANO, não por trimestre.** O `date_ref` seleciona o **ano**; filtre
 `Data_Referencia` no frame para um único trimestre. `CNPJ_Fundo_Classe` é a única coluna validada
@@ -935,7 +935,7 @@ primeiro_tri = df_[df_["Data_Referencia"] == date(2025, 3, 31)]
 
 Os 12 membros de `inf_anual_fii_AAAA.zip` — o **Informe Anual FII**, um reader por membro. **Com ele
 o portal root `fii/` fica completo (4/4).** Página completa:
-[Informe Anual FII](ingestion/inf_anual_fii.md).
+[Informe Anual FII](../ingestion/inf_anual_fii.md).
 
 Particionado por **ano** — aqui a partição é natural (é o informe *anual*). ⚠️ Dois pontos:
 `Link_Download_Anexo` (em `complemento`) é **devolvido como texto e não seguido**; e o **`CPF`** (em
@@ -974,7 +974,7 @@ Os dois informes periódicos dos **FIP** (`inf_trimestral_fip_AAAA.csv`, `inf_qu
 que **inauguram o portal root `fip/`**. O trimestral é o regime **pré-RCVM 175** (2010–2023); o
 quadrimestral o substituiu no **pós-175** (a partir de 2024). Conteúdo quase idêntico — a única
 diferença estrutural é o identificador do fundo (`CNPJ_FUNDO` vs `TP_FUNDO_CLASSE` +
-`CNPJ_FUNDO_CLASSE`). Página completa: [Informes periódicos FIP](ingestion/inf_fip.md).
+`CNPJ_FUNDO_CLASSE`). Página completa: [Informes periódicos FIP](../ingestion/inf_fip.md).
 
 CSVs soltos (não ZIP), particionados por **ano** — o `date_ref` seleciona o ano. Apenas `DT_COMPTC`
 vira `date`; dinheiro e cota ficam texto exato.
@@ -1008,7 +1008,7 @@ df_ = InfQuadrimestralFipReader(date_ref=date(2024, 8, 15)).read()   # o ANO de 
 Os dois membros do Informe Mensal dos **FIAGRO** (`inf_mensal_fiagro_AAAAMM.zip`), que
 **inauguram o portal root `fiagro/`**. `InfMensalFiagroReader` lê o informe proper (133 colunas,
 uma linha por classe por mês); `InfMensalFiagroSubclasseReader` lê o desdobramento por subclasse
-(6 colunas, longo). Página completa: [Informe Mensal FIAGRO](ingestion/inf_mensal_fiagro.md).
+(6 colunas, longo). Página completa: [Informe Mensal FIAGRO](../ingestion/inf_mensal_fiagro.md).
 
 ZIP **particionado por mês** (`AAAAMM`, série a partir de `202505`) — o `date_ref` seleciona o
 mês; o membro é escolhido por **nome exato**. Nomenclatura pós-RCVM 175 (chave `CNPJ_Classe`).
@@ -1042,7 +1042,7 @@ df_ = InfMensalFiagroReader(date_ref=date(2025, 6, 1)).read()   # o MÊS 2025-06
 `filings_cvm.ingestion.MedidasMesFieReader`
 
 Os três datasets dos **FIE** (Fundos de Investimento Especialmente constituídos), que **completam o
-portal root `fie/`**. Página completa: [FIE](ingestion/fie.md). Não há `FIE/CAD`.
+portal root `fie/`**. Página completa: [FIE](../ingestion/fie.md). Não há `FIE/CAD`.
 
 - `BalanceteFieReader` — `balancete_fie_AAAAMM.zip` (ZIP de 1 membro), **mensal** (202401→), balancete
   contábil. Pós-RCVM 175 (`CNPJ_FUNDO_CLASSE`).
@@ -1080,7 +1080,7 @@ df_ = BalanceteFieReader(date_ref=date(2026, 6, 1)).read()   # o MÊS 2026-06
 
 Os três datasets de **CSV solto** da Securitização + emissores de CEPAC, que **inauguram** os portal
 roots `securit/` e `emissor_cepac/`. Página completa:
-[DFIN Securit + Emissor CEPAC](ingestion/securit_cepac_flat.md).
+[DFIN Securit + Emissor CEPAC](../ingestion/securit_cepac_flat.md).
 
 - `DfinCraReader` / `DfinCriReader` — `dfin_{cra,cri}_AAAA.csv`, índices anuais das demonstrações
   financeiras dos CRA/CRI. `date_ref` seleciona o **ano**; `Link_Download` devolvido como texto,
@@ -1116,7 +1116,7 @@ cad = CadastroEmissorCepacReader().read()               # snapshot dos emissores
 
 As 8 seções do Informe Mensal das operações de securitização não-CRA/CRI
 (`inf_mensal_ots_AAAA.zip`). Página completa:
-[Informe Mensal OTS](ingestion/inf_mensal_ots.md). Todos partilham a base privada
+[Informe Mensal OTS](../ingestion/inf_mensal_ots.md). Todos partilham a base privada
 `_base_inf_mensal_ots_reader` e o prefixo-chave `CNPJ_Securitizadora`,
 `Codigo_Identificacao_Certificado`, `Data_Referencia`, `Versao`. ⚠️ Particionado por **ano** apesar
 de mensal (o `date_ref` seleciona o ano). `cedente_devedor.CNPJ` guarda CPF (não validado como
@@ -1150,7 +1150,7 @@ df_ = InfMensalOtsClasseReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 20
 
 As 8 seções do Informe Mensal das operações de **CRA** (*Certificado de Recebíveis do Agronegócio*,
 `inf_mensal_cra_AAAA.zip`). Página completa:
-[Informe Mensal CRA](ingestion/inf_mensal_cra.md). Todos partilham a base privada
+[Informe Mensal CRA](../ingestion/inf_mensal_cra.md). Todos partilham a base privada
 `_base_inf_mensal_cra_reader` e o prefixo-chave `CNPJ_Emissora`,
 `Codigo_Identificacao_Certificado`, `Data_Referencia`, `Versao`. ⚠️ Particionado por **ano** apesar
 de mensal (o `date_ref` seleciona o ano).
@@ -1190,7 +1190,7 @@ df_ = InfMensalCraDireitosCreditoriosReader(date_ref=date(2025, 6, 1)).read()   
 
 As 11 seções do Informe Mensal das operações de **CRI** (*Certificado de Recebíveis Imobiliários*,
 `inf_mensal_cri_AAAA.zip`). Página completa:
-[Informe Mensal CRI](ingestion/inf_mensal_cri.md). Todos partilham a base privada
+[Informe Mensal CRI](../ingestion/inf_mensal_cri.md). Todos partilham a base privada
 `_base_inf_mensal_cri_reader` e o prefixo-chave `CNPJ_Emissora`,
 `Codigo_Identificacao_Certificado`, `Data_Referencia`, `Versao`. ⚠️ Particionado por **ano** apesar
 de mensal (o `date_ref` seleciona o ano). **Fecha o portal root `securit/` (4/4).**
@@ -1232,7 +1232,7 @@ df_ = InfMensalCriCreditosReader(date_ref=date(2025, 6, 1)).read()   # o ANO de 
 
 O cadastro dos **auditores independentes** (`AUDITOR/CAD`, `cad_auditor.zip`) — **snapshot** de URL
 fixa, sem `date_ref`. Inaugura o *portal root* `auditor/` e a **Wave 3** do #41. Página completa em
-[Cadastro de Auditores (AUDITOR)](ingestion/auditor.md).
+[Cadastro de Auditores (AUDITOR)](../ingestion/auditor.md).
 
 - `AuditorPfReader` — `cad_auditor_pf.csv`, auditores pessoa física (4 colunas; **sem CNPJ/CPF**).
 - `AuditorPjReader` — `cad_auditor_pj.csv`, firmas de auditoria (12 colunas; `CNPJ` mascarado).
@@ -1262,7 +1262,7 @@ df_ = AuditorPjReader().read()
 
 O cadastro dos **agentes fiduciários** (`AGENTE_FIDUC/CAD`, `cad_agente_fiduc.zip`) — **snapshot** de
 URL fixa, sem `date_ref`. Inaugura o *portal root* `agente_fiduc/` (2ª fatia da Wave 3 do #41).
-Página completa em [Cadastro de Agentes Fiduciários](ingestion/agente_fiduc.md).
+Página completa em [Cadastro de Agentes Fiduciários](../ingestion/agente_fiduc.md).
 
 - `AgenteFiducPfReader` — `cad_agente_fiduc_pf.csv`, agentes pessoa física (5 colunas; **sem
   CNPJ/CPF/`CD_CVM`**, identifica só pelo nome).
@@ -1294,7 +1294,7 @@ df_ = AgenteFiducPjReader().read()
 
 O cadastro dos **agentes autônomos de investimento** (`AGENTE_AUTON/CAD`, `cad_agente_auton.zip`) —
 **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `agente_auton/` (3ª fatia da Wave
-3 do #41). Página completa em [Cadastro de Agentes Autônomos](ingestion/agente_auton.md).
+3 do #41). Página completa em [Cadastro de Agentes Autônomos](../ingestion/agente_auton.md).
 
 - `AgenteAutonPfReader` — `cad_agente_auton_pf.csv`, agentes pessoa física (6 colunas; **sem
   CNPJ/CPF**, identifica pelo `NOME`, que pode vir em branco).
@@ -1328,7 +1328,7 @@ df_ = AgenteAutonPjReader().read()
 O cadastro dos **representantes de investidores não residentes** (`INVNR/CAD`,
 `cad_invnr_repres.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
 `invnr/` (4ª fatia da Wave 3 do #41). Página completa em
-[Cadastro de Repres. de Inv. Não Residentes](ingestion/invnr.md).
+[Cadastro de Repres. de Inv. Não Residentes](../ingestion/invnr.md).
 
 - `InvnrRepresPfReader` — `cad_invnr_repres_pf.csv`, representantes pessoa física (6 colunas; **sem
   CNPJ/CPF**, identifica pelo `NOME`).
@@ -1361,7 +1361,7 @@ df_ = InvnrRepresPjReader().read()
 
 O cadastro dos **intermediários de mercado** (`INTERMED/CAD`, `cad_intermed.zip`) — **snapshot** de
 URL fixa, sem `date_ref`. Inaugura o *portal root* `intermed/` (5ª fatia da Wave 3 do #41). Página
-completa em [Cadastro de Intermediários](ingestion/intermed.md).
+completa em [Cadastro de Intermediários](../ingestion/intermed.md).
 
 ⚠️ **Os dois membros NÃO são um split `pf`/`pj`** — são o registro do intermediário e a tabela de
 responsáveis, ambos chaveados pelo `CNPJ` do intermediário:
@@ -1398,7 +1398,7 @@ df_ = IntermedReader().read()
 O cadastro dos **administradores de carteira** (`ADM_CART/CAD`, `cad_adm_cart.zip`) — **snapshot** de
 URL fixa, sem `date_ref`. Inaugura o *portal root* `adm_cart/` e é o **primeiro root de 5 membros**
 (6ª fatia da Wave 3 do #41). Página completa em
-[Cadastro de Administradores de Carteira](ingestion/adm_cart.md).
+[Cadastro de Administradores de Carteira](../ingestion/adm_cart.md).
 
 - `AdmCartPfReader` — `cad_adm_cart_pf.csv`, administradores pessoa física (7 colunas; **sem
   CNPJ/CPF**, identifica pelo `ADMIN`).
@@ -1437,7 +1437,7 @@ df_ = AdmCartPjReader().read()
 O cadastro dos **consultores de valores mobiliários** (`CONSULTOR_VLMOB/CAD`,
 `cad_consultor_vlmob.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
 `consultor_vlmob/` (7ª fatia da Wave 3 do #41), na mesma forma de 5 membros do ADM_CART. Página
-completa em [Cadastro de Consultores de Valores Mobiliários](ingestion/consultor_vlmob.md).
+completa em [Cadastro de Consultores de Valores Mobiliários](../ingestion/consultor_vlmob.md).
 
 - `ConsultorVlmobPfReader` — `cad_consultor_vlmob_pf.csv`, consultores pessoa física (7 colunas;
   **sem CNPJ/CPF**, identifica pelo `NOME`).
@@ -1476,7 +1476,7 @@ O cadastro das entidades registradas para **administrar FII** (`ADM_FII/CAD`, `c
 **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `adm_fii/` e **encerra a Wave 3
 do #41** (8ª e última fatia). Único membro da Wave 3 num **CSV solto** (não ZIP), no molde do
 `CadastroFiReader` / Emissor CEPAC. Página completa em
-[Cadastro de Administradores de FII](ingestion/adm_fii.md).
+[Cadastro de Administradores de FII](../ingestion/adm_fii.md).
 
 - `CadastroAdmFiiReader` — `cad_adm_fii.csv`, uma linha por administrador de FII (18 colunas; `CNPJ`
   mascarado, **sem coluna de CPF**; `MOTIVO_CANCEL` é texto, não data).
@@ -1508,7 +1508,7 @@ df_ = CadastroAdmFiiReader().read()
 A lista dos **atos declaratórios** que suspendem a intermediação irregular (`ATO_DECLR/INTERMED`,
 `ato_declr.csv`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `ato_declr/`.
 `CNPJ_CPF` mistura CNPJ, CPF e vazio (fora de `tuple_cnpj_cols`). Duas colunas de data viram `date`;
-o resto é texto exato. Página completa em [Atos Declaratórios](ingestion/ato_declr.md).
+o resto é texto exato. Página completa em [Atos Declaratórios](../ingestion/ato_declr.md).
 
 ```python
 from filings_cvm.ingestion.ato_declr import AtoDeclrReader
@@ -1526,7 +1526,7 @@ O cadastro das **companhias estrangeiras** registradas na CVM (`CIA_ESTRANG/CAD`
 `cad_cia_estrang.csv`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
 `cia_estrang/` e **abre a Wave 4 do #41**. **CSV solto** de 1 reader, no molde do
 `CadastroAdmFiiReader`. Página completa em
-[Cadastro de Companhias Estrangeiras](ingestion/cia_estrang.md).
+[Cadastro de Companhias Estrangeiras](../ingestion/cia_estrang.md).
 
 - `CadastroCiaEstrangReader` — `cad_cia_estrang.csv`, uma linha por companhia estrangeira (49
   colunas; **duas colunas de CNPJ**: `CNPJ` da companhia + `CNPJ_AUDITOR`; `RESP` tem nome de
@@ -1560,7 +1560,7 @@ O cadastro das **companhias incentivadas** registradas na CVM (`CIA_INCENT/CAD`,
 `cad_cia_incent.csv`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
 `cia_incent/` (2ª fatia da Wave 4 do #41). **CSV solto** de 1 reader, no molde do
 `CadastroCiaEstrangReader`. Página completa em
-[Cadastro de Companhias Incentivadas](ingestion/cia_incent.md).
+[Cadastro de Companhias Incentivadas](../ingestion/cia_incent.md).
 
 - `CadastroCiaIncentReader` — `cad_cia_incent.csv`, uma linha por companhia incentivada (47 colunas,
   ~3.570 linhas). ⚠️ **Não é cópia do CIA_ESTRANG** (tem `ST_CIA_INCENT_REG`, usa `MUN`/`UF`). Duas
@@ -1593,7 +1593,7 @@ df_ = CadastroCiaIncentReader().read()
 O cadastro dos **coordenadores de oferta** (`COORD_OFERTA/CAD`, `cad_coord_oferta.zip`) —
 **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `coord_oferta/` (3ª fatia da
 Wave 4 do #41) e é o **primeiro ZIP multi-membro da Wave 4**, no molde do INTERMED. Página completa
-em [Cadastro de Coordenadores de Oferta](ingestion/coord_oferta.md).
+em [Cadastro de Coordenadores de Oferta](../ingestion/coord_oferta.md).
 
 - `CoordOfertaReader` — `cad_coord_oferta.csv`, o registro (25 colunas, 4 date cols: `DT_REG`,
   `DT_CANCEL`, `DT_INI_SIT`, `DT_PATRIM_LIQ`).
@@ -1628,7 +1628,7 @@ df_ = CoordOfertaReader().read()
 O cadastro das **plataformas de crowdfunding** (`CROWDFUNDING/CAD`, `cad_crowdfunding.zip`) —
 **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root* `crowdfunding/` (4ª fatia da
 Wave 4 do #41). Página completa em
-[Cadastro de Plataformas de Crowdfunding](ingestion/crowdfunding.md).
+[Cadastro de Plataformas de Crowdfunding](../ingestion/crowdfunding.md).
 
 - `CrowdfundingReader` — `cad_crowdfunding.csv`, o registro (17 colunas, 2 date cols). ⚠️ **Mais
   enxuto que os irmãos**: sem `DT_CANCEL`/`MOTIVO_CANCEL`/`CD_CVM`; usa `WEBSITE` (não `SITE_WEB`)
@@ -1664,7 +1664,7 @@ df_ = CrowdfundingReader().read()
 O registro das **ofertas de distribuição de valores mobiliários** (`OFERTA/DISTRIB`,
 `oferta_distribuicao.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
 `oferta/` (5ª fatia da Wave 4 do #41; fecha a issue #14). Página completa em
-[Ofertas de Distribuição](ingestion/oferta_distrib.md).
+[Ofertas de Distribuição](../ingestion/oferta_distrib.md).
 
 - `OfertaDistribuicaoReader` — `oferta_distribuicao.csv`, o registro histórico pré-RCVM 160 (76
   colunas, 9 date cols, ~48,9k linhas; 3 colunas de CNPJ).
@@ -1700,7 +1700,7 @@ df_ = OfertaDistribuicaoReader().read()
 
 Os **processos administrativos sancionadores** da CVM e seus acusados (`PROCESSO/SANCIONADOR`,
 `processo_sancionador.zip`) — **snapshot** de URL fixa, sem `date_ref`. Inaugura o *portal root*
-`processo/`. Página completa em [Processo Sancionador](ingestion/processo_sancionador.md).
+`processo/`. Página completa em [Processo Sancionador](../ingestion/processo_sancionador.md).
 
 - `ProcessoSancionadorReader` — `processo_sancionador.csv`, um processo por `NUP` (9 colunas, 2 date
   cols: `Data_Abertura`, `Data_Ultima_Movimentacao`; 581 linhas).
@@ -1735,7 +1735,7 @@ df_ = ProcessoSancionadorReader().read()
 O cadastro das **companhias abertas** registradas na CVM (`CIA_ABERTA/CAD`, `cad_cia_aberta.csv`) —
 **snapshot** de URL fixa, sem `date_ref`. **Inaugura o *portal root* `cia_aberta/`** — a última e
 maior raiz da Wave 4 do #41. **CSV solto** de 1 reader, no molde do `CadastroCiaEstrangReader`.
-Página completa em [Cadastro de Companhias Abertas](ingestion/cia_aberta_cad.md).
+Página completa em [Cadastro de Companhias Abertas](../ingestion/cia_aberta_cad.md).
 
 - `CadastroCiaAbertaReader` — `cad_cia_aberta.csv`, uma linha por companhia aberta (47 colunas,
   ~2.677 linhas). ⚠️ **Não é cópia do CIA_ESTRANG/CIA_INCENT** (chave `CNPJ_CIA`, não `CNPJ`;
@@ -1773,7 +1773,7 @@ O **índice das Informações Periódicas e Eventuais** das companhias abertas
 (`CIA_ABERTA/DOC/IPE`, `ipe_cia_aberta_AAAA.zip`) — **ZIP de 1 membro, particionado por ano**.
 Primeira fatia do sub-root `DOC`, no molde do `DfinFiiReader` (semântica de índice) com a extração
 ZIP do `BalanceteFieReader`. Página completa em
-[IPE Companhias Abertas](ingestion/ipe_cia_aberta.md).
+[IPE Companhias Abertas](../ingestion/ipe_cia_aberta.md).
 
 - `IpeCiaAbertaReader` — `ipe_cia_aberta_AAAA.csv`, **uma linha por documento entregue** (13
   colunas, ~49,3 mil linhas em 2025). ⚠️ **É um índice, não o documento**: `Link_Download` aponta
@@ -1813,7 +1813,7 @@ df_ = IpeCiaAbertaReader(date_ref=date(2025, 6, 15)).read()
 
 Os **valores mobiliários negociados e detidos** (`CIA_ABERTA/DOC/VLMO`,
 `vlmo_cia_aberta_AAAA.zip`) — **ZIP de 2 membros, particionado por ano**. Página completa em
-[VLMO Companhias Abertas](ingestion/vlmo_cia_aberta.md).
+[VLMO Companhias Abertas](../ingestion/vlmo_cia_aberta.md).
 
 - `VlmoCiaAbertaReader` — **índice** dos informes entregues (12 cols, ~5,8 mil linhas em 2025);
   molde do IPE + `Motivo_Reapresentacao`. `Link_Download` **não é seguido**.
@@ -1858,7 +1858,7 @@ df_ = VlmoCiaAbertaConReader(date_ref=date(2025, 6, 15)).read()
 
 O **Formulário Cadastral** (`CIA_ABERTA/DOC/FCA`, `fca_cia_aberta_AAAA.zip`) — **ZIP de 10
 membros**, particionado por ano: o índice + 9 tabelas de detalhe. Página completa em
-[FCA Companhias Abertas](ingestion/fca_cia_aberta.md).
+[FCA Companhias Abertas](../ingestion/fca_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
 |---|---|---|---|
@@ -1913,7 +1913,7 @@ df_ = FcaCiaAbertaGeralReader(date_ref=date(2025, 6, 15)).read()
 
 O **Informe sobre o Código Brasileiro de Governança Corporativa** (`CIA_ABERTA/DOC/CGVN`,
 `cgvn_cia_aberta_AAAA.zip`) — **ZIP de 2 membros**, particionado por ano: índice + conteúdo (molde
-do VLMO). Página completa em [CGVN Companhias Abertas](ingestion/cgvn_cia_aberta.md).
+do VLMO). Página completa em [CGVN Companhias Abertas](../ingestion/cgvn_cia_aberta.md).
 
 - `CgvnCiaAbertaReader` — **índice** dos informes (12 cols, 382 linhas em 2025), **4 colunas de
   data**, `Link_Download` **não seguido**.
@@ -1956,7 +1956,7 @@ df_ = CgvnCiaAbertaPraticasReader(date_ref=date(2025, 6, 15)).read()
 Os **programas de recompra de ações** (`CIA_ABERTA/EVENTOS/RECOMPRA_ACOES`,
 `cia_aberta_recompra_acoes.zip`) — o programa, suas corretoras e suas quantidades, todos ligados por
 `ID_Programa`. **Com este dataset o root `cia_aberta/` fica completo.** Página completa em
-[Recompra de Ações](ingestion/recompra_acoes.md).
+[Recompra de Ações](../ingestion/recompra_acoes.md).
 
 | reader | membro | cols | linhas |
 |---|---|---|---|
@@ -1985,7 +1985,7 @@ Os **programas de recompra de ações** (`CIA_ABERTA/EVENTOS/RECOMPRA_ACOES`,
 As **Informações Trimestrais** (`CIA_ABERTA/DOC/ITR`, `itr_cia_aberta_AAAA.zip`) — **19 membros,
 3.640.994 linhas**, o maior artefato que esta biblioteca lê (3× o DFP). Mesma forma do DFP: índice,
 oito demonstrações em `_con`/`_ind`, composição do capital e parecer. Página completa em
-[ITR Companhias Abertas](ingestion/itr_cia_aberta.md).
+[ITR Companhias Abertas](../ingestion/itr_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
 |---|---|---|---|
@@ -2020,7 +2020,7 @@ oito demonstrações em `_con`/`_ind`, composição do capital e parecer. Págin
 As **Demonstrações Financeiras Padronizadas** (`CIA_ABERTA/DOC/DFP`, `dfp_cia_aberta_AAAA.zip`) —
 **19 membros, ~1,17 milhão de linhas**: o índice, oito demonstrações em versão `_con`
 (consolidada) e `_ind` (individual) cada, a composição do capital e o parecer. Página completa em
-[DFP Companhias Abertas](ingestion/dfp_cia_aberta.md).
+[DFP Companhias Abertas](../ingestion/dfp_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
 |---|---|---|---|
@@ -2061,7 +2061,7 @@ do portal: 36 membros, ~131 mil linhas**, entregue em **4 fatias temáticas**, t
 **1ª: índice + estrutura de capital** (8 membros), **2ª: administração/pessoas** (7 membros, todos
 os do dataset que carregam CPF), **3ª: diversidade** (11 membros de contagens agregadas) e
 **4ª: remuneração + valores mobiliários + transações** (10 membros). Página completa em
-[FRE Companhias Abertas](ingestion/fre_cia_aberta.md).
+[FRE Companhias Abertas](../ingestion/fre_cia_aberta.md).
 
 | reader | membro | cols | linhas (2025) |
 |---|---|---|---|
@@ -2162,7 +2162,7 @@ df_acionistas = FreCiaAbertaPosicaoAcionariaReader(date_ref=date(2025, 6, 15)).r
 ### `Meta*Reader` (52 readers)
 
 Os **META** — a spec que a própria CVM publica para cada dataset (`.../<DATASET>/META/`). Um reader
-por dataset; página completa em [META (metadados da CVM)](ingestion/meta.md).
+por dataset; página completa em [META (metadados da CVM)](../ingestion/meta.md).
 
 `MetaInformeDiarioReader` · `MetaCdaReader` · `MetaLaminaReader` · `MetaCadastroFiReader` ·
 `MetaCadFiHistReader` · `MetaRegistroReader` · `MetaInfMensalFidcReader` · `MetaInfMensalFiiReader` ·

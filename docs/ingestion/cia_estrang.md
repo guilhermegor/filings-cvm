@@ -7,7 +7,7 @@ Leitura (← CVM) do cadastro das **companhias estrangeiras** registradas na CVM
 > **Abre a Wave 4 do #41** (companhias/ofertas). Um **CSV solto** de 1 reader — molde do
 > [Cadastro FI](cadastro_fi.md) / [ADM_FII](adm_fii.md), não o multi-membro dos ZIPs.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 
