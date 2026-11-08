@@ -27,6 +27,7 @@ dist/*
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
+!.vscode/extensions.json
 .idea/
 *.swp
 
@@ -57,11 +58,14 @@ site/
 
 # Corporate CA (generated locally by `make get_corporate_ca` — never committed)
 bin/corporate_ca.pem
+bin/ca_bundle.pem
 
 # Generated lessons mirrors (BlueprintX + dotfiles-dev backport queues) — local
 # read-only copies; the canonical stores live globally under ~/.claude/memory/.
 # Never committed here.
 .specs/_lessons/
+docs/blueprintx-lessons.md
+docs/dotfiles-dev-lessons.md
 
 # Environment files — ignore real env files, keep .env.example tracked
 .env

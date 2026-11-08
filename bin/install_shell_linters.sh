@@ -1,40 +1,17 @@
 #!/usr/bin/env bash
-#
-# install_shell_linters.sh — OPTIONAL system-binary install of shellcheck + shfmt.
-#
-# The PRIMARY route is pip: shellcheck-py / shfmt-py are dev-deps, vendored into the
-# venv and used by bin/lint_shell.sh via `poetry run` (works on every OS, incl. a
-# Windows UNC/mapped A: drive). This helper is a CONVENIENCE for machines that prefer
-# — or need — a SYSTEM binary on PATH, e.g. where the venv lives on a network share
-# that blocks executing the vendored binary. bin/lint_shell.sh falls back to exactly
-# such a system binary.
-#
-# It detects the OS and uses the available package manager. Each branch is GUARDED with
-# `command -v` and SKIPS gracefully with guidance when no supported manager is found —
-# it never hard-fails (a box without a usable manager just keeps using the pip route).
-#
-# Managers, by OS (first one found wins):
-#   windows : chocolatey (choco) -> scoop
-#   macos   : homebrew (brew)
-#   linux   : apt-get -> dnf -> pacman -> zypper  (shellcheck; shfmt via pip/go — see below)
-#
-# Flags / env:
-#   --dry-run | DRY_RUN=1   print the install commands instead of running them (preview).
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 # shellcheck source=bin/lib/bootstrap.sh
-source "$SCRIPT_DIR/lib/bootstrap.sh" # detect_os
+source "$SCRIPT_DIR/lib/bootstrap.sh"
 
 bool_dry_run=false
 if [[ "${1:-}" == "--dry-run" || "${DRY_RUN:-0}" == "1" ]]; then
 	bool_dry_run=true
 fi
 
-# Run a (state-mutating) install command, or echo it under --dry-run. Keeps the actual
-# package-manager invocations in one guarded place so a preview never installs anything.
 run_cmd() {
 	if [[ "$bool_dry_run" == true ]]; then
 		print_status info "[dry-run] $*"
@@ -44,7 +21,6 @@ run_cmd() {
 }
 
 install_windows() {
-	# Chocolatey and Scoop both package shellcheck AND shfmt.
 	if command -v choco >/dev/null 2>&1; then
 		print_status info "chocolatey: installing shellcheck + shfmt..."
 		run_cmd choco install shellcheck shfmt -y
@@ -74,8 +50,6 @@ install_macos() {
 }
 
 install_linux() {
-	# Most distro repos package shellcheck; shfmt is a Go binary rarely packaged, so it
-	# stays on the pip dev-dep (shfmt-py) — or `go install mvdan.cc/sh/v3/cmd/shfmt`.
 	local bool_done=false
 	if command -v apt-get >/dev/null 2>&1; then
 		print_status info "apt-get: installing shellcheck..."

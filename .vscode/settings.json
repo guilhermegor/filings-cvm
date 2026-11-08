@@ -6,11 +6,42 @@
 	// "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
 	"python.terminal.activateEnvironment": true,
 	"python.analysis.extraPaths": ["src"],
+	// Pylance/pyright type-checks as-you-type at the same strictness the CI mypy leg
+	// enforces — a wrong-typed annotation is flagged in the editor, not only at commit.
+	// The runtime checker (utils/typing) fires only when code runs; this is the fast
+	// static loop. No config is duplicated: ruff.toml and mypy.ini stay authoritative.
+	"python.analysis.typeCheckingMode": "strict",
 	"python.testing.pytestEnabled": true,
 	"python.testing.pytestArgs": ["tests/unit"],
+	// A visible column guide per language, since the width that matters differs by file
+	// type — ruff.toml (99), .sqlfluff (120), .gitlint (72/80). The bare "editor.rulers"
+	// is the fallback for everything with no section below (markdown, yaml, toml, json,
+	// .env.example, and any future extension this repo ships without updating this list) —
+	// it is not redundant with the per-language values, it is what a NEW filetype inherits.
+	// Declaring [python]'s 99 explicitly (rather than relying on it matching the fallback)
+	// is deliberate too: written, it says "Python is 99"; inherited, it says only "nobody
+	// decided" — the two read the same today and diverge silently the day one changes.
+	"editor.rulers": [99],
+	// Ruff is the formatter + linter (matches ruff.toml: line-length 99, 4-space indent,
+	// double quotes). Format + autofix + organise-imports on save, scoped to Python so
+	// no other filetype is reformatted. Requires the charliermarsh.ruff extension
+	// (recommended in .vscode/extensions.json).
 	"[python]": {
-		"editor.insertSpaces": false,
-		"editor.tabSize": 4
+		"editor.insertSpaces": true,
+		"editor.tabSize": 4,
+		"editor.defaultFormatter": "charliermarsh.ruff",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.ruff": "explicit",
+			"source.organizeImports.ruff": "explicit"
+		},
+		"editor.rulers": [99]
+	},
+	"[sql]": {
+		"editor.rulers": [120]
+	},
+	"[git-commit]": {
+		"editor.rulers": [72, 80]
 	},
 	"files.insertFinalNewline": true,
 	"files.trimTrailingWhitespace": true,
@@ -22,6 +53,7 @@
 		".gitlint": "ini",
 		".codespellrc": "ini",
 		".pydocstyle": "ini",
+		".coveragerc": "ini",
 		".sqlfluff": "ini",
 		".sqlfluffignore": "ini",
 		".yamllint": "ini",

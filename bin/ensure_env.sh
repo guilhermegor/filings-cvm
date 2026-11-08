@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-# Ensure a local .env exists before the rest of `make init` runs.
-#
-# If .env is already present, do nothing. Otherwise seed it from .env.example
-# so a fresh checkout starts with a working config skeleton. When .env.example
-# itself is missing there is nothing to copy: report the error and abort THIS
-# script with a non-zero status. The Makefile invokes it with a leading '-' so
-# make ignores that failure and still runs the remaining init steps (venv,
-# precommit) — the missing template blocks only the env-seeding step.
 
 set -euo pipefail
 
@@ -24,8 +16,8 @@ ensure_env_file() {
 	fi
 
 	if [[ ! -f "$path_example" ]]; then
-		print_status "error" ".env.example not found at $path_example — cannot seed .env"
-		return 1
+		print_status "info" "No .env.example in this project — nothing to seed, skipping .env"
+		return 0
 	fi
 
 	print_status "info" "No .env found — seeding it from .env.example..."
