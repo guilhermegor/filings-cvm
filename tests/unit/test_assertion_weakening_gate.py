@@ -142,10 +142,19 @@ def test_equality_weakened_to_membership_is_reported(str_fragment: str) -> None:
 	)
 
 
-def test_an_operator_swap_to_an_inequality_is_not_flagged() -> None:
-	"""An operator swap is out of the decidable core, by design (no safety claim made)."""
-	str_old = "def test_x() -> None:\n\tassert compute() == 5\n"
-	str_new = "def test_x() -> None:\n\tassert compute() > 5\n"
+@pytest.mark.parametrize("str_op", [">", "<"])
+def test_equality_swapped_to_a_strict_inequality_is_reported(str_op: str) -> None:
+	"""``== 5`` -> ``> 5`` is not a tightening: it accepts values the old assertion rejected."""
+	assert f"weakened from == to {str_op}" in _sole_finding(
+		"def test_x() -> None:\n\tassert compute() == 5\n",
+		f"def test_x() -> None:\n\tassert compute() {str_op} 5\n",
+	)
+
+
+def test_an_assertion_that_was_already_a_strict_inequality_is_clean() -> None:
+	"""Negative control: only a swap FROM ``==`` is read as a weakening."""
+	str_old = "def test_x() -> None:\n\tassert compute() > 5\n"
+	str_new = "def test_x() -> None:\n\tassert compute() > 5\n\tassert True is not None\n"
 
 	assert _findings(str_old, str_new) == []
 
@@ -341,11 +350,12 @@ def test_a_unittest_call_rewritten_as_an_equivalent_bare_assert_is_clean() -> No
 	assert _findings(str_old, str_new) == []
 
 
-def test_a_unittest_call_rewritten_with_a_swapped_operator_is_not_flagged() -> None:
-	"""A swapped operator after the rewrite is outside the decidable core, by design."""
+def test_a_unittest_call_rewritten_as_a_strict_inequality_is_reported() -> None:
+	"""``assertEqual(a(), 5)`` -> ``assert a() > 5`` accepts values the call rejected."""
 	str_old = "class T:\n\tdef test_v(self) -> None:\n\t\tself.assertEqual(a(), 5)\n"
 	str_new = "class T:\n\tdef test_v(self) -> None:\n\t\tassert a() > 5\n"
-	assert _findings(str_old, str_new) == []
+
+	assert "weakened to a bare assert with >" in _sole_finding(str_old, str_new)
 
 
 @pytest.mark.parametrize("str_new_assert", ["assert True", "assert 1", 'assert "x"'])

@@ -75,8 +75,16 @@ STR_INDEX_REF = ""
 _INT_MIN_FIELDS = 2
 _MIN_EQ_ARGS = 2
 
-_WEAK_FROM_EQ = frozenset({"In", "NotIn", "GtE", "LtE", "NotEq"})
-_OP_SYMBOLS = {"In": "in", "NotIn": "not in", "GtE": ">=", "LtE": "<=", "NotEq": "!="}
+_WEAK_FROM_EQ = frozenset({"In", "NotIn", "Gt", "GtE", "Lt", "LtE", "NotEq"})
+_OP_SYMBOLS = {
+    "In": "in",
+    "NotIn": "not in",
+    "Gt": ">",
+    "GtE": ">=",
+    "Lt": "<",
+    "LtE": "<=",
+    "NotEq": "!=",
+}
 
 _WEAKER_ASSERT_CALLS = {
     "assertEqual": frozenset(
