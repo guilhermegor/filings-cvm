@@ -177,3 +177,14 @@ carimbo registra.
 - A árvore do pacote vendorizado aparece sob o nome de espaço reservado do tier, `src/project/...`;
   neste repositório, todo o `src/` é reportado como ausente. Ignore essas linhas.
 - Respostas de scaffold além do roster de bots de revisão não são registradas no carimbo.
+
+## O que já foi importado dos guards
+
+Cada importação é uma issue própria, com um gate no pre-commit **e** um passo no CI (paridade de
+gates, descrita em `.github/CLAUDE.md`).
+
+| Issue | O que veio do template |
+|---|---|
+| #294 | guards de qualidade de código e de testes, com o catraca `bin/quality_ratchet.py` |
+| #295 | guards de documentação (`check_docs_code_refs.py`, `check_docs_gap.py`), de higiene (`check_identifier_masking.py`, `check_clean_index.sh`, `check_secrets.sh`) e o workflow `secret_scan.yaml` |
+| #296 | workflows de revisão (`review_threads`, `review_retry`, `coderabbit_trigger`) |
