@@ -9,7 +9,7 @@ datasets, um reader cada, que **inauguram o portal root `fip/`**:
 - **`InfQuadrimestralFipReader`** — `inf_quadrimestral_fip_AAAA.csv`, o informe **quadrimestral**
   que o substituiu no regime **pós-RCVM 175** (a partir de 2024).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > os informes FII ([Trimestral](inf_trimestral_fii.md), [Anual](inf_anual_fii.md)), de forma
 > semelhante particionados por ano.
 

@@ -1,6 +1,7 @@
 """Unit tests for the atomic output helper and the writers' use of it."""
 
 import contextlib
+from functools import partial
 import inspect
 import os
 from pathlib import Path
@@ -168,6 +169,37 @@ def test_atomic_write_bytes_keeps_existing_target_mode(mode_kept_after_overwrite
 def test_atomic_write_bytes_uses_umask_default_mode(mode_written_under_umask_022: int) -> None:
 	"""The file gets open()'s default permissions, not mkstemp's 0600."""
 	assert mode_written_under_umask_022 == 0o644
+
+
+_REAL_FSYNC = os.fsync
+
+
+def _fsync_recording_mode(list_modes: list[int], fd: int) -> None:
+	"""Record the permission bits of ``fd`` and then really fsync it."""
+	list_modes.append(stat.S_IMODE(os.fstat(fd).st_mode))
+	_REAL_FSYNC(fd)
+
+
+@pytest.fixture
+def widest_mode_seen_while_writing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> int:
+	"""Overwrite a 0600 file and return the temp-file mode seen at fsync time."""
+	path_out = tmp_path / "out.xml"
+	path_out.write_bytes(b"old")
+	path_out.chmod(0o600)
+	list_modes: list[int] = []
+	monkeypatch.setattr(atomic_write.os, "fsync", partial(_fsync_recording_mode, list_modes))
+	umask = os.umask(0o022)
+	atomic_write_bytes(path_out, b"secret")
+	os.umask(umask)
+	return list_modes[0]
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permission bits")
+def test_atomic_write_bytes_never_exposes_payload_under_wider_mode(
+	widest_mode_seen_while_writing: int,
+) -> None:
+	"""The temp file already carries the target's 0600 while the payload is written."""
+	assert widest_mode_seen_while_writing == 0o600
 
 
 def test_writer_discovery_finds_every_writer_module() -> None:

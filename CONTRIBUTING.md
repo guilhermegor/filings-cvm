@@ -146,6 +146,10 @@ Each guard runs as a pre-commit hook and as a CI step (`.github/workflows/tests.
 | `check_gate_integrity.py` | a PR must not weaken a check silently | `gate-change-ok: <reason>` in the PR body |
 | `check_coverage_floor.py` | `.coveragerc` `omit` never swallows `ingestion/`/`submission/` code | narrow the glob |
 | `check_required_checks_sync.py` | every context in `bin/required-checks.txt` is emitted by a job running on every PR | edit both together |
+| `check_layer_imports.py` | every `src/` import obeys `.layer-policy.yaml` (vendors only through a `_internal/utils` seam) | fix the import, or add a reasoned `allow` |
+| `check_dynamic_version_stub.py` | with poetry-dynamic-versioning on, `[tool.poetry] version` stays `0.0.0` | restore the stub |
+| `check_description_sync.sh` | `pyproject.toml` and `mkdocs.yml` carry one project description | edit both together |
+| `pin_contract_oracle.py` | (helper, not a gate) generates a `FileContract` column tuple + header-only fixture from a real CVM header | run `poetry run python bin/pin_contract_oracle.py --help` |
 
 The first five predate much of this tree, so they run through `bin/quality_ratchet.py` against
 a per-file baseline (`bin/quality_baseline.txt`, `<guard> <count> <path>`). A **new** file is
@@ -158,6 +162,15 @@ poetry run python bin/quality_ratchet.py <guard> --write-baseline <guard command
 ```
 
 `check_dead_code.py` skips when `vulture` is absent locally; CI installs it, so it always runs there.
+
+## Template Drift
+
+The repo carries a BlueprintX provenance stamp (`.blueprintx-provenance.yaml`). To compare it
+with the current template, run `python bin/check_template_drift.py --root . --blueprintx-root <checkout>`
+(or set `BLUEPRINTX_TEMPLATE_ROOT`); it is a report, not a gate. `bin/template_update.py` is a
+dry run unless `--apply` is passed; `--apply` writes files on a `chore/template-update-<short-sha>`
+branch, moves `blueprintx_commit` only when every file applied cleanly, and exits 1 otherwise.
+See [Template updates](docs/template-updates.md) for the known limits.
 
 ## Pull Request Process
 

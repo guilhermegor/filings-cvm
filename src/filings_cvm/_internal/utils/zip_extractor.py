@@ -171,7 +171,8 @@ def find_member(list_members: list[Path], str_name: str) -> Path:
 	for path_member in list_members:
 		if path_member.name == str_name:
 			return path_member
-	raise ValueError(f"No member named {str_name!r} in the archive")
+	list_available = sorted(path_member.name for path_member in list_members)
+	raise ValueError(f"No member named {str_name!r} in the archive. Available: {list_available}")
 
 
 @type_checker

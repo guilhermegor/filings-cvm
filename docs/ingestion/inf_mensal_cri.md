@@ -6,7 +6,7 @@ Imobiliários* (`inf_mensal_cri_AAAA.zip`, dataset `SECURIT/DOC/INF_MENSAL_CRI`)
 **Quarta e última fatia da Wave 2** do #41 (Securitização) — **com este, o portal root `securit/`
 está completo (4/4)**.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > [Informe Mensal CRA](inf_mensal_cra.md) (o irmão agro) ·
 > [Informe Mensal OTS](inf_mensal_ots.md) (o residual não-CRA/CRI).
 

@@ -8,7 +8,7 @@ readers **inauguram** o *portal root* `invnr/` (irmão de `fi/`, `auditor/`, `ag
 > Quarta fatia da **Wave 3** do #41 (snapshots CAD de prestadores de serviço). Copia o molde
 > multi-membro do [AUDITOR](auditor.md) / [AGENTE_FIDUC](agente_fiduc.md) / [AGENTE_AUTON](agente_auton.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

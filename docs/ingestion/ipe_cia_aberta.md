@@ -4,7 +4,7 @@ Leitura (← CVM) do **índice das Informações Periódicas e Eventuais das com
 (`ipe_cia_aberta_AAAA.zip`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/IPE/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > o [Cadastro de Companhias Abertas](cia_aberta_cad.md), que inaugura o portal root `cia_aberta/`.
 
 ---
@@ -89,7 +89,7 @@ df = IpeCiaAbertaReader(
 ```
 
 O frame devolvido carrega, além das 13 colunas da fonte, as seis colunas de
-[proveniência](../api.md) (`url`, `updated_at`, `source_key`, `package_version`,
+[proveniência](../api/reference.md) (`url`, `updated_at`, `source_key`, `package_version`,
 `ingestion_run_id`, `content_hash`).
 
 ---
