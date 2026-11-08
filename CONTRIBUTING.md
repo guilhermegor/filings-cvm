@@ -146,6 +146,10 @@ Each guard runs as a pre-commit hook and as a CI step (`.github/workflows/tests.
 | `check_gate_integrity.py` | a PR must not weaken a check silently | `gate-change-ok: <reason>` in the PR body |
 | `check_coverage_floor.py` | `.coveragerc` `omit` never swallows `ingestion/`/`submission/` code | narrow the glob |
 | `check_required_checks_sync.py` | every context in `bin/required-checks.txt` is emitted by a job running on every PR | edit both together |
+| `check_layer_imports.py` | every `src/` import obeys `.layer-policy.yaml` (vendors only through a `_internal/utils` seam) | fix the import, or add a reasoned `allow` |
+| `check_dynamic_version_stub.py` | with poetry-dynamic-versioning on, `[tool.poetry] version` stays `0.0.0` | restore the stub |
+| `check_description_sync.sh` | `pyproject.toml` and `mkdocs.yml` carry one project description | edit both together |
+| `pin_contract_oracle.py` | (helper, not a gate) generates a `FileContract` column tuple + header-only fixture from a real CVM header | run `poetry run python bin/pin_contract_oracle.py --help` |
 
 The first five predate much of this tree, so they run through `bin/quality_ratchet.py` against
 a per-file baseline (`bin/quality_baseline.txt`, `<guard> <count> <path>`). A **new** file is
