@@ -83,6 +83,7 @@ nav:
   - Projeto:
       - Perguntas frequentes: faq.md
       - Contribuindo: contributing.md
+      - Lançamento do 1.0.0: releasing-1-0-0.md
       - Atualizações do template: template-updates.md
       - Histórico de versões: changelog.md
 theme:

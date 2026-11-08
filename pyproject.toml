@@ -32,7 +32,7 @@ classifiers = [
 "Documentation" = "https://guilhermegor.github.io/filings-cvm/"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<4.0"
 # Required by the private _internal helpers (dtypes / tabular_reader / config.contracts).
 pandas = ">=2.1.0"
 openpyxl = ">=3.1.0"
@@ -68,7 +68,6 @@ yamllint = ">=1.35.0"
 shfmt-py = ">=3.7.0"
 shellcheck-py = ">=0.10.0"
 pyyaml = ">=6.0"
-tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = ">=1.6.0"

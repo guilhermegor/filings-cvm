@@ -18,7 +18,7 @@ Ou com Poetry:
 poetry add filings-cvm
 ```
 
-Requer **Python >= 3.10**.
+Requer **Python >= 3.11**.
 
 ---
 

@@ -5,7 +5,7 @@ The seam appends the six provenance columns to a parsed frame. These tests pin t
 mutated. ``hash_artifact`` is tested against a temp file.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import hashlib
 from pathlib import Path
 
@@ -61,9 +61,9 @@ def test_url_source_key_and_hash_carry_their_values_as_string() -> None:
 
 def test_updated_at_is_a_single_tz_aware_utc_timestamp() -> None:
 	"""updated_at is one tz-aware UTC instant, plausibly now, on every row (kept tz-aware)."""
-	before = datetime.now(timezone.utc)
+	before = datetime.now(UTC)
 	df_ = _stamped()
-	after = datetime.now(timezone.utc)
+	after = datetime.now(UTC)
 
 	sr = df_["updated_at"]
 	assert sr.dt.tz is not None
