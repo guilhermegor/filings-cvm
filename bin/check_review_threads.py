@@ -188,6 +188,7 @@ def _run_git(list_args: tuple) -> subprocess.CompletedProcess:
 		["git", *list_args],  # noqa: S607
 		capture_output=True,
 		text=True,
+		encoding="utf-8",
 		check=False,
 		timeout=_GIT_TIMEOUT_SECONDS,
 		env={k: v for k, v in os.environ.items() if k not in _GIT_LOCATION_VARS},
@@ -226,24 +227,27 @@ def policy_root() -> pathlib.Path:
 			f"{_ROSTER_FILE} from the PR's own checkout."
 		)
 	str_ref = f"origin/{str_base}"
+	str_fetch_err = ""
 	if _git("rev-parse", "--verify", "--quiet", str_ref).returncode != 0:
-		_git("fetch", "--depth=1", "origin", f"+{str_base}:refs/remotes/{str_ref}")
+		cls_fetch = _git("fetch", "--depth=1", "origin", f"+{str_base}:refs/remotes/{str_ref}")
+		str_fetch_err = cls_fetch.stderr.strip()[:400]
 	if _git("rev-parse", "--verify", "--quiet", str_ref).returncode != 0:
 		raise RuntimeError(
 			f"cannot resolve {str_ref} to read {_ROSTER_FILE} from the base ref — refusing "
-			f"to judge the PR by a roster its own checkout supplies."
+			f"to judge the PR by a roster its own checkout supplies. {str_fetch_err}".rstrip()
 		)
-	path_dir = pathlib.Path(tempfile.mkdtemp(prefix="review-bots-base-"))
 	cls_tree = _git("ls-tree", "--name-only", str_ref, "--", _ROSTER_FILE)
 	if cls_tree.returncode != 0:
 		raise RuntimeError(f"cannot list {_ROSTER_FILE} on {str_ref} — refusing to guess.")
-	if not cls_tree.stdout.strip():
-		return path_dir  # confirmed absent on the base: the gate is not adopted there
-	cls_show = _git("show", f"{str_ref}:{_ROSTER_FILE}")
-	if cls_show.returncode != 0:
-		raise RuntimeError(f"{_ROSTER_FILE} exists on {str_ref} but could not be read.")
-	(path_dir / _ROSTER_FILE).write_text(cls_show.stdout, encoding="utf-8")
-	return path_dir
+	cls_show = None
+	if cls_tree.stdout.strip():
+		cls_show = _git("show", f"{str_ref}:{_ROSTER_FILE}")
+		if cls_show.returncode != 0:
+			raise RuntimeError(f"{_ROSTER_FILE} exists on {str_ref} but could not be read.")
+	path_dir = pathlib.Path(tempfile.mkdtemp(prefix="review-bots-base-"))
+	if cls_show is not None:
+		(path_dir / _ROSTER_FILE).write_text(cls_show.stdout, encoding="utf-8")
+	return path_dir  # empty dir = confirmed absent on the base: the gate is not adopted there
 
 
 def _roster_exists_on_default_branch(path_root: pathlib.Path) -> bool:
