@@ -8,7 +8,7 @@ Leitura (← CVM) do registro das **ofertas de distribuição de valores mobili�
 > ofertas do portal, no molde do [COORD_OFERTA](coord_oferta.md) (base privada + membros), mas
 > **não** um par registro+satélite.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

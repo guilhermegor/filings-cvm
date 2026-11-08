@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **Perfil Mensal V4**
 ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp)).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---
@@ -25,7 +25,7 @@ verificadores de CNPJ/CPF e a escala decimal de cada campo.
 armazenado sem máscara), `nr_client`, `total_recurs_exter`, `total_recurs_br`,
 `tot_ativos_p_relac`, `tot_ativos_cred_priv`. Os blocos opcionais (`DISTR_PATRIM`,
 `VARIACAO_PERC_VAL_COTA`, derivativos de balcão, emissores de crédito privado, taxa de
-performance, etc.) e a lista completa de modelos estão na [Referência da API](../api.md).
+performance, etc.) e a lista completa de modelos estão na [Referência da API](../api/reference.md).
 
 - **Decimais** têm escala fixada por campo; a precisão excedente é **truncada em direção a zero**
   (`ROUND_DOWN`), nunca arredondada. Passe valores como `str`/`Decimal`, nunca `float`.

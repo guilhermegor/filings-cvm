@@ -3,7 +3,7 @@
 Leitura (← CVM) das **Demonstrações Financeiras Padronizadas** das companhias abertas
 (`dfp_cia_aberta_AAAA.zip`), publicadas no [portal de dados abertos](https://dados.cvm.gov.br).
 
-> **Ver também:** [Referência da API](../api.md) · [Uso](../usage.md) · os irmãos do mesmo
+> **Ver também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) · os irmãos do mesmo
 > sub-root: [IPE](ipe_cia_aberta.md), [VLMO](vlmo_cia_aberta.md), [FCA](fca_cia_aberta.md),
 > [CGVN](cgvn_cia_aberta.md), [FRE](fre_cia_aberta.md).
 

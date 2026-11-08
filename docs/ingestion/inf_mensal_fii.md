@@ -4,7 +4,7 @@ Leitura (← CVM) do **Informe Mensal dos FII** (`inf_mensal_fii_AAAA.zip`), pub
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FII/DOC/INF_MENSAL/DADOS/).
 Inaugura o *portal root* `fii/` da biblioteca (irmão de `fi/` e `fidc/`).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 
