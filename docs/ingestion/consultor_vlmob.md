@@ -7,7 +7,7 @@ publicado no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/). 
 > Sétima fatia da **Wave 3** do #41 — mesmo formato de 5 membros do [ADM_CART](adm_cart.md), mais
 > simples. Fecha os roots de 5 membros; resta só o ADM_FII (CSV solto) para encerrar a Wave 3.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

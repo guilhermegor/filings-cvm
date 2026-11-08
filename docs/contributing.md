@@ -2,7 +2,7 @@
 
 Tudo o que você precisa para desenvolver, testar e lançar esta biblioteca.
 
-> **Veja também:** [Uso](usage.md) · [Referência da API](api.md) · o `CONTRIBUTING.md` na raiz do
+> **Veja também:** [Uso](usage.md) · [Referência da API](api/reference.md) · o `CONTRIBUTING.md` na raiz do
 > repositório contém a política autoritativa de branch/PR e de mensagem de commit.
 
 ---
@@ -54,6 +54,11 @@ O site é **versionado com [mike](https://github.com/jimporter/mike)**: cada rel
 própria versão navegável na branch `gh-pages`, e o leitor alterna entre versões por um **dropdown**
 no cabeçalho. O alias `latest` sempre aponta para a release mais recente, então a URL raiz do site
 cai na versão mais nova.
+
+**Como adicionar uma página:** crie o `.md` em `docs/` e registre-o no `nav:` do `mkdocs.yml` no
+mesmo commit. A referência da API é um **diretório** (`docs/api/`): a entrada de um novo leitor ou
+serializador vai em `docs/api/reference.md`, nunca em um `docs/api.md`. As páginas obrigatórias
+estão em `docs/.docs-skeleton.yaml` e são verificadas por `bin/check_docs_sections.py`.
 
 **Como cada peça se encaixa:**
 

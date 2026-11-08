@@ -178,3 +178,18 @@ bash -n bin/*.sh bin/lib/*.sh
 `SC1091` (can't follow sourced file) is excluded globally because scripts
 source siblings at runtime paths shellcheck cannot resolve. Any other
 `# shellcheck disable=` must be line-scoped and carry a one-line reason comment.
+
+## Guards imported from BlueprintX `lib-minimal` (#367)
+
+Each is a pre-commit hook **and** a `tests.yaml` step (gate parity, `.github/CLAUDE.md`).
+
+| Guard | Enforces | Run |
+|-------|----------|-----|
+| `check_layer_imports.py` | Every `src/` import is judged against `.layer-policy.yaml`: stdlib and first-party always pass, a vendor passes only if its layer lists it with a reason, and `pandas` is annotation-only outside `_internal/utils` (build a frame via `utils.frames`). | `poetry run python bin/check_layer_imports.py` |
+| `check_dynamic_version_stub.py` | With `poetry-dynamic-versioning` enabled, `[tool.poetry] version` stays the `0.0.0` stub (the git tag is the version). | `poetry run python bin/check_dynamic_version_stub.py` |
+| `check_description_sync.sh` (+ `lib/description_sources.py`) | `pyproject.toml` and `mkdocs.yml` carry one description; the GitHub About is compared too when `GH_TOKEN`/`GITHUB_TOKEN` is set. | `poetry run bash bin/check_description_sync.sh` |
+| `pin_contract_oracle.py` | Not a gate: prints a `tuple_required` and (`--write`) a verbatim header-only fixture from a real downloaded artifact, so a contract is generated from CVM's bytes, never transcribed. Defaults to `ISO-8859-1`. | `poetry run python bin/pin_contract_oracle.py <artifact.csv> --write tests/fixtures/<dataset>/<dataset>_<section>_header.csv` |
+
+A layer-policy finding is fixed by moving the vendor call behind a seam in `_internal/utils`, or
+by adding the vendor to that layer's `allow` **with a written reason** in `.layer-policy.yaml` —
+never by loosening the guard.

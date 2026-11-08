@@ -1,4 +1,4 @@
-"""Unit tests for the Informe Mensal de Investidor Não Residente submission writer."""
+"""Unit tests for the ``Informe Mensal de Investidor Não Residente`` submission writer."""
 
 from collections.abc import Callable
 import contextlib

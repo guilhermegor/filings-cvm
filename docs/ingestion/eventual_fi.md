@@ -3,7 +3,7 @@
 Leitura (← CVM) do **índice dos documentos eventuais** entregues por fundos e classes
 (`eventual_fi_AAAA.csv`), publicado no [portal de dados abertos](https://dados.cvm.gov.br).
 
-> **Ver também:** [Referência da API](../api.md) · [Uso](../usage.md) · o irmão
+> **Ver também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) · o irmão
 > [DFIN FII](dfin_fii.md), que é o mesmo *tipo* de artefato e **não compartilha um só nome de
 > coluna**.
 

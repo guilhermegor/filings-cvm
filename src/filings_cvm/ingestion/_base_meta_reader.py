@@ -27,6 +27,7 @@ import zipfile
 import pandas as pd
 
 from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from filings_cvm._internal.utils.frames import frame_from_records
 from filings_cvm._internal.utils.http_downloader import download_file
 from filings_cvm._internal.utils.meta_parser import parse_meta_blocks
 from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
@@ -134,9 +135,7 @@ class BaseMetaReader(IngestionReader):
 			)
 			str_content_hash = hash_artifact(path_meta)
 			list_records = self._parse_artifact(path_meta)
-		df_ = pd.DataFrame(list_records, columns=list(self._CONTRACT.tuple_required)).astype(
-			"string"
-		)
+		df_ = frame_from_records(list_records, self._CONTRACT.tuple_required).astype("string")
 		self._cls_logger.log_message(
 			f"Loaded {len(df_)} META field rows from {str_filename}", "info"
 		)

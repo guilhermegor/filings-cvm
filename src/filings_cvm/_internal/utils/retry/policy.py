@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 from filings_cvm._internal.utils.retry._schedule import (
 	_DEFAULT_BASE_WAIT_S,
@@ -54,7 +55,8 @@ class RetryPolicy(metaclass=TypeChecker):
 		------
 		ValueError
 			If ``int_max_attempts`` is less than 1, or ``str_strategy`` is not one of
-			``"exponential"``, ``"linear"``, ``"constant"``.
+			``"exponential"``, ``"linear"``, ``"constant"``, or a wait (``float_base_wait_s``,
+			``float_factor``, ``float_max_wait_s``) is negative or non-finite.
 		"""
 		if self.int_max_attempts < 1:
 			raise ValueError("int_max_attempts must be >= 1")
@@ -62,3 +64,29 @@ class RetryPolicy(metaclass=TypeChecker):
 			raise ValueError(
 				f"str_strategy must be one of {sorted(_STRATEGIES)}, got {self.str_strategy!r}"
 			)
+		self._validate_waits()
+
+	def _validate_waits(self) -> None:
+		"""Reject wait values ``time.sleep`` cannot accept.
+
+		The retry loop hands the computed wait straight to ``time.sleep``, which raises
+		``ValueError`` on a negative and ``OverflowError`` on an infinity — a crash *during*
+		the retry that would replace the transient error being retried.
+
+		Raises
+		------
+		ValueError
+			If any wait is negative or non-finite.
+		"""
+		dict_waits = {
+			"float_base_wait_s": self.float_base_wait_s,
+			"float_factor": self.float_factor,
+			"float_max_wait_s": self.float_max_wait_s,
+		}
+		list_bad = [
+			str_name
+			for str_name, float_value in dict_waits.items()
+			if float_value is not None and not (math.isfinite(float_value) and float_value >= 0)
+		]
+		if list_bad:
+			raise ValueError(f"must be finite and >= 0: {', '.join(sorted(list_bad))}")

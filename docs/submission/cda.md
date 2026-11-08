@@ -3,7 +3,7 @@
 Envio (→ CVM) do padrão **CDA V4** (Composição e Diversificação das Aplicações,
 [`PadraoXMLCDANetV4.aspx`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx)).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---

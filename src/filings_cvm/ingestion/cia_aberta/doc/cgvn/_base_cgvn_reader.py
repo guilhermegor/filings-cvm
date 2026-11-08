@@ -3,8 +3,8 @@
 `cgvn_cia_aberta_AAAA.zip` ships **two members** — an **index** and its **content**, the same shape
 as VLMO:
 
-- `cgvn_cia_aberta_AAAA.csv` (12 cols) — one row per *Informe sobre o Código Brasileiro de
-  Governança Corporativa* filed, carrying a `Link_Download`.
+- `cgvn_cia_aberta_AAAA.csv` (12 cols) — one row per `Informe sobre o Código Brasileiro de
+  Governança Corporativa` filed, carrying a `Link_Download`.
 - `cgvn_cia_aberta_praticas_AAAA.csv` (11 cols) — one row per recommended practice, whether the
   company adopted it (`Pratica_Adotada`) and its free-text `Explicacao`.
 
