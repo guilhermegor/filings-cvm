@@ -36,13 +36,11 @@ else:
 
 
 # Frame modules skipped when reconstructing the caller context: the stdlib logging and inspect
-# machinery, pydantic and typing internals, the project's own runtime type-checker, and the
+# machinery, typing internals, the project's own runtime type-checker, and the
 # logging seam itself (logs, logs emitter, retry) whose wrapper frames would otherwise mask the
 # real caller. Matched on the module name's last dotted component (see the walker below), so a
 # package-qualified name still matches its final segment where a prefix match would not.
-_SET_SKIP_MODULES = frozenset(
-	{"pydantic", "typing", "inspect", "logging", "logs", "logs_emitter", "retry"}
-)
+_SET_SKIP_MODULES = frozenset({"typing", "inspect", "logging", "logs", "logs_emitter", "retry"})
 
 # The severities a message may carry — shared by ``CreateLog.log_message`` and the module-level
 # ``log_message`` seam so the two never drift (mypy checks the forwarded argument against this).

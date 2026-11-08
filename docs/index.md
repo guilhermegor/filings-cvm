@@ -1,58 +1,22 @@
 # **filings-cvm** <img src="assets/logo.png" align="right" width="200" style="border-radius: 15px;" alt="filings-cvm">
 
-Biblioteca Python **tipada** para os padrões de arquivo XML regulatórios da
-[CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários).
+Biblioteca Python **tipada** para ler os arquivos abertos da
+[CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários): baixa o dump publicado no
+portal de dados abertos e devolve um `DataFrame` tipado e validado por contrato.
 
-Construa, valide e serialize documentos no formato exigido pela CVM — ou, à medida que a
-biblioteca cresce, leia e interprete arquivos baixados da CVM de volta para modelos tipados.
-
----
-
-## As duas macrosseções
-
-Toda solução da biblioteca vive em uma destas duas direções:
-
-| Seção | Sentido | O que faz |
-|-------|---------|-----------|
-| `filings_cvm.submission` | **envio** → CVM | Recebe modelos de schema validados e produz o arquivo XML compatível com a CVM, pronto para envio. |
-| `filings_cvm.ingestion` | **leitura** ← CVM | Analisa e interpreta um arquivo recebido/baixado da CVM de volta para modelos tipados. Criada quando o primeiro padrão de leitura for implementado. |
-
-O **schema compartilhado** (modelos [Pydantic](https://docs.pydantic.dev/) que espelham cada
-padrão XML) é neutro em relação à direção e é reexportado pelas seções públicas — você importa
-tudo de que precisa a partir de `filings_cvm.submission`.
+> **Migração:** a seção de **envio** (`filings_cvm.submission`, modelo validado → XML) foi
+> removida e vive no pacote separado `layouts-cvm`. Esta biblioteca não depende dele.
 
 ---
 
-## Fonte da verdade — catálogo CVM
+## Fonte da verdade — portal de dados abertos
 
-Os nomes de campo, escalas decimais e cardinalidades vêm da página oficial de padrões da CVM,
-não desta documentação:
+Nomes de coluna e tipos vêm dos arquivos reais publicados no portal, não desta documentação:
 
-> <https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp>
+> <https://dados.cvm.gov.br/dados/>
 
-### Padrões implementados
-
-- ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp))
-  — envio (`submission/perfil_mensal.py`).
-- ✅ **Perfil Mensal — original** ([`PadraoXMLPerfil.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp))
-  — envio (`submission/perfil_mensal_original.py`).
-- ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp))
-  — envio (`submission/informe_diario.py`).
-- ✅ **Informe Diário — V3** ([`PadraoXMLInfoDiarioNetV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp))
-  — envio (`submission/informe_diario_v3.py`).
-- ✅ **Informe de Portabilidade** ([`PadraoXMLInfoPortabilidade.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoPortabilidade.asp))
-  — envio (`submission/informe_portabilidade.py`).
-- ✅ **Informe Quadrimestral — V2** ([`PadraoXMLInfoTrimV2.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrimV2.asp))
-  — envio (`submission/informe_quadrimestral.py`).
-- ✅ **Informe Trimestral — V1** ([`PadraoXMLInfoTrim.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoTrim.asp), válido até 2017-06)
-  — envio (`submission/informe_trimestral_v1.py`).
-- ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp))
-  — envio (`submission/cadastro_ativos.py`).
-- ✅ **Informe Mensal de Investidor não Residente** ([`PadraoXMLInfoMensalINR.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoMensalINR.asp))
-  — envio (`submission/inr_mensal.py`).
-
-Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes.
-Consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
+Cada leitor fica sob `filings_cvm.ingestion.<raiz_do_portal>`; veja **[Leitura](ingestion/index.md)**
+para a visão geral e o catálogo de leitores.
 
 ---
 
@@ -70,9 +34,7 @@ Instalação como dependência:
 pip install filings-cvm
 ```
 
-Continue em **[Uso](usage.md)** para o primeiro documento, ou veja cada padrão em **Envio**:
-**[Perfil Mensal](submission/perfil_mensal.md)**, **[Informe Diário](submission/informe_diario.md)**,
-**[Lâmina V3](submission/lamina.md)**, **[Cadastro de Ativos](submission/cadastro_ativos.md)** e **[Informe Mensal INR](submission/inr_mensal.md)**.
+Continue em **[Uso](usage.md)** para o primeiro `DataFrame`, ou veja a **[Leitura](ingestion/index.md)**.
 
 ---
 

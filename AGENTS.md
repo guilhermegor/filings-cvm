@@ -28,26 +28,16 @@ tests, docs, and PyPI + Test-PyPI release workflows ready to go. It is scaffolde
 BlueprintX into a new project directory; the scaffold replaces the `<project_name>` package
 directory and the `pyproject.toml` placeholders via `envsubst`.
 
-## CVM Sources of Truth — one per direction
+## CVM Source of Truth
 
-The library implements the CVM regulatory file standards in two directions, and **each
-direction has its own authoritative CVM source.** Do not cross them.
-
-**Submission (`submission/`, envio → CVM) — the XML-standards catalog page:**
-
-> https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp
-
-Each catalog entry below links to a `PadraoXML*.asp` page (relative to that base URL) describing
-one XML standard. When implementing or updating a **writer**, treat the linked CVM page as
-authoritative — field names, decimal scales, and cardinalities come from there, not from this
-file.
+This library only **reads** CVM files. (The submission section, envio → CVM XML, moved to the
+separate `layouts-cvm` package — filings-cvm#389 — and is not a dependency of this one.)
 
 **Ingestion (`ingestion/`, leitura ← CVM) — the open-data portal:**
 
 > https://dados.cvm.gov.br/dados/
 
-The **readers** consume the flat open-data dumps published under this portal, **not** the
-submission XML specs. Nearly every ingestion artifact comes from here, each with its own dataset
+The **readers** consume the flat open-data dumps published under this portal. Nearly every ingestion artifact comes from here, each with its own dataset
 page — e.g. Perfil Mensal ingestion is <https://dados.cvm.gov.br/dataset/fi-doc-perfil_mensal>,
 and the implemented readers pull from `FI/DOC/INF_DIARIO`, `FI/DOC/CDA`, `FI/DOC/LAMINA`,
 `FI/CAD`, … When implementing or updating a **reader**, ground its `FileContract` in the real
@@ -56,30 +46,21 @@ downloaded artifact from the relevant dataset page (per "Standing decisions" in 
 The portal holds far more than is implemented; a standing task (issue **#41**) is to survey it
 once the current ingestion backlog is cleared and decide what else is worth scraping.
 
-### Two macro-sections — every solution lives in one of them
+### One macro-section — every solution lives in `ingestion/`
 
-- **`submission/` (envio → CVM)** — build, validate, and serialise a document to a
-  CVM-compliant file *to send* to CVM. Takes schema models (or a filled spreadsheet) → XML.
 - **`ingestion/` (leitura ← CVM)** — parse and interpret a file *received/downloaded* from
   CVM back into typed models / DataFrames.
 
-The **shared, direction-neutral schema** (Pydantic models mirroring each XML standard) lives
-under `_internal/config/schemas/<standard>.py`; both sections import it. `submission/` and
-`ingestion/` re-export the public names consumers need.
-
-Each section's classes implement a private **port** (hexagonal ports-and-adapters) in
-`_internal/config/ports/`: submission writers are `SubmissionWriter[TDoc]` adapters exposing
-`export(doc, output_path)`; ingestion readers are `IngestionReader` adapters exposing
-`read() -> pd.DataFrame`. The ports are ABCs (`ABCTypeCheckerMeta`) and stay private — consumers
-import the concrete writers/readers, never the port. An `ingestion` reader of a CVM open-data
-CSV consumes a **different artifact** from the same standard's submission XML, so it declares its
-own `FileContract` rather than reusing the submission Pydantic schema.
+Ingestion readers are `IngestionReader` adapters exposing `read() -> pd.DataFrame`, implementing
+a private **port** (hexagonal ports-and-adapters) in `_internal/config/ports/`. The port is an
+ABC (`ABCTypeCheckerMeta`) and stays private — consumers import the concrete readers, never the
+port. A reader of a CVM open-data CSV declares its own `FileContract`.
 
 **Every ingestion reader takes an optional `path_raw: Path | None = None`** at construction.
 `None` → the artifact is fetched into a `TemporaryDirectory` and destroyed on exit, so nothing
 persists (note: the read still transiently touches disk and needs a writable temp dir — it is not
 a zero-disk read); a path → the untouched raw artifact (`.zip`, `.csv`, `.html`, `.xlsx`, …) is
-written there and **kept**, before any parsing. This is the reading-side mirror of the writers' `output_path`. It is
+written there and **kept**, before any parsing. It is
 implemented once by the shared `_internal/utils/raw_workspace.py` context manager — never
 re-branch on the tempdir inside a reader. Keeping the raw bytes is what makes a downstream
 datalake's bronze layer authoritative: when CVM changes a data contract and a transform breaks,
@@ -88,28 +69,15 @@ already-changed source.
 
 ### Catalog (status: ✅ implemented · ⬜ pending)
 
-Status marks the `submission` direction unless noted; `ingestion` is tracked as it grows.
+Status marks the `ingestion` direction. The submission (XML envio) standards moved to the separate `layouts-cvm` package (filings-cvm#389) and are no longer catalogued here.
 
 **Fundos**
-- Informe Diário — ✅ **V4** (`PadraoXMLInfoDiarioNetV4.asp`) — `submission/informe_diario.py` (`InformeDiario`); schema `_internal/config/schemas/informe_diario.py` · ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py` · ✅ **submission V3** (`PadraoXMLInfoDiarioNetV3.asp`) — `submission/informe_diario_v3.py` (`InformeDiarioV3`, estende o V4; só `CNPJ_FDO`, `VERSAO` 3.0); schema `_internal/config/schemas/informe_diario_v3.py` · ⬜ V2 (`PadraoXMLInfoDiarioNet739.asp`) · V1 (`PadraoXMLInfoDiarioNet.asp`)
-- Informe de Fundo 157 — ✅ **submission** (`PadraoXMLInf157.asp`) — `submission/inf_fundo_157.py`
-  (`InfFundo157`); schema `_internal/config/schemas/inf_fundo_157.py` (`InfFundo157Document`),
-  validadores em `_internal/utils/xml_fields.py`. A página não tem decimais e não diz o formato de
-  `DT_FIM` (adotado `DD/MM/AAAA`) nem a cardinalidade de `COTST` (≥1); ver
-  `docs/submission/inf_fundo_157.md`. Nenhum validador da CVM foi executado.
-- ⬜ Informe Sintético — FCCE (`PadraoXMLSintFCCE.asp`) · FITVM/FMP-FGTS CL/FIIM (`PadraoXMLSintFITVM.asp`) · FIC-FITVM (`PadraoXMLSintFIC.asp`) · FMP-FGTS/FMAI (`PadraoXMLSintOutros.asp`)
-- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py` · ✅ **submission V4** (`PadraoXMLCDANetV4.aspx`) — `submission/cda.py` (`Cda`); schema `_internal/config/schemas/cda.py` · ⬜ V2 (`PadraoXMLCDANet.aspx`) · V3 (`PadraoXMLCDANetV3.aspx`)
-- ⬜ Demonstrativo de Fontes e Aplicações de Recursos — FAR (`PadraoXMLFAR.asp`)
-- ⬜ Balanço (`PadraoXMLBalanco.asp`)
-- ⬜ Balancete (`PadraoXMLBalancete.asp`)
-- Informe Quadrimestral (FIP) — ✅ **submission V2** (`PadraoXMLInfoTrimV2.asp`, antigo Informe Trimestral) — `submission/informe_quadrimestral.py` (`InformeQuadrimestral`); schema `_internal/config/schemas/informe_quadrimestral.py`; validadores em `_internal/utils/xml_fields.py` · ✅ **submission V1** Informe Trimestral, válido até 2017-06 (`PadraoXMLInfoTrim.asp`) — `submission/informe_trimestral_v1.py` (`InformeTrimestralV1`); schema `_internal/config/schemas/informe_trimestral_v1.py` (reusa o serializador da V2; 5 campos por fundo, `VERSAO` 1.0)
+- Informe Diário — ✅ **V4** ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py`
+- Demonstrativo de Composição e Diversificação das Aplicações (CDA) — ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/cda.py` (`CdaReader`); contract `_internal/config/contracts/cda_fif.py`
 - Informe Mensal FIDC — ✅ **ingestion** FIDC open-data dump (`inf_mensal_fidc_AAAAMM.zip`, **18
   membros**: Tabelas I–X + sub-tabelas X.1/X.1.1/X.2…X.7) — `ingestion/fidc/doc/inf_mensal/*`
   (`InfMensalFidcTab*Reader`, base privada `_base_inf_mensal_fidc_reader.py`); contracts
   `_internal/config/contracts/inf_mensal_fidc.py`. Inaugura o portal root `fidc/` (irmão de `fi/`)
-  · **submission** — ⬜ até 2019-11-01 (`PadraoXMLMensalFIDC489.asp`, descontinuado) · ✅ a partir de
-  2019-11-01 (`PadraoXMLMensalFIDC576.asp`) — `submission/inf_mensal_fidc.py` (`InfMensalFidc`);
-  schema `_internal/config/schemas/inf_mensal_fidc.py`
 - Cadastro de Fundos (CAD/FI) — **open-data only, sem padrão XML de envio** — ✅ **ingestion**
   snapshot `cad_fi.csv` — `ingestion/fi/cad/cadastro_fi.py` (`CadastroFiReader`); contract
   `_internal/config/contracts/cad_fi.py`. Sem `date_ref` (retrato do estado atual) e **sem chave
@@ -282,14 +250,7 @@ números do mesmo parágrafo discordavam.
   (`LaminaCarteiraReader`); contract `_internal/config/contracts/lamina_carteira_fif.py` ·
   ✅ **ingestion** lâmina proper (`lamina_fi_*`, 78 colunas) — `ingestion/fi/doc/lamina/lamina.py`
   (`LaminaReader`); contract `_internal/config/contracts/lamina_fif.py` ·
-  ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP) ·
-  ✅ **submission** **V3** (`PadraoXMLLaminaV3.asp`) — `submission/lamina.py` (`Lamina`); schema
-  `_internal/config/schemas/lamina.py` (`LaminaDocument`, 20 blocos), validadores em
-  `_internal/utils/xml_fields.py`. ⚠️ A página **não diz a escala de nenhum decimal** (tudo "float"),
-  então as escalas são **política do repo, não número da CVM** (dinheiro 2, percentuais 4, truncado), e
-  ela **se contradiz** em 2 pontos: namespace (`urn:lamina` no exemplo × `urn:infdiario` na lista de
-  tags — usado o do exemplo) e a tag da linha mensal (`MES` × `MES_RENT` — usada `MES`); ver
-  `docs/submission/lamina.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLLaminaV2.asp`) · V1 (`PadraoXMLLamina.asp`)
+  ⬜ **ingestion** `rentab_ano_*` / `rentab_mes_*` (membros irmãos do mesmo ZIP)
 
 **Complemento de Fundos (FI/DOC/COMPL)** — **open-data only** (sem padrão XML de envio):
 - Complemento FI — ✅ **ingestion** `compl_fi_AAAAMM.zip` (**ZIP de 4 membros**: `compl_fi` 20 cols,
@@ -345,13 +306,12 @@ envio; é o registro do que foi entregue, não um informe):
   META `.txt` solto descreve só o regime novo (`_META_UNDESCRIBED_READERS`)
 
 **Perfil Mensal e Extrato das Informações sobre o Fundo**
-- ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`) — `submission/perfil_mensal.py` (`PerfilMensal`); schema `_internal/config/schemas/perfil_mensal.py`
+- ✅ **Perfil Mensal — V4** (`PadraoXMLPerfilV4.asp`)
   · ✅ **ingestion** `perfil_mensal_fi_AAAAMM.csv` (**CSV solto**, não ZIP, **particionado por MÊS**,
   série a partir de 201901; 107 cols / 24.832 linhas / 13,19 MB em 202506) —
   `ingestion/fi/doc/perfil_mensal/*` (`PerfilMensalReader`, `PerfilMensalPre175Reader`, base privada
   `_base_perfil_mensal_reader.py`); contracts `_internal/config/contracts/perfil_mensal_fi.py`,
   **gerados dos headers e pinados** a `tests/fixtures/perfil_mensal_fi/*_header.csv`.
-  **Fecha a simetria: era o único padrão com writer de submission e sem reader.**
   ⚠️⚠️ **UM PADRÃO DE NOME, DOIS SCHEMAS — e o corte é MEDIDO, não deduzido da norma:** a RCVM 175
   trocou o bloco-chave no meio da série, `CNPJ_FUNDO` (**106** cols, até **202311**) → `TP_FUNDO_CLASSE`
   + `CNPJ_FUNDO_CLASSE` (**107**, de **202312**). **As outras 105 são IDÊNTICAS** (`pré[1:] == pós[2:]`,
@@ -372,8 +332,6 @@ envio; é o registro do que foi entregue, não um informe):
   arquivo do `META/`** (medido pela listagem; as outras 3 grafias dão 404), com **107 campos = o header
   pós-175 exatamente** ⇒ **a META NÃO é oráculo do contrato pré-175**, e o job de deriva registra isso em
   `_META_UNDESCRIBED_READERS` para não reportar a mesma linha explicada toda semana
-- ⬜ Perfil Mensal — V3 (`PadraoXMLPerfilV3.asp`) · 739 (`PadraoXMLPerfil739.asp`)
-- ✅ Perfil Mensal — original (`PadraoXMLPerfil.asp`) — `submission/perfil_mensal_original.py` (`PerfilMensalOriginal`); schema `_internal/config/schemas/perfil_mensal_original.py`. **NÃO deriva do V4** (medido: exemplo XML de 53 tags contra 92, 36 nomes em comum): `NR_CLIENT`/`DISTR_PATRIM` com 14 tags `*_NAC`/`*_ENT_AB_FC_PREV_COMPL`, corpo próprio (`PERC_PL_MAIOR_COTST`, `NR_DIAS_NEGOC`, …) e **cabeçalho sem `VERSAO`**. Só `PercentField` vem do V4; `max_digits` do pydantic ignora zeros à direita e não limita as inteiras, então as escalas "N inteiras e M decimais" usam um teto de magnitude
 - Extrato das Informações sobre o Fundo — ✅ **ingestion** dataset `FI/DOC/EXTRATO`, que publica
   **DOIS artefatos**: `extrato_fi_AAAA.csv` (**CSV solto anual**, 2015–2026, **toda** entrega do ano)
   e `extrato_fi.csv` (**URL fixa, sem ano**) — `ingestion/fi/doc/extrato/*` (`ExtratoFiReader` 117c
@@ -397,11 +355,6 @@ envio; é o registro do que foi entregue, não um informe):
   **zero linhas ragged** nos 3 artefatos. META = `meta_extrato_fi.txt` (`.txt` solto, único do
   `META/`), **117 campos = o header atual exatamente** ⇒ **não é oráculo do contrato pré-2020**
   (registrado em `_META_UNDESCRIBED_READERS`)
-- ✅ **submission** Extrato — **V3** (`PadraoXMLInfExtratoV3.asp`) — `submission/extrato.py` (`Extrato`); schema
-  `_internal/config/schemas/extrato.py` (`ExtratoDocument`), validadores em `_internal/utils/xml_fields.py`.
-  ⚠️ A página **se contradiz** (exemplo × lista de tags: namespace `urn:extr`×`urn:perf`, `CNPJ_FDO`×`CNPJ_FUNDO`,
-  tag `TP_VL_FIXO_TX_INGRESSO` reutilizada em `TX_SAIDA`); seguido o exemplo; escalas não ditas são política do repo
-  (percentuais 4, truncado); ver `docs/submission/extrato.md`. Nenhum validador da CVM foi executado. ⬜ V2 (`PadraoXMLInfExtratoV2.asp`) · V1/450 (`PadraoXMLInfExtrato450.asp`)
 
 **Auditores** — portal root `auditor/`; **open-data only** para o cadastro (a CVM não publica padrão
 XML de envio para o registro). Sob `AUDITOR/CAD/`:
@@ -412,10 +365,9 @@ XML de envio para o registro). Sob `AUDITOR/CAD/`:
   `date_ref`** (molde do `CadastroFiReader`). O membro `pf` **não tem CPF** (identifica por
   `CD_CVM`+nome); `pj.CNPJ` chega mascarado. **Inaugura o portal root `auditor/` e a primeira fatia
   da Wave 3 do #41** (snapshots CAD de prestadores de serviço)
-- ⬜ **submission** Informe Anual de Auditor (`PadraoXMLAuditorAnual.asp`)
 
 **Agentes Fiduciários** — portal root `agente_fiduc/`; **open-data only** (a CVM não publica padrão
-XML de envio). Não há submission. Sob `AGENTE_FIDUC/CAD/`:
+XML de envio). Sob `AGENTE_FIDUC/CAD/`:
 - Cadastro de Agentes Fiduciários — ✅ **ingestion** `cad_agente_fiduc.zip` (**2 membros**: `pf`, `pj`)
   — `ingestion/agente_fiduc/cad/{agente_fiduc_pf,agente_fiduc_pj}.py` (`AgenteFiducPfReader`,
   `AgenteFiducPjReader`, base privada `_base_agente_fiduc_reader.py`); contracts
@@ -807,28 +759,12 @@ Sob `CIA_ABERTA/CAD/`:
   onde é o único arquivo); as outras 5 grafias dão 404, inclusive o infixo `_txt` que é o correto do
   DFP/ITR **neste mesmo root**
 
-**Investidores Não Residentes**
-- Informe Mensal de Investidor não Residente — ✅ **submission** (`PadraoXMLInfoMensalINR.asp`) — `submission/inr_mensal.py` (`InrMensal`); schema `_internal/config/schemas/inr_mensal.py`; validators `_internal/utils/inr_mensal_fields.py`. Valores inteiros (a página diz "numérico e inteiro" apesar de pedir vírgula decimal); `COD_DOC` 477; `VL_NOCION_APLIC` só para a Tabela A 15–24
-- ⬜ Informe Semestral de Investidor não Residente (`PadraoXMLInfoSemestralINR.asp`)
-
-**Mercados de Negociação**
-- ✅ Atualização do Cadastro de Ativos (`PadraoXMLAtivos.asp`) — `submission/cadastro_ativos.py` (`CadastroAtivos`); schema `_internal/config/schemas/cadastro_ativos.py`
-
-**Escriturador de Valores Mobiliários**
-- ⬜ Informe Art. 12 Resolução CVM 33 (`PadraoXMLPrest.asp`)
-- Informe de Portabilidade — ✅ **submission** (`PadraoXMLInfoPortabilidade.asp`, COD_DOC 478) —
-  `submission/informe_portabilidade.py` (`InformePortabilidade`); schema
-  `_internal/config/schemas/informe_portabilidade.py`. Sem decimais: as 6 quantidades são `int`
-  estrito ≥ 0; `DT_EVENT` assumido `MM/AAAA` (a página não declara o formato)
-
 ## Layout
 
 ```
 src/filings_cvm/
     __init__.py            # ONLY the cross-cutting names: RetryPolicy + __version__ (#91).
-                           #   NOT readers, NOT writers — each section owns its own names.
-    submission/            # envio → CVM: SubmissionWriter adapters (validated model → XML)
-                           #   `from filings_cvm.submission import InformeDiario`
+                           #   NOT readers — the ingestion section owns its own names.
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
                            #   nested by CVM portal path (dados/<ROOT>/…); its __init__ exports the
                            #   24 ROOT PACKAGES, never the readers
@@ -888,8 +824,7 @@ src/filings_cvm/
                            #   text, zip_extractor, br_identifiers, typing/)
         config/            # private structural declarations (shapes + interfaces, not machinery)
             contracts/     # FileContract declarations (one per input source)
-            schemas/       # shared, direction-neutral Pydantic models (one per XML standard)
-            ports/         # private behavioural ABCs (SubmissionWriter, IngestionReader)
+            ports/         # private behavioural ABCs (IngestionReader)
 tests/
     unit/  integration/  performance/
 ```
@@ -907,7 +842,6 @@ neither section:
 | what | import from |
 |---|---|
 | an ingestion reader | `filings_cvm.ingestion.<portal_root>` (24 roots) |
-| a submission writer | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
 **So a new reader is registered along its own package chain up to its portal root — and stops
@@ -1000,8 +934,6 @@ placebo.
   metaclass from `_internal.utils.typing` (`metaclass=TypeChecker`; `ABCTypeCheckerMeta` for ABCs,
   `ProtocolTypeCheckerMeta` for Protocols), and **every standalone function** uses `@type_checker`
   — private (`_`-prefixed) helpers included. The only exclusions:
-  - **Pydantic `BaseModel` subclasses** — Pydantic owns the metaclass (conflict at import) and
-    already validates at construction, so never add `metaclass=TypeChecker` to a model.
   - **The typing engine itself** (`_internal/utils/typing/`) — it is the machinery.
   - **Dunders** (`__x__`) — the `TypeChecker` metaclass leaves them untouched, so the hook
     skips them too; single-underscore private names are **not** exempt.

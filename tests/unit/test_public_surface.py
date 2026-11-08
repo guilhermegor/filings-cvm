@@ -27,8 +27,6 @@ SAMPLE_READERS = (
 	("securit", "InfMensalCriGeralReader"),
 )
 
-SAMPLE_WRITERS = ("InformeDiario", "PerfilMensal")
-
 
 def test_top_level_all_holds_only_cross_cutting_names() -> None:
 	"""The root package exports what belongs to neither section — and nothing else."""
@@ -88,22 +86,6 @@ def test_reader_is_not_importable_from_the_ingestion_package(
 
 	assert not hasattr(ingestion, str_reader)
 	assert str_reader not in ingestion.__all__
-
-
-@pytest.mark.parametrize("str_writer", SAMPLE_WRITERS)
-def test_writer_is_importable_only_from_the_submission_section(str_writer: str) -> None:
-	"""Submission is symmetric with ingestion: its own section owns its names.
-
-	Parameters
-	----------
-	str_writer : str
-		The writer's class name.
-	"""
-	import filings_cvm
-	import filings_cvm.submission as submission
-
-	assert str_writer in submission.__all__
-	assert not hasattr(filings_cvm, str_writer)
 
 
 def test_ingestion_exports_exactly_the_portal_roots() -> None:

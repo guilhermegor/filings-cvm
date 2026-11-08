@@ -2,7 +2,7 @@
 
 Every "leitura" solution lives here: it takes a file downloaded from CVM (an XML standard document
 or an open-data dump) and returns typed models / DataFrames. The building/serialising counterpart
-lives in the ``submission`` section.
+moved to the separate ``layouts-cvm`` package.
 
 Readers are grouped by **CVM open-data portal root** (`dados.cvm.gov.br/dados/<ROOT>/…`), and each
 root package **is** the public surface for its own readers::

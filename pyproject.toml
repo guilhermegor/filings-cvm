@@ -36,8 +36,6 @@ python = ">=3.11,<4.0"
 # Required by the private _internal helpers (dtypes / tabular_reader / config.contracts).
 pandas = ">=2.1.0"
 openpyxl = ">=3.1.0"
-# Schema validation for the CVM XML standards (submission/ingestion sections).
-pydantic = ">=2.6,<3"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = ">=4.1.0"

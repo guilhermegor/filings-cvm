@@ -11,8 +11,8 @@
   });
 </script>
 
-A interface pública, agrupada pela divisão de topo do próprio código: `filings_cvm.submission`
-(envio → CVM) e `filings_cvm.ingestion` (leitura ← CVM).
+A interface pública, agrupada pela divisão de topo do próprio código: `filings_cvm.ingestion`
+(leitura ← CVM). O envio vive no pacote separado `layouts-cvm`.
 
 > **Veja também:** [Uso](../usage.md) · [Exemplos](../examples.md)
 
@@ -20,7 +20,7 @@ A interface pública, agrupada pela divisão de topo do próprio código: `filin
 
 | Grupo | Conteúdo |
 |-------|----------|
-| [Referência](reference.md) | Cada símbolo público: serializadores (`submission`) e leitores (`ingestion`, por raiz do portal) |
+| [Referência](reference.md) | Cada símbolo público: leitores (`ingestion`, por raiz do portal) |
 
 ## Crescendo esta seção
 
@@ -39,5 +39,5 @@ Ao adicionar páginas:
 - **Registre toda página nova no `nav:` do `mkdocs.yml` no mesmo commit.** O MkDocs publica a
   página mesmo sem registro — ela só some da navegação, e é isso que o gate
   `bin/check_docs_sections.py` existe para pegar.
-- A entrada de cada novo leitor ou serializador entra em [`reference.md`](reference.md) (ou em uma
+- A entrada de cada novo leitor entra em [`reference.md`](reference.md) (ou em uma
   página irmã neste diretório) — **nunca** em um `docs/api.md`, que não existe mais.

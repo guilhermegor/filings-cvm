@@ -1,3 +1,3 @@
-- Public API lives in the distributable package (`ingestion/`, `submission/`); `_internal` holds contracts, ports and schemas.
+- Public API lives in the distributable package (`ingestion/`); `_internal` holds contracts, ports and helpers.
 - Inject loggers and clients; never hard-import them.
 - No .env in a distributable library.

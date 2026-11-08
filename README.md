@@ -18,44 +18,27 @@
 <!-- slug: overview -->
 ## Visão geral
 
-Biblioteca Python **tipada** para os padrões de arquivo XML regulatórios da
-[CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários). Monte, valide e
-serialize documentos no formato exigido pela CVM — e, à medida que a biblioteca cresce,
-leia arquivos baixados da CVM de volta para modelos tipados.
+Biblioteca Python **tipada** para ler os arquivos abertos da
+[CVM](https://www.gov.br/cvm) (Comissão de Valores Mobiliários): baixa o dump publicado em
+<https://dados.cvm.gov.br/dados/> e devolve um `DataFrame` tipado e validado por contrato.
 
-Modelos [Pydantic v2](https://docs.pydantic.dev/) validam **tudo** na construção — formato
-de datas, dígitos verificadores de CNPJ/CPF e a **escala decimal** de cada campo — e valores
-com casas decimais em excesso são **truncados em direção a zero** (`ROUND_DOWN`), nunca
-arredondados, para que um valor reportado jamais seja inflado.
+Valores decimais seguem a regra do projeto: nada de `float` onde a precisão importa. Colunas
+numéricas voltam como **texto exato da fonte**, sem truncar nem arredondar — a escala e o
+`Decimal` ficam a cargo de quem consome.
 
-> **Fonte da verdade:** nomes de campo, escalas decimais e cardinalidades vêm do catálogo
-> oficial da CVM — <https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadroesXML.asp> —
-> não desta documentação.
+> **Migração:** a seção de **envio** (`filings_cvm.submission`, modelo validado → XML) foi
+> removida e vive no pacote separado `layouts-cvm` (`from layouts_cvm import PerfilMensal`). Esta biblioteca não depende dele.
+
+> **Fonte da verdade:** nomes de coluna e tipos vêm dos arquivos reais publicados no portal de
+> dados abertos da CVM — <https://dados.cvm.gov.br/dados/> — não desta documentação.
 
 <!-- slug: features -->
 ## Funcionalidades
 
-Toda solução vive em uma de duas macrosseções:
+Toda solução vive em `filings_cvm.ingestion` (**leitura** ← CVM): analisa um arquivo baixado
+da CVM de volta para modelos tipados, agrupado por raiz do portal (ex.: `filings_cvm.ingestion.fi`).
 
-| Seção | Sentido | O que faz |
-|-------|---------|-----------|
-| `filings_cvm.submission` | **envio** → CVM | Recebe modelos de schema validados e produz o arquivo XML compatível com a CVM, pronto para envio. |
-| `filings_cvm.ingestion` | **leitura** ← CVM | Analisa um arquivo baixado da CVM de volta para modelos tipados. Criada quando o primeiro padrão de leitura for implementado. |
-
-O **schema compartilhado** (modelos Pydantic que espelham cada padrão XML) é neutro em
-relação à direção e reexportado pelas seções públicas — você importa tudo de que precisa a
-partir de `filings_cvm.submission`.
-
-### Padrões implementados (envio)
-
-- ✅ **Perfil Mensal — V4** ([`PadraoXMLPerfilV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfilV4.asp)) — `PerfilMensal` / `PerfilMensalDocument`
-- ✅ **Perfil Mensal — original** ([`PadraoXMLPerfil.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil.asp)) — `PerfilMensalOriginal` / `PerfilMensalOriginalDocument`
-- ✅ **Informe Diário — V4** ([`PadraoXMLInfoDiarioNetV4.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV4.asp)) — `InformeDiario` / `InformeDiarioDocument`
-- ✅ **Informe Diário — V3** ([`PadraoXMLInfoDiarioNetV3.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfoDiarioNetV3.asp)) — `InformeDiarioV3` / `InformeDiarioV3Document`
-- ✅ **Atualização do Cadastro de Ativos** ([`PadraoXMLAtivos.asp`](https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLAtivos.asp)) — `CadastroAtivos` / `CadastroAtivosDocument`
-
-Os demais padrões do catálogo (CDA, Lâmina, Informe Mensal FIDC, etc.) estão pendentes —
-consulte o `CLAUDE.md` do repositório para o catálogo completo com o status de cada um.
+Para **gerar** os arquivos XML de envio → CVM, use o pacote separado `layouts-cvm`.
 
 <!-- slug: documentation -->
 ## Documentação
@@ -99,23 +82,7 @@ make init            # cria a .venv e instala os hooks de pre-commit
 <!-- slug: usage -->
 ### Uso básico
 
-```python
-from filings_cvm.submission import (
-    DocumentHeader,
-    PerfilMensal,
-    PerfilMensalDocument,
-    PerfilMensalRow,
-)
-
-header = DocumentHeader(dt_compt="01/2025", dt_gerac_arq="15/01/2025")
-row = PerfilMensalRow(cnpj_fdo="11222333000181", ...)  # validado na construção
-doc = PerfilMensalDocument(header=header, rows=[row])
-
-xml = PerfilMensal().export(doc)                          # XML como str
-PerfilMensal().export(doc, output_path="perfil.xml")     # ou grava em disco (windows-1252)
-```
-
-E a leitura (← CVM) devolve um `DataFrame` tipado e validado por contrato:
+A leitura (← CVM) devolve um `DataFrame` tipado e validado por contrato:
 
 ```python
 from datetime import date
@@ -139,9 +106,8 @@ filings-cvm/
 ├── mkdocs.yml              # configuração do site de documentação
 ├── src/filings_cvm/
 │   ├── __init__.py         # API pública (controlada por __all__)
-│   ├── submission/         # envio → CVM (modelo validado → XML)
 │   ├── ingestion/          # leitura ← CVM (arquivo baixado → DataFrame tipado)
-│   └── _internal/          # PRIVADO — schemas Pydantic, ports (interfaces) + helpers
+│   └── _internal/          # PRIVADO — contratos, ports (interfaces) + helpers
 ├── tests/
 │   ├── unit/  integration/  performance/
 ├── .pre-commit-config.yaml
@@ -167,13 +133,12 @@ nas seções obrigatórias e lista de autores com links do GitHub e do LinkedIn.
 <!-- slug: public-api -->
 ## API pública
 
-Cada seção é dona dos seus nomes; o `filings_cvm.__all__` de topo guarda apenas o que não
+A seção `ingestion` é dona dos seus nomes; o `filings_cvm.__all__` de topo guarda apenas o que não
 pertence a nenhuma delas. Tudo sob `_internal/` é privado.
 
 | O quê | Importe de |
 |-------|------------|
 | Um reader de ingestão | `filings_cvm.ingestion.<raiz_do_portal>` (ex.: `filings_cvm.ingestion.fi`) |
-| Um writer de envio | `filings_cvm.submission` |
 | `RetryPolicy`, `__version__` | `filings_cvm` |
 
 <!-- slug: publishing -->

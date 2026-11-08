@@ -1,17 +1,15 @@
 # **Referência da API**
 
-Interface pública da biblioteca. **Cada seção é dona dos seus próprios nomes** — nada de leitor ou
-serializador é reexportado no topo de `filings_cvm`:
+Interface pública da biblioteca. **Cada seção é dona dos seus próprios nomes** — nenhum leitor
+é reexportado no topo de `filings_cvm`:
 
 | o que | importe de |
 |---|---|
 | um **leitor** (ingestion) | `filings_cvm.ingestion.<portal_root>` — os **24 roots** do portal |
-| um **serializador** (submission) | `filings_cvm.submission` |
 | `RetryPolicy` | `filings_cvm` |
 
 ```python
 from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader
-from filings_cvm.submission import InformeDiario
 from filings_cvm import RetryPolicy
 ```
 
@@ -21,307 +19,11 @@ from filings_cvm import RetryPolicy
 > **portal root** que é dono do leitor — o mesmo agrupamento que a
 > [CVM usa no portal](https://dados.cvm.gov.br/dados) e que esta página segue. A tabela de cada
 > seção abaixo nomeia o root de cada leitor.
-> **Veja também:** [Uso](../usage.md) · Envio: [Perfil Mensal](../submission/perfil_mensal.md), [Informe Diário](../submission/informe_diario.md), [Informe Quadrimestral](../submission/informe_quadrimestral.md), [Informe Trimestral V1](../submission/informe_trimestral_v1.md), [Lâmina V3](../submission/lamina.md), [Extrato V3](../submission/extrato.md), [Informe de Fundo 157](../submission/inf_fundo_157.md), [CDA V4](../submission/cda.md), [Informe Mensal INR](../submission/inr_mensal.md) · Leitura: [Informe Diário FIF](../ingestion/informe_diario.md), [CDA FIF](../ingestion/cda.md), [Lâmina carteira FIF](../ingestion/lamina_carteira.md), [Lâmina FIF](../ingestion/lamina.md), [CAD/FI](../ingestion/cadastro_fi.md), [Registro RCVM 175](../ingestion/registro.md), [CAD/FI histórico](../ingestion/cad_fi_hist.md), [Informe Mensal FIDC](../ingestion/inf_mensal_fidc.md), [Informe Mensal FII](../ingestion/inf_mensal_fii.md), [DFIN FII](../ingestion/dfin_fii.md), [Informe Trimestral FII](../ingestion/inf_trimestral_fii.md), [Informe Anual FII](../ingestion/inf_anual_fii.md), [Informes periódicos FIP](../ingestion/inf_fip.md)
+> **Veja também:** [Uso](../usage.md) · Leitura: [Informe Diário FIF](../ingestion/informe_diario.md), [CDA FIF](../ingestion/cda.md), [Lâmina carteira FIF](../ingestion/lamina_carteira.md), [Lâmina FIF](../ingestion/lamina.md), [CAD/FI](../ingestion/cadastro_fi.md), [Registro RCVM 175](../ingestion/registro.md), [CAD/FI histórico](../ingestion/cad_fi_hist.md), [Informe Mensal FIDC](../ingestion/inf_mensal_fidc.md), [Informe Mensal FII](../ingestion/inf_mensal_fii.md), [DFIN FII](../ingestion/dfin_fii.md), [Informe Trimestral FII](../ingestion/inf_trimestral_fii.md), [Informe Anual FII](../ingestion/inf_anual_fii.md), [Informes periódicos FIP](../ingestion/inf_fip.md)
 
 ---
-
-## Serializador
-
-### `PerfilMensal`
-
-`filings_cvm.submission.PerfilMensal`
-
-Serializa um documento validado para XML compatível com a CVM (padrão Perfil Mensal V4).
-
-#### `export(doc, output_path=None, versao="4.0") -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `PerfilMensalDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` (de forma atômica: o destino é o arquivo anterior ou o novo completo, nunca parcial; exige permissão de escrita no diretório do destino, pois o arquivo temporário é criado ao lado dele) e retorna `None`. Caso contrário, retorna a `str` XML (UTF-8 em memória). |
-| `versao` | `str` | Versão do formato colocada na tag `VERSAO`. Padrão `"4.0"`. |
-
-```python
-from filings_cvm.submission import PerfilMensal
-
-xml = PerfilMensal().export(doc)                       # retorna str
-PerfilMensal().export(doc, output_path="perfil.xml")   # grava arquivo, retorna None
-```
-
-Não há acesso à rede — apenas lógica pura e I/O de arquivo na borda.
-
-### `PerfilMensalOriginal`
-
-`filings_cvm.submission.PerfilMensalOriginal`
-
-Serializa um `PerfilMensalOriginalDocument` (padrão Perfil Mensal original, `PadraoXMLPerfil.asp`).
-Layout próprio — não é o V4 nem derivado dele, e o cabeçalho **não tem `VERSAO`**. Veja
-[Perfil Mensal original](../submission/perfil_mensal_original.md).
-
-#### `export(doc, output_path=None) -> str | None`
-
-Mesma semântica do `PerfilMensal.export` (gravação atômica em `windows-1252`), sem o parâmetro
-`versao`.
-
-### `InfFundo157`
-
-`filings_cvm.submission.InfFundo157`
-
-Serializa um documento validado para XML compatível com a CVM (padrão Informe de Fundo 157).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InfFundo157Document` | Documento totalmente validado (`header` + 1 ou mais `cotistas`). |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-```python
-from filings_cvm.submission import InfFundo157
-
-xml = InfFundo157().export(doc)
-```
-
-Namespace `urn:inffdo157`, `COD_DOC=55`. Modelos: `InfFundo157Document`, `InfFundo157Header`,
-`InfFundo157Cotista`. Decisões: veja [Informe de Fundo 157](../submission/inf_fundo_157.md).
-
-### `InformeDiario`
-
-`filings_cvm.submission.InformeDiario`
-
-Serializa um documento validado para XML compatível com a CVM (padrão Informe Diário V4).
-
-#### `export(doc, output_path=None, versao="4.0") -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InformeDiarioDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML (UTF-8 em memória). |
-| `versao` | `str` | Versão do formato colocada na tag `VERSAO`. Padrão `"4.0"`. |
-
-```python
-from filings_cvm.submission import InformeDiario
-
-xml = InformeDiario().export(doc)                          # retorna str
-InformeDiario().export(doc, output_path="informe.xml")     # grava arquivo, retorna None
-```
-
-O XML usa o namespace `urn:infdiario` e `COD_DOC=1`. Mesma borda de I/O do `PerfilMensal`.
-
-### `InformeDiarioV3`
-
-`filings_cvm.submission.InformeDiarioV3`
-
-Serializa um `InformeDiarioV3Document` para XML do padrão Informe Diário V3 (`VERSAO` 3.0, só
-`CNPJ_FDO`). `export(doc, output_path=None) -> str | None`, mesma borda de I/O do `InformeDiario`.
-Modelos: `InformeDiarioV3Document`, `InformeDiarioV3Header`, `InformeDiarioV3Inform`. Veja
-[Informe Diário V3](../submission/informe_diario_v3.md).
-
-### `Extrato`
-
-`filings_cvm.submission.Extrato`
-
-Serializa um documento validado para XML compatível com a CVM (padrão Extrato das Informações sobre o Fundo V3).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `ExtratoDocument` | Documento totalmente validado (`header` + 1 a 1000 `rows`). |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-O texto é codificado, checado como XML bem formado e limitado a 1 MB **antes** de abrir o destino:
-uma falha levanta `ValueError` e **não trunca** um arquivo já existente. `COD_DOC=41` e
-`VERSAO=3.0` são fixos no `ExtratoHeader`.
-
-```python
-from filings_cvm.submission import Extrato
-
-xml = Extrato().export(doc)                        # retorna str
-Extrato().export(doc, output_path="extrato.xml")   # grava arquivo, retorna None
-```
-
-### `Lamina`
-
-`filings_cvm.submission.Lamina`
-
-Serializa um documento validado para XML compatível com a CVM (padrão Lâmina de Fundos V3).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `LaminaDocument` | Documento totalmente validado (`header` + 1 a 70 `informs`). |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-O texto é codificado e checado como XML bem formado **antes** de abrir o destino: uma falha de
-codificação levanta `ValueError` e **não trunca** um arquivo já existente. `COD_DOC=24` e
-`VERSAO=3.0` são fixos no `LaminaHeader`; não há parâmetro `versao`.
-
-```python
-from filings_cvm.submission import Lamina
-
-xml = Lamina().export(doc)                          # retorna str
-Lamina().export(doc, output_path="lamina.xml")      # grava arquivo, retorna None
-```
-
-Modelos públicos: `LaminaDocument`, `LaminaHeader`, `LaminaInform` e os blocos
-(`LaminaCarencia`, `LaminaConversao`, `LaminaTaxaAdministracao`, `LaminaTaxaEntrada`,
-`LaminaTaxaSaida`, `LaminaDespesas`, `LaminaListaCompCarteira`, `LaminaCompCarteira`,
-`LaminaInforTabRentAnual`, `LaminaAntesInic2`, `LaminaListaTabRentAnual`, `LaminaTabRentAnual`,
-`LaminaListaTabRentMensal`, `LaminaTabRentMensal`, `LaminaTabVarDesemp`,
-`LaminaInformExemploComp`, `LaminaTabSimulDespesas`). Limites e decisões: veja
-[Lâmina V3](../submission/lamina.md).
-
-### `Cda`
-
-`filings_cvm.submission.Cda`
-
-Serializa um `CdaDocument` validado para XML compatível com a CVM (padrão CDA V4, namespace
-`urn:cda`, `COD_DOC=3`, `VERSAO=4.0`).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `CdaDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-Modelos de entrada, todos em `filings_cvm.submission`: `CdaDocument`, `CdaHeader`, `CdaInform`,
-`CdaTitPub`, `CdaCotas`, `CdaSwap`, `CdaSwapAplic`, `CdaSwapPosFim`, `CdaDemaisCodif`,
-`CdaDepPrazoTitIf`, `CdaTitAgroCredPriv`, `CdaInvExt`, `CdaDemaisNCodif`, `CdaAplic`, `CdaNegoc`,
-`CdaPosFim`, `CdaAtivoExt`, `CdaEmitter`, `CdaBankEmitter`, `CdaPosFixIndex`, `CdaRiskRating`.
-Campos, escalas e regras em [CDA V4](../submission/cda.md).
-
----
-
-### `CadastroAtivos`
-
-`filings_cvm.submission.CadastroAtivos`
-
-Serializa um `CadastroAtivosDocument` validado para XML compatível com a CVM (Atualização do
-Cadastro de Ativos, sem namespace, `COD_DOC=2`).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `CadastroAtivosDocument` | Documento totalmente validado (até 1000 linhas). |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-Modelos de entrada, em `filings_cvm.submission`: `CadastroAtivosDocument`, `CadastroAtivosHeader`,
-`CadastroAtivosRow`. Campos e regras em [Cadastro de Ativos](../submission/cadastro_ativos.md).
-
----
-
-### `InfMensalFidc`
-
-`filings_cvm.submission.InfMensalFidc`
-
-Serializa um documento validado para XML compatível com a CVM (Informe Mensal FIDC, ICVM 576, a partir de 2019-11-01). Schema em `InfMensalFidcDocument` (`InfMensalFidcHeader` + `InfMensalFidcInform`).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InfMensalFidcDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-```python
-from filings_cvm.submission import InfMensalFidc
-
-xml = InfMensalFidc().export(doc)                            # retorna str
-InfMensalFidc().export(doc, output_path="fidc.xml")          # grava arquivo, retorna None
-```
-
-Limites e regras do padrão: `docs/submission/inf_mensal_fidc.md`.
-
-
----
-
-### `InrMensal`
-
-`filings_cvm.submission.InrMensal`
-
-Serializa um `InrMensalDocument` validado para o XML do Informe Mensal de Investidor Não Residente
-(namespace `urn:infmensal`, `COD_DOC=477`). Os blocos e regras estão em
-[Informe Mensal INR](../submission/inr_mensal.md).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InrMensalDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-```python
-from filings_cvm.submission import InrMensal
-
-xml = InrMensal().export(doc)
-InrMensal().export(doc, output_path="inr_mensal.xml")
-```
-
----
-
-### `InformeQuadrimestral`
-
-`filings_cvm.submission.InformeQuadrimestral`
-
-Serializa um `InformeQuadrimestralDocument` validado para XML compatível com a CVM (Informe
-Quadrimestral V2, namespace `urn:inftrim`). Detalhes em
-[Informe Quadrimestral](../submission/informe_quadrimestral.md).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InformeQuadrimestralDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava em `windows-1252` e retorna `None`; o texto é codificado antes de abrir o arquivo. Caso contrário, retorna a `str` XML. |
-
-Modelos de schema (Pydantic): `InformeQuadrimestralDocument` (`DOC_ARQ`),
-`InformeQuadrimestralHeader` (`CAB_INFORM`), `InformeQuadrimestralInform` (`INFORM`),
-`ListaCotstCateg`, `CotistCategory` (`COTST_CATEG`), `ListaClasseCotas`, `ClasseCotas`
-(`CLASSE_COTAS`).
-
-### `InformeTrimestralV1`
-
-`filings_cvm.submission.InformeTrimestralV1`
-
-Serializa um `InformeTrimestralV1Document` validado para XML compatível com a CVM (Informe
-Trimestral V1, válido até 2017-06, namespace `urn:inftrim`). Detalhes em
-[Informe Trimestral V1](../submission/informe_trimestral_v1.md).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InformeTrimestralV1Document` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava em `windows-1252` (arquivo temporário + `os.replace`) e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-Modelos de schema (Pydantic): `InformeTrimestralV1Document` (`DOC_ARQ`),
-`InformeTrimestralV1Header` (`CAB_INFORM`), `InformeTrimestralV1Inform` (`INFORM`).
 
 ## Leitor (ingestion)
-
-### `InformePortabilidade`
-
-`filings_cvm.submission.InformePortabilidade`
-
-Serializa um `InformePortabilidadeDocument` validado para o XML do Informe de Portabilidade
-(`COD_DOC=478`, namespace `urn:portab`). Detalhes em [Informe de Portabilidade](../submission/informe_portabilidade.md).
-
-#### `export(doc, output_path=None) -> str | None`
-
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `doc` | `InformePortabilidadeDocument` | Documento totalmente validado. |
-| `output_path` | `str \| None` | Se informado, grava o arquivo em `windows-1252` (codificado antes de abrir o arquivo) e retorna `None`. Caso contrário, retorna a `str` XML. |
-
-```python
-from filings_cvm.submission import InformePortabilidade
-
-xml = InformePortabilidade().export(doc)
-```
 
 ### `InformeDiarioReader`
 
@@ -570,9 +272,8 @@ concentração por comitente e por emissor. **CSV solto** (não ZIP), **particio
 colunas / 24.832 linhas / 13,19 MB em 2025-06. Página completa em
 [Perfil Mensal FI](../ingestion/perfil_mensal_fi.md).
 
-É o lado da **leitura** do writer `PerfilMensal` (submission, V4) — mesmo padrão regulatório,
-**artefato diferente** (o dump aberto, não o XML de envio), então declara o seu próprio
-`FileContract`.
+É a leitura do Perfil Mensal — o dump aberto (não o XML de envio, que vive no pacote separado
+`layouts-cvm`), então declara o seu próprio `FileContract`.
 
 > ⚠️⚠️ **Um padrão de nome, dois schemas.** A RCVM 175 trocou o bloco-chave no meio da série:
 > `CNPJ_FUNDO` (**106** colunas, até **`202311`**) virou `TP_FUNDO_CLASSE` + `CNPJ_FUNDO_CLASSE`
@@ -2207,90 +1908,9 @@ df_meta = MetaInfMensalCraReader().read()
 
 ---
 
-## Modelos de schema (Pydantic)
-
-Todos são modelos [Pydantic v2](https://docs.pydantic.dev/) — a validação acontece na
-construção. Cada grupo espelha um padrão CVM: `PadrãoXMLPerfil` (V4) e
-`PadrãoXMLInfoDiarioNet` (V4).
-
-### Perfil Mensal — documento e cabeçalho
-
-| Modelo | Tag XML | Papel |
-|--------|---------|-------|
-| `PerfilMensalDocument` | `DOC_ARQ` | Documento completo: `header` + `rows`. |
-| `DocumentHeader` | `CAB_INFORM` | Cabeçalho. `dt_compt` no formato `MM/AAAA`; `dt_gerac_arq` no formato `DD/MM/AAAA`. |
-| `PerfilMensalRow` | `ROW_PERFIL` | Uma entrada de perfil mensal por classe de fundo. |
-
-**Campos obrigatórios de `PerfilMensalRow`:** `cnpj_fdo` (validado por dígito verificador,
-armazenado sem máscara), `nr_client`, `total_recurs_exter`, `total_recurs_br`,
-`tot_ativos_p_relac`, `tot_ativos_cred_priv`. Os demais são opcionais.
-
-### Perfil Mensal — blocos e listas
-
-| Modelo | Tag XML | Papel |
-|--------|---------|-------|
-| `ClientCount` | `NR_CLIENT` | Contagem de clientes por tipo de investidor (16 campos, obrigatórios, ≥ 0). |
-| `PatrimonyDistribution` | `DISTR_PATRIM` | Percentual de patrimônio por tipo de cliente (bloco opcional). |
-| `VarPercValCota` | `VARIACAO_PERC_VAL_COTA` | Cenário de estresse com fatores primitivos de risco. |
-| `PrimitiveRiskFactor` | `FATOR_PRIMIT_RISCO` | Um fator primitivo de risco (IBOVESPA, JUROS-PRE, CUPOM CAMBIAL, DOLAR, OUTROS). |
-| `VarOutros` | `VARIACAO_..._N_OUTROS` | Sensibilidade a um fator de risco não padronizado. |
-| `NominalRiskBlock` | `VALOR_NOC_TOT_CONTRAT_DERIV_MANT_FDO` | Exposição nocional em derivativos de balcão. |
-| `NominalRiskFactor` | `FATOR_RISCO_NOC` | Um fator de risco nocional (pernas long e short). |
-| `OtcOperation` | `OPER_CURS_MERC_BALCAO` | Contraparte de balcão sem contraparte central (até 3). |
-| `PrivateCreditIssuer` | `EMISSORES_TIT_CRED_PRIV` | Emissor de título de crédito privado (até 3). |
-| `PerformanceFeeDetails` | `RESP_VED_REGUL_COBR_TAXA_PERFORM` | Data e valor da cota na última cobrança de taxa de performance. |
-
-### Perfil Mensal original — documento e blocos
-
-| Modelo | Tag XML | Papel |
-|--------|---------|-------|
-| `PerfilMensalOriginalDocument` | `DOC_ARQ` | Documento completo: `header` + `rows` (um fundo por linha, sem repetição). |
-| `PerfilMensalOriginalHeader` | `CAB_INFORM` | `COD_DOC=40`, `dt_compt` (`MM/AAAA`), `dt_gerac_arq` (`DD/MM/AAAA`); sem `VERSAO`. |
-| `PerfilMensalOriginalRow` | `ROW_PERFIL` | Perfil mensal de um fundo. Obrigatórios: `cnpj_fdo`, `nr_client`, `distr_patrim`, `perc_pl_maior_cotst`. |
-| `PerfilMensalOriginalClientCount` | `NR_CLIENT` | Contagem de clientes por tipo (14 campos, obrigatórios, ≥ 0). |
-| `PerfilMensalOriginalPatrimonyDistribution` | `DISTR_PATRIM` | Percentual do PL por tipo (14 campos, obrigatórios, 0 a 100). |
-| `PerfilMensalOriginalTradingDays` | `NR_DIAS_NEGOC` | Bloco opcional: prazo de liquidação de 50% / 100% dos ativos (em par) e `APRES_LIQDZ`. |
-
-### Informe Diário — documento e blocos
-
-| Modelo | Tag XML | Papel |
-|--------|---------|-------|
-| `InformeDiarioDocument` | `DOC_ARQ` | Documento completo: `header` + `informs` (até 100 fundos). |
-| `InformeDiarioHeader` | `CAB_INFORM` | Cabeçalho. `dt_compt` e `dt_gerac_arq` no formato `DD/MM/AAAA`; `COD_DOC=1`. |
-| `InformeDiarioInform` | `INFORM` | O informe diário de um fundo. |
-| `SignificantShareholder` | `COTST_SIGNIF` | Um cotista com participação ≥ 20% do PL (bloco opcional). |
-
-**Campos de `InformeDiarioInform`:** identifique o fundo por **exatamente um** de `cnpj_fdo`
-(classe, validado por dígito verificador) **ou** `cod_subclasse` (subclasse) — informar ambos ou
-nenhum levanta `ValidationError`. Obrigatórios: `data_prox_pl` (`DD/MM/AAAA`), `vl_total`,
-`vl_quota` (até 12 casas), `patrim_liq`, `captc_dia`, `resg_dia`, `vl_total_sai`, `vl_total_atv`
-(monetários, 2 casas) e `nr_cotst` (inteiro ≥ 0). `lista_cotst_signif` é opcional; `pr_cotst`
-tem até 4 casas.
-
----
-
-## Validação e precisão
-
-- **Datas** são validadas por regex (`MM/AAAA` ou `DD/MM/AAAA`).
-- **CNPJ/CPF** passam pelos validadores de dígito verificador próprios da biblioteca
-  (`_internal.utils.br_identifiers`, cientes do CNPJ alfanumérico de 2026) e são armazenados
-  na forma nua, sem máscara — como a CVM espera no XML.
-- **Decimais** têm a escala fixada por campo conforme o padrão CVM; precisão excedente é
-  **truncada em direção a zero** (`ROUND_DOWN`), nunca arredondada. Passe valores como `str`
-  ou `Decimal`, nunca `float`.
-- Na serialização, decimais saem com **vírgula** como separador (`10,99`).
-
----
-
 ## Estendendo
 
-Novos padrões da CVM entram como novos módulos:
-
-- O schema compartilhado (neutro em relação à direção) vai em
-  `src/filings_cvm/_internal/config/schemas/<padrao>.py`.
-- O escritor de envio vai em `src/filings_cvm/submission/<padrao>.py` (uma classe pública por
-  arquivo, nomeada como o arquivo).
-- Reexporte os símbolos públicos em `filings_cvm/submission/__init__.py` e, quando fizer sentido,
-  no `filings_cvm/__init__.py`.
-
-O catálogo completo de padrões (implementados e pendentes) está no `CLAUDE.md` do repositório.
+Novos conjuntos do portal entram como novos leitores sob `src/filings_cvm/ingestion/<raiz>/`,
+com o `FileContract` ancorado no arquivo real baixado. O catálogo completo (implementados e
+pendentes) está no `AGENTS.md` do repositório. A geração de XML de envio vive no pacote separado
+`layouts-cvm`.

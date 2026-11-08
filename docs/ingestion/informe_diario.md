@@ -16,8 +16,8 @@ Leitura (← CVM) do dump mensal de *open-data* do **Informe Diário de fundos**
 declarados** aplicados — nunca a inferência do pandas.
 
 > **Nota:** este leitor consome o CSV de *open-data* — um artefato **distinto** do XML do padrão
-> Informe Diário V4 produzido no [Envio](../submission/informe_diario.md). Por isso ele tem o
-> seu próprio contrato de colunas, e não reaproveita o schema de submissão.
+> Informe Diário V4 (de envio, no pacote separado `layouts-cvm`). Por isso ele tem o seu próprio
+> contrato de colunas.
 
 | Coluna | Tipo | Observação |
 |--------|------|-----------|

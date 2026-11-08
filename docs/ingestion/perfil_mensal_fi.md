@@ -5,9 +5,8 @@ VaR e cenários de estresse, nocionais de derivativos e os blocos de concentraç
 por **emissor**. Fonte: `perfil_mensal_fi_AAAAMM.csv`, do dataset
 [`FI/DOC/PERFIL_MENSAL`](https://dados.cvm.gov.br/dataset/fi-doc-perfil_mensal).
 
-É o lado da **leitura** do writer [`PerfilMensal`](../api/reference.md) (envio, V4): mesmo padrão regulatório,
-**artefato diferente** — o dump aberto, não o XML de envio —, então declara o seu próprio
-`FileContract` em vez de reusar o schema Pydantic do writer.
+É a **leitura** do Perfil Mensal: o dump aberto, não o XML de envio (que vive no pacote separado
+`layouts-cvm`), então declara o seu próprio `FileContract`.
 
 > **Veja também:** [Referência da API](../api/reference.md) · [META](meta.md) · [Proveniência](index.md).
 
