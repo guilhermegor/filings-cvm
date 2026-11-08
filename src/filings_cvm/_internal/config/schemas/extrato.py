@@ -1,4 +1,4 @@
-"""Pydantic models for the CVM Extrato das Informações sobre o Fundo XML standard — V3.
+"""Pydantic models for the CVM `Extrato das Informações sobre o Fundo` XML standard — V3.
 
 Direction-neutral schema for ``PadraoXMLInfExtratoV3.asp``
 (https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLInfExtratoV3.asp). The
