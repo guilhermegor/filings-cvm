@@ -1,4 +1,4 @@
-"""CVM Informe Mensal de Investidor Não Residente — submission (envio) writer.
+"""CVM ``Informe Mensal de Investidor Não Residente`` — submission (envio) writer.
 
 Produces the INR monthly XML from a validated :class:`InrMensalDocument`. The schema declares
 its fields in XML order and named after their tag, so the serialiser is one recursive walk over
@@ -99,7 +99,7 @@ def _require_within_limit(payload: bytes) -> None:
 class InrMensal(SubmissionWriter[InrMensalDocument]):
 	"""Serialize a validated INR monthly document to CVM-compliant XML.
 
-	Concrete :class:`SubmissionWriter` for the Informe Mensal de Investidor Não Residente.
+	Concrete :class:`SubmissionWriter` for the ``Informe Mensal de Investidor Não Residente``.
 
 	Methods
 	-------
