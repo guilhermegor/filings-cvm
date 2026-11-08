@@ -2,8 +2,9 @@
 
 Three invariants, all keyed on file slugs / configured labels, not on localized nav titles:
 
-1. The canonical pages (``index, usage, api, faq, contributing, changelog``) exist and are
-   registered in the ``mkdocs.yml`` ``nav:``.
+1. The canonical pages (``index, usage, examples, api/index, faq, contributing, changelog``)
+   exist and are registered in the ``mkdocs.yml`` ``nav:``. The API reference is a directory
+   (``api/``), never a single ``api.md``. ``docs/.docs-skeleton.yaml`` lists the same pages.
 2. Every published ``docs/**/*.md`` (i.e. not matched by ``exclude_docs``) is in the ``nav:``.
 3. Each page of a declared family carries that family's required ``## `` sections. Pages that
    predate the rule sit on a named allowlist: a NEW page must comply, and an allowlisted page
@@ -18,7 +19,15 @@ import re
 import sys
 
 
-CANONICAL_SLUGS = ("index", "usage", "api", "faq", "contributing", "changelog")
+CANONICAL_SLUGS = (
+	"index",
+	"usage",
+	"examples",
+	"api/index",
+	"faq",
+	"contributing",
+	"changelog",
+)
 
 # Family glob (relative to docs/) -> required level-2 headings. Labels are repo config (pt-BR,
 # matching mkdocs.yml ``theme.language``). ``index.md`` is an overview, not a family member.

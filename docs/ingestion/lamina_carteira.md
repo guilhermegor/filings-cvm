@@ -4,7 +4,7 @@ Leitura (← CVM) do membro `lamina_fi_carteira_AAAAMM.csv` do dump mensal da **
 (`lamina_fi_AAAAMM.zip`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FI/DOC/LAMINA/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) para cada símbolo público · [Uso](../usage.md)
+> **Veja também:** [Referência da API](../api/reference.md) para cada símbolo público · [Uso](../usage.md)
 > para instalação e o conceito geral.
 
 ---

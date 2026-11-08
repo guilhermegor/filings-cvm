@@ -4,7 +4,7 @@ Leitura (← CVM) do **Informe sobre o Código Brasileiro de Governança Corpora
 (`cgvn_cia_aberta_AAAA.zip`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > o [IPE](ipe_cia_aberta.md), o [VLMO](vlmo_cia_aberta.md) e o [FCA](fca_cia_aberta.md).
 
 ---
@@ -88,7 +88,7 @@ nao_adotadas = df_praticas[df_praticas["Pratica_Adotada"] == "Não"]
 ```
 
 O frame devolvido carrega, além das colunas da fonte, as seis colunas de
-[proveniência](../api.md).
+[proveniência](../api/reference.md).
 
 ---
 

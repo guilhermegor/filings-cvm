@@ -4,7 +4,7 @@ Leitura (← CVM) do **Informe Anual dos FII** (`inf_anual_fii_AAAA.zip`), publi
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FII/DOC/INF_ANUAL/DADOS/).
 **Com este dataset o portal root `fii/` fica completo (4/4).**
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > [Informe Mensal FII](inf_mensal_fii.md) · [DFIN FII](dfin_fii.md) ·
 > [Informe Trimestral FII](inf_trimestral_fii.md).
 

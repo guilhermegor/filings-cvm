@@ -5,7 +5,9 @@ repo_url: https://github.com/guilhermegor/filings-cvm
 docs_dir: docs
 nav:
   - Início: index.md
-  - Uso: usage.md
+  - Guia:
+      - Uso: usage.md
+      - Exemplos: examples.md
   - Envio (→ CVM):
       - Perfil Mensal: submission/perfil_mensal.md
       - Perfil Mensal original: submission/perfil_mensal_original.md
@@ -75,30 +77,36 @@ nav:
       - META (metadados da CVM): ingestion/meta.md
       - Deriva de contrato (job semanal): ingestion/contract_drift.md
       - Completude do portal (job semanal): ingestion/portal_completeness.md
-  - Referência da API: api.md
-  - Perguntas frequentes: faq.md
-  - Contribuindo: contributing.md
-  - Lançamento do 1.0.0: releasing-1-0-0.md
-  - Atualizações do template: template-updates.md
-  - Histórico de versões: changelog.md
+  - Referência da API:
+      - Visão geral: api/index.md
+      - Referência: api/reference.md
+  - Projeto:
+      - Perguntas frequentes: faq.md
+      - Contribuindo: contributing.md
+      - Lançamento do 1.0.0: releasing-1-0-0.md
+      - Atualizações do template: template-updates.md
+      - Histórico de versões: changelog.md
 theme:
   name: material
   language: pt-BR
-  logo: assets/cvm-logo.png
-  favicon: assets/cvm-logo.png
+  features:
+    - navigation.tabs
+    - navigation.sections
+  logo: assets/logo.png
+  favicon: assets/logo.png
   # The `media` queries make the site follow the READER'S OS theme on first visit, instead of always
   # opening light (Material picks the first palette when no `media` is given). The toggle still wins
   # and is remembered in localStorage — the OS preference is only the default.
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
+      primary: custom
       toggle:
         icon: material/weather-night
         name: Alternar para o modo escuro
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
+      primary: custom
       toggle:
         icon: material/white-balance-sunny
         name: Alternar para o modo claro
@@ -106,6 +114,8 @@ theme:
 # its own version to the `gh-pages` branch (`mike deploy X.Y latest` in release-pypi.yaml), and this
 # provider renders the dropdown that lets a reader switch between them. `latest` is the default
 # alias, so the bare site URL always lands on the newest release.
+extra_css:
+  - stylesheets/brand.css
 extra:
   version:
     provider: mike
