@@ -1,14 +1,29 @@
 #!/bin/bash
-# Pre-commit hook: scan Python docstrings for URLs and validate reachability.
-# Results are cached for 1 week to avoid repeated network calls.
+# Scan Python docstrings for URLs and validate reachability (manual / weekly, not a hook).
+# Results are cached; see docs/contributing.md.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 
-CACHE_DIR=".url_check_cache"
 CACHE_TTL=$((60 * 60 * 24 * 7)) # 1 week in seconds
+CACHE_TTL_FAIL=$((60 * 60 * 24))
+
+resolve_cache_dir() {
+	if [[ -n "${URL_CACHE_DIR:-}" ]]; then
+		echo "$URL_CACHE_DIR"
+		return
+	fi
+	local str_common
+	if str_common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+		echo "$str_common/url_check_cache"
+	else
+		echo ".url_check_cache"
+	fi
+}
+
+CACHE_DIR="$(resolve_cache_dir)"
 
 get_cache() {
 	local url="$1"
@@ -21,8 +36,13 @@ get_cache() {
 		local int_now
 		int_now=$(date +%s)
 
-		if ((int_now - int_timestamp < CACHE_TTL)); then
-			cat "$str_cache_file"
+		local str_cached
+		str_cached=$(cat "$str_cache_file")
+		local int_ttl=$CACHE_TTL
+		[[ "$str_cached" =~ ^2 ]] || int_ttl=$CACHE_TTL_FAIL
+
+		if ((int_now - int_timestamp < int_ttl)); then
+			echo "$str_cached"
 			return 0
 		fi
 	fi
@@ -38,7 +58,7 @@ set_cache() {
 }
 
 clean_cache() {
-	find "$CACHE_DIR" -type f -mtime +$((CACHE_TTL / 60 / 60 / 24)) -delete 2>/dev/null
+	find "$CACHE_DIR" -type f -mtime +$((CACHE_TTL / 60 / 60 / 24)) -delete 2>/dev/null || true
 }
 
 check_url() {
@@ -98,21 +118,41 @@ check_url() {
 		fi
 	fi
 
-	if [[ "$str_status_code" =~ ^2 ]]; then
+	if [[ -n "$str_status_code" && "$str_status_code" != "000" ]]; then
 		set_cache "$url" "$str_status_code"
 	fi
 
 	echo "$str_status_code"
 }
 
+list_python_files() {
+	if (($# == 0)); then
+		find . -type f -name "*.py" -print0
+		return
+	fi
+	local path
+	for path in "$@"; do
+		if [[ "$path" == *.py && -f "$path" ]]; then
+			printf '%s\0' "$path"
+		fi
+	done
+	return 0
+}
+
 process_python_files() {
 	clean_cache
 
-	local str_root_dir="${1:-.}"
 	declare -A processed_urls
 	local has_errors=0
 
-	print_status "info" "Scanning Python docstrings for URLs in '$str_root_dir'..."
+	report_dead() {
+		has_errors=1
+		if [[ -n "${URL_REPORT_FILE:-}" ]]; then
+			printf '%s\t%s\t%s\n' "$1" "$2" "$3" >>"$URL_REPORT_FILE"
+		fi
+	}
+
+	print_status "info" "Scanning Python docstrings for URLs ($# path argument(s); none = whole tree)..."
 
 	while IFS= read -r -d '' file; do
 		local int_line_num=0
@@ -158,20 +198,20 @@ process_python_files() {
 
 					if [[ -z "$str_status_code" ]]; then
 						print_status "error" "Failed to access URL in $file (line $int_line_num): $url"
-						has_errors=1
+						report_dead "none" "$file:$int_line_num" "$url"
 					elif [[ "$str_status_code" =~ ^[34] ]]; then
 						print_status "error" "URL issue ($str_status_code) in $file (line $int_line_num): $url"
-						has_errors=1
+						report_dead "$str_status_code" "$file:$int_line_num" "$url"
 					elif [[ ! "$str_status_code" =~ ^2 ]]; then
 						print_status "error" "URL problem ($str_status_code) in $file (line $int_line_num): $url"
-						has_errors=1
+						report_dead "$str_status_code" "$file:$int_line_num" "$url"
 					fi
 
 					line="${line#*$url}"
 				done
 			fi
 		done <"$file"
-	done < <(find "$str_root_dir" -type f -name "*.py" -print0)
+	done < <(list_python_files "$@")
 
 	if [[ $has_errors -eq 0 ]]; then
 		print_status "success" "All docstring URLs are reachable"
@@ -182,7 +222,7 @@ process_python_files() {
 
 main() {
 	mkdir -p "$CACHE_DIR"
-	process_python_files "${1:-.}" || exit 1
+	process_python_files "$@" || [[ -n "${URL_REPORT_FILE:-}" ]] || exit 1
 }
 
 main "$@"

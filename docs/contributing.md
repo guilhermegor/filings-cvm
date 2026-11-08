@@ -348,3 +348,19 @@ upload falha com um `invalid-publisher` opaco:
 Para o primeiro upload o projeto ainda não existe — registre um **pending publisher** no nível da
 conta (não dentro das configurações de um projeto existente). Publicar de um laptop em vez da CI é
 o único caso que ainda precisa de um API token; OIDC só funciona a partir do GitHub Actions.
+
+## Verificação de URLs em docstrings
+
+O hook `check-urls` roda apenas no estágio `manual` (`pre-commit run check-urls --hide-output
+--hook-stage manual`), nunca em commit: ele sonda endpoints reais (cerca de 140 URLs apontam para
+`dados.cvm.gov.br`) e uma falha de rede não é um defeito do diff. Na CI, o workflow semanal
+`docstring-urls.yaml` (segundas, não bloqueante, também via `workflow_dispatch`) roda
+`bin/test_urls_docstrings.sh src` com `URL_REPORT_FILE` definido e abre ou atualiza **uma** issue
+"Dead URLs in docstrings"; sem links quebrados, fecha a issue. Esta é uma exceção consciente à
+paridade hook/CI: o gate existe só na CI semanal.
+
+O script guarda o veredito de cada URL em `$(git rev-parse --git-common-dir)/url_check_cache`
+(compartilhado entre worktrees; `URL_CACHE_DIR` sobrescreve): sucessos valem 1 semana, falhas 1 dia,
+e respostas sem status (offline) nunca são cacheadas. Com `URL_REPORT_FILE` definido, cada link
+morto vira uma linha `status<TAB>arquivo:linha<TAB>url` e o script sai com 0; sem ele, sai com 1.
+Sem argumentos varre a árvore toda; com argumentos, só os `.py` passados.

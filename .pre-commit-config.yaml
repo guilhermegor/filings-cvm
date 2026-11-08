@@ -383,6 +383,7 @@ repos:
       - id: check-urls
         name: check urls in docstrings
         entry: bash bin/test_urls_docstrings.sh
+        stages: [manual]
         language: system
         types:
           - file

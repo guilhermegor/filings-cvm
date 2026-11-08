@@ -1,0 +1,56 @@
+name: Docstring URLs
+
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: docstring-urls
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: Check docstring URLs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7.0.1
+
+      - name: Scan docstring URLs
+        env:
+          URL_REPORT_FILE: ${{ runner.temp }}/dead_urls.tsv
+        run: bash bin/test_urls_docstrings.sh src
+
+      - name: Open or update the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ runner.temp }}/dead_urls.tsv
+          TITLE: "Dead URLs in docstrings"
+        run: |
+          set -euo pipefail
+          number=$(gh issue list --state open --search "\"$TITLE\" in:title" \
+            --json number,title --jq "map(select(.title == \"$TITLE\"))[0].number // empty")
+          if [[ ! -s "$REPORT" ]]; then
+            echo "No dead links."
+            if [[ -n "$number" ]]; then
+              gh issue close "$number" --comment "No dead docstring URLs in the latest scan."
+            fi
+            exit 0
+          fi
+          {
+            echo "Weekly scan found dead docstring URLs (run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)."
+            echo
+            echo "| status | location | URL |"
+            echo "|---|---|---|"
+            awk -F'\t' '{printf "| %s | `%s` | %s |\n", $1, $2, $3}' "$REPORT"
+          } >"$RUNNER_TEMP/body.md"
+          if [[ -n "$number" ]]; then
+            gh issue edit "$number" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh issue create --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          fi
