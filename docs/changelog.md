@@ -9,7 +9,7 @@ refletem o que realmente foi publicado.
 por `cz changelog`. A página publicada é regenerada **do zero a cada build da documentação** (o
 workflow de docs roda `cz changelog` antes de `mkdocs build`), então ela sempre reflete a branch
 padrão — a CI nunca faz commit de `CHANGELOG.md` de volta no repositório. Você nunca edita à mão.
-Regenere ou visualize localmente quando quiser com `make changelog` (ou `bash tasks.sh changelog`).
+Regenere ou visualize localmente quando quiser com `poe changelog`.
 
 ---
 

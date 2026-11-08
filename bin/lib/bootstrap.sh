@@ -199,7 +199,7 @@ append_ca_to_certifi() {
 # ── wire_corporate_ca ─────────────────────────────────────────────────────────
 # Wire the corporate CA into the SSL toolchain — but only if bin/corporate_ca.pem
 # exists. Absent the pem this is a no-op, so non-corporate setups keep full TLS
-# verification. Run `make corporate_ca` to generate the pem.
+# verification. Run `poe corporate_ca` to generate the pem.
 wire_corporate_ca() {
 	if [[ ! -f "$CORPORATE_CA_PEM" ]]; then
 		print_status "debug" "No corporate CA at $CORPORATE_CA_PEM — using standard SSL"

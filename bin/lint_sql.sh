@@ -2,7 +2,7 @@
 #
 # lint_sql.sh — sqlfluff over the project's SQL query files.
 #
-# Single source of truth for SQL linting: called by both `make lint` / `./tasks.sh lint`
+# Single source of truth for SQL linting: called by both `poe lint`
 # and the pre-commit `lint-sql` hook. Lints every `.sql` under src/config/queries with the
 # default dialect from .sqlfluff (sqlfluff honours .sqlfluffignore for runtime-templated
 # queries). sqlfluff is a poetry dev-dep, so this is GUARDED on `command -v poetry` and

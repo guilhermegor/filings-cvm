@@ -146,9 +146,9 @@ nunca `float` — converta para `Decimal` no ponto em que for calcular.
 ## Rodando os testes
 
 ```bash
-make unit_tests         # apenas testes unitários
-make integration_tests  # apenas testes de integração
-make test_cov           # testes unitários + relatório de cobertura + badge
+poe unit_tests         # apenas testes unitários
+poe integration_tests  # apenas testes de integração
+poe test_cov           # testes unitários + relatório de cobertura + badge
 ```
 
 ---
@@ -156,7 +156,7 @@ make test_cov           # testes unitários + relatório de cobertura + badge
 ## Lint e formatação
 
 ```bash
-make lint          # ruff check + ruff format + codespell + pydocstyle
+poe lint          # ruff check + ruff format + codespell + pydocstyle
 ```
 
 ---

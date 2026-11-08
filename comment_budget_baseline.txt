@@ -1,10 +1,10 @@
 scope 2
-base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
-267 .coderabbit.yaml
+base 82b53dbb2575b80fdc76ab55b7dd84e0be95d01a
+266 .coderabbit.yaml
 8 .codespellrc
 4 .coveragerc
 3 .cz.toml
-24 .editorconfig
+22 .editorconfig
 6 .gitattributes
 23 .github/dependabot.yml
 20 .github/workflows/coderabbit_trigger.yaml
@@ -30,7 +30,6 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 5 .shellcheckrc
 12 .sqlfluff
 9 .yamllint
-35 Makefile
 16 bin/check_backlog_ledger.py
 79 bin/check_contract_drift.py
 4 bin/check_docs_sections.py
@@ -43,14 +42,12 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 2 bin/check_typing.py
 1 bin/check_unix_filenames.sh
 15 bin/commit.sh
-5 bin/db.sh
 1 bin/dependabot_auto_merge.sh
 25 bin/enable_pages.sh
 60 bin/enable_repo_rules.sh
 30 bin/enable_security.sh
 8 bin/ensure_env.sh
 20 bin/export_repo_content.sh
-7 bin/fix_playwright.sh
 4 bin/get_corporate_ca.sh
 27 bin/install_shell_linters.sh
 37 bin/lib/bootstrap.sh
@@ -66,12 +63,9 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 2 bin/quality_ratchet.py
 8 bin/reconcile_merged_prs.py
 5 bin/required-checks.txt
-11 bin/run.sh
-29 bin/ship.sh
 2 bin/sweep_stale_branches.py
 6 bin/test_urls_docstrings.sh
 13 bin/venv.sh
-10 make/library.mk
 20 mkdocs.yml
 25 mypy.ini
 19 pyproject.toml
@@ -234,7 +228,6 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 3 src/filings_cvm/submission/informe_diario.py
 3 src/filings_cvm/submission/inr_mensal.py
 3 src/filings_cvm/submission/perfil_mensal.py
-36 tasks.sh
 13 tests/integration/test_bin_scripts.py
 6 tests/unit/test_adm_cart_ingestion.py
 5 tests/unit/test_agente_auton_ingestion.py

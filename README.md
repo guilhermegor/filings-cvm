@@ -64,7 +64,7 @@ A documentação completa (em pt-BR) fica em **<https://guilhermegor.github.io/f
 ou pode ser servida localmente:
 
 ```bash
-make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_server)
+poe docs_serve     # serve em http://0.0.0.0:8000
 ```
 
 <!-- slug: getting-started -->
@@ -74,7 +74,7 @@ make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_
 
 - Python **>= 3.11**
 - Poetry (recomendado)
-- Opcional: Makefile (ou use `./tasks.sh` no Git Bash / Windows)
+- Poe the Poet (já vem nas dependências de dev)
 
 <!-- slug: install -->
 ### Instalação
@@ -92,8 +92,8 @@ poetry add filings-cvm
 ```bash
 git clone https://github.com/guilhermegor/filings-cvm.git
 cd filings-cvm
-make init            # cria a .venv e instala os hooks de pre-commit
-                     # (sem make: ./tasks.sh init)
+bash bin/venv.sh     # cria a .venv (traz o poe)
+poe init            # instala os hooks de pre-commit e prepara o repo (com a .venv ativa; ou: bash bin/poe_exec.sh init)
 ```
 
 <!-- slug: usage -->
@@ -135,7 +135,7 @@ O exemplo completo (incluindo o bloco obrigatório de contagem de clientes) est�
 filings-cvm/
 ├── assets/                 # logo e imagens do projeto
 ├── bin/                    # scripts de gate e utilitários (inclui check_readme_structure.sh)
-├── docs/                   # documentação MkDocs (pt-BR) — make docs_server
+├── docs/                   # documentação MkDocs (pt-BR) — poe docs_serve
 ├── mkdocs.yml              # configuração do site de documentação
 ├── src/filings_cvm/
 │   ├── __init__.py         # API pública (controlada por __all__)
@@ -145,7 +145,7 @@ filings-cvm/
 ├── tests/
 │   ├── unit/  integration/  performance/
 ├── .pre-commit-config.yaml
-├── Makefile  /  tasks.sh   # interfaces espelhadas (com e sem make)
+├── poe_tasks*.toml         # tarefas poe (poe --help)
 ├── pyproject.toml
 └── README.md
 ```
@@ -154,10 +154,10 @@ filings-cvm/
 ## Desenvolvimento
 
 ```bash
-make unit_tests      # pytest tests/unit/
-make test_cov        # cobertura + badge (coverage.svg)
-make lint            # ruff, codespell, pydocstyle, check_docstrings
-make help            # lista todos os comandos disponíveis
+poe unit_tests      # pytest tests/unit/
+poe test_cov        # cobertura + badge (coverage.svg)
+poe lint            # ruff, codespell, pydocstyle, check_docstrings
+poe --help          # lista todos os comandos disponíveis
 ```
 
 O `README.md` em si é validado por `bin/check_readme_structure.sh` (hook `readme-structure`
@@ -193,14 +193,14 @@ Contribuições são bem-vindas — leia o
 resumido:
 
 ```bash
-make lint            # ruff, codespell, pydocstyle
-make unit_tests      # pytest tests/unit/
+poe lint            # ruff, codespell, pydocstyle
+poe unit_tests      # pytest tests/unit/
 ```
 
 Toda mudança entra por **pull request**: a branch padrão é protegida pelo ruleset
 `pr-quality-gate` (PR obrigatório, testes nos 3 SOs + build da doc verdes, CodeQL limpo e
-**revisão automática do Copilot** a cada push). Ele é provisionado por código — `make init` já o
-aplica, e `make enable_repo_rules` o (re)aplica sozinho; nenhuma configuração manual na UI do
+**revisão automática do Copilot** a cada push). Ele é provisionado por código — `poe init` já o
+aplica, e `poe enable_repo_rules` o (re)aplica sozinho; nenhuma configuração manual na UI do
 GitHub é necessária. Detalhes em
 [docs/contributing.md](docs/contributing.md#o-ruleset-pr-quality-gate-revisão-automática-e-proteção-da-branch).
 

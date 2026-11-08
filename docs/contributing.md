@@ -9,14 +9,12 @@ Tudo o que você precisa para desenvolver, testar e lançar esta biblioteca.
 
 ## Preparando o ambiente de desenvolvimento
 
-O projeto traz um `Makefile` e um `tasks.sh` equivalente, então use o que couber na sua máquina —
-**`make init`** ou **`bash tasks.sh init`** quando `make` não estiver disponível (por exemplo, num
-shell padrão do Windows).
+O projeto usa o [Poe the Poet](https://poethepoet.natn.io/) como executor de tarefas (`poe --help`
+lista todas). Na primeira vez, rode `bash bin/venv.sh` para criar o virtualenv; depois use `bash bin/poe_exec.sh <tarefa>`
+ou apenas `poe <tarefa>` com a `.venv` ativa.
 
 ```bash
-make init        # cria o virtualenv do Poetry + instala deps + instala hooks de pre-commit
-# ou, sem make:
-bash tasks.sh init
+poe init        # cria o virtualenv do Poetry + instala deps + instala hooks de pre-commit
 ```
 
 `init` compõe `venv` (cria o virtualenv do Poetry e instala **todas** as dependências, inclusive
@@ -26,9 +24,9 @@ faltando.
 ## Testes e lint
 
 ```bash
-make unit_tests          # poetry run pytest tests/unit/
-make integration_tests   # poetry run pytest tests/integration/
-make lint                # ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml/actions
+poe unit_tests          # poetry run pytest tests/unit/
+poe integration_tests   # poetry run pytest tests/integration/
+poe lint                # ruff + mypy + codespell + pydocstyle + gates de shell/sql/yaml/actions
 ```
 
 A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente antes de dar push.
@@ -38,7 +36,7 @@ A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente an
 > *workflow que o GitHub roda*. Um `on:` com evento inexistente passa no primeiro e faz o GitHub
 > **rejeitar o arquivo inteiro** — o workflow não roda de forma alguma, e o sintoma (PR sem rótulo,
 > sem comentário do gate) parece lentidão, não morte. O `actionlint` é **opcional localmente**:
-> `make lint` avisa e segue se ele não estiver instalado, mas na CI a ausência **falha o job**, de
+> `poe lint` avisa e segue se ele não estiver instalado, mas na CI a ausência **falha o job**, de
 > propósito. Para tê-lo aqui, baixe o binário da página de releases
 > (<https://github.com/rhysd/actionlint/releases>) — ele **não** entra como dev-dep do Poetry: o
 > `actionlint-py` é *sdist-only* e baixa o binário em tempo de build, o que colocaria um download
@@ -47,7 +45,7 @@ A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente an
 ## Servindo a documentação localmente
 
 ```bash
-make docs_server   # mkdocs serve em http://0.0.0.0:8000
+poe docs_serve   # mkdocs serve em http://0.0.0.0:8000
 ```
 
 ## Documentação versionada (mike + GitHub Pages)
@@ -79,13 +77,13 @@ para a branch `gh-pages` (o modelo mike), em vez da fonte *GitHub Actions*. O wo
 isso: o `GITHUB_TOKEN` é um token de GitHub App que não altera as configurações do Pages.
 
 ```bash
-make enable_pages          # ou: bash tasks.sh enable_pages
+poe enable_pages          #
 ```
 
-Já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente e não-bloqueante**, e — para
+Já roda dentro de `poe init`. É **idempotente e não-bloqueante**, e — para
 **nunca** deixar o site em 404 — só troca a fonte para `gh-pages` **depois** que essa branch existir
 (o primeiro `mike deploy` do release a cria). Se rodar antes disso, ele avisa e não mexe no Pages;
-basta rodar `make enable_pages` de novo após o primeiro release. Alternativa manual:
+basta rodar `poe enable_pages` de novo após o primeiro release. Alternativa manual:
 *Settings → Pages → Build and deployment → Source: Deploy from a branch → `gh-pages` / `(root)`*.
 
 **Semear a versão atual imediatamente (opcional):** se quiser publicar a versão já lançada sem
@@ -95,7 +93,7 @@ esperar o próximo release, rode uma vez, com a branch limpa:
 git config user.name "<você>" && git config user.email "<seu-email>"
 poetry run mike deploy --push --update-aliases 0.18 latest
 poetry run mike set-default --push latest
-make enable_pages          # agora que gh-pages existe, aponta o Pages para ela
+poe enable_pages          # agora que gh-pages existe, aponta o Pages para ela
 ```
 
 ## Verificando o pacote construído
@@ -105,7 +103,7 @@ erros de empacotamento (um `__init__` faltando, um subpacote `_internal/` não i
 testes na árvore de fontes nunca revelam:
 
 ```bash
-make install_dist_locally    # python -m build → instala → smoke-import → reporta a wheel
+poe install_dist_locally    # python -m build → instala → smoke-import → reporta a wheel
 ```
 
 ## Pull requests
@@ -121,10 +119,10 @@ A branch padrão é protegida por um **branch ruleset** chamado `pr-quality-gate
 **inteiramente por código** — nenhuma caixinha marcada à mão:
 
 ```bash
-make enable_repo_rules     # ou: bash tasks.sh enable_repo_rules
+poe enable_repo_rules     #
 ```
 
-Já roda dentro de `make init` / `bash tasks.sh init`. É **idempotente** (um ruleset existente é
+Já roda dentro de `poe init`. É **idempotente** (um ruleset existente é
 atualizado no lugar, não duplicado) e **não-bloqueante** (sem `gh`, sem auth ou sem permissão de
 admin, ele avisa e sai com 0 — o `init` completa). Exige `gh` autenticado com direitos de admin no
 repositório: o `GITHUB_TOKEN` do CI **não** consegue escrever rulesets, por isso isto é um passo do
@@ -191,7 +189,7 @@ escrito. Por isso a classificação é por **caminho**:
 | Classe | Caminhos | Auto-merge? |
 |---|---|---|
 | `docs` | `docs/**`, `*.md`, `mkdocs.yml` | ✅ |
-| `ci` | `.github/**`, `bin/**`, `Makefile`, `tasks.sh`, configs de lint | ✅ |
+| `ci` | `.github/**`, `bin/**`, `poe_tasks*.toml`, configs de lint | ✅ |
 | `deps` | `poetry.lock`, `pyproject.toml` | ✅ (os testes são o gate) |
 | `tests` | `tests/**` | ❌ — definem o que "passar" significa |
 | `src` | `src/filings_cvm/**` | ❌ **nunca**, em nenhum tamanho |
@@ -329,7 +327,7 @@ Os releases são **dirigidos por tag** quando o projeto está conectado a um rem
 - O workflow de release roda a **suíte completa de testes** como gate rígido, constrói com
   `python -m build` e publica via **trusted publishing (OIDC)** (`pypa/gh-action-pypi-publish`) —
   sem `PYPI_TOKEN` armazenado.
-- O changelog é regenerado a partir das tags no momento do build (`make changelog` localmente); a
+- O changelog é regenerado a partir das tags no momento do build (`poe changelog` localmente); a
   CI nunca faz commit de `CHANGELOG.md` de volta na branch padrão protegida.
 
 ### Configuração do mantenedor — trusted publisher (uma vez, antes do primeiro release)

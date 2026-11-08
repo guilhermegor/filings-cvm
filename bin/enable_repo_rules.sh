@@ -12,7 +12,7 @@
 # not reproducible and is silently forgotten on a fresh clone/fork, so the whole ruleset is
 # declared here and applied with one command. This is repo-settings work: CI's GITHUB_TOKEN
 # (a GitHub App installation token) CANNOT write rulesets, but a maintainer running
-# `make init` / `tasks.sh init` has repo-admin via `gh auth` — so it belongs here, not in CI.
+# `poe init` has repo-admin via `gh auth` — so it belongs here, not in CI.
 #
 # EVERY rule below is settable through the REST API (verified against this repo), INCLUDING
 # the Copilot auto-review, which is its OWN rule type (`copilot_code_review`) — it is NOT a
@@ -51,7 +51,7 @@ require_gh() {
 		return 1
 	fi
 	if ! gh auth status >/dev/null 2>&1; then
-		print_status "warning" "gh not authenticated — skipping ruleset setup (run 'gh auth login', then 'make enable_repo_rules')"
+		print_status "warning" "gh not authenticated — skipping ruleset setup (run 'gh auth login', then 'poe enable_repo_rules')"
 		return 1
 	fi
 	return 0
@@ -145,7 +145,7 @@ apply_ruleset() {
 		return 0
 	fi
 
-	print_status "warning" "Could not apply the '$STR_RULESET_NAME' ruleset to $str_repo (needs repo-admin rights) — a maintainer must run 'make enable_repo_rules' or set it in Settings -> Rules -> Rulesets"
+	print_status "warning" "Could not apply the '$STR_RULESET_NAME' ruleset to $str_repo (needs repo-admin rights) — a maintainer must run 'poe enable_repo_rules' or set it in Settings -> Rules -> Rulesets"
 	return 0
 }
 

@@ -57,7 +57,7 @@ jobs:
       # instead of silently regenerating it — regenerating (rm + poetry lock) would re-resolve and
       # upgrade every dependency to the latest in-range version, a non-reproducible build that can
       # pull a breaking release. (A version bump does NOT invalidate the lock — only a dependency
-      # change does — so `make bump_version` never trips this.)
+      # change does — so `poe bump_version` never trips this.)
       - name: Check Lock File Is In Sync
         run: |
           if ! poetry check --lock; then
@@ -210,7 +210,7 @@ jobs:
 
       - name: Run Non-Python Lint Gates (shell, sql, yaml, actions)
         if: runner.os == 'Linux'
-        # Mirrors `make lint` and the pre-commit lint-* hooks (one home, zero drift).
+        # Mirrors `poe lint` and the pre-commit lint-* hooks (one home, zero drift).
         # shellcheck/shfmt/actionlint are system tools; install them so
         # the gates actually RUN in CI — the wrappers skip gracefully on a box without
         # them, which is right locally and would be a placebo here.

@@ -447,9 +447,6 @@ reviews:
     # No markdown lint here; codespell covers spelling only.
     markdownlint:
       enabled: true
-    # The Makefile is a CI surface and is entirely ungated.
-    checkmake:
-      enabled: true
     # Dependency CVEs — the still-open question in #90 (pip-audit vs Snyk).
     osvScanner:
       enabled: true

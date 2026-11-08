@@ -1,0 +1,41 @@
+[tool.poe.tasks.lint]
+cmd = "bash bin/lint.sh"
+help = "Run every lint gate in the order CI runs them"
+
+[tool.poe.tasks.install_shell_linters]
+cmd = "bash bin/install_shell_linters.sh"
+help = "Optionally install shellcheck + shfmt as system binaries (choco/scoop/brew/apt)"
+
+[tool.poe.tasks.check_docstrings]
+cmd = "python bin/check_docstrings.py"
+help = "Verify NumPy docstrings against their signatures"
+
+[tool.poe.tasks.check_readme_structure]
+cmd = "bash bin/check_readme_structure.sh README.md"
+help = "Check the README layout: plain headings, slug sections, Authors links"
+
+[tool.poe.tasks.check_function_length]
+cmd = "python bin/check_function_length.py"
+help = "Cap a function at 60 lines of code (docstring excluded)"
+
+[tool.poe.tasks.check_fixture_scope]
+cmd = "python bin/check_fixture_scope.py"
+help = "Proxy: flag a non-function-scope test fixture with no written reason (#442)"
+
+[tool.poe.tasks.check_complexity]
+cmd = "bash bin/check_complexity.sh"
+help = "Cyclomatic-complexity ceiling per tree (tests 1, src 2, bin 8)"
+
+[tool.poe.tasks.template_drift]
+cmd = "python bin/check_template_drift.py"
+help = "Report template files this project never received (needs --blueprintx-root or BLUEPRINTX_TEMPLATE_ROOT)"
+
+[tool.poe.tasks.check_commit_msg]
+cmd = "pre-commit run --hook-stage commit-msg --commit-msg-filename \"${file}\""
+help = "Pre-flight a commit message file against the project's own commit-msg hooks"
+
+	[[tool.poe.tasks.check_commit_msg.args]]
+	name = "file"
+	positional = true
+	required = true
+	help = "path to the commit message file"

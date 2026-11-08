@@ -1,0 +1,20 @@
+[tool.poe.tasks.install_dist_locally]
+shell = """
+rm -rf dist/* build/ ./*.egg-info/
+python -m build
+bash bin/poetry_exec.sh install
+pkg=$(bash bin/poetry_exec.sh version | awk '{print $1}' | tr '-' '_')
+python -c "import importlib, sys; m = importlib.import_module(sys.argv[1]); assert m.__version__; print('Package import works; __version__ resolves')" "$pkg"
+python -c "import pathlib; print('Built wheel:', sorted(pathlib.Path('dist').glob('*.whl'))[-1].name)"
+"""
+help = "Build the wheel, install it, and smoke-import the package"
+
+[tool.poe.tasks.test_feat]
+cmd = "pytest tests/unit/ -k \"${feat}\""
+help = "Run the unit tests matching a keyword (poe test_feat <kw>)"
+
+	[[tool.poe.tasks.test_feat.args]]
+	name = "feat"
+	positional = true
+	required = true
+	help = "pytest -k expression"

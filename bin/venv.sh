@@ -101,7 +101,7 @@ install_playwright() {
 try_install_playwright_browsers() {
 	# Best-effort Playwright browser install. The Poetry/.venv environment is already
 	# usable without browsers, so a failure here must NEVER abort `init` — it warns and
-	# points at `make fix_playwright`. This guards against `playwright install` failing on
+	# points at `playwright install`. This guards against `playwright install` failing on
 	# hosts without a compatible browser toolchain (notably `Error: spawn UNKNOWN` under
 	# Git Bash/MINGW on Windows). `--with-deps` installs Linux OS packages via apt and is
 	# only valid on Debian/Ubuntu, so it is added on Linux only.
@@ -117,7 +117,7 @@ try_install_playwright_browsers() {
 		print_status "success" "Playwright browsers installed"
 	else
 		print_status "warning" \
-			"Could not install Playwright browsers — init continues; run 'make fix_playwright' later if you need them"
+			"Could not install Playwright browsers — init continues; run 'poetry run playwright install chromium' later if you need them"
 	fi
 }
 

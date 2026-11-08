@@ -47,7 +47,7 @@ We use the following standardized variable naming conventions:
 
 **`main` is protected — direct commits and pushes are blocked** (`no-commit-to-branch` locally,
 server-side branch protection on GitHub). All changes land via a branch → Pull Request → merge
-(online), or `make new_branch` → `make git_merge_to_main` (offline).
+(online), or `git switch -c <branch>` → `git switch main && git merge --no-ff <branch>` (offline).
 
 ### Branch Naming Convention
 
@@ -104,7 +104,7 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
    - Run `poetry install` to set up the development environment
 
 2. **Pre-commit Hooks**:
-   - Install with `make precommit_update`
+   - Install with `poe precommit`
    - This enables automatic:
      - Code linting
      - Formatting
@@ -116,7 +116,7 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
    - Maintain the standard file structure:
      - Implementation: `src/<feat_name>.py`
      - Tests: `tests/test_<feat_name>.py`
-   - Run comprehensive validation with: `make test_feat MODULE=<feat_name>`
+   - Run comprehensive validation with: `poe test_feat <feat_name>`
         - This command executes:
             - **Ruff**: Linting, formatting, and flagging deprecated Python features
             - **Codespell**: Spelling verification in comments and docstrings
