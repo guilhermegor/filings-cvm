@@ -523,7 +523,7 @@ def test_every_page_of_open_prs_is_examined(cls_retry: ModuleType) -> None:
 		[{"number": 2, "created_at": "2026-08-24T09:00:00Z"}],
 	]
 
-	assert [d["number"] for d in cls_retry.flatten_open_prs(list_pages)] == [2, 1]
+	assert [dict_pr["number"] for dict_pr in cls_retry.flatten_open_prs(list_pages)] == [2, 1]
 
 
 def test_a_malformed_page_cannot_crash_the_sweep(cls_retry: ModuleType) -> None:
@@ -539,7 +539,7 @@ def test_a_malformed_page_cannot_crash_the_sweep(cls_retry: ModuleType) -> None:
 	"""
 	list_pages = [[{"number": 1}], "not-a-page", [{"no_number": True}, {"number": 4}]]
 
-	assert [d["number"] for d in cls_retry.flatten_open_prs(list_pages)] == [1, 4]
+	assert [dict_pr["number"] for dict_pr in cls_retry.flatten_open_prs(list_pages)] == [1, 4]
 
 
 def test_flatten_open_prs_sorts_oldest_created_at_first(cls_retry: ModuleType) -> None:
@@ -557,7 +557,7 @@ def test_flatten_open_prs_sorts_oldest_created_at_first(cls_retry: ModuleType) -
 		]
 	]
 
-	assert [d["number"] for d in cls_retry.flatten_open_prs(list_pages)] == [3, 9]
+	assert [dict_pr["number"] for dict_pr in cls_retry.flatten_open_prs(list_pages)] == [3, 9]
 
 
 def test_an_author_less_marker_cannot_match_an_unknown_identity(
@@ -1045,7 +1045,7 @@ def test_build_candidate_passes_the_roster_to_the_fetch(
 	monkeypatch : pytest.MonkeyPatch
 		Fixture used to record the fetch call.
 	"""
-	mock_fetch = Mock(side_effect=RuntimeError("stop"))
-	monkeypatch.setattr(cls_gate, "fetch_pull_request", mock_fetch)
+	cls_fetch = Mock(side_effect=RuntimeError("stop"))
+	monkeypatch.setattr(cls_gate, "fetch_pull_request", cls_fetch)
 	cls_retry.build_candidate("acme/widget", 7, "2026-08-24T00:00:00Z", {"coderabbitai"}, cls_gate)
-	assert mock_fetch.call_args.args[3] == frozenset({"coderabbitai"})
+	assert cls_fetch.call_args.args[3] == frozenset({"coderabbitai"})
