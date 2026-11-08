@@ -1,7 +1,7 @@
 """CVM Informe Anual FII — membro *ativo adquirido* reader.
 
 The ``inf_anual_fii_ativo_adquirido`` member of ``inf_anual_fii_AAAA.zip``: assets acquired during
-the year — one row per asset (objetivos, montante investido, origem dos recursos). A **long**
+the year — one row per asset (objectives, amount invested, source of funds). A **long**
 table. See ``_base_inf_anual_fii_reader`` for the shared behaviour.
 """
 

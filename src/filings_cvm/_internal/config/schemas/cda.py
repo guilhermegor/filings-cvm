@@ -1,4 +1,4 @@
-"""Pydantic models for the CVM CDA (Composição e Diversificação das Aplicações) XML — V4.
+"""Pydantic models for the CVM CDA (`Composição e Diversificação das Aplicações`) XML — V4.
 
 Direction-neutral schema mirroring the submission XML described at
 https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLCDANetV4.aspx

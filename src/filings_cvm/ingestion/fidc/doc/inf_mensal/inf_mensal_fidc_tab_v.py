@@ -1,4 +1,4 @@
-"""CVM Informe Mensal FIDC — tabela V (prazos dos direitos creditórios a adquirir) reader.
+"""CVM Informe Mensal FIDC — tabela V (`prazos dos direitos creditórios a adquirir`) reader.
 
 The ``inf_mensal_fidc_tab_V`` member of ``inf_mensal_fidc_AAAAMM.zip``: direitos creditórios a
 adquirir por faixa de prazo de vencimento (a vencer, inadimplentes, antecipados). See

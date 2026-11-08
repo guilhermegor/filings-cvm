@@ -209,6 +209,23 @@ See [Template updates](docs/template-updates.md) for the known limits.
    - Code coverage should not decrease
    - Documentation must be updated
 
+### Baseline-Ratchet Guards: The Baseline PR Merges First
+
+A baseline-ratchet guard grandfathers what exists today and gives every new file a budget of
+zero. The comment budget (`bin/check_comment_budget.py`, baseline `comment_budget_baseline.txt`)
+is the current one. The baseline is a snapshot of the default branch, so every PR that merges
+ahead of the PR that introduces or regenerates it adds files the snapshot has no row for, and
+that PR goes red after each branch update through no fault of its own.
+
+- **The PR that introduces or regenerates a baseline merges first.** Hold the merge queue
+  until it lands; in a serial queue it otherwise never converges, and a red baseline PR that
+  is pushed to the back stays red.
+- **A later PR's new violations are its author's to fix, never to baseline.** Do not
+  regenerate the baseline to absorb them; the ratchet only goes down.
+- `--write-baseline` records the commit it measured in a `base <sha>` row (`unknown` when git
+  is unavailable) and prints it. A failing run prints `baselined at <sha>, HEAD is at <sha>`,
+  so a stale baseline is visible in the CI log instead of reading as a broken PR.
+
 ## Best Practices
 
 - **Keep branches focused** - one feature/bugfix per branch
