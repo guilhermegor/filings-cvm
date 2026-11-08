@@ -1,5 +1,5 @@
 scope 2
-base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
+base d998f6fb3276f70bbabf1b0a5f5ed6bc99724a8e
 267 .coderabbit.yaml
 8 .codespellrc
 4 .coveragerc
@@ -31,7 +31,6 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 12 .sqlfluff
 9 .yamllint
 35 Makefile
-16 bin/check_backlog_ledger.py
 79 bin/check_contract_drift.py
 4 bin/check_docs_sections.py
 14 bin/check_docstrings.py
@@ -72,7 +71,7 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 6 bin/test_urls_docstrings.sh
 13 bin/venv.sh
 10 make/library.mk
-20 mkdocs.yml
+19 mkdocs.yml
 25 mypy.ini
 19 pyproject.toml
 55 ruff.toml
@@ -247,7 +246,7 @@ base c3ab696b6cdf64eded2c7e8967aa8c275d367d95
 13 tests/unit/test_cda_ingestion.py
 1 tests/unit/test_cda_submission.py
 3 tests/unit/test_cgvn_cia_aberta_ingestion.py
-9 tests/unit/test_check_backlog_ledger.py
+3 tests/unit/test_check_backlog_ledger.py
 13 tests/unit/test_check_contract_drift.py
 8 tests/unit/test_check_portal_completeness.py
 3 tests/unit/test_check_review_threads.py

@@ -681,3 +681,135 @@ def test_check_pr_policy_body_ignores_headings_inside_a_code_fence(tmp_path: Pat
 	cls_result = _run("check_pr_policy.sh", "body", dict_env=dict_env)
 
 	assert cls_result.returncode == 1
+
+
+def _gate(str_script: str, path_root: Path) -> subprocess.CompletedProcess[str]:
+	"""Run a ``--root`` gate script against a scratch tree.
+
+	Parameters
+	----------
+	str_script : str
+		The script filename under ``bin/``.
+	path_root : pathlib.Path
+		The scratch repository root to check.
+
+	Returns
+	-------
+	subprocess.CompletedProcess
+		The finished process, output captured as text.
+	"""
+	return subprocess.run(  # noqa: S603 -- constant argv, no untrusted input
+		[shutil.which("bash") or "bash", str(_bin_script(str_script)), "--root", str(path_root)],
+		capture_output=True,
+		text=True,
+		check=False,
+		env=_env_without_git(),
+	)
+
+
+def _write(path_file: Path, str_text: str = "x\n") -> None:
+	"""Create ``path_file`` (and its parents) with ``str_text``."""
+	path_file.parent.mkdir(parents=True, exist_ok=True)
+	path_file.write_text(str_text, encoding="utf-8")
+
+
+def _valid_specs(path_root: Path) -> None:
+	"""Lay out a minimal valid ``.specs/`` tree."""
+	_write(path_root / ".specs/CLAUDE.md")
+	_write(
+		path_root / ".specs/features/demo-feature/tasks.md", "- [ ] a\n- [~] chore/1-x\n- [x] b\n"
+	)
+	_write(path_root / ".specs/backlog/topic_20261103_120000.md", "- [ ] a\n")
+
+
+def test_specs_structure_accepts_a_valid_tree(tmp_path: Path) -> None:
+	"""A tree following the template layout passes."""
+	_valid_specs(tmp_path)
+
+	cls_result = _gate("check_specs_structure.sh", tmp_path)
+
+	assert cls_result.returncode == 0, cls_result.stderr
+
+
+def test_specs_structure_passes_without_a_specs_dir(tmp_path: Path) -> None:
+	"""No ``.specs/`` means nothing to check."""
+	assert _gate("check_specs_structure.sh", tmp_path).returncode == 0
+
+
+@pytest.mark.parametrize(
+	("str_rel", "str_text"),
+	[
+		(".specs/stray.md", "x\n"),
+		(".specs/features/fix/tasks.md", "- [ ] a\n"),
+		(".specs/features/Bad_Name/tasks.md", "- [ ] a\n"),
+		(".specs/features/only-pr/pr.md", "x\n"),
+		(".specs/features/demo-feature/tasks.md", "- [?] a\n"),
+		(".specs/features/demo-feature/tasks.md", "- [~] no-branch\n"),
+		(".specs/backlog/no-timestamp.md", "- [ ] a\n"),
+		(".specs/backlog/sub/topic_20261103_120000.md", "- [ ] a\n"),
+	],
+)
+def test_specs_structure_rejects_a_violation(tmp_path: Path, str_rel: str, str_text: str) -> None:
+	"""Each rule of ``.specs/CLAUDE.md`` fails the gate when broken."""
+	_valid_specs(tmp_path)
+	_write(tmp_path / str_rel, str_text)
+
+	cls_result = _gate("check_specs_structure.sh", tmp_path)
+
+	assert cls_result.returncode == 1
+	assert "ERROR" in cls_result.stderr
+
+
+def test_specs_structure_ignores_markers_inside_a_fence(tmp_path: Path) -> None:
+	"""A bad marker inside a code fence is example text, not a task."""
+	_valid_specs(tmp_path)
+	_write(
+		tmp_path / ".specs/features/demo-feature/tasks.md", "```\n- [?] example\n```\n- [ ] a\n"
+	)
+
+	assert _gate("check_specs_structure.sh", tmp_path).returncode == 0
+
+
+def test_docs_boundary_accepts_published_pages(tmp_path: Path) -> None:
+	"""Plain published pages pass."""
+	_write(tmp_path / "docs/index.md")
+	_write(tmp_path / "docs/ingestion/meta.md")
+
+	cls_result = _gate("check_docs_boundary.sh", tmp_path)
+
+	assert cls_result.returncode == 0, cls_result.stderr
+
+
+def test_docs_boundary_passes_without_a_docs_dir(tmp_path: Path) -> None:
+	"""No ``docs/`` means nothing to check."""
+	assert _gate("check_docs_boundary.sh", tmp_path).returncode == 0
+
+
+@pytest.mark.parametrize(
+	"str_rel",
+	[
+		"docs/backlog/topic_20261103_120000.md",
+		"docs/my-lessons.md",
+		"docs/design.md",
+		"docs/sub/plan.md",
+		"docs/SECURITY.md",
+		"docs/.superpowers/spec.md",
+	],
+)
+def test_docs_boundary_rejects_working_material(tmp_path: Path, str_rel: str) -> None:
+	"""Working material under ``docs/`` fails the gate."""
+	_write(tmp_path / "docs/index.md")
+	_write(tmp_path / str_rel)
+
+	cls_result = _gate("check_docs_boundary.sh", tmp_path)
+
+	assert cls_result.returncode == 1
+	assert "ERROR" in cls_result.stderr
+
+
+def test_the_repository_itself_passes_both_gates() -> None:
+	"""The real tree is clean: no ledger left in ``docs/`` and a valid ``.specs/``."""
+	path_repo = Path(__file__).resolve().parents[2]
+
+	assert _gate("check_specs_structure.sh", path_repo).returncode == 0
+	assert _gate("check_docs_boundary.sh", path_repo).returncode == 0

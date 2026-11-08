@@ -1,341 +1,311 @@
-#!/usr/bin/env python
-"""Enforce the per-branch work ledger deterministically, not by memory.
+"""Enforce the per-branch work-ledger convention structurally, not by memory.
 
-``docs/CLAUDE.md`` requires that every non-trivial branch keep a **per-branch work ledger** at
-``docs/backlog/<kebab-topic>_YYYYMMDD_HHMMSS.md`` (timestamped at creation, never renamed), each
-item a Markdown checkbox (``- [ ]`` open, ``- [x]`` done). That was the last rule of the flow that
-lived only in prose — a repo that already makes every other convention structural
-(``bin/check_typing.py``, ``bin/check_provenance.py``, ``tests/unit/test_reader_retry_policy.py``).
-This hook closes it.
+A branch whose cumulative diff touches a **non-trivial** path must add a work ledger under
+``.specs/backlog/<kebab>_YYYYMMDD_HHMMSS.md`` carrying at least one ``- [ ]`` / ``- [x]`` checkbox.
+It was the last rule of the flow enforced by memory in a repo that makes every other convention
+structural, so it is wired into both pre-commit and CI (gate parity), like ``check_typing.py``.
 
-**"Non-trivial" is made deterministic by PATH** — the same axis ``bin/pr_gate.py`` classifies a
-PR by, reused here rather than re-listed (the two must never drift). A branch whose cumulative
-diff touches any ``src`` or ``ci`` path (source, or ``bin/`` / ``.github/`` / build config) must
-add or edit at least one ``docs/backlog`` ledger. Every other class — a docs-only edit, a ``deps``
-bump (``poetry.lock`` / ``pyproject.toml``), a tests-only tweak — is exempt.
+Four design points that are easy to get wrong, all deliberate here:
 
-``pr_gate.classify_risk`` collapses a whole diff to its *single most dangerous* class (and ranks
-``tests`` above ``ci``), which is the right question for auto-merge but the wrong one here: a
-branch touching both ``bin/`` and ``tests/`` would collapse to ``tests`` and wrongly escape the
-ledger requirement. So the classifier is reused **per path** — the question is set-membership
-("does *any* changed path fall in a ledger class?"), not "what is the diff's worst class".
+0. **Bot PRs are exempt, keyed on the AUTHOR.** A gate demanding a human-authored artifact
+   permanently blocks every bot PR that trips it — nobody can satisfy it, so the real effect is
+   training people to reach for ``--admin``. The exemption reads the PR author from the event
+   payload (never ``GITHUB_ACTOR``, which is whoever *triggered* the run) and fails closed when
+   the author cannot be resolved. Keyed on the author and never the path: a human branch
+   touching the same files still owes the ledger. See ``pr_author_login`` / ``is_bot_author``.
 
-The check is **diff-based, not per-commit**: the ledger is a per-*branch* artifact, so a later
-source-only commit on a branch that already carries a ledger must pass. It compares the branch to
-its merge-base with ``main`` and asks whether a ledger rides along in that cumulative diff. On
-``main`` itself (or a tag build) the merge-base is ``HEAD``, the diff is empty, and the check is a
-no-op — so it only ever fires on a feature branch / PR, which is exactly where a ledger is owed.
 
-Failures (each a hard error, exit 1):
+1. **"Non-trivial" is decided BY PATH, reusing the PR gate's classifier — but PER PATH.**
+   ``pr_gate.classify_risk(list)`` returns the single *most-dangerous* class and ranks ``tests``
+   above ``ci``, so a branch touching both ``bin/`` and ``tests/`` collapses to ``tests`` and would
+   wrongly escape the requirement. The ledger question is *set membership* ("does ANY path fall in
+   a ledger class?"), so the classifier is called **one path at a time**. Reusing it means no drift
+   on what "src"/"ci" mean; asking per path means asking the right question.
 
-- the branch touches a ``src``/``ci`` path but no ``docs/backlog/*.md`` is part of its diff;
-- a touched ledger's filename does not match ``<kebab-topic>_YYYYMMDD_HHMMSS.md``;
-- a touched ledger carries no ``- [ ]`` / ``- [x]`` checkbox item (task lists as bare bullets).
+2. **Diff-based, not per-commit.** The ledger is a per-*branch* artifact, so a later source-only
+   commit on a branch that already has one must pass. Diff against ``merge-base(HEAD, <default>)``.
+   Off a feature branch the merge-base is HEAD, the diff is empty, and this is a no-op.
+
+3. **Diff the INDEX (``git diff --cached <base>``), not the working tree.** pre-commit runs on
+   *staged* content and plain ``git diff`` ignores untracked files, so a brand-new-but-unstaged
+   ledger would be invisible and the gate would demand a ledger that is sitting right there. With
+   ``--cached`` the comparison sees branch commits + staged files; in CI (clean tree) it reduces to
+   the branch's cumulative diff.
+
+CI must check out with ``fetch-depth: 0`` — a shallow clone has no common ancestor to resolve.
 """
 
-from __future__ import annotations
-
-from collections.abc import Callable
+import importlib.util
+import json
 import os
 import pathlib
 import re
-import shutil
 import subprocess
 import sys
+import types
 
 
-# Reuse the PR gate's path->risk classifier instead of re-listing the risk paths here, so the two
-# can never drift on what "src" or "ci" means. ``bin/`` is this file's own directory; put it on
-# the path first so the sibling import resolves regardless of the caller's cwd (pre-commit and CI
-# both invoke this as ``python bin/check_backlog_ledger.py``).
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import pr_gate  # noqa: E402  (deliberate: import follows the sys.path bootstrap above)
+BOT_LOGIN_SUFFIX = "[bot]"
 
 
-# Risk classes whose changes are "non-trivial" enough to demand a work ledger — the same path axis
-# ``pr_gate`` computes: ``src`` = source, ``ci`` = bin/CI/workflows/build config. ``deps`` /
-# ``docs`` / ``tests`` / ``other`` are exempt (a lockfile bump, a docs typo, a test-only tweak).
-LEDGER_CLASSES: frozenset[str] = frozenset({"src", "ci"})
+def is_bot_author(str_login: str) -> bool:
+    """Return whether a GitHub login belongs to a bot account.
 
-# Where a per-branch ledger lives (docs/CLAUDE.md). Not published (mkdocs ``exclude_docs``).
-LEDGER_DIR = "docs/backlog/"
+    Parameters
+    ----------
+    str_login : str
+        A GitHub login, e.g. ``dependabot[bot]`` or ``octocat``. An empty or ``None``-ish
+        value is treated as human, so an unresolved author fails CLOSED.
 
-# ``<kebab-topic>_YYYYMMDD_HHMMSS.md`` — the topic is kebab-case (no underscores of its own), then
-# an 8-digit date and 6-digit time. Fixed at creation, never renamed.
-_NAME_RE = re.compile(r"^[a-z0-9-]+_\d{8}_\d{6}\.md$")
-
-# At least one Markdown task checkbox: ``- [ ]`` open, or ``- [x]`` / ``- [X]`` done. A bare ``-``
-# bullet does not count — the rule is that ledger items are trackable checkboxes.
-_CHECKBOX_RE = re.compile(r"^\s*[-*] \[[ xX]\]", re.MULTILINE)
-
-
-def requires_ledger(list_paths: list[str]) -> bool:
-	"""Say whether a diff's paths oblige the branch to carry a work ledger.
-
-	Reuses :func:`pr_gate.classify_risk` **per path** (set-membership), not on the whole list: the
-	whole-list call returns only the single most-dangerous class and ranks ``tests`` above ``ci``,
-	so a branch touching both ``bin/`` and ``tests/`` would collapse to ``tests`` and wrongly
-	escape the requirement. Asking each path keeps "any src/ci path present?" honest.
-
-	Parameters
-	----------
-	list_paths : list of str
-		Repo-relative paths in the branch's cumulative diff.
-
-	Returns
-	-------
-	bool
-		True when at least one path classifies as a ledger class (``src`` or ``ci``).
-	"""
-	return any(pr_gate.classify_risk([str_path]) in LEDGER_CLASSES for str_path in list_paths)
+    Returns
+    -------
+    bool
+        ``True`` only for a login carrying GitHub's ``[bot]`` suffix.
+    """
+    return bool(str_login) and str_login.endswith(BOT_LOGIN_SUFFIX)
 
 
-def ledger_paths(list_paths: list[str]) -> list[str]:
-	"""Filter a diff's paths down to the ``docs/backlog`` Markdown ledgers.
+def pr_author_login() -> str:
+    """Return the PR author's login from the GitHub event payload (I/O seam).
 
-	Parameters
-	----------
-	list_paths : list of str
-		Repo-relative paths in the branch's cumulative diff.
+    ⚠️ This must be the PR **author**, never ``GITHUB_ACTOR``. The actor is whoever
+    *triggered* the run, so an actor-keyed exemption dies the moment a human touches the
+    bot's PR (update-branch, re-run, fixup) — i.e. the act of unblocking it defeats the fix,
+    and every retry looks like "the fix doesn't work".
 
-	Returns
-	-------
-	list of str
-		The paths under ``docs/backlog/`` ending in ``.md``.
-	"""
-	return [p for p in list_paths if p.startswith(LEDGER_DIR) and p.endswith(".md")]
+    ``GITHUB_ACTOR`` is consulted **only** when there is no PR payload at all (a ``push``
+    run, a local pre-commit), where there is no author to confuse it with.
 
+    Returns
+    -------
+    str
+        The author login, or ``""`` when it cannot be resolved — which the caller treats as
+        human, so the gate fails closed rather than exempting everyone.
+    """
+    str_event_path = os.environ.get("GITHUB_EVENT_PATH", "")
 
-def is_valid_ledger_name(str_name: str) -> bool:
-	"""Report whether a ledger's basename matches ``<kebab-topic>_YYYYMMDD_HHMMSS.md``.
+    if str_event_path:
+        try:
+            dict_event = json.loads(pathlib.Path(str_event_path).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return ""
+        dict_pr = dict_event.get("pull_request") or {}
+        return str((dict_pr.get("user") or {}).get("login") or "")
 
-	Parameters
-	----------
-	str_name : str
-		The file's basename (no directory).
-
-	Returns
-	-------
-	bool
-		True when the name matches the required timestamped pattern.
-	"""
-	return bool(_NAME_RE.match(str_name))
+    return os.environ.get("GITHUB_ACTOR", "")
 
 
-def has_checkbox_item(str_text: str) -> bool:
-	"""Report whether a ledger's text carries at least one Markdown task checkbox.
+LEDGER_CLASSES = frozenset({"src", "ci"})
 
-	Parameters
-	----------
-	str_text : str
-		The ledger's full text.
+LEDGER_DIR = ".specs/backlog"
+LEDGER_RE = re.compile(r"^\.specs/backlog/[a-z0-9]+(?:-[a-z0-9]+)*_\d{8}_\d{6}\.md$")
+CHECKBOX_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(?:\[[ x]\]|\[~\][ \t]+[a-z]+/\S)", re.M)
+FENCE_RE = re.compile(
+    r"^[ \t]*(?:(?P<b>`{3,})[^\n]*$.*?(?:^[ \t]*(?P=b)`*[ \t]*$|\Z)"
+    r"|(?P<t>~{3,})[^\n]*$.*?(?:^[ \t]*(?P=t)~*[ \t]*$|\Z))",
+    re.M | re.S,
+)
 
-	Returns
-	-------
-	bool
-		True when a ``- [ ]`` / ``- [x]`` / ``- [X]`` item is present.
-	"""
-	return bool(_CHECKBOX_RE.search(str_text))
+_BIN = pathlib.Path(__file__).resolve().parent
 
 
-def check(list_paths: list[str], read_text: Callable[[str], str | None]) -> list[str]:
-	"""Return every ledger violation for a branch's cumulative diff (empty list = clean).
+def _load_pr_gate() -> types.ModuleType | None:
+    """Load ``bin/pr_gate.py`` by path (``bin/`` is not a package).
 
-	Pure: all filesystem and git access is injected via ``read_text`` and supplied by the caller,
-	so the rule is unit-testable without a working tree.
-
-	Parameters
-	----------
-	list_paths : list of str
-		Repo-relative paths in the branch's cumulative diff.
-	read_text : callable
-		Maps a repo-relative path to its text, or ``None`` when the file is absent (e.g. a ledger
-		that the diff *deletes* — its content cannot be judged, only its name).
-
-	Returns
-	-------
-	list of str
-		Human-readable error lines; empty when the branch satisfies the ledger rule.
-	"""
-	if not requires_ledger(list_paths):
-		return []
-	list_ledgers = ledger_paths(list_paths)
-	if not list_ledgers:
-		return [
-			"❌ branch touches a src/ci path but its diff adds no "
-			"docs/backlog/<kebab-topic>_YYYYMMDD_HHMMSS.md work ledger — every non-trivial "
-			"branch keeps one (docs/CLAUDE.md). Create it, tracking each to-do as a `- [ ]` box."
-		]
-	list_errors: list[str] = []
-	for str_path in list_ledgers:
-		str_name = str_path.rsplit("/", 1)[-1]
-		if not is_valid_ledger_name(str_name):
-			list_errors.append(
-				f"❌ {str_path}: ledger filename must match <kebab-topic>_YYYYMMDD_HHMMSS.md "
-				"(kebab topic, then an 8-digit date and 6-digit time)."
-			)
-		str_text = read_text(str_path)
-		if str_text is not None and not has_checkbox_item(str_text):
-			list_errors.append(
-				f"❌ {str_path}: no `- [ ]`/`- [x]` checkbox item — ledger to-dos must be "
-				"checkboxes, not bare `-` bullets."
-			)
-	return list_errors
+    Returns
+    -------
+    module or None
+        The ``pr_gate`` module, or ``None`` when it is absent (the gate is an opt-in tier).
+    """
+    path_gate = _BIN / "pr_gate.py"
+    if not path_gate.is_file():
+        return None
+    cls_spec = importlib.util.spec_from_file_location("pr_gate", path_gate)
+    cls_module = importlib.util.module_from_spec(cls_spec)
+    cls_spec.loader.exec_module(cls_module)
+    return cls_module
 
 
-def _git(*args: str) -> subprocess.CompletedProcess[str]:
-	"""Run a git command with a trusted, constant argv and capture its output.
+def _git(list_args: list) -> str:
+    """Run a read-only git command and return stdout (empty string on failure).
 
-	Parameters
-	----------
-	*args : str
-		Arguments after the ``git`` executable.
+    Parameters
+    ----------
+    list_args : list of str
+        Arguments after ``git``.
 
-	Returns
-	-------
-	subprocess.CompletedProcess of str
-		The completed process (``check=False``; callers inspect ``returncode``).
-	"""
-	str_git = shutil.which("git") or "git"
-	# Trusted, constant argv, with an absolute git path resolved beforehand — bandit S603.
-	return subprocess.run([str_git, *args], capture_output=True, text=True, check=False)  # noqa: S603
-
-
-def _base_ref() -> str | None:
-	"""Resolve the commit to diff the branch against (its merge-base with main).
-
-	Honours a ``LEDGER_BASE_REF`` override first (CI passes the PR base), then the merge-base with
-	``origin/main`` and finally with ``main``. Returns ``None`` when none resolves — e.g. on
-	``main`` itself, where there is no branch to enforce.
-
-	Returns
-	-------
-	str or None
-		A commit-ish to diff against, or ``None`` when the check should be a no-op.
-	"""
-	str_override = os.environ.get("LEDGER_BASE_REF")
-	if str_override:
-		return str_override
-	for str_ref in ("origin/main", "main"):
-		cls_proc = _git("merge-base", "HEAD", str_ref)
-		if cls_proc.returncode == 0 and cls_proc.stdout.strip():
-			return cls_proc.stdout.strip()
-	return None
+    Returns
+    -------
+    str
+        Captured stdout, stripped.
+    """
+    try:
+        cls_proc = subprocess.run(  # noqa: S603
+            ["git", *list_args],  # noqa: S607
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return ""
+    return cls_proc.stdout.strip()
 
 
-def _changed_paths() -> list[str]:
-	"""Return the branch's cumulative changed paths (merge-base with main -> the index).
+def default_branch() -> str:
+    """Return the repository's default branch name (``main``/``master``, else ``main``).
 
-	Diffs the **index** (``--cached``), not the working tree: pre-commit runs against *staged*
-	content, and ``git diff`` ignores untracked files — a brand-new ledger not yet staged would be
-	invisible, so the gate would demand a ledger that is right there but not added. The index holds
-	both the branch's earlier commits (matched by ``HEAD``) and the files staged for this commit,
-	so ``--cached`` captures exactly what the branch is about to contribute. In CI the tree is
-	clean (index == HEAD), so it reduces to the branch's cumulative diff against its base.
-
-	Diffing from the merge-base (not two-dot against the branch tip) yields exactly the branch's
-	own changes and excludes commits that landed on ``main`` in the meantime, matching three-dot
-	semantics without needing them.
-
-	Returns
-	-------
-	list of str
-		Repo-relative changed paths; empty when there is no base to compare against.
-	"""
-	str_base = _base_ref()
-	if str_base is None:
-		return []
-	cls_proc = _git("diff", "--cached", "--name-only", str_base)
-	cls_proc.check_returncode()
-	return [line for line in cls_proc.stdout.splitlines() if line]
+    Returns
+    -------
+    str
+        The default branch name.
+    """
+    str_ref = _git(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"])
+    if str_ref:
+        return str_ref.rsplit("/", 1)[-1]
+    for str_candidate in ("main", "master"):
+        if _git(["rev-parse", "--verify", "--quiet", str_candidate]):
+            return str_candidate
+    return "main"
 
 
-def is_bot_actor(str_actor: str | None) -> bool:
-	"""Say whether a branch's author is a bot, and so exempt from the ledger rule.
+def merge_heads() -> list:
+    """Return every incoming commit of a merge in progress (several for an octopus).
 
-	GitHub names bot actors with a ``[bot]`` suffix — ``dependabot[bot]``,
-	``github-actions[bot]``. That suffix is the whole test: it is GitHub's own marker, so no
-	allow-list of bot names has to be maintained (and none can go stale).
+    Mid-merge the index already holds the incoming side's files but HEAD is still the
+    pre-merge tip, so a base taken from HEAD alone charges the incoming delta to this branch.
+    ``rev-parse MERGE_HEAD`` resolves only the first line, so the file itself is read.
 
-	⚠️ **Feed this the PR's author, not ``GITHUB_ACTOR``.** ``GITHUB_ACTOR`` names whoever
-	*triggered the run*, so the moment a human touches a bot's PR — ``gh pr update-branch``, a
-	manual re-run, a maintainer's fixup — it becomes that human and the exemption evaporates,
-	which is exactly when it is needed. Measured on PR #167: the original dependabot push ran as
-	``dependabot[bot]``, every later run as ``guilhermegor``, while the PR's author stayed
-	``dependabot[bot]`` throughout. :func:`_ledger_author` resolves the right value.
-
-	**Why bots are exempt.** A work ledger records a *human's* reasoning — what was done, what
-	is still open, why a shortcut was taken. An automated dependency bump has none to record:
-	the diff is the entire message and the upstream changelog is the justification. Demanding
-	one cannot be satisfied, so every bot PR touching a workflow (risk class ``ci``) would be
-	permanently red, which only teaches people to reach for ``--admin`` — a worse habit than
-	the gate prevents.
-
-	The exemption keys on the **author**, never on the path: a *human* branch touching a
-	workflow still owes a ledger, and only the actor changes the answer.
-
-	Parameters
-	----------
-	str_actor : str or None
-		The acting user, normally ``GITHUB_ACTOR``. ``None`` or empty (a local run) is **not**
-		a bot — a developer's machine must still satisfy the rule.
-
-	Returns
-	-------
-	bool
-		True when the actor is a GitHub bot.
-	"""
-	if not str_actor:
-		return False
-	return str_actor.strip().lower().endswith("[bot]")
+    Returns
+    -------
+    list of str
+        One commit hash per incoming head; empty when no merge is in progress.
+    """
+    str_path = _git(["rev-parse", "--git-path", "MERGE_HEAD"])
+    if not str_path or not pathlib.Path(str_path).is_file():
+        return []
+    return pathlib.Path(str_path).read_text(encoding="utf-8").split()
 
 
-def _ledger_author() -> str | None:
-	"""Resolve whose branch this is: the PR's author, falling back to the run's actor.
+def resolve_base() -> str:
+    """Return the merge-base of HEAD and the default branch, counting a merge in progress.
 
-	``LEDGER_PR_AUTHOR`` is supplied by CI from ``github.event.pull_request.user.login`` — the
-	PR's **author**, which never changes no matter who re-runs or updates the branch. It is the
-	value the bot exemption actually needs.
-
-	``GITHUB_ACTOR`` is the fallback for contexts with no pull-request payload (a ``push`` to
-	``main``, a local run). There the actor *is* the right answer, and it is a human, so the gate
-	applies — which is the safe direction to fall back in.
-
-	Returns
-	-------
-	str or None
-		The PR author when CI provides one, else the triggering actor, else ``None``.
-	"""
-	return os.environ.get("LEDGER_PR_AUTHOR") or os.environ.get("GITHUB_ACTOR")
+    Returns
+    -------
+    str
+        The base commit; empty when none resolves.
+    """
+    return _git(["merge-base", default_branch(), "HEAD", *merge_heads()])
 
 
-def _read_text(str_path: str) -> str | None:
-	"""Read a repo-relative file's text, or ``None`` when it does not exist.
+def changed_paths(str_base: str) -> list:
+    """Return the branch's cumulative changed paths, INDEX included.
 
-	Parameters
-	----------
-	str_path : str
-		Repo-relative path.
+    Parameters
+    ----------
+    str_base : str
+        The merge-base commit to diff against.
 
-	Returns
-	-------
-	str or None
-		The file's text, or ``None`` when absent.
-	"""
-	cls_path = pathlib.Path(str_path)
-	if not cls_path.is_file():
-		return None
-	return cls_path.read_text(encoding="utf-8")
+    Returns
+    -------
+    list of str
+        Repository-relative paths.
+    """
+    str_out = _git(["diff", "--cached", "--name-only", str_base])
+    return [p for p in str_out.splitlines() if p]
+
+
+def needs_ledger(list_paths: list, cls_gate: types.ModuleType) -> bool:
+    """Return whether ANY changed path falls in a ledger-requiring class.
+
+    Parameters
+    ----------
+    list_paths : list of str
+        The branch's changed paths.
+    cls_gate : module
+        The loaded ``pr_gate`` module (its classifier is the single source of truth).
+
+    Returns
+    -------
+    bool
+        ``True`` when at least one path is in ``LEDGER_CLASSES``.
+    """
+    return any(cls_gate.classify_risk([p]) in LEDGER_CLASSES for p in list_paths)
+
+
+def find_ledger_problems(list_paths: list) -> list:
+    """Return problems with the branch's ledger (empty when a valid ledger was added).
+
+    Parameters
+    ----------
+    list_paths : list of str
+        The branch's changed paths.
+
+    Returns
+    -------
+    list of str
+        One message per problem.
+    """
+    list_ledgers = [p for p in list_paths if p.startswith(f"{LEDGER_DIR}/") and p.endswith(".md")]
+    if not list_ledgers:
+        return [
+            f"❌ this branch changes src/ or ci paths but adds no work ledger "
+            f"under {LEDGER_DIR}/. "
+            f"Create {LEDGER_DIR}/<kebab-topic>_YYYYMMDD_HHMMSS.md with a '- [ ]' checklist."
+        ]
+    list_problems = []
+    for str_ledger in list_ledgers:
+        if not LEDGER_RE.match(str_ledger):
+            list_problems.append(
+                f"❌ {str_ledger}: name must match {LEDGER_DIR}/<kebab-topic>_YYYYMMDD_HHMMSS.md"
+            )
+            continue
+        path_ledger = pathlib.Path(str_ledger)
+        if path_ledger.is_file() and not CHECKBOX_RE.search(
+            FENCE_RE.sub("", path_ledger.read_text(encoding="utf-8"))
+        ):
+            list_problems.append(
+                f"❌ {str_ledger}: contains no '- [ ]' / '- [x]' (lowercase) / "
+                f"'- [~] <type>/<branch>' checkbox outside a code fence"
+            )
+    return [] if len(list_problems) < len(list_ledgers) else list_problems
+
+
+def main() -> int:
+    """Check the branch's ledger requirement.
+
+    Returns
+    -------
+    int
+        0 when satisfied (or not applicable), 1 on a violation.
+    """
+    str_author = pr_author_login()
+    if is_bot_author(str_author):
+        print(f"✅ work-ledger check skipped — PR authored by a bot ({str_author}).")
+        return 0
+
+    cls_gate = _load_pr_gate()
+    if cls_gate is None:
+        print("bin/pr_gate.py absent — skipping the work-ledger check.")
+        return 0
+
+    str_base = resolve_base()
+    str_head = _git(["rev-parse", "HEAD"])
+    if not str_base or str_base == str_head:
+        return 0
+
+    list_paths = changed_paths(str_base)
+    if not list_paths or not needs_ledger(list_paths, cls_gate):
+        return 0
+
+    list_problems = find_ledger_problems(list_paths)
+    for str_problem in list_problems:
+        print(str_problem)
+    return 1 if list_problems else 0
 
 
 if __name__ == "__main__":
-	# The bot exemption lives here, in the I/O seam, so ``check`` stays pure and unit-testable
-	# without an environment. See ``is_bot_actor`` for why bots are exempt, and ``_ledger_author``
-	# for why the PR's author — not the run's actor — is the value that decides it.
-	if is_bot_actor(_ledger_author()):
-		print("ℹ️  bot-authored branch — work ledger not required (see is_bot_actor).")
-		sys.exit(0)
-	list_found = check(_changed_paths(), _read_text)
-	for str_line in list_found:
-		print(str_line)
-	sys.exit(1 if list_found else 0)
+    for cls_stream in (sys.stdout, sys.stderr):
+        if hasattr(cls_stream, "reconfigure"):
+            cls_stream.reconfigure(encoding="utf-8", errors="replace")
+
+    sys.exit(main())
