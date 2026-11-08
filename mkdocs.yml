@@ -131,8 +131,6 @@ markdown_extensions:
 # "# ..." becomes part of the pattern and silently disables the exclusion. Keep every
 # comment on its own line above the pattern.
 exclude_docs: |
-  # work-to-do backlogs / follow-up notes
-  backlog/
   # design specs / working notes, not published
   superpowers/
   # docs/ authoring guidance, not a published page
