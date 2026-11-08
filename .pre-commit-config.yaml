@@ -115,6 +115,16 @@ repos:
         files: ^(pyproject\.toml|poetry\.lock)$
         pass_filenames: false
 
+      # Dependency-vulnerability gate (#90): pip-audit over the exported poetry.lock. Needs the
+      # network (advisory DB), so locally it runs only when the dependency set changes; CI
+      # runs it on every PR (tests.yaml "Run Dependency Vulnerability Audit").
+      - id: audit-dependencies
+        name: pip-audit (no known-vulnerable package in poetry.lock)
+        entry: bash bin/audit_dependencies.sh
+        language: system
+        files: ^(pyproject\.toml|poetry\.lock|bin/audit_dependencies\.sh)$
+        pass_filenames: false
+
       - id: check-docstrings
         name: docstring type/raises consistency check
         entry: bash bin/poetry_exec.sh run python bin/check_docstrings.py

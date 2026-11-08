@@ -83,6 +83,7 @@ nav:
   - Projeto:
       - Perguntas frequentes: faq.md
       - Contribuindo: contributing.md
+      - Segurança das dependências: security.md
       - Atualizações do template: template-updates.md
       - Histórico de versões: changelog.md
 theme:
