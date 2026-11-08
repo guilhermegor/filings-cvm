@@ -34,6 +34,7 @@ def _load(str_name: str) -> ModuleType:
 		The imported module.
 	"""
 	cls_spec = importlib.util.spec_from_file_location(str_name, _BIN / f"{str_name}.py")
+	assert cls_spec is not None and cls_spec.loader is not None
 	cls_module = importlib.util.module_from_spec(cls_spec)
 	sys.modules[str_name] = cls_module
 	cls_spec.loader.exec_module(cls_module)

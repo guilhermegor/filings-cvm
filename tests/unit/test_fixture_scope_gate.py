@@ -7,6 +7,7 @@ reason it must NOT fire (function scope, no scope at all, a written justificatio
 value it cannot read).
 """
 
+import ast
 import importlib.util
 from pathlib import Path
 import sys
@@ -32,6 +33,7 @@ def _load(str_name: str) -> ModuleType:
 		The imported module.
 	"""
 	cls_spec = importlib.util.spec_from_file_location(str_name, _BIN / f"{str_name}.py")
+	assert cls_spec is not None and cls_spec.loader is not None
 	cls_module = importlib.util.module_from_spec(cls_spec)
 	sys.modules[str_name] = cls_module
 	cls_spec.loader.exec_module(cls_module)
@@ -130,7 +132,7 @@ def test_every_wide_scope_is_reported(tmp_path: Path, str_scope: str) -> None:
 
 def test_a_bare_fixture_decorator_is_accepted() -> None:
 	"""`@pytest.fixture` with no call carries no `scope=` to widen."""
-	node_dec = __import__("ast").parse("@fixture\ndef f(): pass").body[0].decorator_list[0]
+	node_dec = ast.parse("@fixture\ndef f(): pass").body[0].decorator_list[0]
 
 	assert gate._decorator_call_name(node_dec) is None
 

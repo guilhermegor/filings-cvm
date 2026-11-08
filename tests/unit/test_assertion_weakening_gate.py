@@ -1,4 +1,4 @@
-"""Unit tests for the assertion-weakening gate (offline; no git, no network).
+"""Unit tests for the assertion-weakening gate (no network; uses a local git).
 
 **The negative control is the point** (blueprintx#324). A gate that claims to catch a PR
 turning a red test green by weakening its assertion is worthless unless something in this
@@ -35,6 +35,7 @@ def _load(str_name: str) -> ModuleType:
 		The imported module.
 	"""
 	cls_spec = importlib.util.spec_from_file_location(str_name, _PATH_BIN / f"{str_name}.py")
+	assert cls_spec is not None and cls_spec.loader is not None
 	cls_module = importlib.util.module_from_spec(cls_spec)
 	sys.modules[str_name] = cls_module
 	cls_spec.loader.exec_module(cls_module)
@@ -72,7 +73,8 @@ def _sole_finding(str_old: str, str_new: str, *, bool_prod_changed: bool = False
 	Every fixture in this file is a two-line diff built to trip exactly one rule, so "one
 	finding, not a cascade" is a precondition of the fixture rather than a per-test
 	behaviour (blueprintx#544). Hoisting it here keeps each test at one assertion AND makes
-	every caller check the count, including those that previously only indexed ``[0]``.
+	the callers that use it check the count; tests that need several findings use
+	``_findings`` directly.
 
 	Parameters
 	----------
@@ -140,8 +142,8 @@ def test_equality_weakened_to_membership_is_reported(str_fragment: str) -> None:
 	)
 
 
-def test_a_stricter_operator_swap_is_not_flagged() -> None:
-	"""``==`` tightened to a strict inequality is out of the decidable core, by design."""
+def test_an_operator_swap_to_an_inequality_is_not_flagged() -> None:
+	"""An operator swap is out of the decidable core, by design (no safety claim made)."""
 	str_old = "def test_x() -> None:\n\tassert compute() == 5\n"
 	str_new = "def test_x() -> None:\n\tassert compute() > 5\n"
 
@@ -339,8 +341,8 @@ def test_a_unittest_call_rewritten_as_an_equivalent_bare_assert_is_clean() -> No
 	assert _findings(str_old, str_new) == []
 
 
-def test_a_unittest_call_rewritten_as_a_stricter_bare_assert_is_clean() -> None:
-	"""A stricter operator after the rewrite is a strengthening, not a weakening."""
+def test_a_unittest_call_rewritten_with_a_swapped_operator_is_not_flagged() -> None:
+	"""A swapped operator after the rewrite is outside the decidable core, by design."""
 	str_old = "class T:\n\tdef test_v(self) -> None:\n\t\tself.assertEqual(a(), 5)\n"
 	str_new = "class T:\n\tdef test_v(self) -> None:\n\t\tassert a() > 5\n"
 	assert _findings(str_old, str_new) == []
