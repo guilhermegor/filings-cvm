@@ -1,7 +1,7 @@
 line-length = 99
 indent-width = 4
-# Floor of the project's requires-python (>=3.10). Bump in lockstep with pyproject.
-target-version = "py310"
+# Floor of the project's requires-python (>=3.11). Bump in lockstep with pyproject.
+target-version = "py311"
 exclude = [
     # version control systems
     ".bzr",

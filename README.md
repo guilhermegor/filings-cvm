@@ -4,7 +4,7 @@
 <p align="center"><img src="https://raw.githubusercontent.com/guilhermegor/filings-cvm/main/assets/cvm-logo.png" width="200" alt="Emblema da CVM"></p>
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 [![PyPI Version](https://img.shields.io/pypi/v/filings-cvm)](https://pypi.org/project/filings-cvm/)
 [![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://guilhermegor.github.io/filings-cvm/)
 [![Linting](https://img.shields.io/badge/linting-ruff_%7C_codespell-blue)](https://github.com/astral-sh/ruff)
@@ -55,7 +55,7 @@ make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_
 
 ### Pré-requisitos
 
-- Python **>= 3.10**
+- Python **>= 3.11**
 - Poetry (recomendado)
 - Opcional: Makefile (ou use `./tasks.sh` no Git Bash / Windows)
 
@@ -146,6 +146,9 @@ pertence a nenhuma delas. Tudo sob `_internal/` é privado.
 
 As versões saem pelos workflows `release-test-pypi.yaml` (ensaio no Test PyPI) e
 `release-pypi.yaml` (PyPI + GitHub Release) em `.github/workflows/`; a tag git é a versão.
+
+O caminho do 0.x ao 1.0.0, e o portão de release que o protege, está em
+[docs/releasing-1-0-0.md](docs/releasing-1-0-0.md).
 
 <!-- slug: contributing -->
 ## Contribuição

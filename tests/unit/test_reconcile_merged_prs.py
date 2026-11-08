@@ -9,7 +9,7 @@ The invariants that matter most: a **fork** branch and the **default branch** ar
 targets, and only a merged PR is ever acted on.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import importlib.util
 import io
 from pathlib import Path
@@ -75,7 +75,7 @@ def test_branch_to_delete_never_deletes_default_branch() -> None:
 
 def test_recently_merged_numbers_filters_by_window_and_merge_state() -> None:
 	"""Only PRs merged within the trailing window are returned; unmerged ones are dropped."""
-	dt_now = datetime(2026, 7, 15, 12, 0, tzinfo=timezone.utc)
+	dt_now = datetime(2026, 7, 15, 12, 0, tzinfo=UTC)
 	list_prs = [
 		{"number": 1, "merged_at": "2026-07-15T09:00:00Z"},  # today — in
 		{"number": 2, "merged_at": None},  # closed unmerged — out
@@ -87,7 +87,7 @@ def test_recently_merged_numbers_filters_by_window_and_merge_state() -> None:
 
 def test_recently_merged_numbers_boundary_is_inclusive() -> None:
 	"""A PR merged exactly at the window floor is kept (>=, not >)."""
-	dt_now = datetime(2026, 7, 15, 0, 0, tzinfo=timezone.utc)
+	dt_now = datetime(2026, 7, 15, 0, 0, tzinfo=UTC)
 	list_prs = [{"number": 9, "merged_at": "2026-07-08T00:00:00Z"}]  # exactly 7 days
 	assert reconcile.recently_merged_numbers(list_prs, dt_now, 7) == [9]
 

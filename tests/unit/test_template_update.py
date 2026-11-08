@@ -672,7 +672,7 @@ def _rmtree_force(path_dir: Path) -> None:
 	-------
 	None
 	"""
-	# The keyword was renamed in 3.12 and the old one warns, yet the floor here is 3.10.
+	# The keyword was renamed in 3.12 and the old one warns, yet the floor here is 3.11.
 	str_kw = "onexc" if sys.version_info >= (3, 12) else "onerror"
 	shutil.rmtree(path_dir, **{str_kw: _clear_readonly_and_retry})
 

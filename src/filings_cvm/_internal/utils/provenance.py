@@ -31,7 +31,7 @@ the artifact hash is computed by the reader (which holds the file) and passed in
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 import hashlib
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -132,7 +132,7 @@ def stamp_provenance(
 	int_rows = len(df_input)
 	df_ = df_input.copy()
 	df_[str_col_url] = pd.array([str_url] * int_rows, dtype="string")
-	df_[str_col_updated] = pd.Timestamp(datetime.now(timezone.utc))
+	df_[str_col_updated] = pd.Timestamp(datetime.now(UTC))
 	df_[str_col_source] = pd.array([cls_contract.str_source_key] * int_rows, dtype="string")
 	df_[str_col_version] = pd.array([_package_version()] * int_rows, dtype="string")
 	df_[str_col_run] = pd.array([str(uuid.uuid4())] * int_rows, dtype="string")

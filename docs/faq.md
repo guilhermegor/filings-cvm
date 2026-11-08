@@ -13,7 +13,7 @@ conforme surgirem nas issues.
 pip install filings-cvm
 ```
 
-Requer Python **>= 3.10**.
+Requer Python **>= 3.11**.
 
 ## Quais conjuntos da CVM já estão implementados?
 
