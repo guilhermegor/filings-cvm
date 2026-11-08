@@ -75,13 +75,8 @@ pip_fallback_ensure_toml_reader() {
 		return 0
 	fi
 
-	if "$PYTHON" -c "import tomli" >/dev/null 2>&1; then
-		return 0
-	fi
-
-	pip_fallback_populate_pip_args
-	print_status "info" "Installing tomli for pyproject fallback parsing..."
-	"$PYTHON" -m pip install "${PIP_FALLBACK_ARGS[@]}" --user tomli
+	print_status "error" "$PYTHON has no tomllib (Python >= 3.11 required)."
+	return 1
 }
 
 pip_fallback_ensure_project_poetry() {
@@ -137,10 +132,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
+import tomllib
 
 
 def parse_version_parts(raw: str) -> list[int]:
