@@ -6,7 +6,7 @@ performance, ingresso, saída), uso de derivativos e os **limites mínimo/máxim
 (as ~60 colunas `PR_*_MIN`/`PR_*_MAX`). Fonte: dataset
 [`FI/DOC/EXTRATO`](https://dados.cvm.gov.br/dataset/fi-doc-extrato).
 
-> **Veja também:** [Referência da API](../api.md) · [META](meta.md) · [Proveniência](index.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [META](meta.md) · [Proveniência](index.md).
 
 ---
 

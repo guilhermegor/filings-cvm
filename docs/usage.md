@@ -2,7 +2,7 @@
 
 Como instalar a biblioteca e gerar o seu primeiro arquivo XML compatível com a CVM.
 
-> **Veja também:** [Referência da API](api.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe Mensal INR](submission/inr_mensal.md)
+> **Veja também:** [Referência da API](api/reference.md) · Envio: [Perfil Mensal](submission/perfil_mensal.md), [Informe Diário](submission/informe_diario.md), [Lâmina V3](submission/lamina.md), [Extrato V3](submission/extrato.md), [Informe Mensal INR](submission/inr_mensal.md)
 
 ---
 
@@ -137,7 +137,7 @@ df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 ```
 
 O leitor baixa, descompacta e faz o parse em um diretório temporário, valida o
-[contrato](api.md) (colunas obrigatórias + coluna de CNPJ coercível) e aplica os tipos
+[contrato](api/reference.md) (colunas obrigatórias + coluna de CNPJ coercível) e aplica os tipos
 declarados. As colunas monetárias são mantidas como **texto exato** (o que a CVM publicou),
 nunca `float` — converta para `Decimal` no ponto em que for calcular.
 

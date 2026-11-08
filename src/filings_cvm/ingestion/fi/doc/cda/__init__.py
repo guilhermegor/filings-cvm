@@ -1,6 +1,6 @@
 """CVM open-data **CDA** reader (`FI/DOC/CDA`).
 
-Demonstrativo de Composição e Diversificação das Aplicações, plus its META reader. Re-exported
+`Demonstrativo de Composição e Diversificação das Aplicações`, plus its META reader. Re-exported
 from `filings_cvm.ingestion`.
 """
 

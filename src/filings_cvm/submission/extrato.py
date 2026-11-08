@@ -1,4 +1,4 @@
-"""CVM Extrato das Informações sobre o Fundo — submission (envio) writer.
+"""CVM `Extrato das Informações sobre o Fundo` — submission (envio) writer.
 
 Produces the Extrato V3 XML from a validated :class:`ExtratoDocument`. The schema declares its
 fields in XML order and named after their tag, so the serialiser is one recursive walk over
@@ -74,7 +74,7 @@ def _append(parent: ET.Element, name: str, value: object) -> None:
 class Extrato(SubmissionWriter[ExtratoDocument]):
 	"""Serialize a validated Extrato V3 document to CVM-compliant XML.
 
-	Concrete :class:`SubmissionWriter` for the Extrato das Informações sobre o Fundo V3 XML
+	Concrete :class:`SubmissionWriter` for the `Extrato das Informações sobre o Fundo` V3 XML
 	standard.
 
 	Methods

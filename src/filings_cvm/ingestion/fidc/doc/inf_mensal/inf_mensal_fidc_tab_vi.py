@@ -1,4 +1,4 @@
-"""CVM Informe Mensal FIDC — tabela VI (prazos dos direitos creditórios da carteira) reader.
+"""CVM Informe Mensal FIDC — tabela VI (`prazos dos direitos creditórios da carteira`) reader.
 
 The ``inf_mensal_fidc_tab_VI`` member of ``inf_mensal_fidc_AAAAMM.zip``: direitos creditórios da
 carteira por faixa de prazo de vencimento (a vencer, inadimplentes, antecipados). See

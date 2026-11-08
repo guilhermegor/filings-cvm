@@ -5,7 +5,7 @@ Agronegócio* (`inf_mensal_cra_AAAA.zip`, dataset `SECURIT/DOC/INF_MENSAL_CRA`),
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/SECURIT/DOC/INF_MENSAL_CRA/DADOS/).
 Terceira fatia da **Wave 2** do #41 (Securitização).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > [Informe Mensal OTS](inf_mensal_ots.md) (o irmão não-CRA/CRI).
 
 ---
