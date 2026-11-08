@@ -249,19 +249,40 @@ def test_a_raised_cap_admits_a_two_assert_unit_test(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("str_value", ["not-a-number", "-1", "1.5"])
-def test_a_non_integer_max_per_test_value_is_rejected(tmp_path: Path, str_value: str) -> None:
-	"""Bad usage is refused, not silently coerced or ignored."""
-	assert _run(tmp_path, ["--max-per-test", str_value]) == 1
+def test_a_non_integer_max_per_test_value_is_rejected(
+	tmp_path: Path, capsys: pytest.CaptureFixture[str], str_value: str
+) -> None:
+	"""Bad usage is refused, not silently coerced; the message names the rejected flag."""
+	int_code = _run(tmp_path, ["--max-per-test", str_value])
+
+	assert (
+		int_code,
+		"--max-per-test needs a non-negative integer" in capsys.readouterr().out,
+	) == (
+		1,
+		True,
+	)
 
 
-def test_an_unrecognised_flag_is_rejected(tmp_path: Path) -> None:
+def test_an_unrecognised_flag_is_rejected(
+	tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
 	"""A typo'd flag must not be swallowed into a silently narrower run."""
-	assert _run(tmp_path, ["--max-per-tests", "1"]) == 1
+	int_code = _run(tmp_path, ["--max-per-tests", "1"])
+
+	assert (int_code, "unrecognised argument: --max-per-tests" in capsys.readouterr().out) == (
+		1,
+		True,
+	)
 
 
-def test_a_flag_with_no_value_is_rejected(tmp_path: Path) -> None:
+def test_a_flag_with_no_value_is_rejected(
+	tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
 	"""Every flag takes a value; a dangling one is bad usage, not a default."""
-	assert _run(tmp_path, ["--unit-dir"]) == 1
+	int_code = _run(tmp_path, ["--unit-dir"])
+
+	assert (int_code, "--unit-dir needs a value" in capsys.readouterr().out) == (1, True)
 
 
 def test_a_justified_multi_assert_test_is_exempted_by_the_hatch(tmp_path: Path) -> None:

@@ -31,6 +31,7 @@ deliberate rename) through ``report()``.
 """
 
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -452,7 +453,11 @@ def path_mid_merge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 	pathlib.Path
 		The repository, left mid-merge.
 	"""
+	monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+	monkeypatch.setenv("GIT_CONFIG_SYSTEM", os.devnull)
+	monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
 	_git_in(tmp_path, "init", "-q", "--initial-branch=main")
+	_git_in(tmp_path, "config", "core.hooksPath", os.devnull)
 	_git_in(tmp_path, "config", "user.email", "t@example.com")
 	_git_in(tmp_path, "config", "user.name", "t")
 	_git_in(tmp_path, "config", "commit.gpgsign", "false")
