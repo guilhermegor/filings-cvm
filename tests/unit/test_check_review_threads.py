@@ -51,8 +51,14 @@ def _find_gate_path() -> Path:
 	)
 
 
-def _load_gate() -> ModuleType:
+def _load_gate(real_policy_root: bool = False) -> ModuleType:
 	"""Import ``check_review_threads.py`` as a module.
+
+	Parameters
+	----------
+	real_policy_root : bool
+		Keep the real ``policy_root`` (which reads the roster from the base ref and raises
+		without one). Every other test gets a stub returning the cwd, where it writes its roster.
 
 	Returns
 	-------
@@ -65,6 +71,7 @@ def _load_gate() -> ModuleType:
 	assert cls_spec.loader is not None
 	cls_module = importlib.util.module_from_spec(cls_spec)
 	cls_spec.loader.exec_module(cls_module)
+	cls_module.policy_root = (Path.cwd, cls_module.policy_root)[real_policy_root]
 	return cls_module
 
 
@@ -3881,13 +3888,14 @@ def _base_checkout(tmp_path: Path) -> Path:
 def _no_inherited_base_ref(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""Drop a runner-inherited ``GITHUB_BASE_REF`` so tests never need a real ``origin/main``."""
 	monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+	monkeypatch.delenv("REVIEW_POLICY_BASE_REF", raising=False)
 
 
 def test_policy_root_roster_exists_but_unreadable_fails_closed(
 	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
 	"""A roster listed on the base but failing ``git show`` raises, not reads as absent."""
-	cls_gate = _load_gate()
+	cls_gate = _load_gate(real_policy_root=True)
 	monkeypatch.setenv("GITHUB_BASE_REF", "main")
 	cls_gate.policy_root.cache_clear()
 	list_replies = [
@@ -3906,7 +3914,7 @@ def test_policy_root_pr_edited_roster_cannot_add_its_author_as_a_bot(
 	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
 	"""A PR that adds itself to ``.review-bots.yaml`` is still judged by the base roster."""
-	cls_gate = _load_gate()
+	cls_gate = _load_gate(real_policy_root=True)
 	path_repo = _base_checkout(tmp_path)
 	monkeypatch.chdir(path_repo)
 	monkeypatch.setenv("GITHUB_BASE_REF", "main")
@@ -3917,23 +3925,49 @@ def test_policy_root_pr_edited_roster_cannot_add_its_author_as_a_bot(
 	cls_gate.policy_root.cache_clear()
 
 
-def test_policy_root_without_base_ref_reads_the_checkout(
+def test_policy_root_without_base_ref_fails_closed(
 	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-	"""Local and pre-commit runs (no ``GITHUB_BASE_REF``) keep reading the cwd."""
-	cls_gate = _load_gate()
+	"""No base ref (a review/comment event) must raise, never read the PR's checkout."""
+	cls_gate = _load_gate(real_policy_root=True)
 	monkeypatch.chdir(tmp_path)
-	monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+	monkeypatch.delenv("REVIEW_POLICY_BASE_REF", raising=False)
 	cls_gate.policy_root.cache_clear()
-	assert cls_gate.policy_root() == tmp_path
+	with pytest.raises(RuntimeError):
+		cls_gate.policy_root()
 	cls_gate.policy_root.cache_clear()
+
+
+def test_policy_root_reads_the_workflow_resolved_base_ref(
+	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+	"""``REVIEW_POLICY_BASE_REF`` alone (no ``GITHUB_BASE_REF``) selects the base."""
+	cls_gate = _load_gate(real_policy_root=True)
+	monkeypatch.chdir(_base_checkout(tmp_path))
+	monkeypatch.setenv("REVIEW_POLICY_BASE_REF", "main")
+	cls_gate.policy_root.cache_clear()
+	assert set(cls_gate.load_roster(cls_gate.policy_root())) == {
+		cls_gate.normalise_login("coderabbitai[bot]")
+	}
+	cls_gate.policy_root.cache_clear()
+
+
+def test_git_timeout_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+	"""A hung git raises ``RuntimeError`` rather than stalling the job."""
+	cls_gate = _load_gate()
+
+	monkeypatch.setattr(
+		cls_gate.subprocess, "run", Mock(side_effect=subprocess.TimeoutExpired("git", 1))
+	)
+	with pytest.raises(RuntimeError):
+		cls_gate._git("status")
 
 
 def test_policy_root_unresolvable_base_fails_closed(
 	tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
 	"""A named but unresolvable base must raise, never fall back to the PR's roster."""
-	cls_gate = _load_gate()
+	cls_gate = _load_gate(real_policy_root=True)
 	monkeypatch.chdir(tmp_path)
 	monkeypatch.setenv("GITHUB_BASE_REF", "nope")
 	cls_gate.policy_root.cache_clear()

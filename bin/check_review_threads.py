@@ -164,15 +164,32 @@ query($owner:String!, $repo:String!, $number:Int!, $rc:String, $tc:String, $cc:S
 
 
 _GIT_LOCATION_VARS = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE")
+_GIT_TIMEOUT_SECONDS = 120
 
 
 def _git(*list_args: str) -> subprocess.CompletedProcess:
-	"""Run ``git`` quietly here, without the variables that outrank the working directory."""
+	"""Run ``git`` quietly here, without the variables that outrank the working directory.
+
+	Raises
+	------
+	RuntimeError
+		When git does not answer within ``_GIT_TIMEOUT_SECONDS`` — a hung fetch must fail the
+		gate closed rather than stall the job.
+	"""
+	try:
+		return _run_git(list_args)
+	except subprocess.TimeoutExpired as exc:
+		raise RuntimeError(f"git {' '.join(list_args)} timed out") from exc
+
+
+def _run_git(list_args: tuple) -> subprocess.CompletedProcess:
+	"""Run ``git`` with the location variables stripped (the raw call behind ``_git``)."""
 	return subprocess.run(  # noqa: S603
 		["git", *list_args],  # noqa: S607
 		capture_output=True,
 		text=True,
 		check=False,
+		timeout=_GIT_TIMEOUT_SECONDS,
 		env={k: v for k, v in os.environ.items() if k not in _GIT_LOCATION_VARS},
 	)
 
@@ -183,11 +200,11 @@ def policy_root() -> pathlib.Path:
 
 	The roster is the gate's POLICY, so it must not come from the checkout the PR author
 	controls: a PR that edits ``.review-bots.yaml`` (adding itself as a bot, changing markers)
-	would be judged by the policy it wrote (#379). When ``GITHUB_BASE_REF`` is set (every
-	``pull_request`` run) the file is read from ``origin/<base>`` — fetched shallowly when the
-	checkout lacks it — into a temp dir. A base without the file yields an empty dir, i.e. the
-	gate is not adopted there. Without ``GITHUB_BASE_REF`` (local and pre-commit runs, and
-	``issue_comment`` runs whose checkout already is the default branch) it is the cwd.
+	would be judged by the policy it wrote (#379). The base is ``REVIEW_POLICY_BASE_REF`` (the
+	workflow resolves it from the PR for every event) or ``GITHUB_BASE_REF`` (set by GitHub only
+	for ``pull_request``/``pull_request_target``); the file is read from ``origin/<base>`` —
+	fetched shallowly when the checkout lacks it — into a temp dir. A base without the file
+	yields an empty dir, i.e. the gate is not adopted there.
 
 	Returns
 	-------
@@ -197,12 +214,17 @@ def policy_root() -> pathlib.Path:
 	Raises
 	------
 	RuntimeError
-		When the base ref is named but cannot be resolved — failing closed rather than
+		When no base ref is named or it cannot be resolved — failing closed rather than
 		falling back to the PR's own roster.
 	"""
-	str_base = os.environ.get("GITHUB_BASE_REF", "").strip()
+	str_base = (
+		os.environ.get("REVIEW_POLICY_BASE_REF") or os.environ.get("GITHUB_BASE_REF") or ""
+	).strip()
 	if not str_base:
-		return pathlib.Path.cwd()
+		raise RuntimeError(
+			"no base ref (REVIEW_POLICY_BASE_REF / GITHUB_BASE_REF) — refusing to read "
+			f"{_ROSTER_FILE} from the PR's own checkout."
+		)
 	str_ref = f"origin/{str_base}"
 	if _git("rev-parse", "--verify", "--quiet", str_ref).returncode != 0:
 		_git("fetch", "--depth=1", "origin", f"+{str_base}:refs/remotes/{str_ref}")
