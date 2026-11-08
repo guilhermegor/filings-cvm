@@ -3,7 +3,7 @@
 A seção `filings_cvm.ingestion` analisa e interpreta arquivos **recebidos/baixados** da CVM de
 volta para modelos tipados — a contraparte do envio, que vive no pacote separado `layouts-cvm`.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

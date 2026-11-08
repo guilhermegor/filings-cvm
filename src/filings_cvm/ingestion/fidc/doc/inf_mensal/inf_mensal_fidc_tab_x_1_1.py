@@ -1,8 +1,8 @@
 """CVM Informe Mensal FIDC — tabela X.1.1 (número de cotistas por tipo de investidor) reader.
 
-The ``inf_mensal_fidc_tab_X_1_1`` member of ``inf_mensal_fidc_AAAAMM.zip``: número de cotistas
-por classe (sênior/subordinada) e tipo de investidor (PF, PJ, banco, investidor não residente,
-EAPC/EFPC/RPPS, seguradora, …). See ``_base_inf_mensal_fidc_reader`` for the shared behaviour
+The ``inf_mensal_fidc_tab_X_1_1`` member of ``inf_mensal_fidc_AAAAMM.zip``: number of unit holders
+by class (senior/subordinated) and investor type (PF, PJ, bank, non-resident investor,
+EAPC/EFPC/RPPS, insurer, …). See ``_base_inf_mensal_fidc_reader`` for the shared behaviour
 (monthly ``date_ref``, ``DT_COMPTC`` date column, shared archive, ``path_raw``).
 """
 

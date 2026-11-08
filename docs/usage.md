@@ -2,7 +2,7 @@
 
 Como instalar a biblioteca e ler o seu primeiro arquivo da CVM.
 
-> **Veja também:** [Referência da API](api.md) · [Leitura](ingestion/index.md)
+> **Veja também:** [Referência da API](api/reference.md) · [Leitura](ingestion/index.md)
 
 ---
 
@@ -44,7 +44,7 @@ df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 ```
 
 O leitor baixa, descompacta e faz o parse em um diretório temporário, valida o
-[contrato](api.md) (colunas obrigatórias + coluna de CNPJ coercível) e aplica os tipos
+[contrato](api/reference.md) (colunas obrigatórias + coluna de CNPJ coercível) e aplica os tipos
 declarados. As colunas monetárias são mantidas como **texto exato** (o que a CVM publicou),
 nunca `float` — converta para `Decimal` no ponto em que for calcular.
 

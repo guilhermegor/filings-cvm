@@ -4,7 +4,7 @@ Leitura (← CVM) dos **valores mobiliários negociados e detidos** por companhi
 controladores e controladas (`vlmo_cia_aberta_AAAA.zip`), publicado no
 [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/DADOS/).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md) ·
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md) ·
 > o [IPE](ipe_cia_aberta.md), que abre o sub-root `CIA_ABERTA/DOC`.
 
 ---
@@ -96,7 +96,7 @@ total = sum(Decimal(v) for v in df_mov["Volume"] if v)
 ```
 
 O frame devolvido carrega, além das colunas da fonte, as seis colunas de
-[proveniência](../api.md) (`url`, `updated_at`, `source_key`, `package_version`,
+[proveniência](../api/reference.md) (`url`, `updated_at`, `source_key`, `package_version`,
 `ingestion_run_id`, `content_hash`).
 
 ---

@@ -8,7 +8,7 @@ por **emissor**. Fonte: `perfil_mensal_fi_AAAAMM.csv`, do dataset
 É a **leitura** do Perfil Mensal: o dump aberto, não o XML de envio (que vive no pacote separado
 `layouts-cvm`), então declara o seu próprio `FileContract`.
 
-> **Veja também:** [Referência da API](../api.md) · [META](meta.md) · [Proveniência](index.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [META](meta.md) · [Proveniência](index.md).
 
 ---
 

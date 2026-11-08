@@ -1,0 +1,31 @@
+# Per-layer import policy, enforced by bin/check_layer_imports.py (hook `check-layer-imports`).
+#
+# Layers sit one level below src/<package>/: `ingestion/`, `_internal/` and the
+# package root (`__root__`). `_internal/utils` and `_internal/utils/*` (two keys, so a sibling
+# like `utils_old` is not swept in) are split out of `_internal`: the seam layer, the one place a
+# vendor may be reached directly.
+
+src_prefix_depth: 1
+
+annotation_only:
+  pandas: >-
+    Annotation only. Build or combine a frame through utils.frames (frame_from_records,
+    concat_frames); read one through utils.tabular_reader.read_table (it enforces a
+    FileContract + dtypes).
+
+layers:
+  __root__:
+    allow: {}
+
+  ingestion:
+    allow: {}
+
+  _internal:
+    allow: {}
+
+  "_internal/utils":
+    allow: &utils_allow
+      pandas: "the seam layer owns the pandas surface (frames, dtypes, tabular_reader)"
+
+  "_internal/utils/*":
+    allow: *utils_allow

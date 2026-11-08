@@ -7,7 +7,7 @@ Leitura (← CVM) do cadastro dos **intermediários** supervisionados pela CVM, 
 > Quinta fatia da **Wave 3** do #41 (snapshots CAD de prestadores de serviço). Copia o molde
 > multi-membro do [AUDITOR](auditor.md) / [AGENTE_AUTON](agente_auton.md) / [INVNR](invnr.md).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

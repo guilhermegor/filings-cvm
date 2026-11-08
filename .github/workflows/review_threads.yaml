@@ -52,6 +52,17 @@ jobs:
       - name: Install PyYAML
         run: pip install --quiet "pyyaml==6.0.3"
 
+      # GITHUB_BASE_REF exists only on pull_request(_target) runs; the review and comment
+      # events would otherwise read the PR-controlled roster (#379). Resolve the base live.
+      - name: Resolve the PR base ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: |
+          str_base=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.base.ref')
+          [ -n "$str_base" ] || { echo "::error::could not resolve base ref for PR ${PR_NUMBER}"; exit 1; }
+          echo "REVIEW_POLICY_BASE_REF=${str_base}" >> "$GITHUB_ENV"
+
       - name: Every review thread is answered and resolved
         env:
           GH_TOKEN: ${{ github.token }}

@@ -7,7 +7,7 @@ Leitura (← CVM) do cadastro das **companhias incentivadas** registradas na CVM
 > Segunda fatia da **Wave 4 do #41** (companhias/ofertas). Um **CSV solto** de 1 reader — molde do
 > [CIA_ESTRANG](cia_estrang.md) / [ADM_FII](adm_fii.md), não o multi-membro dos ZIPs.
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 
