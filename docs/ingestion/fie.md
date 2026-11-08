@@ -4,7 +4,7 @@ Leitura (← CVM) dos três datasets dos **Fundos de Investimento Especialmente 
 publicados no [portal de dados abertos da CVM](https://dados.cvm.gov.br/dados/FIE/). **Completa** o
 *portal root* `fie/` da biblioteca (irmão de `fi/`, `fidc/`, `fii/`, `fip/`, `fiagro/`).
 
-> **Veja também:** [Referência da API](../api.md) · [Uso](../usage.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
 
 ---
 

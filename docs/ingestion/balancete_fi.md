@@ -4,7 +4,7 @@ Leitura (← CVM) do **balancete mensal** dos fundos de investimento: uma linha 
 mês de competência × conta contábil, com o saldo da conta. Fonte: `balancete_fi_AAAAMM.zip`, do
 dataset [`FI/DOC/BALANCETE`](https://dados.cvm.gov.br/dataset/fi-doc-balancete).
 
-> **Veja também:** [Referência da API](../api.md) · [META](meta.md) · [Proveniência](index.md).
+> **Veja também:** [Referência da API](../api/reference.md) · [META](meta.md) · [Proveniência](index.md).
 
 ---
 
