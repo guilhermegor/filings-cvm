@@ -10,7 +10,7 @@ conforme surgirem nas issues.
 ## Como instalo a biblioteca?
 
 ```bash
-pip install filings-cvm
+pip install opendata-cvm
 ```
 
 Requer Python **>= 3.11**.

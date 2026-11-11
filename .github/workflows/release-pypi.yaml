@@ -291,18 +291,17 @@ jobs:
     permissions:
       contents: write
 
-  backfill:
+  backfill_build:
     if: ${{ inputs.backfill }}
     runs-on: ubuntu-latest
-    environment:
-      name: release-pypi
     permissions:
-      id-token: write
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set Up Python
         uses: actions/setup-python@v7
@@ -315,7 +314,7 @@ jobs:
           old="filings-cvm"
           mkdir -p dist
           failed=()
-          for tag in $(git tag --list 'v[0-9]*' --sort=v:refname); do
+          for tag in $(git tag --list 'v*' --sort=v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$'); do
             src=$(mktemp -d)
             git archive "$tag" | tar -x -C "$src"
             sed -i -E '0,/^name = ".*"/s//name = "'"$PACKAGE_NAME"'"/' "$src/pyproject.toml"
@@ -326,7 +325,27 @@ jobs:
               echo "::warning::$tag did not build; skipped"; tail -20 "$src.log"; failed+=("$tag")
             fi
           done
-          echo "Built $(ls dist/*.whl | wc -l) versions; skipped: ${failed[*]:-none}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Built $(find dist -name "*.whl" | wc -l) versions; skipped: ${failed[*]:-none}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: backfill-dist
+          path: dist/
+
+  backfill:
+    needs: backfill_build
+    runs-on: ubuntu-latest
+    environment:
+      name: release-pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: backfill-dist
+          path: dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

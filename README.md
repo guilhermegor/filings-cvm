@@ -5,7 +5,7 @@
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)
-[![PyPI Version](https://img.shields.io/pypi/v/filings-cvm)](https://pypi.org/project/filings-cvm/)
+[![PyPI Version](https://img.shields.io/pypi/v/opendata-cvm)](https://pypi.org/project/opendata-cvm/)
 [![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://guilhermegor.github.io/filings-cvm/)
 [![Linting](https://img.shields.io/badge/linting-ruff_%7C_codespell-blue)](https://github.com/astral-sh/ruff)
 [![Type-checked: mypy](https://img.shields.io/badge/type--checked-mypy-blue)](https://mypy-lang.org/)
@@ -13,7 +13,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/filings-cvm)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
-![PyPI Downloads](https://static.pepy.tech/badge/filings-cvm)
+![PyPI Downloads](https://static.pepy.tech/badge/opendata-cvm)
 
 <!-- slug: overview -->
 ## Visão geral
@@ -65,9 +65,9 @@ make docs_server     # serve em http://0.0.0.0:8000  (sem make: ./tasks.sh docs_
 **Como dependência:**
 
 ```bash
-pip install filings-cvm
+pip install opendata-cvm
 # ou
-poetry add filings-cvm
+poetry add opendata-cvm
 ```
 
 **A partir do código-fonte:**
@@ -183,7 +183,7 @@ Este projeto é licenciado sob a Licença **MIT** — veja [LICENSE](LICENSE).
 ## Links úteis
 
 - [Documentação](https://guilhermegor.github.io/filings-cvm/)
-- [PyPI](https://pypi.org/project/filings-cvm/)
+- [PyPI](https://pypi.org/project/opendata-cvm/)
 - [Repositório no GitHub](https://github.com/guilhermegor/filings-cvm)
 - [Issues](https://github.com/guilhermegor/filings-cvm/issues)
 
