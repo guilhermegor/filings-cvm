@@ -17,6 +17,9 @@ env:
   PACKAGE_NAME: "opendata-cvm"
   OWNER: "guilhermegor"
 
+permissions:
+  contents: read
+
 jobs:
   # Hard release gate: always run the full test suite (tests.yaml, full matrix) on the code
   # being released. The build/publish jobs depend on this, so a release cannot proceed unless
