@@ -16,10 +16,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import CAD_COORD_OFERTA, CAD_COORD_OFERTA_RESP
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.coord_oferta import CoordOfertaReader, CoordOfertaRespReader
+from opendata_cvm._internal.config.contracts import CAD_COORD_OFERTA, CAD_COORD_OFERTA_RESP
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.coord_oferta import CoordOfertaReader, CoordOfertaRespReader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; both contracts' CNPJ check accepts it.
@@ -83,7 +83,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.coord_oferta.cad._base_coord_oferta_reader.download_file",
+		"opendata_cvm.ingestion.coord_oferta.cad._base_coord_oferta_reader.download_file",
 		_fake_download,
 	)
 
@@ -204,7 +204,7 @@ def test_meta_url_is_the_zip_not_a_txt() -> None:
 	dataset's shape: several roots publish a flat ``meta_<dataset>.txt`` while this one ships a
 	two-member archive.
 	"""
-	from filings_cvm.ingestion.coord_oferta.cad.meta import MetaCoordOfertaReader
+	from opendata_cvm.ingestion.coord_oferta.cad.meta import MetaCoordOfertaReader
 
 	assert MetaCoordOfertaReader._META_URL.endswith("/META/meta_cad_coord_oferta.zip")
 
@@ -217,7 +217,7 @@ def test_meta_section_labels_are_asymmetric_by_design() -> None:
 	``meta_cad_coord_oferta_resp.txt`` reduces to ``resp``. The same asymmetry INTERMED has. Pinned
 	so it stays a recorded source fact rather than something a future change silently "tidies".
 	"""
-	from filings_cvm.ingestion.coord_oferta.cad.meta import MetaCoordOfertaReader
+	from opendata_cvm.ingestion.coord_oferta.cad.meta import MetaCoordOfertaReader
 
 	cls_reader = MetaCoordOfertaReader()
 	assert cls_reader._section_of("meta_cad_coord_oferta.txt") == "cad_coord_oferta"

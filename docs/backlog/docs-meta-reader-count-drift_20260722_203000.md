@@ -29,7 +29,7 @@ after the same session corrected a sibling stale count in the root `CLAUDE.md` (
 - [x] The 7 missing table rows added, in implementation order, each with its real META artifact type
       (read from the code, not transcribed: 4 `.txt`, 3 `.zip` with member counts).
 - [x] **Anti-drift gate** in `tests/unit/test_meta_readers.py` — two tests, both deriving truth from
-      `filings_cvm.__all__`:
+      `opendata_cvm.__all__`:
       - `test_docs_meta_roster_lists_every_exported_reader` — the roster table's reader set equals
         the exported set (and has no duplicate rows). Scoped to the `## Os N readers` section, since
         the page carries a second table that also names readers.

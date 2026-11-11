@@ -17,11 +17,11 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
-from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
-from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import RegistroFundoReader
+from opendata_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
+from opendata_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
+from opendata_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import RegistroFundoReader
 
 
 # Bare-digit CNPJs (CVM ships them unmasked here) valid under the repo's ASCII-48 mod-11 routine.
@@ -100,7 +100,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.cad.registro.registro_fundo.download_file", _fake_download
+		"opendata_cvm.ingestion.fi.cad.registro.registro_fundo.download_file", _fake_download
 	)
 
 
@@ -232,7 +232,7 @@ def test_read_keeps_money_as_exact_source_text(monkeypatch: pytest.MonkeyPatch) 
 
 def test_dtype_map_covers_every_non_date_column() -> None:
 	"""The derived dtype map and the date columns together span the whole contract."""
-	from filings_cvm.ingestion.fi.cad.registro.registro_fundo import _DATE_COLS, _DTYPES
+	from opendata_cvm.ingestion.fi.cad.registro.registro_fundo import _DATE_COLS, _DTYPES
 
 	assert set(_DTYPES) | set(_DATE_COLS) == set(REGISTRO_FUNDO.tuple_required)
 	assert not set(_DTYPES) & set(_DATE_COLS)

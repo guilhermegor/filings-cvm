@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.contracts import ATO_DECLR, META_ATO_DECLR
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.ato_declr import AtoDeclrReader, MetaAtoDeclrReader
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.contracts import ATO_DECLR, META_ATO_DECLR
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.ato_declr import AtoDeclrReader, MetaAtoDeclrReader
 
 
-_MODULE = "filings_cvm.ingestion.ato_declr.intermed.ato_declr"
+_MODULE = "opendata_cvm.ingestion.ato_declr.intermed.ato_declr"
 _PATH_FIXTURE = (
 	Path(__file__).resolve().parents[1] / "fixtures" / "ato_declr" / "ato_declr_header.csv"
 )

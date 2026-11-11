@@ -67,7 +67,7 @@ Padrão do repo: 5 tentativas com espera exponencial limitada (~2, 4, 8, 10 s) e
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import BalanceteFiPre202311Reader, BalanceteFiReader
+from opendata_cvm.ingestion.fi import BalanceteFiPre202311Reader, BalanceteFiReader
 
 # Regime atual (202311 em diante)
 df_ = BalanceteFiReader(date_ref=date(2025, 6, 15)).read()

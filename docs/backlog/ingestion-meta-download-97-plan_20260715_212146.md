@@ -49,17 +49,17 @@ ruff/mypy · Poetry.
 **Created**
 | Path | Responsibility |
 |---|---|
-| `src/filings_cvm/_internal/utils/meta_parser.py` | Pure `parse_meta_blocks(text, section)` — CVM block text → records. No I/O. |
-| `src/filings_cvm/ingestion/_base_meta_reader.py` | Private base: download → hash → parse (`.txt` flat / `.zip` multi-member) → stamp. |
-| `src/filings_cvm/_internal/config/contracts/meta.py` | `_meta_contract()` factory + the 22 `META_*` instances. |
-| `src/filings_cvm/ingestion/**/<dataset>/meta.py` × 22 | Thin subclass: `_META_URL` + `_SOURCE_KEY` only. |
-| `src/filings_cvm/ingestion/**/<dataset>/__init__.py` × 12 | Re-export for each promoted package. |
+| `src/opendata_cvm/_internal/utils/meta_parser.py` | Pure `parse_meta_blocks(text, section)` — CVM block text → records. No I/O. |
+| `src/opendata_cvm/ingestion/_base_meta_reader.py` | Private base: download → hash → parse (`.txt` flat / `.zip` multi-member) → stamp. |
+| `src/opendata_cvm/_internal/config/contracts/meta.py` | `_meta_contract()` factory + the 22 `META_*` instances. |
+| `src/opendata_cvm/ingestion/**/<dataset>/meta.py` × 22 | Thin subclass: `_META_URL` + `_SOURCE_KEY` only. |
+| `src/opendata_cvm/ingestion/**/<dataset>/__init__.py` × 12 | Re-export for each promoted package. |
 | `tests/unit/test_meta_parser.py` | Parser unit tests, pinned to real CVM fixtures. |
 | `tests/unit/test_meta_readers.py` | Base + subclass tests (mocked download); introspective coverage test. |
 | `tests/fixtures/meta/*.txt` | **Real CVM META bytes** (the oracle). No PII — META describes fields, carries no data rows. |
 | `docs/ingestion/meta.md` | Published page (pt-BR). |
 
-**Modified**: 8 test files (patch targets), `ingestion/__init__.py`, `filings_cvm/__init__.py`,
+**Modified**: 8 test files (patch targets), `ingestion/__init__.py`, `opendata_cvm/__init__.py`,
 `_internal/config/contracts/__init__.py`, `mkdocs.yml`, `docs/api.md`, `docs/ingestion/index.md`,
 root `CLAUDE.md`, the branch ledger.
 
@@ -105,7 +105,7 @@ no test outcome).
 - [ ] **Step 2: Move all 12 modules into their own package directory**
 
 ```bash
-cd src/filings_cvm/ingestion
+cd src/opendata_cvm/ingestion
 for p in fi/doc/informe_diario fi/doc/cda fi/cad/cadastro_fi fii/doc/dfin \
          fip/doc/inf_trimestral fip/doc/inf_quadrimestral \
          fie/doc/balancete fie/doc/balanco fie/medidas \
@@ -127,10 +127,10 @@ Mirror `fi/doc/lamina/__init__.py` exactly. One file per package; example for `c
 """CVM open-data **CDA** reader (`FI/DOC/CDA`).
 
 Demonstrativo de Composição e Diversificação das Aplicações. Re-exported from
-`filings_cvm.ingestion`.
+`opendata_cvm.ingestion`.
 """
 
-from filings_cvm.ingestion.fi.doc.cda.cda import CdaReader
+from opendata_cvm.ingestion.fi.doc.cda.cda import CdaReader
 
 
 __all__ = ["CdaReader"]
@@ -146,7 +146,7 @@ Module→class map for the other 11: `informe_diario`→`InformeDiarioReader` ·
 
 Run: `poetry run pytest tests/unit -q`
 Expected: **FAIL** in the 8 test files below. This failure is the point of the next step: a test
-patches `"filings_cvm.ingestion.fi.doc.cda.download_file"`, but `…fi.doc.cda` is now a **package**
+patches `"opendata_cvm.ingestion.fi.doc.cda.download_file"`, but `…fi.doc.cda` is now a **package**
 whose `__init__` re-exports `CdaReader` and **not** `download_file`. The patch binds an unused
 attribute on the package, the reader module keeps its real `download_file`, the read attempts a real
 fetch, and the autouse socket guard in `tests/conftest.py` fails it. **A green run here would mean
@@ -182,7 +182,7 @@ Expected: PASS, with the **same test count as Step 1**. A pure move must not cha
 
 Run:
 ```bash
-poetry run python -c "import filings_cvm as f; print(len(f.__all__)); print(f.__all__ == sorted(f.__all__, key=str.lower))"
+poetry run python -c "import opendata_cvm as f; print(len(f.__all__)); print(f.__all__ == sorted(f.__all__, key=str.lower))"
 ```
 Expected: the same count as before the move (108 at `0.25.4`), and the ordering check unchanged.
 This is the real assertion that the promotion was transparent to consumers.
@@ -226,7 +226,7 @@ scrolls off and the commit silently does not land (bit this repo twice).
 ### Task 2: The META block parser (pure, no I/O)
 
 **Files:**
-- Create: `src/filings_cvm/_internal/utils/meta_parser.py`
+- Create: `src/opendata_cvm/_internal/utils/meta_parser.py`
 - Create: `tests/unit/test_meta_parser.py`
 - Create: `tests/fixtures/meta/meta_inf_mensal_cra_fluxo_caixa.txt`,
   `tests/fixtures/meta/meta_dfin_cra.txt`
@@ -269,7 +269,7 @@ chars, and this parser must hand that back verbatim rather than "repair" it.
 
 from pathlib import Path
 
-from filings_cvm._internal.utils.meta_parser import parse_meta_blocks
+from opendata_cvm._internal.utils.meta_parser import parse_meta_blocks
 
 
 _FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "meta"
@@ -332,7 +332,7 @@ def test_parse_meta_blocks_returns_empty_for_text_without_blocks() -> None:
 - [ ] **Step 3: Run to verify they fail**
 
 Run: `poetry run pytest tests/unit/test_meta_parser.py -q`
-Expected: FAIL — `ModuleNotFoundError: No module named 'filings_cvm._internal.utils.meta_parser'`.
+Expected: FAIL — `ModuleNotFoundError: No module named 'opendata_cvm._internal.utils.meta_parser'`.
 
 - [ ] **Step 4: Write the parser**
 
@@ -375,12 +375,12 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-	from filings_cvm._internal.utils.typing import type_checker
+	from opendata_cvm._internal.utils.typing import type_checker
 else:
 	try:
-		from filings_cvm._internal.utils.typing import type_checker
+		from opendata_cvm._internal.utils.typing import type_checker
 	except ModuleNotFoundError:  # DDD ships the engine as chassis.typing
-		from filings_cvm._internal.utils.typing import type_checker
+		from opendata_cvm._internal.utils.typing import type_checker
 
 
 # CVM's pt-BR attribute labels → this package's English column names. The labels are *hers* (they
@@ -457,7 +457,7 @@ Expected: 5 passed. If `test_parse_meta_blocks_returns_one_record_per_field` fai
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/filings_cvm/_internal/utils/meta_parser.py tests/unit/test_meta_parser.py tests/fixtures/meta
+git add src/opendata_cvm/_internal/utils/meta_parser.py tests/unit/test_meta_parser.py tests/fixtures/meta
 git commit -m "feat(ingestion): CVM META block parser pinned to real bytes"
 git log --oneline -1
 ```
@@ -467,8 +467,8 @@ git log --oneline -1
 ### Task 3: The META contracts
 
 **Files:**
-- Create: `src/filings_cvm/_internal/config/contracts/meta.py`
-- Modify: `src/filings_cvm/_internal/config/contracts/__init__.py`
+- Create: `src/opendata_cvm/_internal/config/contracts/meta.py`
+- Modify: `src/opendata_cvm/_internal/config/contracts/__init__.py`
 - Modify: `tests/unit/test_meta_readers.py` (created in Task 4 — write this test there if running
   out of order; otherwise add it now and let Task 4 extend the file)
 
@@ -485,7 +485,7 @@ Add to `tests/unit/test_meta_readers.py` (create the file if absent):
 ```python
 """Unit tests for the META contracts and readers."""
 
-from filings_cvm._internal.config.contracts.meta import META_CAD_FI, META_COLUMNS, META_DFIN_CRA
+from opendata_cvm._internal.config.contracts.meta import META_CAD_FI, META_COLUMNS, META_DFIN_CRA
 
 
 def test_meta_contracts_share_one_column_tuple() -> None:
@@ -532,8 +532,8 @@ downstream — the precise ambiguity ``source_key`` exists to prevent.
 
 from __future__ import annotations
 
-from filings_cvm._internal.utils.meta_parser import RECORD_COLUMNS
-from filings_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm._internal.utils.meta_parser import RECORD_COLUMNS
+from opendata_cvm._internal.utils.tabular_reader import FileContract
 
 
 # The parsed META frame's source columns, in order. Imported from the parser that produces them, so
@@ -596,12 +596,12 @@ META_CAD_EMISSOR_CEPAC = _meta_contract("cad_emissor_cepac", "META — Cadastro 
 
 - [ ] **Step 4: Re-export from the contracts aggregator**
 
-In `src/filings_cvm/_internal/config/contracts/__init__.py`, add the import block in alphabetical
+In `src/opendata_cvm/_internal/config/contracts/__init__.py`, add the import block in alphabetical
 position (after the `lamina_*` imports, before `medidas_mes_fie`) and add every name to `__all__`
 in its **isort-natural** sorted position:
 
 ```python
-from filings_cvm._internal.config.contracts.meta import (
+from opendata_cvm._internal.config.contracts.meta import (
 	META_BALANCETE_FIE,
 	META_BALANCO_FIE,
 	META_CAD_EMISSOR_CEPAC,
@@ -636,7 +636,7 @@ Expected: 3 passed.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/filings_cvm/_internal/config/contracts tests/unit/test_meta_readers.py
+git add src/opendata_cvm/_internal/config/contracts tests/unit/test_meta_readers.py
 git commit -m "feat(ingestion): META contracts, one source key per dataset"
 git log --oneline -1
 ```
@@ -646,7 +646,7 @@ git log --oneline -1
 ### Task 4: The private base META reader
 
 **Files:**
-- Create: `src/filings_cvm/ingestion/_base_meta_reader.py`
+- Create: `src/opendata_cvm/ingestion/_base_meta_reader.py`
 - Modify: `tests/unit/test_meta_readers.py`
 
 **Interfaces:**
@@ -673,9 +673,9 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.utils.tabular_reader import FileContract
-from filings_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
-from filings_cvm.ingestion.securit.doc.inf_mensal_cra.meta import MetaInfMensalCraReader
+from opendata_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
+from opendata_cvm.ingestion.securit.doc.inf_mensal_cra.meta import MetaInfMensalCraReader
 
 
 _FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "meta"
@@ -699,7 +699,7 @@ def _fake_download_zip(str_url: str, path_dest: Path, *args: object, **kwargs: o
 def test_flat_meta_reader_returns_the_parsed_frame(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""A `.txt` META parses to one row per field, section = the dataset."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	df_ = MetaDfinCraReader().read()
 	assert len(df_) == 9
@@ -709,7 +709,7 @@ def test_flat_meta_reader_returns_the_parsed_frame(monkeypatch: pytest.MonkeyPat
 def test_meta_reader_stamps_provenance(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""Every ingested frame carries the six provenance columns, source_key from the contract."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	df_ = MetaDfinCraReader().read()
 	for str_column in FileContract.PROVENANCE_COLUMNS:
@@ -719,7 +719,7 @@ def test_meta_reader_stamps_provenance(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_zip_meta_reader_labels_each_member_as_a_section(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""A multi-member META zip yields ONE long frame; the member name becomes `section`."""
-	monkeypatch.setattr("filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_zip)
+	monkeypatch.setattr("opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_zip)
 	df_ = MetaInfMensalCraReader().read()
 	assert set(df_["section"].unique()) == {"fluxo_caixa"}
 	# The 50-char truncation survives the whole reader path, not just the parser.
@@ -731,7 +731,7 @@ def test_meta_reader_persists_the_raw_artifact(
 ) -> None:
 	"""`path_raw` keeps the untouched bytes — the only record of what the spec said that day."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	MetaDfinCraReader(path_raw=tmp_path).read()
 	assert list(tmp_path.glob("meta_dfin_cra.txt"))
@@ -740,7 +740,7 @@ def test_meta_reader_persists_the_raw_artifact(
 def test_meta_reader_output_columns_match_the_contract(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""The frame's columns are exactly the contract's declared output shape, in order."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	df_ = MetaDfinCraReader().read()
 	assert tuple(df_.columns) == MetaDfinCraReader._CONTRACT.output_columns
@@ -783,13 +783,13 @@ import zipfile
 
 import pandas as pd
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.http_downloader import download_file
-from filings_cvm._internal.utils.meta_parser import parse_meta_blocks
-from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
-from filings_cvm._internal.utils.raw_workspace import raw_workspace
-from filings_cvm._internal.utils.retry import LogEmitter, RetryPolicy
-from filings_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.http_downloader import download_file
+from opendata_cvm._internal.utils.meta_parser import parse_meta_blocks
+from opendata_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
+from opendata_cvm._internal.utils.raw_workspace import raw_workspace
+from opendata_cvm._internal.utils.retry import LogEmitter, RetryPolicy
+from opendata_cvm._internal.utils.tabular_reader import FileContract
 
 
 # CVM encodes every META in ISO-8859-1 (Latin-1), like the data dumps.
@@ -949,13 +949,13 @@ class BaseMetaReader(IngestionReader):
 Run: `poetry run pytest tests/unit/test_meta_readers.py -q`
 Expected: still FAIL — the `meta.py` subclasses do not exist yet (Task 5). The base itself must
 import cleanly:
-Run: `poetry run python -c "from filings_cvm.ingestion._base_meta_reader import BaseMetaReader; print('ok')"`
+Run: `poetry run python -c "from opendata_cvm.ingestion._base_meta_reader import BaseMetaReader; print('ok')"`
 Expected: `ok`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/filings_cvm/ingestion/_base_meta_reader.py tests/unit/test_meta_readers.py
+git add src/opendata_cvm/ingestion/_base_meta_reader.py tests/unit/test_meta_readers.py
 git commit -m "feat(ingestion): private base for the META readers"
 git log --oneline -1
 ```
@@ -965,14 +965,14 @@ git log --oneline -1
 ### Task 5: The 22 `meta.py` subclasses + public API
 
 **Files:**
-- Create: `src/filings_cvm/ingestion/**/<dataset>/meta.py` × 22
+- Create: `src/opendata_cvm/ingestion/**/<dataset>/meta.py` × 22
 - Modify: each dataset package's `__init__.py` (add the `Meta*Reader` re-export)
-- Modify: `src/filings_cvm/ingestion/__init__.py`, `src/filings_cvm/__init__.py`
+- Modify: `src/opendata_cvm/ingestion/__init__.py`, `src/opendata_cvm/__init__.py`
 - Modify: `tests/unit/test_meta_readers.py`
 
 **Interfaces:**
 - Consumes: `BaseMetaReader` (Task 4), the `META_*` contracts (Task 3).
-- Produces: 22 public classes `Meta<Dataset>Reader`, each re-exported from `filings_cvm`.
+- Produces: 22 public classes `Meta<Dataset>Reader`, each re-exported from `opendata_cvm`.
 
 **The full table — dataset → package → class → real META URL** (every URL verified live against
 the portal on 2026-07-15; base `https://dados.cvm.gov.br/dados/`):
@@ -1009,7 +1009,7 @@ the portal on 2026-07-15; base `https://dados.cvm.gov.br/dados/`):
 
 - [ ] **Step 1: Write one `meta.py` — the ZIP case**
 
-`src/filings_cvm/ingestion/securit/doc/inf_mensal_cra/meta.py`:
+`src/opendata_cvm/ingestion/securit/doc/inf_mensal_cra/meta.py`:
 
 ```python
 """CVM **META** for the SECURIT INF_MENSAL_CRA dataset (`SECURIT/DOC/INF_MENSAL_CRA`).
@@ -1027,9 +1027,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from filings_cvm._internal.config.contracts.meta import META_INF_MENSAL_CRA
-from filings_cvm._internal.utils.tabular_reader import FileContract
-from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
+from opendata_cvm._internal.config.contracts.meta import META_INF_MENSAL_CRA
+from opendata_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm.ingestion._base_meta_reader import BaseMetaReader
 
 
 class MetaInfMensalCraReader(BaseMetaReader):
@@ -1050,7 +1050,7 @@ class MetaInfMensalCraReader(BaseMetaReader):
 
 - [ ] **Step 2: Write one `meta.py` — the flat case**
 
-`src/filings_cvm/ingestion/securit/doc/dfin_cra/meta.py`:
+`src/opendata_cvm/ingestion/securit/doc/dfin_cra/meta.py`:
 
 ```python
 """CVM **META** for the SECURIT DFIN_CRA dataset (`SECURIT/DOC/DFIN_CRA`).
@@ -1063,9 +1063,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from filings_cvm._internal.config.contracts.meta import META_DFIN_CRA
-from filings_cvm._internal.utils.tabular_reader import FileContract
-from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
+from opendata_cvm._internal.config.contracts.meta import META_DFIN_CRA
+from opendata_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm.ingestion._base_meta_reader import BaseMetaReader
 
 
 class MetaDfinCraReader(BaseMetaReader):
@@ -1103,14 +1103,14 @@ Add the `Meta*Reader` to every dataset package `__init__`, keeping `__all__` sor
 ```python
 """CVM open-data **DFIN CRA** reader and its META (`SECURIT/DOC/DFIN_CRA`)."""
 
-from filings_cvm.ingestion.securit.doc.dfin_cra.dfin_cra import DfinCraReader
-from filings_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
+from opendata_cvm.ingestion.securit.doc.dfin_cra.dfin_cra import DfinCraReader
+from opendata_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
 
 
 __all__ = ["DfinCraReader", "MetaDfinCraReader"]
 ```
 
-- [ ] **Step 6: Re-export from `ingestion/__init__.py` and `filings_cvm/__init__.py`**
+- [ ] **Step 6: Re-export from `ingestion/__init__.py` and `opendata_cvm/__init__.py`**
 
 Add all 22 `Meta*Reader` names to both, in **isort-natural** sorted position in `__all__` (note
 RUF022 is not enabled yet — #101 — so sorting is by hand and by eye; keep `Meta…` names together).
@@ -1127,11 +1127,11 @@ def test_every_meta_reader_is_public_and_declares_its_url() -> None:
 	Mirrors `test_reader_retry_policy.py` — the convention is enforced structurally, so it cannot
 	rot the way a documented rule does.
 	"""
-	import filings_cvm
+	import opendata_cvm
 
 	list_meta = [
-		getattr(filings_cvm, str_name)
-		for str_name in filings_cvm.__all__
+		getattr(opendata_cvm, str_name)
+		for str_name in opendata_cvm.__all__
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	]
 	assert len(list_meta) == 22
@@ -1144,11 +1144,11 @@ def test_every_meta_reader_is_public_and_declares_its_url() -> None:
 
 def test_meta_source_keys_are_unique_across_every_reader() -> None:
 	"""Two datasets sharing a source_key would be indistinguishable in the bronze table."""
-	import filings_cvm
+	import opendata_cvm
 
 	list_keys = [
-		getattr(filings_cvm, str_name)._CONTRACT.str_source_key
-		for str_name in filings_cvm.__all__
+		getattr(opendata_cvm, str_name)._CONTRACT.str_source_key
+		for str_name in opendata_cvm.__all__
 		if str_name.startswith("Meta") and str_name.endswith("Reader")
 	]
 	assert len(list_keys) == len(set(list_keys))
@@ -1168,7 +1168,7 @@ Expected: PASS on both. The `astype("string")` (nullable) in the base is deliber
 
 ```bash
 poetry run python -c "
-from filings_cvm import MetaInfMensalCraReader, MetaCadFiReader, MetaCadFiHistReader
+from opendata_cvm import MetaInfMensalCraReader, MetaCadFiReader, MetaCadFiHistReader
 df = MetaInfMensalCraReader().read()
 print('CRA rows', len(df), '| sections', sorted(df['section'].unique()))
 print('50-char names kept:', sum(1 for f in df['field'] if len(f) == 50))
@@ -1205,7 +1205,7 @@ Cover: o que é o META, a tabela dos 22 datasets → classe, o `path_raw`, a **t
 regra "o header real é a fonte da ordem e dos nomes longos", e um exemplo:
 
 ```python
-from filings_cvm.ingestion.securit import MetaInfMensalCraReader
+from opendata_cvm.ingestion.securit import MetaInfMensalCraReader
 
 df_meta = MetaInfMensalCraReader().read()
 ```

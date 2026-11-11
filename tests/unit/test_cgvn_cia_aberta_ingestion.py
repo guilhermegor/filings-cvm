@@ -26,15 +26,15 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	CGVN_CIA_ABERTA_PRATICAS,
 	FCA_CIA_ABERTA,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.cia_aberta import (
 	CgvnCiaAbertaPraticasReader,
 	CgvnCiaAbertaReader,
 	FcaCiaAbertaReader,
@@ -45,7 +45,7 @@ from filings_cvm.ingestion.cia_aberta import (
 VALID_CNPJ = "11.222.333/0001-81"
 DATE_REF = date(2025, 6, 15)
 URL = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/DADOS/cgvn_cia_aberta_2025.zip"
-MODULE = "filings_cvm.ingestion.cia_aberta.doc.cgvn._base_cgvn_reader"
+MODULE = "opendata_cvm.ingestion.cia_aberta.doc.cgvn._base_cgvn_reader"
 PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "cgvn_cia_aberta"
 
 # Real 2025 shapes whose leading zero / hierarchy a numeric cast would destroy.

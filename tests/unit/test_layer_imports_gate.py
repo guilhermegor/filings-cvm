@@ -118,8 +118,8 @@ def test_vendor_at_the_top_of_a_layer_is_rejected(tmp_path: Path) -> None:
 
 	Measured in two independent projects (blueprintx#171).
 	"""
-	assert "filings_cvm" in _sole_problem(
-		tmp_path, "from filings_cvm.submission import Submission\n"
+	assert "opendata_cvm" in _sole_problem(
+		tmp_path, "from opendata_cvm.submission import Submission\n"
 	)
 
 
@@ -127,14 +127,14 @@ _STR_DEFERRED_VENDOR = (
 	"def read_portal() -> None:\n"
 	'\t"""Read."""\n'
 	"\ttry:\n"
-	"\t\tfrom filings_cvm.ingestion import fi\n"
+	"\t\tfrom opendata_cvm.ingestion import fi\n"
 	"\texcept ImportError:\n"
 	"\t\treturn None\n"
 	"\treturn fi\n"
 )
 
 
-@pytest.mark.parametrize("str_fragment", ["filings_cvm", "inside a function"])
+@pytest.mark.parametrize("str_fragment", ["opendata_cvm", "inside a function"])
 def test_vendor_deferred_into_a_function_is_still_rejected(
 	tmp_path: Path, str_fragment: str
 ) -> None:
@@ -218,7 +218,7 @@ def test_one_statement_binding_many_names_is_one_violation(tmp_path: Path, str_l
 	str_layer : str
 		The layer the synthetic module is treated as belonging to.
 	"""
-	list_problems = _problems(tmp_path, "from filings_cvm import a, b, c\n", str_layer)
+	list_problems = _problems(tmp_path, "from opendata_cvm import a, b, c\n", str_layer)
 	assert len(list_problems) == 1
 
 
@@ -232,7 +232,7 @@ def test_a_module_directly_under_src_is_not_skipped(tmp_path: Path) -> None:
 	cls_gate = _load_gate()
 	path_src = tmp_path / "src"
 	path_src.mkdir()
-	(path_src / "main.py").write_text("from filings_cvm import fi\n", encoding="utf-8")
+	(path_src / "main.py").write_text("from opendata_cvm import fi\n", encoding="utf-8")
 	(tmp_path / ".layer-policy.yaml").write_text(
 		"layers:\n  __root__:\n    allow: {}\n", encoding="utf-8"
 	)
@@ -242,7 +242,7 @@ def test_a_module_directly_under_src_is_not_skipped(tmp_path: Path) -> None:
 		path_src / "main.py", cls_gate._ROOT_LAYER, dict_policy, {"src"}
 	)
 
-	assert "filings_cvm" in _sole(list_problems)
+	assert "opendata_cvm" in _sole(list_problems)
 
 
 def _run_main(path_root: Path) -> tuple[int, str]:

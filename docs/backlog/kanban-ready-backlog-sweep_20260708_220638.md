@@ -65,7 +65,7 @@ would otherwise have burned two versions on byte-identical wheels). It slots bet
 
     ```bash
     python3 -c "import re,urllib.request as u; \
-      h=u.urlopen('https://pypi.org/simple/filings-cvm/').read().decode(); \
+      h=u.urlopen('https://pypi.org/simple/opendata-cvm/').read().decode(); \
       print(sorted(set(re.findall(r'filings[_-]cvm-([0-9.]+?)(?:\.tar\.gz|-py3)', h))))"
     ```
 
@@ -83,13 +83,13 @@ would otherwise have burned two versions on byte-identical wheels). It slots bet
 
     ```bash
     python3 -c "import re,urllib.request as u; \
-      h=u.urlopen('https://test.pypi.org/simple/filings-cvm/').read().decode(); \
+      h=u.urlopen('https://test.pypi.org/simple/opendata-cvm/').read().decode(); \
       print(sorted(set(re.findall(r'filings[_-]cvm-([0-9.]+?)(?:\.tar\.gz|-py3)', h))))"
 
     python3 -m venv /tmp/smoke && /tmp/smoke/bin/pip install \
       --index-url https://test.pypi.org/simple/ \
-      --extra-index-url https://pypi.org/simple/ "filings-cvm==X.Y.Z"
-    /tmp/smoke/bin/python -c "import filings_cvm as f; print(f.__version__, f.__all__)"
+      --extra-index-url https://pypi.org/simple/ "opendata-cvm==X.Y.Z"
+    /tmp/smoke/bin/python -c "import opendata_cvm as f; print(f.__version__, f.__all__)"
     ```
 
 4d. Only once Test PyPI holds that version, run **`release-pypi.yaml`** with the **same**
@@ -130,7 +130,7 @@ nothing and spends a number that can never be reclaimed.
   (rustfs is under consideration), reached today via a mounted/synced directory. An `s3://`
   upgrade would land inside `raw_workspace` alone, touching no reader.
 
-  This convention is **not** `filings-*`-specific: it governs every scraping/ingestion package
+  This convention is **not** `opendata-*`-specific: it governs every scraping/ingestion package
   in the family (`bcb`, `investingcom`, `yahii`, `debentures-com-br`, `mais-retorno`, `fmp_*`,
   `global-rates`, `trading-econ`, `world-gov-bonds`, …). Captured as the BlueprintX
   python-common lesson `ingestion-reader-persists-raw-artifact.md`.

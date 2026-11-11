@@ -1,0 +1,18 @@
+"""CVM open-data **Emissor CEPAC** readers (`EMISSOR_CEPAC/`).
+
+Mirrors the `dados.cvm.gov.br/dados/EMISSOR_CEPAC/` portal branch — one sibling among the portal's
+other roots. It publishes only a registry (`EMISSOR_CEPAC/CAD`,
+:mod:`opendata_cvm.ingestion.emissor_cepac.cad`) of the CEPAC issuers (municipalities), plus its
+META reader. Every reader is re-exported flat from `opendata_cvm.ingestion`.
+"""
+
+from opendata_cvm.ingestion.emissor_cepac.cad import (
+	CadastroEmissorCepacReader,
+	MetaCadEmissorCepacReader,
+)
+
+
+__all__ = [
+	"CadastroEmissorCepacReader",
+	"MetaCadEmissorCepacReader",
+]

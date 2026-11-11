@@ -14,9 +14,9 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import (
 	CadastroFiHistAdminReader,
 	CadastroFiHistAuditorReader,
 	CadastroFiHistClasseReader,
@@ -111,7 +111,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.cad.cad_fi_hist._base_cad_fi_hist_reader.download_file",
+		"opendata_cvm.ingestion.fi.cad.cad_fi_hist._base_cad_fi_hist_reader.download_file",
 		_fake_download,
 	)
 

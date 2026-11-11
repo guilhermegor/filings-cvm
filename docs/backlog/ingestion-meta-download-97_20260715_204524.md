@@ -87,7 +87,7 @@ fabricaria um dado que a CVM nunca escreveu e destruiria o valor de oráculo. Re
       `stamp_provenance`
 - [x] **22** `meta.py` finos (só `_META_URL` + `_SOURCE_KEY` + docstring), um por dataset
 - [x] `_internal/config/contracts/meta.py` — **22** contracts via factory
-- [x] Re-export na API pública (`ingestion/__init__` + `filings_cvm/__init__`, `__all__`)
+- [x] Re-export na API pública (`ingestion/__init__` + `opendata_cvm/__init__`, `__all__`)
 - [x] Testes: parser contra **fixtures de bytes reais** da CVM; `download_file` mockado; um teste
       trava a **truncagem em 50 preservada verbatim** (o único oráculo não-tautológico)
 - [x] Gates: ruff/format/check_typing/check_provenance/mypy/codespell + pytest nas **duas majors do

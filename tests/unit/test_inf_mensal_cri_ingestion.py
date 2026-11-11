@@ -19,9 +19,9 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.securit import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.securit import (
 	InfMensalCriAtivoPassivoReader,
 	InfMensalCriCarteiraModificacaoReader,
 	InfMensalCriCarteiraReader,
@@ -34,7 +34,7 @@ from filings_cvm.ingestion.securit import (
 	InfMensalCriGeralReader,
 	InfMensalCriResponsavelReader,
 )
-from filings_cvm.ingestion.securit.doc.inf_mensal_cri._base_inf_mensal_cri_reader import (
+from opendata_cvm.ingestion.securit.doc.inf_mensal_cri._base_inf_mensal_cri_reader import (
 	_DEFAULT_RETRY_POLICY,
 )
 
@@ -114,7 +114,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> list[str
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.securit.doc.inf_mensal_cri."
+		"opendata_cvm.ingestion.securit.doc.inf_mensal_cri."
 		"_base_inf_mensal_cri_reader.download_file",
 		_fake_download,
 	)
@@ -158,7 +158,7 @@ def test_cri_asset_class_sections_are_not_the_cra_contracts() -> None:
 	by the pinned-header oracle in ``test_contract_matches_the_published_header``; it is **not** a
 	copy error, so those two are deliberately excluded here.
 	"""
-	from filings_cvm._internal.config import contracts as cls_contracts
+	from opendata_cvm._internal.config import contracts as cls_contracts
 
 	tuple_asset_class = ("geral", "ativo_passivo", "classe", "fluxo_caixa", "derivativos")
 	for str_section in tuple_asset_class:
@@ -172,7 +172,7 @@ def test_cri_has_creditos_not_direitos_creditorios() -> None:
 
 	The single most likely copy artefact from a sibling dump, so it is asserted explicitly.
 	"""
-	from filings_cvm._internal.config import contracts as cls_contracts
+	from opendata_cvm._internal.config import contracts as cls_contracts
 
 	assert hasattr(cls_contracts, "INF_MENSAL_CRI_CREDITOS")
 	assert not hasattr(cls_contracts, "INF_MENSAL_CRI_DIREITOS_CREDITORIOS")

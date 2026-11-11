@@ -7,7 +7,7 @@ import re
 
 import pytest
 
-from filings_cvm._internal.utils.zip_extractor import extract_all, find_member
+from opendata_cvm._internal.utils.zip_extractor import extract_all, find_member
 
 
 def test_extract_all_missing_zip_raises_file_not_found(tmp_path: Path) -> None:

@@ -13,17 +13,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import EXAMPLE_SOURCE
-from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
-from filings_cvm._internal.config.contracts.dfp_cia_aberta import (
+from opendata_cvm._internal.config.contracts import EXAMPLE_SOURCE
+from opendata_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
+from opendata_cvm._internal.config.contracts.dfp_cia_aberta import (
 	DFP_CIA_ABERTA_DFC_MD_CON,
 	DFP_CIA_ABERTA_DFC_MD_IND,
 )
-from filings_cvm._internal.config.contracts.itr_cia_aberta import (
+from opendata_cvm._internal.config.contracts.itr_cia_aberta import (
 	ITR_CIA_ABERTA_DFC_MD_CON,
 	ITR_CIA_ABERTA_DFC_MD_IND,
 )
-from filings_cvm._internal.utils.tabular_reader import (
+from opendata_cvm._internal.utils.tabular_reader import (
 	ContractError,
 	FileContract,
 	find_contract_problems,

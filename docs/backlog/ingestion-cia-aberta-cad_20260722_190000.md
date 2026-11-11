@@ -41,7 +41,7 @@ one slice, and the sibling roots have repeatedly proven that shape is not inheri
 - [x] `CadastroCiaAbertaReader` (`cia_aberta/cad/cadastro/cadastro.py`) + `MetaCadCiaAbertaReader`
       (`meta.py`) — **37th Meta reader**.
 - [x] Nested `__init__.py` (`cia_aberta/`, `cad/`, `cad/cadastro/`) + flat re-exports in
-      `ingestion/__init__.py` and top `filings_cvm/__init__.py` (imports + `__all__`).
+      `ingestion/__init__.py` and top `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: `_UNEXPOSED_CONTRACTS` +`_META_MEMBERS` entries.
 - [x] Tests: new `FlatCase` in `tests/unit/test_securit_cepac_flat_ingestion.py` (the shared flat-CSV
       harness — reused, not duplicated) + anti-tautology header test reading the fixture. Bumped

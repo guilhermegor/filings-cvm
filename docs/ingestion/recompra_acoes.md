@@ -80,7 +80,7 @@ listagem do diretório `META/`, onde é o **único** arquivo. As outras 5 grafia
 ```python
 from pathlib import Path
 
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm.ingestion.cia_aberta import (
     RecompraAcoesIntermediariosReader,
     RecompraAcoesQuantidadesReader,
     RecompraAcoesReader,

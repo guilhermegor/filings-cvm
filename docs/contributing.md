@@ -194,7 +194,7 @@ escrito. Por isso a classificação é por **caminho**:
 | `ci` | `.github/**`, `bin/**`, `Makefile`, `tasks.sh`, configs de lint | ✅ |
 | `deps` | `poetry.lock`, `pyproject.toml` | ✅ (os testes são o gate) |
 | `tests` | `tests/**` | ❌ — definem o que "passar" significa |
-| `src` | `src/filings_cvm/**` | ❌ **nunca**, em nenhum tamanho |
+| `src` | `src/opendata_cvm/**` | ❌ **nunca**, em nenhum tamanho |
 | `other` | qualquer outro | ❌ (desconhecido = inseguro) |
 
 Numa classe auto-fundível, o auto-merge é **opt-out**: a classificação **é** o consentimento, então

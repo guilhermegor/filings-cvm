@@ -82,7 +82,7 @@ passaria, porque os testes afirmam o contract que foi escrito.
 ```python
 from datetime import date
 
-from filings_cvm.ingestion.securit import InfMensalCriGeralReader
+from opendata_cvm.ingestion.securit import InfMensalCriGeralReader
 
 # O ano de 2025 (o dump é particionado por ano, apesar de mensal).
 df = InfMensalCriGeralReader(date_ref=date(2025, 6, 15)).read()

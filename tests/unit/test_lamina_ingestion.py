@@ -17,9 +17,9 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import LaminaReader
+from opendata_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import LaminaReader
 
 
 # CNPJs whose check digits are valid under the repo's ASCII-48 mod-11 routine. CVM ships
@@ -78,7 +78,9 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		path_dest.write_bytes(payload)
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.fi.doc.lamina.lamina.download_file", _fake_download)
+	monkeypatch.setattr(
+		"opendata_cvm.ingestion.fi.doc.lamina.lamina.download_file", _fake_download
+	)
 
 
 def _read_default(monkeypatch: pytest.MonkeyPatch) -> pd.DataFrame:
@@ -200,7 +202,7 @@ def test_read_keeps_empty_id_subclasse_missing(monkeypatch: pytest.MonkeyPatch) 
 
 def test_dtype_map_covers_every_non_date_column() -> None:
 	"""The derived dtype map and the date columns together span the whole contract."""
-	from filings_cvm.ingestion.fi.doc.lamina.lamina import _DATE_COLS, _DTYPES
+	from opendata_cvm.ingestion.fi.doc.lamina.lamina import _DATE_COLS, _DTYPES
 
 	assert set(_DTYPES) | set(_DATE_COLS) == set(LAMINA_FIF.tuple_required)
 	assert not set(_DTYPES) & set(_DATE_COLS)

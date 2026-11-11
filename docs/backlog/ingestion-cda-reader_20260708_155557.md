@@ -33,7 +33,7 @@ Part of the sweep tracked in `kanban-ready-backlog-sweep_20260708_220638.md`.
   included) and the untouched `.zip` + extracted CSVs **kept**, before any parsing. Retrofitted
   onto `InformeDiarioReader` (#5) in the same commit, and documented on the `IngestionReader` port.
   Generalised as the BlueprintX python-common lesson `ingestion-reader-persists-raw-artifact.md`.
-- [x] **Public API** — export `CdaReader` from `ingestion/__init__.py` and `filings_cvm/__init__.py`.
+- [x] **Public API** — export `CdaReader` from `ingestion/__init__.py` and `opendata_cvm/__init__.py`.
 - [x] **Tests** — `tests/unit/test_cda_ingestion.py` (16) + `tests/unit/test_raw_workspace.py` (4)
   + 2 new persistence tests on the Informe Diário reader. Boundary-mocked download of a fixture ZIP
   with two *differently-shaped* blocks, so the column union is genuinely exercised; PL join,

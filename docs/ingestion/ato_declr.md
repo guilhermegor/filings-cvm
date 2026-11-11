@@ -48,7 +48,7 @@ O reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu padrã
 
 ```python
 from pathlib import Path
-from filings_cvm.ingestion.ato_declr import AtoDeclrReader
+from opendata_cvm.ingestion.ato_declr import AtoDeclrReader
 
 df_ = AtoDeclrReader().read()
 # ou, preservando o CSV bruto para o bronze:

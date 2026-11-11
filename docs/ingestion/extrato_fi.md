@@ -92,7 +92,7 @@ header, e o job de deriva registra a exclusão para não repetir a mesma linha e
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import (
+from opendata_cvm.ingestion.fi import (
     ExtratoFiPre2020Reader,
     ExtratoFiReader,
     ExtratoFiSnapshotReader,

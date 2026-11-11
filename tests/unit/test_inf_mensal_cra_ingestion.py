@@ -19,8 +19,8 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm.ingestion.securit import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm.ingestion.securit import (
 	InfMensalCraAtivoPassivoReader,
 	InfMensalCraCedenteDevedorReader,
 	InfMensalCraClasseReader,
@@ -30,7 +30,7 @@ from filings_cvm.ingestion.securit import (
 	InfMensalCraFluxoCaixaReader,
 	InfMensalCraGeralReader,
 )
-from filings_cvm.ingestion.securit.doc.inf_mensal_cra._base_inf_mensal_cra_reader import (
+from opendata_cvm.ingestion.securit.doc.inf_mensal_cra._base_inf_mensal_cra_reader import (
 	_DEFAULT_RETRY_POLICY,
 )
 
@@ -107,7 +107,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> list[str
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.securit.doc.inf_mensal_cra."
+		"opendata_cvm.ingestion.securit.doc.inf_mensal_cra."
 		"_base_inf_mensal_cra_reader.download_file",
 		_fake_download,
 	)
@@ -144,7 +144,7 @@ def test_cra_contracts_are_not_the_ots_contracts() -> None:
 	CRA is agro-specific; OTS is the generic residual. This is a real trap, not a hypothetical: the
 	8 section names are identical, so the dumps look interchangeable at a glance.
 	"""
-	from filings_cvm._internal.config import contracts as cls_contracts
+	from opendata_cvm._internal.config import contracts as cls_contracts
 
 	for cls in ALL_READERS:
 		str_section = cls._MEMBER_STEM.removeprefix("inf_mensal_cra_")  # type: ignore[attr-defined]

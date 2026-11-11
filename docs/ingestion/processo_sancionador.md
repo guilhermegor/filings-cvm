@@ -65,7 +65,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Processos
 
 ```python
-from filings_cvm.ingestion.processo import ProcessoSancionadorReader
+from opendata_cvm.ingestion.processo import ProcessoSancionadorReader
 
 df_ = ProcessoSancionadorReader().read()
 # df_[["NUP", "Data_Abertura", "Fase_Atual", "Local_Atual", "Data_Ultima_Movimentacao"]]
@@ -75,7 +75,7 @@ df_ = ProcessoSancionadorReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm.ingestion.processo import ProcessoSancionadorAcusadoReader
+from opendata_cvm.ingestion.processo import ProcessoSancionadorAcusadoReader
 
 df_ = ProcessoSancionadorAcusadoReader(
     path_raw=Path("/data/bronze/cvm/processo_sancionador"),

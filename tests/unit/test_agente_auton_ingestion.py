@@ -16,10 +16,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import CAD_AGENTE_AUTON_PF, CAD_AGENTE_AUTON_PJ
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.agente_auton import AgenteAutonPfReader, AgenteAutonPjReader
+from opendata_cvm._internal.config.contracts import CAD_AGENTE_AUTON_PF, CAD_AGENTE_AUTON_PJ
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.agente_auton import AgenteAutonPfReader, AgenteAutonPjReader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; the pj contract's CNPJ check accepts it.
@@ -83,7 +83,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.agente_auton.cad._base_agente_auton_reader.download_file",
+		"opendata_cvm.ingestion.agente_auton.cad._base_agente_auton_reader.download_file",
 		_fake_download,
 	)
 

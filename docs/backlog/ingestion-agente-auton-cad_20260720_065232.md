@@ -27,7 +27,7 @@ Issue **#131**. Branch `feat/131-agente-auton-cad-reader`. Third PR of **Wave 3*
 - [x] `META_CAD_AGENTE_AUTON` in `contracts/meta.py`; `MetaAgenteAutonReader` registered in
       `bin/check_contract_drift.py` `_META_MEMBERS`.
 - [x] Wiring: `agente_auton/__init__.py` + `agente_auton/cad/__init__.py`; flat re-exports in
-      `ingestion/__init__.py` and top `filings_cvm/__init__.py` (+ `__all__`); `contracts/__init__.py`.
+      `ingestion/__init__.py` and top `opendata_cvm/__init__.py` (+ `__all__`); `contracts/__init__.py`.
 - [x] Tests `tests/unit/test_agente_auton_ingestion.py` (mirrors AGENTE_FIDUC). Bumped
       `test_meta_readers.py` 25→26.
 - [x] Docs: `docs/ingestion/agente_auton.md` + mkdocs nav + `api.md` (new section, Meta 25→26) +

@@ -14,10 +14,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fidc import (
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fidc import (
 	InfMensalFidcTabIIIReader,
 	InfMensalFidcTabIIReader,
 	InfMensalFidcTabIReader,
@@ -37,7 +37,7 @@ from filings_cvm.ingestion.fidc import (
 	InfMensalFidcTabX11Reader,
 	InfMensalFidcTabXReader,
 )
-from filings_cvm.ingestion.fidc.doc.inf_mensal._base_inf_mensal_fidc_reader import (
+from opendata_cvm.ingestion.fidc.doc.inf_mensal._base_inf_mensal_fidc_reader import (
 	_DEFAULT_RETRY_POLICY,
 )
 
@@ -125,7 +125,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fidc.doc.inf_mensal._base_inf_mensal_fidc_reader.download_file",
+		"opendata_cvm.ingestion.fidc.doc.inf_mensal._base_inf_mensal_fidc_reader.download_file",
 		_fake_download,
 	)
 

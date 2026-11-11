@@ -14,11 +14,11 @@ import zipfile
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fiagro import InfMensalFiagroReader, InfMensalFiagroSubclasseReader
-from filings_cvm.ingestion.fiagro.doc.inf_mensal._base_inf_mensal_fiagro_reader import (
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fiagro import InfMensalFiagroReader, InfMensalFiagroSubclasseReader
+from opendata_cvm.ingestion.fiagro.doc.inf_mensal._base_inf_mensal_fiagro_reader import (
 	_DEFAULT_RETRY_POLICY,
 )
 
@@ -87,7 +87,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fiagro.doc.inf_mensal._base_inf_mensal_fiagro_reader.download_file",
+		"opendata_cvm.ingestion.fiagro.doc.inf_mensal._base_inf_mensal_fiagro_reader.download_file",
 		_fake_download,
 	)
 

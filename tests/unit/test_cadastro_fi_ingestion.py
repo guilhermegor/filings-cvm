@@ -13,10 +13,10 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
-from filings_cvm._internal.utils.retry import LogEmitter
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import CadastroFiReader
+from opendata_cvm._internal.config.contracts.cad_fi import CAD_FI
+from opendata_cvm._internal.utils.retry import LogEmitter
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import CadastroFiReader
 
 
 # CNPJs whose check digits are valid under the repo's ASCII-48 mod-11 routine. CVM ships
@@ -87,7 +87,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_csv: str) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.cad.cadastro_fi.cadastro_fi.download_file", _fake_download
+		"opendata_cvm.ingestion.fi.cad.cadastro_fi.cadastro_fi.download_file", _fake_download
 	)
 
 
@@ -207,7 +207,7 @@ def test_read_keeps_money_columns_as_exact_source_text(
 
 def test_dtype_map_covers_every_non_date_column() -> None:
 	"""The derived dtype map and the date columns together span the whole contract."""
-	from filings_cvm.ingestion.fi.cad.cadastro_fi.cadastro_fi import _DATE_COLS, _DTYPES
+	from opendata_cvm.ingestion.fi.cad.cadastro_fi.cadastro_fi import _DATE_COLS, _DTYPES
 
 	assert set(_DTYPES) | set(_DATE_COLS) == set(CAD_FI.tuple_required)
 	assert not set(_DTYPES) & set(_DATE_COLS)

@@ -6,7 +6,7 @@ from types import ModuleType
 
 import pytest
 
-from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
+from opendata_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
 
 
 _ROOT = Path(__file__).resolve().parents[2]

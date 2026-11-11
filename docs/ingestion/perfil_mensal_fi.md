@@ -105,7 +105,7 @@ dataset (medido pela listagem). As outras três grafias que este portal usa em o
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import PerfilMensalPre175Reader, PerfilMensalReader
+from opendata_cvm.ingestion.fi import PerfilMensalPre175Reader, PerfilMensalReader
 
 # Regime atual (202312 em diante)
 df_ = PerfilMensalReader(date_ref=date(2025, 6, 15)).read()

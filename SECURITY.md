@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-`filings-cvm` is published on [PyPI](https://pypi.org/project/filings-cvm/) and is still in
+`opendata-cvm` is published on [PyPI](https://pypi.org/project/opendata-cvm/) and is still in
 the `0.x` series, where **only the newest release receives fixes**. Always upgrade to the
 latest release before reporting — a fix will not be backported to an older `0.x` line.
 
@@ -18,7 +18,7 @@ problem before a fix exists.
 
 Instead, use **GitHub's private vulnerability reporting** for this repository:
 
-1. Go to the [**Security** tab](https://github.com/guilhermegor/filings-cvm/security).
+1. Go to the [**Security** tab](https://github.com/guilhermegor/opendata-cvm/security).
 2. Click **Report a vulnerability** (this opens a private GitHub Security Advisory visible only
    to you and the maintainers).
 3. Describe the issue, the affected version, and a reproduction if you have one.

@@ -100,7 +100,7 @@ segue sendo a fonte da ordem**, e a META a fonte do tipo declarado.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import EventualFiReader
+from opendata_cvm.ingestion.fi import EventualFiReader
 
 # O índice do ano:
 df_ = EventualFiReader(date_ref=date(2025, 6, 15)).read()

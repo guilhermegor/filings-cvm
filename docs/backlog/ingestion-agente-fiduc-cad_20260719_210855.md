@@ -28,7 +28,7 @@ Issue **#129**. Branch `feat/129-agente-fiduc-cad-reader`. Second PR of **Wave 3
 - [x] `META_CAD_AGENTE_FIDUC` in `contracts/meta.py`; `MetaAgenteFiducReader` registered in
       `bin/check_contract_drift.py` `_META_MEMBERS`.
 - [x] Wiring: `agente_fiduc/__init__.py` + `agente_fiduc/cad/__init__.py`; flat re-exports in
-      `ingestion/__init__.py` and top `filings_cvm/__init__.py` (+ `__all__`); `contracts/__init__.py`.
+      `ingestion/__init__.py` and top `opendata_cvm/__init__.py` (+ `__all__`); `contracts/__init__.py`.
 - [x] Tests `tests/unit/test_agente_fiduc_ingestion.py` (mirrors AUDITOR, incl. the anti-tautology
       header test). Bumped `test_meta_readers.py` 24→25.
 - [x] Docs: `docs/ingestion/agente_fiduc.md` + mkdocs nav + `api.md` (new section, Meta 24→25) +

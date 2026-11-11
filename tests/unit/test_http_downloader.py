@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm._internal.utils import http_downloader
+from opendata_cvm._internal.utils import http_downloader
 
 
 class _FakeResponse:
@@ -52,7 +52,7 @@ class _FlakyOpener:
 def _no_real_sleep(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""Neutralise the backoff wait so retry tests run instantly."""
 	monkeypatch.setattr(
-		"filings_cvm._internal.utils.retry.backoff.time.sleep", lambda _float_s: None
+		"opendata_cvm._internal.utils.retry.backoff.time.sleep", lambda _float_s: None
 	)
 
 

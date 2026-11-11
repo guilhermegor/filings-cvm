@@ -1,7 +1,7 @@
-site_name: filings-cvm
+site_name: opendata-cvm
 site_description: Biblioteca Python para os padrões de arquivo XML regulatórios da CVM.
-site_url: https://guilhermegor.github.io/filings-cvm/
-repo_url: https://github.com/guilhermegor/filings-cvm
+site_url: https://guilhermegor.github.io/opendata-cvm/
+repo_url: https://github.com/guilhermegor/opendata-cvm
 docs_dir: docs
 nav:
   - Início: index.md

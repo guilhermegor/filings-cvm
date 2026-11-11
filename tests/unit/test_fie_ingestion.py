@@ -16,16 +16,16 @@ import zipfile
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.contracts import (
 	BALANCETE_FIE,
 	BALANCO_FIE,
 	MEDIDAS_MES_FIE,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fie import BalanceteFieReader, BalancoFieReader, MedidasMesFieReader
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fie import BalanceteFieReader, BalancoFieReader, MedidasMesFieReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"
@@ -53,7 +53,7 @@ CASES: tuple[FieCase, ...] = (
 		date(2026, 6, 15),
 		"balancete_fie_202606",
 		True,
-		"filings_cvm.ingestion.fie.doc.balancete.balancete",
+		"opendata_cvm.ingestion.fie.doc.balancete.balancete",
 		"https://dados.cvm.gov.br/dados/FIE/DOC/BALANCETE/DADOS/balancete_fie_202606.zip",
 		"CNPJ_FUNDO_CLASSE",
 		"VL_SALDO_BALCTE",
@@ -64,7 +64,7 @@ CASES: tuple[FieCase, ...] = (
 		date(2020, 6, 15),
 		"balanco_fie_2020",
 		True,
-		"filings_cvm.ingestion.fie.doc.balanco.balanco",
+		"opendata_cvm.ingestion.fie.doc.balanco.balanco",
 		"https://dados.cvm.gov.br/dados/FIE/DOC/BALANCO/DADOS/balanco_fie_2020.zip",
 		"CNPJ_FUNDO",
 		"VL_SALDO_BALANCO",
@@ -75,7 +75,7 @@ CASES: tuple[FieCase, ...] = (
 		date(2026, 6, 15),
 		"medidas_mes_fie_202606",
 		False,
-		"filings_cvm.ingestion.fie.medidas.medidas",
+		"opendata_cvm.ingestion.fie.medidas.medidas",
 		"https://dados.cvm.gov.br/dados/FIE/MEDIDAS/DADOS/medidas_mes_fie_202606.csv",
 		"CNPJ_FUNDO",
 		"VL_PATRIM_LIQ",

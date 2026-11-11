@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.utils.frames import concat_frames, frame_from_records
+from opendata_cvm._internal.utils.frames import concat_frames, frame_from_records
 
 
 def test_frame_from_records_two_records_keeps_column_order_and_values() -> None:

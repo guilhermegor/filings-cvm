@@ -31,7 +31,7 @@ directory and the `pyproject.toml` placeholders via `envsubst`.
 ## CVM Source of Truth
 
 This library only **reads** CVM files. (The submission section, envio → CVM XML, moved to the
-separate `layouts-cvm` package — filings-cvm#389 — and is not a dependency of this one.)
+separate `layouts-cvm` package — opendata-cvm#389 — and is not a dependency of this one.)
 
 **Ingestion (`ingestion/`, leitura ← CVM) — the open-data portal:**
 
@@ -69,7 +69,7 @@ already-changed source.
 
 ### Catalog (status: ✅ implemented · ⬜ pending)
 
-Status marks the `ingestion` direction. The submission (XML envio) standards moved to the separate `layouts-cvm` package (filings-cvm#389) and are no longer catalogued here.
+Status marks the `ingestion` direction. The submission (XML envio) standards moved to the separate `layouts-cvm` package (opendata-cvm#389) and are no longer catalogued here.
 
 **Fundos**
 - Informe Diário — ✅ **V4** ✅ **ingestion** FIF open-data CSV — `ingestion/fi/doc/informe_diario.py` (`InformeDiarioReader`); contract `_internal/config/contracts/informe_diario_fif.py`
@@ -762,7 +762,7 @@ Sob `CIA_ABERTA/CAD/`:
 ## Layout
 
 ```
-src/filings_cvm/
+src/opendata_cvm/
     __init__.py            # ONLY the cross-cutting names: RetryPolicy + __version__ (#91).
                            #   NOT readers — the ingestion section owns its own names.
     ingestion/             # leitura ← CVM: IngestionReader adapters (CVM file → typed DataFrame)
@@ -772,7 +772,7 @@ src/filings_cvm/
                            #   EVERY dataset is a FOLDER holding its reader(s) + a meta.py:
                            #   dfin_cra/{dfin_cra.py,meta.py}. Mirrors the portal, which has a
                            #   directory per dataset. THE PORTAL ROOT IS THE PUBLIC SURFACE:
-                           #   `from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader`
+                           #   `from opendata_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader`
                            #   A new reader touches ONLY its own root's __init__ — not four of them.
         fi/                #   FI/ — Fundos de Investimento (one portal root; FIDC/, FII/, … as siblings)
             doc/           #     FI/DOC/* — informe_diario, cda, lamina/ (lamina + lamina_carteira),
@@ -836,19 +836,19 @@ of your public `__all__`. The internal imports are package-qualified
 (`from <project_name>._internal.utils.dtypes import …`).
 
 **⚠️ The import surface is grouped, not flat (#91).** Each section owns its own names, and the
-top-level `filings_cvm.__all__` holds **only** `RetryPolicy` and `__version__` — what belongs to
+top-level `opendata_cvm.__all__` holds **only** `RetryPolicy` and `__version__` — what belongs to
 neither section:
 
 | what | import from |
 |---|---|
-| an ingestion reader | `filings_cvm.ingestion.<portal_root>` (24 roots) |
-| `RetryPolicy` | `filings_cvm` |
+| an ingestion reader | `opendata_cvm.ingestion.<portal_root>` (24 roots) |
+| `RetryPolicy` | `opendata_cvm` |
 
 **So a new reader is registered along its own package chain up to its portal root — and stops
 there.** For a flat root that is two `__init__` files (dataset + root); for a nested one it is
 every level in between — `cia_aberta` has an extra `doc/` layer, so its readers need **three**
 (`doc/fre/` → `doc/` → `cia_aberta/`). Count the packages on the path rather than assuming two.
-It must **not** be added to `filings_cvm/__init__.py` or `ingestion/__init__.py`;
+It must **not** be added to `opendata_cvm/__init__.py` or `ingestion/__init__.py`;
 `tests/unit/test_public_surface.py` fails in both directions if it is.
 
 ⚠️ **And register the contract in `_internal/config/contracts/__init__.py` too** — a reader

@@ -2,7 +2,7 @@
 
 A project that sets ``[tool.poetry-dynamic-versioning] enable = true`` takes its published
 version from the git tag, so ``[tool.poetry] version`` is only a placeholder. A hand-bump of
-that placeholder contradicts the tag and the package index (filings-rfb#30: stub bumped to
+that placeholder contradicts the tag and the package index (opendata-rfb#30: stub bumped to
 ``1.0.0`` while ``v1.0.1`` and ``v1.0.2`` shipped from tags).
 
 Conditional by construction: a project without dynamic versioning enabled (the service tiers,

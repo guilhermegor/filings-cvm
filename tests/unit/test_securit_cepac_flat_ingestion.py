@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.contracts import (
 	CAD_ADM_FII,
 	CAD_CIA_ABERTA,
 	CAD_CIA_ESTRANG,
@@ -25,14 +25,14 @@ from filings_cvm._internal.config.contracts import (
 	DFIN_CRI,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.adm_fii import CadastroAdmFiiReader
-from filings_cvm.ingestion.cia_aberta import CadastroCiaAbertaReader
-from filings_cvm.ingestion.cia_estrang import CadastroCiaEstrangReader
-from filings_cvm.ingestion.cia_incent import CadastroCiaIncentReader
-from filings_cvm.ingestion.emissor_cepac import CadastroEmissorCepacReader
-from filings_cvm.ingestion.securit import DfinCraReader, DfinCriReader
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.adm_fii import CadastroAdmFiiReader
+from opendata_cvm.ingestion.cia_aberta import CadastroCiaAbertaReader
+from opendata_cvm.ingestion.cia_estrang import CadastroCiaEstrangReader
+from opendata_cvm.ingestion.cia_incent import CadastroCiaIncentReader
+from opendata_cvm.ingestion.emissor_cepac import CadastroEmissorCepacReader
+from opendata_cvm.ingestion.securit import DfinCraReader, DfinCriReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"
@@ -57,7 +57,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		DfinCraReader,
 		DFIN_CRA,
-		"filings_cvm.ingestion.securit.doc.dfin_cra.dfin_cra",
+		"opendata_cvm.ingestion.securit.doc.dfin_cra.dfin_cra",
 		"https://dados.cvm.gov.br/dados/SECURIT/DOC/DFIN_CRA/DADOS/dfin_cra_2025.csv",
 		"dfin_cra_2025.csv",
 		("Data_Referencia", "Data_Entrega"),
@@ -66,7 +66,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		DfinCriReader,
 		DFIN_CRI,
-		"filings_cvm.ingestion.securit.doc.dfin_cri.dfin_cri",
+		"opendata_cvm.ingestion.securit.doc.dfin_cri.dfin_cri",
 		"https://dados.cvm.gov.br/dados/SECURIT/DOC/DFIN_CRI/DADOS/dfin_cri_2025.csv",
 		"dfin_cri_2025.csv",
 		("Data_Referencia", "Data_Entrega"),
@@ -75,7 +75,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		CadastroEmissorCepacReader,
 		CAD_EMISSOR_CEPAC,
-		"filings_cvm.ingestion.emissor_cepac.cad.cadastro.cadastro",
+		"opendata_cvm.ingestion.emissor_cepac.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/EMISSOR_CEPAC/CAD/DADOS/cad_emissor_cepac.csv",
 		"cad_emissor_cepac.csv",
 		("DT_REG", "DT_CANCEL", "DT_INI_SIT"),
@@ -84,7 +84,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		CadastroAdmFiiReader,
 		CAD_ADM_FII,
-		"filings_cvm.ingestion.adm_fii.cad.cadastro.cadastro",
+		"opendata_cvm.ingestion.adm_fii.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/ADM_FII/CAD/DADOS/cad_adm_fii.csv",
 		"cad_adm_fii.csv",
 		("DT_REG", "DT_CANCEL", "DT_INI_SIT"),
@@ -93,7 +93,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		CadastroCiaEstrangReader,
 		CAD_CIA_ESTRANG,
-		"filings_cvm.ingestion.cia_estrang.cad.cadastro.cadastro",
+		"opendata_cvm.ingestion.cia_estrang.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv",
 		"cad_cia_estrang.csv",
 		(
@@ -110,7 +110,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		CadastroCiaIncentReader,
 		CAD_CIA_INCENT,
-		"filings_cvm.ingestion.cia_incent.cad.cadastro.cadastro",
+		"opendata_cvm.ingestion.cia_incent.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/CIA_INCENT/CAD/DADOS/cad_cia_incent.csv",
 		"cad_cia_incent.csv",
 		(
@@ -127,7 +127,7 @@ CASES: tuple[FlatCase, ...] = (
 	FlatCase(
 		CadastroCiaAbertaReader,
 		CAD_CIA_ABERTA,
-		"filings_cvm.ingestion.cia_aberta.cad.cadastro.cadastro",
+		"opendata_cvm.ingestion.cia_aberta.cad.cadastro.cadastro",
 		"https://dados.cvm.gov.br/dados/CIA_ABERTA/CAD/DADOS/cad_cia_aberta.csv",
 		"cad_cia_aberta.csv",
 		(

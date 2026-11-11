@@ -7,12 +7,12 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import meta as meta_module
-from filings_cvm._internal.config.contracts.meta import META_CAD_FI, META_COLUMNS, META_DFIN_CRA
-from filings_cvm._internal.utils.introspection import iter_public_readers
-from filings_cvm._internal.utils.tabular_reader import FileContract
-from filings_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
-from filings_cvm.ingestion.securit.doc.inf_mensal_cra.meta import MetaInfMensalCraReader
+from opendata_cvm._internal.config.contracts import meta as meta_module
+from opendata_cvm._internal.config.contracts.meta import META_CAD_FI, META_COLUMNS, META_DFIN_CRA
+from opendata_cvm._internal.utils.introspection import iter_public_readers
+from opendata_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm.ingestion.securit.doc.dfin_cra.meta import MetaDfinCraReader
+from opendata_cvm.ingestion.securit.doc.inf_mensal_cra.meta import MetaInfMensalCraReader
 
 
 def test_meta_contracts_share_one_column_tuple() -> None:
@@ -54,7 +54,7 @@ def _fake_download_zip(str_url: str, path_dest: Path, *args: object, **kwargs: o
 def test_flat_meta_reader_returns_the_parsed_frame(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""A `.txt` META parses to one row per field, section = the dataset."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	df_ = MetaDfinCraReader().read()
 	assert len(df_) == 9
@@ -64,7 +64,7 @@ def test_flat_meta_reader_returns_the_parsed_frame(monkeypatch: pytest.MonkeyPat
 def test_meta_reader_stamps_provenance(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""Every ingested frame carries the six provenance columns, source_key from the contract."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	df_ = MetaDfinCraReader().read()
 	for str_column in FileContract.PROVENANCE_COLUMNS:
@@ -75,7 +75,7 @@ def test_meta_reader_stamps_provenance(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_zip_meta_reader_labels_each_member_as_a_section(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""A multi-member META zip yields ONE long frame; the member name becomes `section`."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_zip
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_zip
 	)
 	df_ = MetaInfMensalCraReader().read()
 	assert set(df_["section"].unique()) == {"fluxo_caixa"}
@@ -88,7 +88,7 @@ def test_meta_reader_persists_the_raw_artifact(
 ) -> None:
 	"""`path_raw` keeps the untouched bytes — the only record of what the spec said that day."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	MetaDfinCraReader(path_raw=tmp_path).read()
 	assert list(tmp_path.glob("meta_dfin_cra.txt"))
@@ -97,7 +97,7 @@ def test_meta_reader_persists_the_raw_artifact(
 def test_meta_reader_output_columns_match_the_contract(monkeypatch: pytest.MonkeyPatch) -> None:
 	"""The frame's columns are exactly the contract's declared output shape, in order."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
+		"opendata_cvm.ingestion._base_meta_reader.download_file", _fake_download_flat
 	)
 	df_ = MetaDfinCraReader().read()
 	assert tuple(df_.columns) == MetaDfinCraReader._CONTRACT.output_columns

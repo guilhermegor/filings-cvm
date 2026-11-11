@@ -28,7 +28,7 @@ CAD snapshots), tracked in #122. Ships the `auditor/` portal root.
       `bin/check_contract_drift.py` `_META_MEMBERS` (multi-member readers expose `_CONTRACT`, so no
       `_UNEXPOSED` entry needed).
 - [x] Wiring: `auditor/__init__.py` + `auditor/cad/__init__.py`; flat re-exports in
-      `ingestion/__init__.py` and top `filings_cvm/__init__.py` (+ `__all__`); `contracts/__init__.py`.
+      `ingestion/__init__.py` and top `opendata_cvm/__init__.py` (+ `__all__`); `contracts/__init__.py`.
 - [x] Tests `tests/unit/test_auditor_ingestion.py` (mirrors `test_cad_fi_hist_ingestion.py`) incl. the
       anti-tautology `test_contract_matches_the_published_header`. Bumped `test_meta_readers.py` 23→24.
 - [x] Docs: `docs/ingestion/auditor.md` + mkdocs nav + `api.md` (new section, Meta 23→24) + ingestion

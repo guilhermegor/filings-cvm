@@ -14,9 +14,9 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import ENTREGA_FI, ENTREGA_FI_DIARIO
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.fi import (
+from opendata_cvm._internal.config.contracts import ENTREGA_FI, ENTREGA_FI_DIARIO
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.fi import (
 	EntregaFiDiarioReader,
 	EntregaFiReader,
 	MetaEntregaFiReader,
@@ -65,7 +65,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, dict_members: dict[str, str
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.entrega._base_entrega_reader.download_file", _fake
+		"opendata_cvm.ingestion.fi.doc.entrega._base_entrega_reader.download_file", _fake
 	)
 	return list_urls
 

@@ -1,8 +1,8 @@
 """Unit tests for the public import surface — the portal roots own the readers (#91).
 
-Before this, `filings_cvm` and `filings_cvm.ingestion` each re-exported every reader into one flat
-namespace. At 216 readers that is an undivided wall of names that every new reader widens, so the
-surface moved to the division the data already has: the **CVM portal root**
+Before this, `opendata_cvm` and `opendata_cvm.ingestion` each re-exported every reader into one
+flat namespace. At 216 readers that is an undivided wall of names that every new reader widens, so
+the surface moved to the division the data already has: the **CVM portal root**
 (`dados.cvm.gov.br/dados/<ROOT>/…`). Each macro-section now owns its own names.
 
 These tests pin the shape in **both** directions — what must be reachable, and what must *not* be —
@@ -14,8 +14,8 @@ import importlib
 
 import pytest
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.introspection import iter_public_readers, iter_root_packages
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.introspection import iter_public_readers, iter_root_packages
 
 
 # One reader per shape, named explicitly: a discovered sample would move with the code and could
@@ -30,9 +30,9 @@ SAMPLE_READERS = (
 
 def test_top_level_all_holds_only_cross_cutting_names() -> None:
 	"""The root package exports what belongs to neither section — and nothing else."""
-	import filings_cvm
+	import opendata_cvm
 
-	assert set(filings_cvm.__all__) == {"RetryPolicy", "__version__"}
+	assert set(opendata_cvm.__all__) == {"RetryPolicy", "__version__"}
 
 
 @pytest.mark.parametrize(("str_root", "str_reader"), SAMPLE_READERS)
@@ -46,7 +46,7 @@ def test_reader_is_importable_from_its_portal_root(str_root: str, str_reader: st
 	str_reader : str
 		The reader's class name.
 	"""
-	module_root = importlib.import_module(f"filings_cvm.ingestion.{str_root}")
+	module_root = importlib.import_module(f"opendata_cvm.ingestion.{str_root}")
 
 	assert str_reader in module_root.__all__
 	assert issubclass(getattr(module_root, str_reader), IngestionReader)
@@ -63,17 +63,17 @@ def test_reader_is_not_importable_from_the_top_level(str_root: str, str_reader: 
 	str_reader : str
 		The reader's class name.
 	"""
-	import filings_cvm
+	import opendata_cvm
 
-	assert not hasattr(filings_cvm, str_reader)
-	assert str_reader not in filings_cvm.__all__
+	assert not hasattr(opendata_cvm, str_reader)
+	assert str_reader not in opendata_cvm.__all__
 
 
 @pytest.mark.parametrize(("str_root", "str_reader"), SAMPLE_READERS)
 def test_reader_is_not_importable_from_the_ingestion_package(
 	str_root: str, str_reader: str
 ) -> None:
-	"""``filings_cvm.ingestion`` groups the roots; it does not re-export their readers.
+	"""``opendata_cvm.ingestion`` groups the roots; it does not re-export their readers.
 
 	Parameters
 	----------
@@ -82,7 +82,7 @@ def test_reader_is_not_importable_from_the_ingestion_package(
 	str_reader : str
 		The reader's class name.
 	"""
-	import filings_cvm.ingestion as ingestion
+	import opendata_cvm.ingestion as ingestion
 
 	assert not hasattr(ingestion, str_reader)
 	assert str_reader not in ingestion.__all__
@@ -90,7 +90,7 @@ def test_reader_is_not_importable_from_the_ingestion_package(
 
 def test_ingestion_exports_exactly_the_portal_roots() -> None:
 	"""``ingestion.__all__`` lists root packages, not readers — the grouping *is* the surface."""
-	import filings_cvm.ingestion as ingestion
+	import opendata_cvm.ingestion as ingestion
 
 	dict_roots = iter_root_packages()
 

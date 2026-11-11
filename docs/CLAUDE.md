@@ -64,7 +64,7 @@ reflex list. It sat at "30 readers" through **seven** consecutive reader PRs whi
 either page to the package.
 
 It is now gated: `tests/unit/test_meta_readers.py` derives the roster and the counts
-from `filings_cvm.__all__`, so a missing row or a stale number **fails the suite**.
+from `opendata_cvm.__all__`, so a missing row or a stale number **fails the suite**.
 Do not fix such a failure by editing the test — the code is the truth, the page
 follows it. (#155)
 
