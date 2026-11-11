@@ -40,7 +40,7 @@ jobs:
       github.event.issue.pull_request != null
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -64,7 +64,7 @@ jobs:
           echo "REVIEW_POLICY_BASE_REF=${str_base}" >> "$GITHUB_ENV"
 
       - name: Checkout the gate scripts from the base ref
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.REVIEW_POLICY_BASE_REF }}
           path: .gate-base

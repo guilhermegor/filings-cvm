@@ -237,9 +237,11 @@ def changed_paths(str_base: str) -> list:
     Returns
     -------
     list of tuple
-        ``(status_letter, path)``, e.g. ``("D", "bin/ci/check_actions.sh")``.
+        ``(status_letter, path)``, e.g. ``("D", "bin/ci/check_actions.sh")``. Rename
+        detection is off: a renamed watched file must surface as a deletion of its
+        old path, or a rename-and-edit leaves no base content to compare against.
     """
-    str_out = _git(["diff", "--cached", "--name-status", str_base])
+    str_out = _git(["diff", "--cached", "--name-status", "--no-renames", str_base])
     list_rows = []
     for str_line in str_out.splitlines():
         list_parts = str_line.split("\t")
