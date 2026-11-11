@@ -40,7 +40,7 @@ jobs:
       github.event.issue.pull_request != null
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -63,13 +63,20 @@ jobs:
           [ -n "$str_base" ] || { echo "::error::could not resolve base ref for PR ${PR_NUMBER}"; exit 1; }
           echo "REVIEW_POLICY_BASE_REF=${str_base}" >> "$GITHUB_ENV"
 
+      - name: Checkout the gate scripts from the base ref
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.REVIEW_POLICY_BASE_REF }}
+          path: .gate-base
+          persist-credentials: false
+
       - name: Every review thread is answered and resolved
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
           REVIEW_THREADS_REQUIRE_RESOLVED: "1"
-        run: python bin/check_review_threads.py
+        run: python .gate-base/bin/check_review_threads.py
 
       # A red run from before the last reply stays red in the PR's check rollup even after a
       # later run passes. Re-run those stale runs so the rollup shows the current verdict.
@@ -87,4 +94,4 @@ jobs:
             str_head=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.head.sha')
           fi
           [ -n "$str_head" ] || { echo "::error::could not resolve head SHA for PR ${PR_NUMBER}"; exit 1; }
-          HEAD_SHA="$str_head" bash bin/rerun_stale_gate_runs.sh
+          HEAD_SHA="$str_head" bash .gate-base/bin/rerun_stale_gate_runs.sh

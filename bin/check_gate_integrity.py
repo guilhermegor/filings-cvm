@@ -237,9 +237,11 @@ def changed_paths(str_base: str) -> list:
     Returns
     -------
     list of tuple
-        ``(status_letter, path)``, e.g. ``("D", "bin/ci/check_actions.sh")``.
+        ``(status_letter, path)``, e.g. ``("D", "bin/ci/check_actions.sh")``. Rename
+        detection is off: a renamed watched file must surface as a deletion of its
+        old path, or a rename-and-edit leaves no base content to compare against.
     """
-    str_out = _git(["diff", "--cached", "--name-status", str_base])
+    str_out = _git(["diff", "--cached", "--name-status", "--no-renames", str_base])
     list_rows = []
     for str_line in str_out.splitlines():
         list_parts = str_line.split("\t")
@@ -1058,6 +1060,31 @@ def review_roster_problems(str_old: str, str_new: str, str_shown: str) -> list:
     return [f"{str_shown}: the review-bot roster / marker policy changed"]
 
 
+def gate_script_problems(str_old: str, str_new: str, str_shown: str) -> list:
+    """Flag any edit to a ``bin/check_*`` / ``bin/lint_*`` gate script (#401).
+
+    Parameters
+    ----------
+    str_old : str
+        Content at the merge-base.
+    str_new : str
+        Content in this change.
+    str_shown : str
+        Path to show in messages.
+
+    Returns
+    -------
+    list of str
+        One finding when the content differs. The review-threads gate already runs from the
+        base ref, so an edit cannot change its own verdict; the finding exists because the
+        gates still wired through ``tests.yaml`` and pre-commit run the PR's copy, and an
+        edit to one needs its own justification.
+    """
+    if str_old == str_new:
+        return []
+    return [f"{str_shown}: quality-check script modified"]
+
+
 _DICT_DISPATCH = {
     ".review-bots.yaml": review_roster_problems,
     ".pre-commit-config.yaml": precommit_problems,
@@ -1100,6 +1127,8 @@ def file_problems(
         fn_analyzer = None  # only the root roster is the review policy
     if fn_analyzer is None and RE_WORKFLOW_PATH.search(str_path):
         fn_analyzer = workflow_problems
+    if fn_analyzer is None and RE_GATE_SCRIPT.search(str_path):
+        fn_analyzer = gate_script_problems
     list_problems = fn_analyzer(str_old, str_new, str_path) if fn_analyzer else []
 
     if RE_TEST_PATH.search(str_path) and test_module_stem(str_path) in set_touched_stems:
