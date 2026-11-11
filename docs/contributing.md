@@ -44,6 +44,23 @@ A CI roda os mesmos gates em cada pull request; mantenha-os verdes localmente an
 > `actionlint-py` é *sdist-only* e baixa o binário em tempo de build, o que colocaria um download
 > dentro de todo `poetry install`, nas três matrizes de SO.
 
+## Guarda de prefixo de tipo
+
+`bin/check_type_prefix.py` verifica a regra de nomes da tabela "Naming conventions" de
+`.claude/CLAUDE.md` (o vocabulário de prefixos é lido dessa tabela, nunca duplicado). Ainda
+**não** está ligado ao pre-commit nem ao CI: a árvore tem milhares de violações até as
+renomeações (#407 a #410) terminarem.
+
+```bash
+poetry run python bin/check_type_prefix.py [ARQUIVO ...]  # exit 1 se houver achado
+poetry run python bin/check_type_prefix.py --report       # contagem por área, nunca falha
+poetry run python bin/check_type_prefix.py --mismatches   # prefixo x anotação (medição)
+```
+
+Isentos: `self`/`cls`/`_`/dunders, fixtures do pytest e de plugins instalados pedidas por
+funções `test_*`/`@fixture` em `tests/`, e parâmetros de método que sobrescreve um método de
+classe-base de terceiros.
+
 ## Servindo a documentação localmente
 
 ```bash
