@@ -9,13 +9,13 @@ Como instalar a biblioteca e ler o seu primeiro arquivo da CVM.
 ## Instalação
 
 ```bash
-pip install filings-cvm
+pip install opendata-cvm
 ```
 
 Ou com Poetry:
 
 ```bash
-poetry add filings-cvm
+poetry add opendata-cvm
 ```
 
 Requer **Python >= 3.11**.

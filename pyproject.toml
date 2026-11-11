@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "filings-cvm"
+name = "opendata-cvm"
 # The version source depends on how this project was scaffolded. OFFLINE (no remote): this static
 # version, hand-bumped via `make bump_version`. ONLINE (GitHub remote): the scaffold rewrote this
 # to a "0.0.0" stub + poetry-dynamic-versioning, so the published version comes from the git tag

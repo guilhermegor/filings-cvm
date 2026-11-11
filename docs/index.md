@@ -31,7 +31,7 @@ make docs_server   # serve esta documentação em http://0.0.0.0:8000
 Instalação como dependência:
 
 ```bash
-pip install filings-cvm
+pip install opendata-cvm
 ```
 
 Continue em **[Uso](usage.md)** para o primeiro `DataFrame`, ou veja a **[Leitura](ingestion/index.md)**.

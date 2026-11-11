@@ -28,7 +28,7 @@ from filings_cvm._internal.utils.retry import RetryPolicy
 
 
 try:
-	__version__ = version("filings-cvm")
+	__version__ = version("opendata-cvm")
 except PackageNotFoundError:  # pragma: no cover - source tree without an installed dist
 	__version__ = "0.0.0"
 
