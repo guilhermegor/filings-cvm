@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from filings_cvm._internal.utils.retry import RetryPolicy, call_with_backoff, retry_with_backoff
-from filings_cvm._internal.utils.retry._schedule import _compute_backoff_wait
+from opendata_cvm._internal.utils.retry import RetryPolicy, call_with_backoff, retry_with_backoff
+from opendata_cvm._internal.utils.retry._schedule import _compute_backoff_wait
 
 
 class _Flaky:
@@ -31,7 +31,7 @@ def list_waits(monkeypatch: pytest.MonkeyPatch) -> list[float]:
 	"""Capture every ``time.sleep`` duration the decorator requests, without sleeping."""
 	list_captured: list[float] = []
 	monkeypatch.setattr(
-		"filings_cvm._internal.utils.retry.backoff.time.sleep",
+		"opendata_cvm._internal.utils.retry.backoff.time.sleep",
 		lambda float_s: list_captured.append(float_s),
 	)
 	return list_captured

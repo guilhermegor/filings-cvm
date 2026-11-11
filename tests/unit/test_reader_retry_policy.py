@@ -21,9 +21,9 @@ import inspect
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.introspection import iter_public_readers, iter_root_packages
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.introspection import iter_public_readers, iter_root_packages
 
 
 # Every public reader of the library, discovered — never hand-listed (see the module docstring).

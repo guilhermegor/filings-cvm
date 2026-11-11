@@ -17,10 +17,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fii import (
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fii import (
 	InfMensalFiiAtivoPassivoReader,
 	InfMensalFiiComplementoReader,
 	InfMensalFiiGeralReader,
@@ -87,7 +87,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> list[str
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fii.doc.inf_mensal._base_inf_mensal_fii_reader.download_file",
+		"opendata_cvm.ingestion.fii.doc.inf_mensal._base_inf_mensal_fii_reader.download_file",
 		_fake_download,
 	)
 	return list_urls

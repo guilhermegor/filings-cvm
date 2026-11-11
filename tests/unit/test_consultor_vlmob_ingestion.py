@@ -16,16 +16,16 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	CAD_CONSULTOR_VLMOB_DIRETOR,
 	CAD_CONSULTOR_VLMOB_PF,
 	CAD_CONSULTOR_VLMOB_PJ,
 	CAD_CONSULTOR_VLMOB_RESP,
 	CAD_CONSULTOR_VLMOB_SOCIOS,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.consultor_vlmob import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.consultor_vlmob import (
 	ConsultorVlmobDiretorReader,
 	ConsultorVlmobPfReader,
 	ConsultorVlmobPjReader,
@@ -111,7 +111,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.consultor_vlmob.cad._base_consultor_vlmob_reader.download_file",
+		"opendata_cvm.ingestion.consultor_vlmob.cad._base_consultor_vlmob_reader.download_file",
 		_fake_download,
 	)
 

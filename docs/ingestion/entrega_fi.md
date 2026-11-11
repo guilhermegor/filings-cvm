@@ -60,7 +60,7 @@ um membro seja lido.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import EntregaFiDiarioReader, EntregaFiReader
+from opendata_cvm.ingestion.fi import EntregaFiDiarioReader, EntregaFiReader
 
 df_ = EntregaFiReader(date_ref=date(2025, 6, 15)).read()
 print(df_[["CNPJ_Fundo_Classe", "Tipo_Documento", "Data_Hora_Entrega"]].head())

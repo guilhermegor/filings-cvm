@@ -9,7 +9,7 @@ import importlib.util
 from pathlib import Path
 import re
 
-from filings_cvm._internal.utils.introspection import iter_root_packages
+from opendata_cvm._internal.utils.introspection import iter_root_packages
 
 
 _PATH = Path(__file__).resolve().parents[2] / "bin" / "check_portal_completeness.py"

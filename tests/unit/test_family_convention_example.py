@@ -20,9 +20,9 @@ import pkgutil
 
 import pytest
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.introspection import iter_public_readers
-import filings_cvm.ingestion as pkg_ingestion
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.introspection import iter_public_readers
+import opendata_cvm.ingestion as pkg_ingestion
 
 
 _FAMILY = iter_public_readers()

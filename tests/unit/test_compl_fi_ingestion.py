@@ -14,14 +14,14 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	COMPL_FI,
 	COMPL_FI_INF,
 	COMPL_FI_INF_COTST,
 	COMPL_FI_PREST,
 )
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.fi import (
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.fi import (
 	ComplFiInfCotstReader,
 	ComplFiInfReader,
 	ComplFiPrestReader,
@@ -75,7 +75,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, dict_members: dict[str, str
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.compl._base_compl_reader.download_file", _fake
+		"opendata_cvm.ingestion.fi.doc.compl._base_compl_reader.download_file", _fake
 	)
 	return list_urls
 

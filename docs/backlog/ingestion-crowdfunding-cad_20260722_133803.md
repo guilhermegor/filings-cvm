@@ -38,7 +38,7 @@ platform's CNPJ) with the ADM_CART dateless satellites.
 - [x] Private base `_base_crowdfunding_reader.py` + 3 thin subclasses.
 - [x] `MetaCrowdfundingReader` (`.zip` URL, `_MEMBER_STEM = "cad_crowdfunding"`) — 35th Meta reader.
 - [x] 2 nested `__init__.py` + flat re-export in `ingestion/__init__.py` and top
-      `filings_cvm/__init__.py` (imports + `__all__`).
+      `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: `_META_MEMBERS` entry (all three expose
       `_CONTRACT`, so no `_UNEXPOSED_CONTRACTS` entries needed).
 - [x] Tests `tests/unit/test_crowdfunding_ingestion.py`: anti-tautology header test per member,

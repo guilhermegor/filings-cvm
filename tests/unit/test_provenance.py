@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from filings_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
-from filings_cvm._internal.utils.tabular_reader import FileContract
+from opendata_cvm._internal.utils.provenance import hash_artifact, stamp_provenance
+from opendata_cvm._internal.utils.tabular_reader import FileContract
 
 
 _URL = "https://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi.csv"

@@ -1,25 +1,25 @@
 # Per-file ratchet for the BlueprintX quality guards (see bin/quality_ratchet.py).
 # <guard> <count> <path>. A count may only go DOWN; regenerate a guard's rows with
 # `python bin/quality_ratchet.py <guard> --write-baseline <guard command>`.
-dead-code 1 src/filings_cvm/_internal/utils/http_downloader.py
+dead-code 1 src/opendata_cvm/_internal/utils/http_downloader.py
 function-length 1 tasks.sh
 complexity 1 bin/check_docs_sections.py
 complexity 1 bin/check_docstrings.py
 complexity 1 bin/sweep_stale_branches.py
-complexity 2 src/filings_cvm/_internal/utils/br_identifiers.py
-complexity 2 src/filings_cvm/_internal/utils/dtypes.py
-complexity 2 src/filings_cvm/_internal/utils/http_downloader.py
-complexity 1 src/filings_cvm/_internal/utils/introspection.py
-complexity 3 src/filings_cvm/_internal/utils/logs.py
-complexity 1 src/filings_cvm/_internal/utils/meta_parser.py
-complexity 2 src/filings_cvm/_internal/utils/retry/backoff.py
-complexity 1 src/filings_cvm/_internal/utils/retry/policy.py
-complexity 3 src/filings_cvm/_internal/utils/tabular_reader.py
-complexity 1 src/filings_cvm/_internal/utils/text.py
-complexity 5 src/filings_cvm/_internal/utils/zip_extractor.py
-complexity 1 src/filings_cvm/ingestion/_base_meta_reader.py
-complexity 2 src/filings_cvm/ingestion/fi/doc/cda/cda.py
-complexity 1 src/filings_cvm/ingestion/fi/doc/informe_diario/informe_diario.py
+complexity 2 src/opendata_cvm/_internal/utils/br_identifiers.py
+complexity 2 src/opendata_cvm/_internal/utils/dtypes.py
+complexity 2 src/opendata_cvm/_internal/utils/http_downloader.py
+complexity 1 src/opendata_cvm/_internal/utils/introspection.py
+complexity 3 src/opendata_cvm/_internal/utils/logs.py
+complexity 1 src/opendata_cvm/_internal/utils/meta_parser.py
+complexity 2 src/opendata_cvm/_internal/utils/retry/backoff.py
+complexity 1 src/opendata_cvm/_internal/utils/retry/policy.py
+complexity 3 src/opendata_cvm/_internal/utils/tabular_reader.py
+complexity 1 src/opendata_cvm/_internal/utils/text.py
+complexity 5 src/opendata_cvm/_internal/utils/zip_extractor.py
+complexity 1 src/opendata_cvm/ingestion/_base_meta_reader.py
+complexity 2 src/opendata_cvm/ingestion/fi/doc/cda/cda.py
+complexity 1 src/opendata_cvm/ingestion/fi/doc/informe_diario/informe_diario.py
 complexity 3 tests/integration/test_bin_scripts.py
 complexity 6 tests/unit/test_adm_cart_ingestion.py
 complexity 4 tests/unit/test_agente_auton_ingestion.py
@@ -80,7 +80,7 @@ complexity 2 tests/unit/test_retry.py
 complexity 4 tests/unit/test_securit_cepac_flat_ingestion.py
 complexity 15 tests/unit/test_sweep_stale_branches.py
 complexity 5 tests/unit/test_vlmo_cia_aberta_ingestion.py
-all-exports 1 src/filings_cvm/ingestion/__init__.py
+all-exports 1 src/opendata_cvm/ingestion/__init__.py
 one-assert 9 tests/unit/test_adm_cart_ingestion.py
 one-assert 6 tests/unit/test_agente_auton_ingestion.py
 one-assert 6 tests/unit/test_agente_fiduc_ingestion.py

@@ -19,7 +19,7 @@ Launches the **`fidc/` portal root** (sibling of `fi/`).
       `_RETRY_POLICY: ClassVar[RetryPolicy | None] = _DEFAULT_RETRY_POLICY`; ctor falls back to it,
       per-instance `retry_policy=` overrides. Tunable per table.
 - [x] Wiring at every level: `fidc/__init__`, `fidc/doc/__init__`, `inf_mensal/__init__`,
-      `ingestion/__init__`, top-level `filings_cvm/__init__`, contracts `__init__`.
+      `ingestion/__init__`, top-level `opendata_cvm/__init__`, contracts `__init__`.
 - [x] Tests `tests/unit/test_inf_mensal_fidc_ingestion.py` — parametrized family (member selection,
       `DT_COMPTC` coercion, `date_ref` presence, month-in-member-name, contract error, member
       absent, `path_raw` persistence, money-as-str, wrong-arg-type, per-module retry default,

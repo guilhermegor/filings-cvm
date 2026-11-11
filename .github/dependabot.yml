@@ -9,7 +9,7 @@
 #
 # WHY THIS MATTERS HERE: poetry.lock is committed and CI installs FROM it (poetry install --no-root)
 # and refuses to re-lock (see .github/workflows/tests.yaml). So CI tests the frozen locked versions,
-# while a consumer running `pip install filings-cvm` gets the latest the loose `>=` ranges allow.
+# while a consumer running `pip install opendata-cvm` gets the latest the loose `>=` ranges allow.
 # Those drift apart. This file keeps the lock fresh so CI tests ~what consumers actually install —
 # WITHOUT narrowing the library's ranges (versioning-strategy: lockfile-only leaves pyproject alone,
 # which also keeps it in sync with the lock, so the CI lock-sync guard is never tripped).

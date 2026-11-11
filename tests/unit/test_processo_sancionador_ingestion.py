@@ -19,13 +19,13 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	PROCESSO_SANCIONADOR,
 	PROCESSO_SANCIONADOR_ACUSADO,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.processo import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.processo import (
 	MetaProcessoSancionadorReader,
 	ProcessoSancionadorAcusadoReader,
 	ProcessoSancionadorReader,
@@ -99,7 +99,7 @@ def _fake_download(
 def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 	"""Patch the shared base reader's download_file boundary to drop ``payload``."""
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.processo.sancionador._base_processo_sancionador_reader."
+		"opendata_cvm.ingestion.processo.sancionador._base_processo_sancionador_reader."
 		"download_file",
 		partial(_fake_download, payload),
 	)

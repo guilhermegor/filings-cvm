@@ -154,7 +154,7 @@ porque theirs é lido da árvore de trabalho enquanto o commit carimbado vem do 
 
 ## Neste repositório
 
-O filings-cvm carrega um carimbo (`.blueprintx-provenance.yaml`, tier `lib-minimal`). As tarefas poe
+O opendata-cvm carrega um carimbo (`.blueprintx-provenance.yaml`, tier `lib-minimal`). As tarefas poe
 `template_drift` e `template_update` chegam com a migração para o poe; até lá, rode os scripts
 diretamente, apontando para um checkout do BlueprintX com `--blueprintx-root` ou com a variável de
 ambiente `BLUEPRINTX_TEMPLATE_ROOT`:

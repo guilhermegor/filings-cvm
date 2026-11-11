@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm._internal.utils.raw_workspace import raw_workspace
+from opendata_cvm._internal.utils.raw_workspace import raw_workspace
 
 
 def test_workspace_without_path_yields_a_directory_that_is_removed_on_exit() -> None:

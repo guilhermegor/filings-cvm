@@ -23,9 +23,9 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import IPE_CIA_ABERTA
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.cia_aberta import IpeCiaAbertaReader, MetaIpeCiaAbertaReader
+from opendata_cvm._internal.config.contracts import IPE_CIA_ABERTA
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.cia_aberta import IpeCiaAbertaReader, MetaIpeCiaAbertaReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"
@@ -34,7 +34,7 @@ PLACEHOLDER_CNPJ = "00.000.000/0000-00"
 
 DATE_REF = date(2025, 6, 15)
 STEM = "ipe_cia_aberta_2025"
-MODULE = "filings_cvm.ingestion.cia_aberta.doc.ipe.ipe"
+MODULE = "opendata_cvm.ingestion.cia_aberta.doc.ipe.ipe"
 URL = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/IPE/DADOS/ipe_cia_aberta_2025.zip"
 LINK = (
 	"https://www.rad.cvm.gov.br/ENET/frmDownloadDocumento.aspx"

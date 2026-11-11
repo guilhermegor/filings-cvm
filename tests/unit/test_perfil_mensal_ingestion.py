@@ -23,9 +23,9 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import PERFIL_MENSAL_FI, PERFIL_MENSAL_FI_PRE175
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import (
+from opendata_cvm._internal.config.contracts import PERFIL_MENSAL_FI, PERFIL_MENSAL_FI_PRE175
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import (
 	MetaPerfilMensalFiReader,
 	PerfilMensalPre175Reader,
 	PerfilMensalReader,
@@ -113,7 +113,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_text: str) -> list[str]
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.perfil_mensal._base_perfil_mensal_reader.download_file",
+		"opendata_cvm.ingestion.fi.doc.perfil_mensal._base_perfil_mensal_reader.download_file",
 		_fake_download,
 	)
 	return list_urls

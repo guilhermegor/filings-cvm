@@ -23,10 +23,10 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.contracts import DFIN_FII, EVENTUAL_FI
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import EventualFiReader, MetaEventualFiReader
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.contracts import DFIN_FII, EVENTUAL_FI
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import EventualFiReader, MetaEventualFiReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"
@@ -83,7 +83,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_text: str) -> list[str]
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.eventual.eventual.download_file", _fake_download
+		"opendata_cvm.ingestion.fi.doc.eventual.eventual.download_file", _fake_download
 	)
 	return list_urls
 

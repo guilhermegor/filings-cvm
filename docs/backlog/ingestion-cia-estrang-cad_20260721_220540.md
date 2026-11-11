@@ -37,7 +37,7 @@ oracle), unlike the narrower flat cadastros.
 - [x] Reader `ingestion/cia_estrang/cad/cadastro/cadastro.py` (`CadastroCiaEstrangReader`).
 - [x] `MetaCadCiaEstrangReader` — 32nd Meta reader.
 - [x] 3 nested `__init__.py` + flat re-export in `ingestion/__init__.py` and top
-      `filings_cvm/__init__.py` (imports + `__all__`).
+      `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: import, `_UNEXPOSED_CONTRACTS`, `_META_MEMBERS`.
 - [x] Tests: **generalized the flat-CSV `FlatCase` harness** — dropped the single `str_cnpj_col`
       field; `_value_for` now derives CNPJ cols from `cls_contract.tuple_cnpj_cols` (supports N CNPJ

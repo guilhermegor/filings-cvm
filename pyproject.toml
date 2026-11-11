@@ -9,11 +9,11 @@ description = "Biblioteca Python para os padrões de arquivo XML regulatórios d
 authors = ["guilhermegor"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://guilhermegor.github.io/filings-cvm/"
-documentation = "https://guilhermegor.github.io/filings-cvm/"
-repository = "https://github.com/guilhermegor/filings-cvm"
-keywords = ["filings-cvm", "python", "library"]
-packages = [{ include = "filings_cvm", from = "src" }]
+homepage = "https://guilhermegor.github.io/opendata-cvm/"
+documentation = "https://guilhermegor.github.io/opendata-cvm/"
+repository = "https://github.com/guilhermegor/opendata-cvm"
+keywords = ["opendata-cvm", "python", "library"]
+packages = [{ include = "opendata_cvm", from = "src" }]
 # Keep internal dev docs out of the distributed wheel/sdist.
 exclude = ["src/**/CLAUDE.md"]
 package-mode = true
@@ -27,9 +27,9 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-"Bug Reports" = "https://github.com/guilhermegor/filings-cvm/issues"
-"Source" = "https://github.com/guilhermegor/filings-cvm"
-"Documentation" = "https://guilhermegor.github.io/filings-cvm/"
+"Bug Reports" = "https://github.com/guilhermegor/opendata-cvm/issues"
+"Source" = "https://github.com/guilhermegor/opendata-cvm"
+"Documentation" = "https://guilhermegor.github.io/opendata-cvm/"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"

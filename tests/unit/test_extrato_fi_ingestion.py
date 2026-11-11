@@ -21,13 +21,13 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	EXTRATO_FI,
 	EXTRATO_FI_PRE2020,
 	EXTRATO_FI_SNAPSHOT,
 )
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import (
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import (
 	ExtratoFiPre2020Reader,
 	ExtratoFiReader,
 	ExtratoFiSnapshotReader,
@@ -86,7 +86,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_text: str) -> list[str]
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.extrato._base_extrato_reader.download_file", _fake_download
+		"opendata_cvm.ingestion.fi.doc.extrato._base_extrato_reader.download_file", _fake_download
 	)
 	return list_urls
 
@@ -156,7 +156,7 @@ def test_the_regime_readers_are_not_named_after_a_regulation() -> None:
 	before any assertion runs), while this also catches a **partial** rename that leaves the
 	package importable.
 	"""
-	import filings_cvm.ingestion.fi.doc.extrato as pkg
+	import opendata_cvm.ingestion.fi.doc.extrato as pkg
 
 	assert [n for n in pkg.__all__ if "175" in n] == []
 	assert "ExtratoFiPre2020Reader" in pkg.__all__

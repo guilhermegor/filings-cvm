@@ -20,12 +20,12 @@ _SPEC.loader.exec_module(clg)
 @pytest.mark.parametrize(
 	("list_paths", "bool_expected"),
 	[
-		(["src/filings_cvm/x.py"], True),
+		(["src/opendata_cvm/x.py"], True),
 		(["bin/foo.py"], True),
 		([".github/workflows/tests.yaml"], True),
 		(["Makefile"], True),
 		(["bin/foo.py", "tests/test_x.py"], True),
-		(["src/filings_cvm/x.py", "docs/backlog/topic_20260717_091038.md"], True),
+		(["src/opendata_cvm/x.py", "docs/backlog/topic_20260717_091038.md"], True),
 		(["docs/api.md"], False),
 		(["poetry.lock"], False),
 		(["pyproject.toml"], False),

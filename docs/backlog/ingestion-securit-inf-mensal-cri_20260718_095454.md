@@ -20,7 +20,7 @@ PR 4/4 — **closes the `securit/` root (4/4)** and ends Wave 2 of #41.
 - [x] Registered CRI in `bin/check_contract_drift.py` `_META_MEMBERS` (#98 structural test — CI
       would fail otherwise). Registry re-closes: **113 readers, 113 members, 0 gaps**.
 - [x] Wired all 5 `__init__` layers (package → securit/doc → securit → ingestion → top
-      `filings_cvm`) + `contracts/__init__`. `test_meta_readers.py` 22→23.
+      `opendata_cvm`) + `contracts/__init__`. `test_meta_readers.py` 22→23.
 - [x] Tests `test_inf_mensal_cri_ingestion.py` (mirrors CRA anti-tautology + traps + a header-only
       regression). Full unit suite green.
 - [x] **Live-verified against real 2025 bytes**: geral 26,689×44, creditos ×51, classe 51,914×28,

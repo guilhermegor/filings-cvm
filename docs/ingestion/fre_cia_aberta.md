@@ -236,7 +236,7 @@ teste de entrada gerada — só o header pinado discorda. **Nove pares no total*
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm.ingestion.cia_aberta import (
     FreCiaAbertaCapitalSocialReader,
     FreCiaAbertaPosicaoAcionariaReader,
     FreCiaAbertaReader,

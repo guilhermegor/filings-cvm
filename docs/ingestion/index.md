@@ -1,6 +1,6 @@
 # **Leitura (← CVM)**
 
-A seção `filings_cvm.ingestion` analisa e interpreta arquivos **recebidos/baixados** da CVM de
+A seção `opendata_cvm.ingestion` analisa e interpreta arquivos **recebidos/baixados** da CVM de
 volta para modelos tipados — a contraparte do envio, que vive no pacote separado `layouts-cvm`.
 
 > **Veja também:** [Referência da API](../api/reference.md) · [Uso](../usage.md).
@@ -13,17 +13,17 @@ Os leitores são agrupados pelo **root do portal de dados abertos**
 (`dados.cvm.gov.br/dados/<ROOT>/…`), e **cada root é a superfície pública** dos seus leitores:
 
 ```python
-from filings_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader
-from filings_cvm.ingestion.fidc import InfMensalFidcTabIReader
-from filings_cvm.ingestion.fi import InformeDiarioReader
+from opendata_cvm.ingestion.cia_aberta import FreCiaAbertaAuditorReader
+from opendata_cvm.ingestion.fidc import InfMensalFidcTabIReader
+from opendata_cvm.ingestion.fi import InformeDiarioReader
 ```
 
 São **24 roots**: `adm_cart`, `adm_fii`, `agente_auton`, `agente_fiduc`, `ato_declr`, `auditor`,
 `cia_aberta`, `cia_estrang`, `cia_incent`, `consultor_vlmob`, `coord_oferta`, `crowdfunding`, `emissor_cepac`,
 `fi`, `fiagro`, `fidc`, `fie`, `fii`, `fip`, `intermed`, `invnr`, `oferta`, `processo`, `securit`.
 
-> ⚠️ **Mudança incompatível na 0.26.0.** `from filings_cvm import <Leitor>` e
-> `from filings_cvm.ingestion import <Leitor>` **deixaram de funcionar** — os 216 leitores não são
+> ⚠️ **Mudança incompatível na 0.26.0.** `from opendata_cvm import <Leitor>` e
+> `from opendata_cvm.ingestion import <Leitor>` **deixaram de funcionar** — os 216 leitores não são
 > mais reexportados num namespace plano. Importe do root que é dono do leitor (a página de cada
 > dataset mostra o import correto). O agrupamento é o **do próprio portal da CVM**; um namespace
 > único de 216 nomes não tinha divisão nenhuma e crescia a cada leitor novo.
@@ -288,8 +288,8 @@ A resolução é em duas camadas:
    *backoff* exponencial limitado (~2, 4, 8, 10 s).
 
 ```python
-from filings_cvm import RetryPolicy
-from filings_cvm.ingestion.fi import CdaReader
+from opendata_cvm import RetryPolicy
+from opendata_cvm.ingestion.fi import CdaReader
 
 # 1. Padrão — o leitor usa a política do seu próprio módulo. Nada a passar:
 df_ = CdaReader().read()

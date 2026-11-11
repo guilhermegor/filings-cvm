@@ -17,9 +17,9 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.utils.retry import LogEmitter
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fi import CdaReader
+from opendata_cvm._internal.utils.retry import LogEmitter
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fi import CdaReader
 
 
 class _SpyLogger(LogEmitter):
@@ -103,7 +103,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		path_dest.write_bytes(payload)
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.fi.doc.cda.cda.download_file", _fake_download)
+	monkeypatch.setattr("opendata_cvm.ingestion.fi.doc.cda.cda.download_file", _fake_download)
 
 
 def _read_default(monkeypatch: pytest.MonkeyPatch) -> pd.DataFrame:

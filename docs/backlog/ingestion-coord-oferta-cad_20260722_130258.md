@@ -35,7 +35,7 @@ INTERMED mould (private base + N members) after two flat-CSV slices.
       `coord_oferta_resp.py`).
 - [x] `MetaCoordOfertaReader` (`.zip` URL, `_MEMBER_STEM = "cad_coord_oferta"`) — 34th Meta reader.
 - [x] 2 nested `__init__.py` + flat re-export in `ingestion/__init__.py` and top
-      `filings_cvm/__init__.py` (imports + `__all__`).
+      `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: `_META_MEMBERS` entry (both readers expose
       `_CONTRACT`, so no `_UNEXPOSED_CONTRACTS` entry is needed).
 - [x] Tests `tests/unit/test_coord_oferta_ingestion.py` (mirrors INTERMED): anti-tautology header

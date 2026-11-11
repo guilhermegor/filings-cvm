@@ -41,7 +41,7 @@ COORD_OFERTA mould (private base + members), but NOT a registry+satellite pair.
 - [x] Private base `_base_oferta_reader.py` + 2 thin subclasses.
 - [x] `MetaOfertaReader` (`.zip` URL, `_MEMBER_STEM="oferta"`) — 36th Meta reader.
 - [x] 2 nested `__init__.py` (`oferta/` + `oferta/distrib/`) + flat re-export in
-      `ingestion/__init__.py` and top `filings_cvm/__init__.py` (imports + `__all__`).
+      `ingestion/__init__.py` and top `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: `_META_MEMBERS` entry (both expose `_CONTRACT`).
 - [x] Tests `tests/unit/test_oferta_distrib_ingestion.py`: anti-tautology header test per member,
       two-regime anti-copy test, **BR-date-as-str** pins (2 tests), CNPJ-cols-per-member, member

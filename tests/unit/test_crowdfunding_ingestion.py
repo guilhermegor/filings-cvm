@@ -16,14 +16,14 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	CAD_CROWDFUNDING,
 	CAD_CROWDFUNDING_ADM_RESP,
 	CAD_CROWDFUNDING_SOCIOS,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.crowdfunding import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.crowdfunding import (
 	CrowdfundingAdmRespReader,
 	CrowdfundingReader,
 	CrowdfundingSociosReader,
@@ -102,7 +102,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.crowdfunding.cad._base_crowdfunding_reader.download_file",
+		"opendata_cvm.ingestion.crowdfunding.cad._base_crowdfunding_reader.download_file",
 		_fake_download,
 	)
 
@@ -257,7 +257,7 @@ def test_meta_url_is_the_zip_not_a_txt() -> None:
 	dataset's shape: several roots publish a flat ``meta_<dataset>.txt`` while this one ships a
 	three-member archive.
 	"""
-	from filings_cvm.ingestion.crowdfunding.cad.meta import MetaCrowdfundingReader
+	from opendata_cvm.ingestion.crowdfunding.cad.meta import MetaCrowdfundingReader
 
 	assert MetaCrowdfundingReader._META_URL.endswith("/META/meta_cad_crowdfunding.zip")
 
@@ -271,7 +271,7 @@ def test_meta_section_labels_are_asymmetric_by_design() -> None:
 	Pinned so it stays a recorded source fact rather than something a future change silently
 	"tidies".
 	"""
-	from filings_cvm.ingestion.crowdfunding.cad.meta import MetaCrowdfundingReader
+	from opendata_cvm.ingestion.crowdfunding.cad.meta import MetaCrowdfundingReader
 
 	cls_reader = MetaCrowdfundingReader()
 	assert cls_reader._section_of("meta_cad_crowdfunding.txt") == "cad_crowdfunding"

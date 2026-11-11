@@ -16,10 +16,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import CAD_INTERMED, CAD_INTERMED_RESP
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.intermed import IntermedReader, IntermedRespReader
+from opendata_cvm._internal.config.contracts import CAD_INTERMED, CAD_INTERMED_RESP
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.intermed import IntermedReader, IntermedRespReader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; both contracts' CNPJ check accepts it.
@@ -83,7 +83,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.intermed.cad._base_intermed_reader.download_file",
+		"opendata_cvm.ingestion.intermed.cad._base_intermed_reader.download_file",
 		_fake_download,
 	)
 
@@ -205,7 +205,7 @@ def test_meta_section_labels_are_asymmetric_by_design() -> None:
 	``meta_cad_intermed_resp.txt`` reduces to ``resp``. Pinned so the asymmetry stays a recorded
 	source fact rather than something a future change silently "tidies".
 	"""
-	from filings_cvm.ingestion.intermed.cad.meta import MetaIntermedReader
+	from opendata_cvm.ingestion.intermed.cad.meta import MetaIntermedReader
 
 	cls_reader = MetaIntermedReader()
 	assert cls_reader._section_of("meta_cad_intermed.txt") == "cad_intermed"

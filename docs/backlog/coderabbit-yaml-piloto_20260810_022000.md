@@ -101,7 +101,7 @@ Primeiro PR revisado com a config completa em `main` (`code_guidelines` apontand
 | achado | verificação |
 |---|---|
 | faltava `docs/submission/` no checklist | a listagem de `docs/` traz `ingestion` **e** `submission` |
-| ⚠️ **regra de reader aplicada a writer** | `submission/__init__.py:34-35` reexporta **direto** (sem portal root) e `grep -rn FileContract src/filings_cvm/submission/*.py` volta **vazio** |
+| ⚠️ **regra de reader aplicada a writer** | `submission/__init__.py:34-35` reexporta **direto** (sem portal root) e `grep -rn FileContract src/opendata_cvm/submission/*.py` volta **vazio** |
 | conclusão explícita só p/ mudança interna | deixava de fora a mudança **pública** que legitimamente não pede doc |
 
 ⚠️⚠️ **O segundo é o achado que justifica o piloto inteiro.** Eu escrevi uma regra de **leitor** e a

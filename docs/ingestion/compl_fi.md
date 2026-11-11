@@ -62,7 +62,7 @@ Padrão do repo: 5 tentativas com espera exponencial limitada (~2, 4, 8, 10 s) e
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import ComplFiPrestReader, ComplFiReader
+from opendata_cvm.ingestion.fi import ComplFiPrestReader, ComplFiReader
 
 df_ = ComplFiReader(date_ref=date(2018, 6, 15)).read()
 print(df_[["CNPJ_FUNDO", "AG_RISCO", "GRAU_RISCO"]].head())

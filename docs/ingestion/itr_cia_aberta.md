@@ -130,7 +130,7 @@ sem-prefixo que é a **correta do FCA**. A URL é constante por dataset e **medi
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm.ingestion.cia_aberta import (
     ItrCiaAbertaDreConReader,
     ItrCiaAbertaReader,
 )

@@ -7,7 +7,7 @@ chars, and this parser must hand that back verbatim rather than "repair" it.
 
 from pathlib import Path
 
-from filings_cvm._internal.utils.meta_parser import parse_meta_blocks
+from opendata_cvm._internal.utils.meta_parser import parse_meta_blocks
 
 
 _FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "meta"

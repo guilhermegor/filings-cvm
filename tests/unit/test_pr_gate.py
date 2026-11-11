@@ -38,7 +38,7 @@ _SPEC.loader.exec_module(pr_gate)
 		(["poetry.lock"], "deps"),
 		(["pyproject.toml"], "deps"),
 		(["tests/unit/test_cda_ingestion.py"], "tests"),
-		(["src/filings_cvm/ingestion/fip/doc/inf_trimestral.py"], "src"),
+		(["src/opendata_cvm/ingestion/fip/doc/inf_trimestral.py"], "src"),
 		(["some/unknown/path.txt"], "other"),
 	],
 )
@@ -57,7 +57,7 @@ def test_classify_risk_maps_each_path_family(list_paths: list[str], str_expected
 
 def test_classify_risk_takes_the_most_dangerous_class() -> None:
 	"""A PR touching both docs and src is classified `src`, never the safer of the two."""
-	assert pr_gate.classify_risk(["docs/api.md", "src/filings_cvm/__init__.py"]) == "src"
+	assert pr_gate.classify_risk(["docs/api.md", "src/opendata_cvm/__init__.py"]) == "src"
 
 
 def test_classify_risk_of_no_files_is_not_auto_mergeable() -> None:
@@ -152,7 +152,7 @@ def test_do_not_merge_label_still_opts_out_of_a_lockfile_diff() -> None:
 		(["poetry.lock"], True),
 		(["poetry.lock", "pyproject.toml"], False),
 		(["pyproject.toml"], False),
-		(["src/filings_cvm/__init__.py"], False),
+		(["src/opendata_cvm/__init__.py"], False),
 		([], False),
 	],
 )

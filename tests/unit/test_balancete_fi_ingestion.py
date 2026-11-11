@@ -15,13 +15,13 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	BALANCETE_FI,
 	BALANCETE_FI_PRE202311,
 	BALANCETE_FIE,
 )
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.fi import (
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.fi import (
 	BalanceteFiPre202311Reader,
 	BalanceteFiReader,
 	MetaBalanceteFiReader,
@@ -72,7 +72,7 @@ def _patch_download(
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.balancete._base_balancete_reader.download_file", _fake
+		"opendata_cvm.ingestion.fi.doc.balancete._base_balancete_reader.download_file", _fake
 	)
 	return list_urls
 

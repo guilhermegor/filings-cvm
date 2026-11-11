@@ -23,7 +23,7 @@ Os leitores de `ingestion` cobrem os dumps de *open-data* do portal
 ## Onde foi parar a seção `submission`?
 
 Foi removida desta biblioteca e vive no pacote separado `layouts-cvm`, que monta e serializa os
-arquivos XML de *envio* à CVM. `filings-cvm` agora só **lê** (`ingestion`) e não depende dele.
+arquivos XML de *envio* à CVM. `opendata-cvm` agora só **lê** (`ingestion`) e não depende dele.
 
 ## Como adiciono ou atualizo uma dependência?
 

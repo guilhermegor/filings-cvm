@@ -27,7 +27,7 @@ The only Wave 3 member that is a **flat CSV** (not a multi-member ZIP): one read
 - [x] Reader `ingestion/adm_fii/cad/cadastro/cadastro.py` (`CadastroAdmFiiReader`).
 - [x] `MetaCadAdmFiiReader` (`ingestion/adm_fii/cad/cadastro/meta.py`) — 31st Meta reader.
 - [x] 3 nested `__init__.py` (cadastro / cad / adm_fii) + flat re-export in `ingestion/__init__.py`
-      and top `filings_cvm/__init__.py` (imports + `__all__`).
+      and top `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: `CAD_ADM_FII` import,
       `_UNEXPOSED_CONTRACTS["CadastroAdmFiiReader"]`, `_META_MEMBERS["MetaCadAdmFiiReader"]`.
 - [x] Tests: added `CadastroAdmFiiReader` `FlatCase` to `tests/unit/test_securit_cepac_flat_ingestion.py`

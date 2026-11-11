@@ -29,7 +29,7 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	DFP_CIA_ABERTA,
 	DFP_CIA_ABERTA_BPA_CON,
 	DFP_CIA_ABERTA_BPA_IND,
@@ -52,9 +52,9 @@ from filings_cvm._internal.config.contracts import (
 	FRE_CIA_ABERTA_AUDITOR,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.cia_aberta import (
 	DfpCiaAbertaBpaConReader,
 	DfpCiaAbertaBpaIndReader,
 	DfpCiaAbertaBppConReader,
@@ -81,7 +81,7 @@ from filings_cvm.ingestion.cia_aberta import (
 VALID_CNPJ = "11.222.333/0001-81"
 DATE_REF = date(2025, 6, 15)
 URL = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2025.zip"
-MODULE = "filings_cvm.ingestion.cia_aberta.doc.dfp._base_dfp_reader"
+MODULE = "opendata_cvm.ingestion.cia_aberta.doc.dfp._base_dfp_reader"
 PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "dfp_cia_aberta"
 
 # A value whose scale a binary float would not survive intact — as CVM publishes it.

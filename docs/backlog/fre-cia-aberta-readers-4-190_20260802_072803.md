@@ -18,7 +18,7 @@ Branch: `feat/190-fre-cia-aberta-readers-4-remuneracao` · Issue: #190 · Fatias
 - [x] Testes: **179** no arquivo do FRE (era 126); suíte **2389** unit (+92) + 4 integration.
 - [x] Docs: `docs/ingestion/fre_cia_aberta.md`, `docs/api.md`, `CLAUDE.md`.
 - [x] ⚠️ **Bug de doc corrigido de passagem:** o exemplo de uso da página do FRE ainda importava
-      `from filings_cvm import ...`, que **quebra desde o #91/0.26.0**. Quem copiasse pegaria
+      `from opendata_cvm import ...`, que **quebra desde o #91/0.26.0**. Quem copiasse pegaria
       `ImportError`.
 - [x] **Legado resolvido a pedido do user:** os 4 scripts de `bin/` indentados com espaços
       (`check_backlog_ledger`, `check_docstrings`, `check_provenance`, `check_typing`) passaram a

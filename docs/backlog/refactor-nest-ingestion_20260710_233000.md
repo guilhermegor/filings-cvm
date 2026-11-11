@@ -36,9 +36,9 @@ ingestion/
 
 ## Key property — public API unchanged
 
-`from filings_cvm.ingestion import XReader` still works for all 28 readers. Each sub-package's
+`from opendata_cvm.ingestion import XReader` still works for all 28 readers. Each sub-package's
 `__init__` re-exports its readers; `ingestion/__init__` imports from the sub-packages. Verified:
-`filings_cvm.__all__` still 32 symbols. A **pure internal move** (like the PR #39 ports/schemas
+`opendata_cvm.__all__` still 32 symbols. A **pure internal move** (like the PR #39 ports/schemas
 reorg) — zero public API change.
 
 ## Execution

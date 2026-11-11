@@ -35,7 +35,7 @@ from the META's alphabetical listing — column tuples taken from the **file**, 
   exact-name member selection), `fie/medidas.py` (flat CSV, like FIP). All carry `raw_workspace` +
   `hash_artifact` + `stamp_provenance` + per-module `_RETRY_POLICY`.
 - [x] `fie/` + `fie/doc/` `__init__` chain; public API wired (`ingestion/__init__` + root
-  `filings_cvm/__init__`, imports + `__all__`).
+  `opendata_cvm/__init__`, imports + `__all__`).
 - [x] Docs: page `docs/ingestion/fie.md`, mkdocs nav, `api.md` section, ingestion `index.md` bullet,
   root `CLAUDE.md` catalog (new FIE root + Layout line) + #41 survey ledger (FIE→shipped, corrections).
 - [x] Tests `tests/unit/test_fie_ingestion.py` (24, config-driven across the 3 + ZIP/partition

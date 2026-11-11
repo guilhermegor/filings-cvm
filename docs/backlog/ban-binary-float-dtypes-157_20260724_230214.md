@@ -33,16 +33,16 @@ O zero-padding é **exatamente** o exemplo que o docstring do próprio módulo u
 o seam nunca confia na inferência do pandas (`"007" vira 7, irrecuperável por um astype posterior`).
 O ramo JSON violava o contrato declarado do próprio arquivo.
 
-## O gate se pagou na primeira execução (2ª vez na família `filings-*`)
+## O gate se pagou na primeira execução (2ª vez na família `opendata-*`)
 
 Rodado contra o `main`, o `bin/check_dtypes.py` acusou **1 violação** — o docstring do próprio
 `apply_dtypes`:
 
 ```
-src/filings_cvm/_internal/utils/dtypes.py:59: ``"int64"``, ``"float64"``). A ``"str"`` declaration…
+src/opendata_cvm/_internal/utils/dtypes.py:59: ``"int64"``, ``"float64"``). A ``"str"`` declaration…
 ```
 
-É o **pior lugar possível**, e o mesmo achado do `filings-b3` (lá foi o exemplo de docstring de uma
+É o **pior lugar possível**, e o mesmo achado do `opendata-b3` (lá foi o exemplo de docstring de uma
 classe base): todo reader novo nasce copiando um existente, então um exemplo errado no seam
 compartilhado ensina o padrão errado para o portal inteiro. Removido.
 

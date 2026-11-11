@@ -16,10 +16,10 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.config.contracts import OFERTA_DISTRIBUICAO, OFERTA_RESOLUCAO_160
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.oferta import OfertaDistribuicaoReader, OfertaResolucao160Reader
+from opendata_cvm._internal.config.contracts import OFERTA_DISTRIBUICAO, OFERTA_RESOLUCAO_160
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.oferta import OfertaDistribuicaoReader, OfertaResolucao160Reader
 
 
 # CNPJ valid under the repo's ASCII-48 mod-11 routine; every contract's CNPJ check accepts it.
@@ -87,7 +87,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.oferta.distrib._base_oferta_reader.download_file",
+		"opendata_cvm.ingestion.oferta.distrib._base_oferta_reader.download_file",
 		_fake_download,
 	)
 
@@ -261,7 +261,7 @@ def test_reader_declares_its_cnpj_columns(
 
 def test_meta_url_is_the_zip_not_a_txt() -> None:
 	"""The META lives at a ``.zip`` — the sibling-shaped ``.txt`` guess 404s on this dataset."""
-	from filings_cvm.ingestion.oferta.distrib.meta import MetaOfertaReader
+	from opendata_cvm.ingestion.oferta.distrib.meta import MetaOfertaReader
 
 	assert MetaOfertaReader._META_URL.endswith("/META/meta_oferta_distribuicao.zip")
 
@@ -273,7 +273,7 @@ def test_meta_section_labels_are_symmetric() -> None:
 	fallback), ``_MEMBER_STEM = "oferta"`` strips the shared prefix from both, leaving
 	``distribuicao`` and ``resolucao_160``.
 	"""
-	from filings_cvm.ingestion.oferta.distrib.meta import MetaOfertaReader
+	from opendata_cvm.ingestion.oferta.distrib.meta import MetaOfertaReader
 
 	cls_reader = MetaOfertaReader()
 	assert cls_reader._section_of("meta_oferta_distribuicao.txt") == "distribuicao"

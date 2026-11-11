@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.utils.dtypes import apply_dtypes
+from opendata_cvm._internal.utils.dtypes import apply_dtypes
 
 
 def test_apply_dtypes_keeps_missing_text_values_missing() -> None:

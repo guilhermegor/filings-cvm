@@ -45,7 +45,7 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	CGVN_CIA_ABERTA,
 	FRE_CIA_ABERTA,
 	FRE_CIA_ABERTA_ACAO_ENTREGUE,
@@ -85,9 +85,9 @@ from filings_cvm._internal.config.contracts import (
 	FRE_CIA_ABERTA_TRANSACAO_PARTE_RELACIONADA,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.cia_aberta import (
 	CgvnCiaAbertaReader,
 	FreCiaAbertaAcaoEntregueReader,
 	FreCiaAbertaAdministradorDeclaracaoGeneroReader,
@@ -132,7 +132,7 @@ from filings_cvm.ingestion.cia_aberta import (
 VALID_CNPJ = "11.222.333/0001-81"
 DATE_REF = date(2025, 6, 15)
 URL = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_2025.zip"
-MODULE = "filings_cvm.ingestion.cia_aberta.doc.fre._base_fre_reader"
+MODULE = "opendata_cvm.ingestion.cia_aberta.doc.fre._base_fre_reader"
 PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "fre_cia_aberta"
 
 # A money value whose scale a binary float would not survive intact.

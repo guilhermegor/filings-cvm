@@ -52,7 +52,7 @@ sobreviveu ao 9º.
       completa (issue CLOSED, branch remota deletada, card Done).
 - [ ] **#91** (slim top-level `__all__`) — acordado com o user para **depois deste PR**, antes das
       fatias 3–4, para não colidir. O `__all__` plano já está em **216 readers** (a issue foi escrita
-      com 94). ⚠️ **É breaking pela decisão registrada na issue** (`from filings_cvm import XReader`
+      com 94). ⚠️ **É breaking pela decisão registrada na issue** (`from opendata_cvm import XReader`
       para de funcionar → **0.26.0**, MINOR em 0.x); a própria issue pede para **reconfirmar no
       início do PR** a versão dura vs a branda (manter importável mas fora do `__all__`,
       não-breaking, PATCH).

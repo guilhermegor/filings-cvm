@@ -69,7 +69,7 @@ Todo reader aceita `retry_policy: RetryPolicy | None = None` e declara o seu pad
 ### Firmas administradoras (pessoa jurídica)
 
 ```python
-from filings_cvm.ingestion.adm_cart import AdmCartPjReader
+from opendata_cvm.ingestion.adm_cart import AdmCartPjReader
 
 df_ = AdmCartPjReader().read()
 # df_[["CNPJ", "DENOM_SOCIAL", "CATEG_REG", "SIT", "MUN", "UF"]]
@@ -79,7 +79,7 @@ df_ = AdmCartPjReader().read()
 
 ```python
 from pathlib import Path
-from filings_cvm.ingestion.adm_cart import AdmCartSociosReader
+from opendata_cvm.ingestion.adm_cart import AdmCartSociosReader
 
 df_ = AdmCartSociosReader(
     path_raw=Path("/data/bronze/cvm/cad_adm_cart"),

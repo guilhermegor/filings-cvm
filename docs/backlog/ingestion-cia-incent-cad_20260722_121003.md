@@ -31,7 +31,7 @@ Flat-CSV snapshot molded on `CadastroCiaEstrangReader`, contract pinned to a ver
 - [x] Reader `ingestion/cia_incent/cad/cadastro/cadastro.py` (`CadastroCiaIncentReader`).
 - [x] `MetaCadCiaIncentReader` — 33rd Meta reader.
 - [x] 3 nested `__init__.py` + flat re-export in `ingestion/__init__.py` and top
-      `filings_cvm/__init__.py` (imports + `__all__`).
+      `opendata_cvm/__init__.py` (imports + `__all__`).
 - [x] Drift registry `bin/check_contract_drift.py`: import, `_UNEXPOSED_CONTRACTS`, `_META_MEMBERS`.
 - [x] Tests: added the CIA_INCENT `FlatCase` (harness already multi-CNPJ-aware) + an anti-tautology
       test reading the header fixture. Bumped `test_meta_readers.py` 32 → 33.

@@ -11,7 +11,7 @@
   });
 </script>
 
-A interface pública, agrupada pela divisão de topo do próprio código: `filings_cvm.ingestion`
+A interface pública, agrupada pela divisão de topo do próprio código: `opendata_cvm.ingestion`
 (leitura ← CVM). O envio vive no pacote separado `layouts-cvm`.
 
 > **Veja também:** [Uso](../usage.md) · [Exemplos](../examples.md)

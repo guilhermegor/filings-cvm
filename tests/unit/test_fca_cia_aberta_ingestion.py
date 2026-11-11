@@ -27,7 +27,7 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm._internal.config.contracts import (
 	FCA_CIA_ABERTA,
 	FCA_CIA_ABERTA_AUDITOR,
 	FCA_CIA_ABERTA_CANAL_DIVULGACAO,
@@ -40,9 +40,9 @@ from filings_cvm._internal.config.contracts import (
 	FCA_CIA_ABERTA_VALOR_MOBILIARIO,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.cia_aberta import (
 	FcaCiaAbertaAuditorReader,
 	FcaCiaAbertaCanalDivulgacaoReader,
 	FcaCiaAbertaDepartamentoAcionistasReader,
@@ -61,7 +61,7 @@ VALID_CNPJ = "11.222.333/0001-81"
 VALID_CPF = "111.444.777-35"
 DATE_REF = date(2025, 6, 15)
 URL = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_2025.zip"
-MODULE = "filings_cvm.ingestion.cia_aberta.doc.fca._base_fca_reader"
+MODULE = "opendata_cvm.ingestion.cia_aberta.doc.fca._base_fca_reader"
 PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "fca_cia_aberta"
 
 # The member that ships with a header and no rows.

@@ -7,7 +7,7 @@ hole it cannot see: **a member missing from ``__all__`` is invisible to it.** Th
 returns one fewer item, `parametrize` generates one fewer case, and the suite passes by not
 looking.
 
-Measured (filings-cvm#164): three readers registered by an anchor-replace landed in the import
+Measured (opendata-cvm#164): three readers registered by an anchor-replace landed in the import
 block but never in ``__all__``. They were importable, unexported, and every test was green.
 The sibling failure is worse: narrowing an ``__all__`` **empties** every gate that discovers
 through it — 2182 → 1311 tests with no new failure, four gates silently inert.

@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.contracts import DFIN_FII
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.fii import DfinFiiReader
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.contracts import DFIN_FII
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.fii import DfinFiiReader
 
 
 VALID_CNPJ = "11.222.333/0001-81"
@@ -61,7 +61,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, str_text: str) -> list[str]
 		path_dest.write_bytes(str_text.encode("ISO-8859-1"))
 		return path_dest
 
-	monkeypatch.setattr("filings_cvm.ingestion.fii.doc.dfin.dfin.download_file", _fake_download)
+	monkeypatch.setattr("opendata_cvm.ingestion.fii.doc.dfin.dfin.download_file", _fake_download)
 	return list_urls
 
 

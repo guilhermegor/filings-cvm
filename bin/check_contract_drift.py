@@ -45,49 +45,49 @@ from typing import TYPE_CHECKING, Any
 import urllib.request
 import zipfile
 
-from filings_cvm._internal.config.contracts.ato_declr import ATO_DECLR
-from filings_cvm._internal.config.contracts.balancete_fi import (
+from opendata_cvm._internal.config.contracts.ato_declr import ATO_DECLR
+from opendata_cvm._internal.config.contracts.balancete_fi import (
 	BALANCETE_FI,
 	BALANCETE_FI_PRE202311,
 )
-from filings_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
-from filings_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
-from filings_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
-from filings_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
-from filings_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
-from filings_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
-from filings_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
-from filings_cvm._internal.config.contracts.cad_fi import CAD_FI
-from filings_cvm._internal.config.contracts.cda_fif import CDA_FIF
-from filings_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
-from filings_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
-from filings_cvm._internal.config.contracts.dfin_fii import DFIN_FII
-from filings_cvm._internal.config.contracts.entrega_fi import ENTREGA_FI, ENTREGA_FI_DIARIO
-from filings_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
-from filings_cvm._internal.config.contracts.extrato_fi import (
+from opendata_cvm._internal.config.contracts.balancete_fie import BALANCETE_FIE
+from opendata_cvm._internal.config.contracts.balanco_fie import BALANCO_FIE
+from opendata_cvm._internal.config.contracts.cad_adm_fii import CAD_ADM_FII
+from opendata_cvm._internal.config.contracts.cad_cia_aberta import CAD_CIA_ABERTA
+from opendata_cvm._internal.config.contracts.cad_cia_estrang import CAD_CIA_ESTRANG
+from opendata_cvm._internal.config.contracts.cad_cia_incent import CAD_CIA_INCENT
+from opendata_cvm._internal.config.contracts.cad_emissor_cepac import CAD_EMISSOR_CEPAC
+from opendata_cvm._internal.config.contracts.cad_fi import CAD_FI
+from opendata_cvm._internal.config.contracts.cda_fif import CDA_FIF
+from opendata_cvm._internal.config.contracts.dfin_cra import DFIN_CRA
+from opendata_cvm._internal.config.contracts.dfin_cri import DFIN_CRI
+from opendata_cvm._internal.config.contracts.dfin_fii import DFIN_FII
+from opendata_cvm._internal.config.contracts.entrega_fi import ENTREGA_FI, ENTREGA_FI_DIARIO
+from opendata_cvm._internal.config.contracts.eventual_fi import EVENTUAL_FI
+from opendata_cvm._internal.config.contracts.extrato_fi import (
 	EXTRATO_FI,
 	EXTRATO_FI_PRE2020,
 	EXTRATO_FI_SNAPSHOT,
 )
-from filings_cvm._internal.config.contracts.inf_quadrimestral_fip import INF_QUADRIMESTRAL_FIP
-from filings_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
-from filings_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
-from filings_cvm._internal.config.contracts.ipe_cia_aberta import IPE_CIA_ABERTA
-from filings_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
-from filings_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
-from filings_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
-from filings_cvm._internal.config.contracts.perfil_mensal_fi import (
+from opendata_cvm._internal.config.contracts.inf_quadrimestral_fip import INF_QUADRIMESTRAL_FIP
+from opendata_cvm._internal.config.contracts.inf_trimestral_fip import INF_TRIMESTRAL_FIP
+from opendata_cvm._internal.config.contracts.informe_diario_fif import INFORME_DIARIO_FIF
+from opendata_cvm._internal.config.contracts.ipe_cia_aberta import IPE_CIA_ABERTA
+from opendata_cvm._internal.config.contracts.lamina_carteira_fif import LAMINA_CARTEIRA_FIF
+from opendata_cvm._internal.config.contracts.lamina_fif import LAMINA_FIF
+from opendata_cvm._internal.config.contracts.medidas_mes_fie import MEDIDAS_MES_FIE
+from opendata_cvm._internal.config.contracts.perfil_mensal_fi import (
 	PERFIL_MENSAL_FI,
 	PERFIL_MENSAL_FI_PRE175,
 )
-from filings_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
-from filings_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
-from filings_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.introspection import iter_public_readers
-from filings_cvm._internal.utils.retry import RetryPolicy
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
+from opendata_cvm._internal.config.contracts.registro_classe import REGISTRO_CLASSE
+from opendata_cvm._internal.config.contracts.registro_fundo import REGISTRO_FUNDO
+from opendata_cvm._internal.config.contracts.registro_subclasse import REGISTRO_SUBCLASSE
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.introspection import iter_public_readers
+from opendata_cvm._internal.utils.retry import RetryPolicy
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion._base_meta_reader import BaseMetaReader
 
 
 if TYPE_CHECKING:

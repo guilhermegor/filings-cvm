@@ -11,9 +11,9 @@ import zipfile
 
 import pytest
 
-from filings_cvm._internal.utils.retry import RetryPolicy
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion.fi import InformeDiarioReader
+from opendata_cvm._internal.utils.retry import RetryPolicy
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion.fi import InformeDiarioReader
 
 
 # A CNPJ whose check digits are valid under the repo's ASCII-48 mod-11 routine.
@@ -54,7 +54,7 @@ def _patch_download(monkeypatch: pytest.MonkeyPatch, payload: bytes) -> None:
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.informe_diario.informe_diario.download_file", _fake_download
+		"opendata_cvm.ingestion.fi.doc.informe_diario.informe_diario.download_file", _fake_download
 	)
 
 
@@ -80,7 +80,7 @@ def test_read_forwards_retry_policy_to_download(monkeypatch: pytest.MonkeyPatch)
 		return path_dest
 
 	monkeypatch.setattr(
-		"filings_cvm.ingestion.fi.doc.informe_diario.informe_diario.download_file",
+		"opendata_cvm.ingestion.fi.doc.informe_diario.informe_diario.download_file",
 		_capturing_download,
 	)
 	cls_policy = RetryPolicy(int_max_attempts=7, str_strategy="linear")

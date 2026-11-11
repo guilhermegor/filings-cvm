@@ -2,11 +2,16 @@
 
 ### BREAKING CHANGE
 
-- **submission**: the whole submission section is removed (#389) — `filings_cvm.submission`
+- **rename**: the import package is now `opendata_cvm` (was `filings_cvm`) and the family name
+  is `opendata-*` (#418). There is no compatibility shim: `import filings_cvm` no longer works;
+  use `import opendata_cvm`. Every runtime string that embedded the old package name (logger
+  names, cache directories, user-agent) follows the rename.
+
+- **submission**: the whole submission section is removed (#389) — `opendata_cvm.submission`
   (all 15 XML writers and their document models), the Pydantic schemas, the `SubmissionWriter`
   port, the atomic-write and XML field helpers and the submission docs. It lives on in the
   separate `layouts-cvm` package; there is no shim, no re-export and no dependency on it.
-  Migration: `from filings_cvm.submission import X` becomes `from layouts_cvm import X`
+  Migration: `from opendata_cvm.submission import X` becomes `from layouts_cvm import X`
   (e.g. `from layouts_cvm import PerfilMensal, InformeDiario`; `pip install layouts-cvm`).
   Document-model migration guide: <https://guilhermegor.github.io/layouts-cvm/>.
   The `pydantic` dependency is dropped.

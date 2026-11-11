@@ -40,7 +40,7 @@ tem contrapartida aqui** — quirk é fato de artefato, não de família.
 - [x] `test_cra_contracts_are_not_the_ots_contracts` — guarda explícita contra uma cópia futura.
 - [x] Base privada `_base_inf_mensal_cra_reader.py` + **8 readers finos** (`_MEMBER_STEM`,
   `_CONTRACT`, `_LABEL`, `_DATE_COLS`, `_RETRY_POLICY`), padrão OTS/FIDC.
-- [x] Re-export flat nos 4 níveis (`securit/doc` → `securit` → `ingestion` → `filings_cvm`); 8 nomes
+- [x] Re-export flat nos 4 níveis (`securit/doc` → `securit` → `ingestion` → `opendata_cvm`); 8 nomes
   no `__all__` público.
 - [x] **Live-verificado contra os bytes reais**, os 8: 8093/8093/14073/8093/8093/8093/8093/10691
   linhas, contagem de colunas exata, proveniência (6 colunas) em todos.

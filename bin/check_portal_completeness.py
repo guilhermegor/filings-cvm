@@ -217,7 +217,7 @@ def fetch_published(int_timeout_s: int = 60) -> frozenset[str]:
 	"""
 	cls_request = urllib.request.Request(  # noqa: S310
 		f"{_CKAN_HOST}{_CKAN_PACKAGE_LIST_PATH}",
-		headers={"User-Agent": "filings-cvm portal-completeness bot"},
+		headers={"User-Agent": "opendata-cvm portal-completeness bot"},
 	)
 	with urllib.request.urlopen(cls_request, timeout=int_timeout_s) as cls_response:  # noqa: S310
 		dict_payload = json.loads(cls_response.read())

@@ -28,17 +28,17 @@ import zipfile
 import pandas as pd
 import pytest
 
-from filings_cvm import RetryPolicy
-from filings_cvm._internal.config.contracts import (
+from opendata_cvm import RetryPolicy
+from opendata_cvm._internal.config.contracts import (
 	CIA_ABERTA_RECOMPRA_ACOES,
 	CIA_ABERTA_RECOMPRA_ACOES_INTERMEDIARIOS,
 	CIA_ABERTA_RECOMPRA_ACOES_QUANTIDADES,
 	DFP_CIA_ABERTA,
 	FileContract,
 )
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.tabular_reader import ContractError
-from filings_cvm.ingestion.cia_aberta import (
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.tabular_reader import ContractError
+from opendata_cvm.ingestion.cia_aberta import (
 	MetaRecompraAcoesReader,
 	RecompraAcoesIntermediariosReader,
 	RecompraAcoesQuantidadesReader,
@@ -51,7 +51,7 @@ URL = (
 	"https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/DADOS/"
 	"cia_aberta_recompra_acoes.zip"
 )
-MODULE = "filings_cvm.ingestion.cia_aberta.eventos.recompra_acoes._base_recompra_acoes_reader"
+MODULE = "opendata_cvm.ingestion.cia_aberta.eventos.recompra_acoes._base_recompra_acoes_reader"
 PATH_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "cia_aberta_recompra_acoes"
 
 

@@ -26,7 +26,7 @@ Excluded from the docs site (`backlog/`). Never deleted — tick the last box on
 - [x] 3 contracts (`dfin_cra`, `dfin_cri`, `cad_emissor_cepac`) + re-exports in `contracts/__init__`.
 - [x] 3 readers under new `securit/doc/` + `emissor_cepac/cad/` packages; `__init__` chains for both
   roots. All carry `raw_workspace` + `hash_artifact` + `stamp_provenance` + `_RETRY_POLICY`.
-- [x] Public API wired: `ingestion/__init__` + root `filings_cvm/__init__` (imports + `__all__`).
+- [x] Public API wired: `ingestion/__init__` + root `opendata_cvm/__init__` (imports + `__all__`).
 - [x] Docs: page `securit_cepac_flat.md`, mkdocs nav, `api.md` section, ingestion `index.md` bullet,
   root `CLAUDE.md` catalog (2 new roots + Layout) + #41 survey ledger (SECURIT 🟡 partial, CEPAC ✅).
 - [x] Tests `test_securit_cepac_flat_ingestion.py` (22, config-driven; CEPAC's absent `date_ref`

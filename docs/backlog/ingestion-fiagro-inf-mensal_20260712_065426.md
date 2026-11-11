@@ -33,7 +33,7 @@ a "Completed — kept as a record" note, per `docs/CLAUDE.md`.
   (members differ), unlike FIDC's shared date col. `raw_workspace` + `hash_artifact` +
   `stamp_provenance` + `_RETRY_POLICY` (`_DEFAULT_RETRY_POLICY`, 5-attempt patient default).
 - [x] 2 thin readers; new `fiagro/`, `fiagro/doc/`, `fiagro/doc/inf_mensal/` `__init__` chain.
-- [x] Public API: `ingestion/__init__` + root `filings_cvm/__init__` (imports + `__all__`).
+- [x] Public API: `ingestion/__init__` + root `opendata_cvm/__init__` (imports + `__all__`).
 - [x] Docs: page `docs/ingestion/inf_mensal_fiagro.md`, mkdocs nav, `api.md` section, ingestion
   `index.md` bullet, root `CLAUDE.md` catalog (new FIAGRO root + Layout line).
 - [x] Tests `tests/unit/test_inf_mensal_fiagro_ingestion.py` (16). Full suite **849 passed under

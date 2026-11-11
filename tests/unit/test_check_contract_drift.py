@@ -12,10 +12,10 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from filings_cvm._internal.config.ports.ingestion_reader import IngestionReader
-from filings_cvm._internal.utils.introspection import iter_public_readers
-from filings_cvm._internal.utils.tabular_reader import ContractError, FileContract
-from filings_cvm.ingestion._base_meta_reader import BaseMetaReader
+from opendata_cvm._internal.config.ports.ingestion_reader import IngestionReader
+from opendata_cvm._internal.utils.introspection import iter_public_readers
+from opendata_cvm._internal.utils.tabular_reader import ContractError, FileContract
+from opendata_cvm.ingestion._base_meta_reader import BaseMetaReader
 
 
 _PATH = Path(__file__).resolve().parents[2] / "bin" / "check_contract_drift.py"
@@ -559,7 +559,7 @@ def test_reader_to_meta_is_the_exact_inverse_of_the_registry() -> None:
 
 def test_closed_series_readers_are_probed_at_their_last_published_month() -> None:
 	"""Every closed-series probe date must construct; rolling dates would raise ValueError."""
-	from filings_cvm.ingestion.fi import (
+	from opendata_cvm.ingestion.fi import (
 		BalanceteFiPre202311Reader,
 		ComplFiInfCotstReader,
 		ComplFiInfReader,

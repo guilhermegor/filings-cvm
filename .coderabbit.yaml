@@ -247,7 +247,7 @@ reviews:
   # a CPF declared as CNPJ. Deliberate redundancy where it pays; everything else stays in its one
   # home. When a rule below and a CLAUDE.md disagree, the CLAUDE.md wins and THIS FILE IS STALE.
   path_instructions:
-    - path: "src/filings_cvm/_internal/config/contracts/**"
+    - path: "src/opendata_cvm/_internal/config/contracts/**"
       instructions: >-
         A FileContract must be GENERATED from the artifact's published header bytes and PINNED to
         a fixture under tests/fixtures/<dataset>/, never transcribed and never copied from a
@@ -260,7 +260,7 @@ reviews:
         current year's data happens to be all CNPJ. An empty `tuple_cnpj_cols` can be a measured
         decision — do not flag it as an omission without checking the dataset notes.
 
-    - path: "src/filings_cvm/ingestion/**"
+    - path: "src/opendata_cvm/ingestion/**"
       instructions: >-
         Every reader takes `path_raw: Path | None = None` and routes the raw-artifact handling
         through the shared `_internal/utils/raw_workspace.py` context manager — never re-branch on
@@ -269,7 +269,7 @@ reviews:
         `_internal.utils.br_identifiers`. A returned frame must be provenance-stamped via
         `stamp_provenance` AFTER contract validation. A new reader is registered along its own
         package chain up to its portal root and STOPS there — never in the top-level
-        `filings_cvm/__init__.py` nor in `ingestion/__init__.py`; its contract also needs adding
+        `opendata_cvm/__init__.py` nor in `ingestion/__init__.py`; its contract also needs adding
         to `_internal/config/contracts/__init__.py`, which nothing fails to catch on its own.
 
     # The DOCS half of a reader PR, which is the half that gets forgotten. Advisory on
@@ -279,7 +279,7 @@ reviews:
     # from docs/api.md today, and every one of those PRs did touch docs/.
     #
     # The submission (writer) section moved to the separate layouts-cvm package; this repo only reads.
-    - path: "src/filings_cvm/ingestion/**"
+    - path: "src/opendata_cvm/ingestion/**"
       instructions: >-
         A new or renamed PUBLIC reader is only half-delivered without its documentation. Check, and
         say which apply: an entry in `docs/api.md` (every public reader belongs there); the

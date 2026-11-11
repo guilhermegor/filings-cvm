@@ -16,7 +16,7 @@ seleciona o dump; prefira um mês passado, pois o corrente pode ainda não estar
 ```python
 from datetime import date
 
-from filings_cvm.ingestion.fi import InformeDiarioReader
+from opendata_cvm.ingestion.fi import InformeDiarioReader
 
 df_ = InformeDiarioReader(date_ref=date(2025, 1, 15)).read()
 
@@ -34,7 +34,7 @@ disco para reprocessamento. Sem `path_raw`, nada persiste.
 from datetime import date
 from pathlib import Path
 
-from filings_cvm.ingestion.fi import InformeDiarioReader
+from opendata_cvm.ingestion.fi import InformeDiarioReader
 
 df_ = InformeDiarioReader(date_ref=date(2025, 1, 15), path_raw=Path("raw")).read()
 ```
