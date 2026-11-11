@@ -55,7 +55,7 @@ else:
 
 # The distribution name whose version stamps ``package_version``. Project-specific: a package
 # scaffolded from this template substitutes its own dist name here.
-_DIST_NAME = "filings-cvm"
+_DIST_NAME = "opendata-cvm"
 
 
 @type_checker
